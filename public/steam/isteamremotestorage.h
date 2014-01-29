@@ -12,6 +12,14 @@
 
 #include "isteamclient.h"
 
+
+//-----------------------------------------------------------------------------
+// Purpose: Defines the largest allowed file size. Cloud files cannot be
+//	larger than 100MB.
+//-----------------------------------------------------------------------------
+const uint32 k_unMaxCloudFileSize = 100 * 1024 * 1024;
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Structure that contains an array of const char * strings and the number of those strings
 //-----------------------------------------------------------------------------
@@ -25,11 +33,13 @@ struct SteamParamStringArray_t
 
 // A handle to a piece of user generated content
 typedef uint64 UGCHandle_t;
+typedef uint64 PublishedFileUpdateHandle_t;
 typedef uint64 PublishedFileId_t;
 const UGCHandle_t k_UGCHandleInvalid = 0xffffffffffffffffull;
+const PublishedFileUpdateHandle_t k_PublishedFileUpdateHandleInvalid = 0xffffffffffffffffull;
 
 const uint32 k_cchPublishedDocumentTitleMax = 128 + 1;
-const uint32 k_cchPublishedDocumentDescriptionMax = 256 + 1;
+const uint32 k_cchPublishedDocumentDescriptionMax = 8000;
 const uint32 k_unEnumeratePublishedFilesMaxResults = 50;
 const uint32 k_cchTagListMax = 1024 + 1;
 const uint32 k_cchFilenameMax = 260;
@@ -61,115 +71,11 @@ enum ERemoteStoragePublishedFileVisibility
 };
 
 
-//-----------------------------------------------------------------------------
-// Purpose: helper structure for making updates to published files.
-//	make sure to update serialization/deserialization in interfacemap.cpp if new properties are added
-//-----------------------------------------------------------------------------
-#pragma pack( push, 8 )
-struct RemoteStorageUpdatePublishedFileRequest_t
+enum EWorkshopFileType
 {
-public:
-	RemoteStorageUpdatePublishedFileRequest_t()
-	{
-		Initialize( k_GIDNil );
-	}
-
-	RemoteStorageUpdatePublishedFileRequest_t( PublishedFileId_t unPublishedFileId )
-	{
-		Initialize( unPublishedFileId );
-	}
-
-	PublishedFileId_t GetPublishedFileId() { return m_unPublishedFileId; }
-
-	void SetFile( const char *pchFile )
-	{
-		m_pchFile = pchFile;
-		m_bUpdateFile = true;
-	}
-
-	const char *GetFile() { return m_pchFile; }
-	bool BUpdateFile() { return m_bUpdateFile; }
-
-	void SetPreviewFile( const char *pchPreviewFile )
-	{
-		m_pchPreviewFile = pchPreviewFile;
-		m_bUpdatePreviewFile = true;
-	}
-
-	const char *GetPreviewFile() { return m_pchPreviewFile; }
-	bool BUpdatePreviewFile() { return m_bUpdatePreviewFile; }
-
-	void SetTitle( const char *pchTitle )
-	{
-		m_pchTitle = pchTitle;
-		m_bUpdateTitle = true;
-	}
-
-	const char *GetTitle() { return m_pchTitle; }
-	bool BUpdateTitle() { return m_bUpdateTitle; }
-
-	void SetDescription( const char *pchDescription )
-	{
-		m_pchDescription = pchDescription;
-		m_bUpdateDescription = true;
-	}
-
-	const char *GetDescription() { return m_pchDescription; }
-	bool BUpdateDescription() { return m_bUpdateDescription; }
-
-	void SetVisibility( ERemoteStoragePublishedFileVisibility eVisibility )
-	{
-		m_eVisibility = eVisibility;
-		m_bUpdateVisibility = true;
-	}
-
-	const ERemoteStoragePublishedFileVisibility GetVisibility() { return m_eVisibility; }
-	bool BUpdateVisibility() { return m_bUpdateVisibility; }
-
-	void SetTags( SteamParamStringArray_t *pTags )
-	{
-		m_pTags = pTags;
-		m_bUpdateTags = true;
-	}
-
-	SteamParamStringArray_t *GetTags() { return m_pTags; }
-	bool BUpdateTags() { return m_bUpdateTags; }
-	SteamParamStringArray_t **GetTagsPointer() { return &m_pTags; }
-
-	void Initialize( PublishedFileId_t unPublishedFileId )
-	{
-		m_unPublishedFileId = unPublishedFileId;
-		m_pchFile = 0;
-		m_pchPreviewFile = 0;
-		m_pchTitle = 0;
-		m_pchDescription = 0;
-		m_pTags = 0;
-
-		m_bUpdateFile = false;
-		m_bUpdatePreviewFile = false;
-		m_bUpdateTitle = false;
-		m_bUpdateDescription = false;
-		m_bUpdateTags = false;
-		m_bUpdateVisibility = false;
-	}
-
-private:
-	PublishedFileId_t m_unPublishedFileId;
-	const char *m_pchFile;
-	const char *m_pchPreviewFile;
-	const char *m_pchTitle;
-	const char *m_pchDescription;
-	ERemoteStoragePublishedFileVisibility m_eVisibility;
-	SteamParamStringArray_t *m_pTags;
-
-	bool m_bUpdateFile;
-	bool m_bUpdatePreviewFile;
-	bool m_bUpdateTitle;
-	bool m_bUpdateDescription;
-	bool m_bUpdateVisibility;
-	bool m_bUpdateTags;
+	k_EWorkshopFileTypeCommunity = 0,
+	k_EWorkshopFileTypeMicrotransaction = 1,
 };
-#pragma pack( pop )
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing, reading and writing files stored remotely 
@@ -211,11 +117,21 @@ class ISteamRemoteStorage
 		virtual void SetCloudEnabledForApp( bool bEnabled ) = 0;
 
 		// user generated content
+
+		// Downloads a UGC file
 		virtual SteamAPICall_t UGCDownload( UGCHandle_t hContent ) = 0;
+
+		// Gets the amount of data downloaded so far for a piece of content. pnBytesExpected can be 0 if function returns false
+		// or if the transfer hasn't started yet, so be careful to check for that before dividing to get a percentage
+		virtual bool	GetUGCDownloadProgress( UGCHandle_t hContent, int32 *pnBytesDownloaded, int32 *pnBytesExpected ) = 0;
+
+		// Gets metadata for a file after it has been downloaded. This is the same metadata given in the RemoteStorageDownloadUGCResult_t call result
 		virtual bool	GetUGCDetails( UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner ) = 0;
+
+		// After download, gets the content of the file
 		virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead ) = 0;
 
-		// user generated content iteration
+		// Functions to iterate through UGC that has finished downloading but has not yet been read via UGCRead()
 		virtual int32	GetCachedUGCCount() = 0;
 		virtual	UGCHandle_t GetCachedUGCHandle( int32 iCachedContent ) = 0;
 
@@ -238,9 +154,15 @@ class ISteamRemoteStorage
 #endif
 
 		// publishing UGC
-		virtual SteamAPICall_t	PublishFile( const char *pchFile, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags ) = 0;
-		virtual SteamAPICall_t	PublishWorkshopFile( const char *pchFile, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, SteamParamStringArray_t *pTags ) = 0;
-		virtual SteamAPICall_t	UpdatePublishedFile( RemoteStorageUpdatePublishedFileRequest_t updatePublishedFileRequest ) = 0;
+		virtual SteamAPICall_t	PublishWorkshopFile( const char *pchFile, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags, EWorkshopFileType eWorkshopFileType ) = 0;
+		virtual PublishedFileUpdateHandle_t CreatePublishedFileUpdateRequest( PublishedFileId_t unPublishedFileId ) = 0;
+		virtual bool UpdatePublishedFileFile( PublishedFileUpdateHandle_t updateHandle, const char *pchFile ) = 0;
+		virtual bool UpdatePublishedFilePreviewFile( PublishedFileUpdateHandle_t updateHandle, const char *pchPreviewFile ) = 0;
+		virtual bool UpdatePublishedFileTitle( PublishedFileUpdateHandle_t updateHandle, const char *pchTitle ) = 0;
+		virtual bool UpdatePublishedFileDescription( PublishedFileUpdateHandle_t updateHandle, const char *pchDescription ) = 0;
+		virtual bool UpdatePublishedFileVisibility( PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility ) = 0;
+		virtual bool UpdatePublishedFileTags( PublishedFileUpdateHandle_t updateHandle, SteamParamStringArray_t *pTags ) = 0;
+		virtual SteamAPICall_t	CommitPublishedFileUpdate( PublishedFileUpdateHandle_t updateHandle ) = 0;
 		virtual SteamAPICall_t	GetPublishedFileDetails( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual SteamAPICall_t	DeletePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual SteamAPICall_t	EnumerateUserPublishedFiles( uint32 unStartIndex ) = 0;
@@ -249,7 +171,8 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t	UnsubscribePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION005"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION006"
+
 
 // callbacks
 #pragma pack( push, 8 )
@@ -344,31 +267,6 @@ struct RemoteStoragePublishFileResult_t
 
 
 //-----------------------------------------------------------------------------
-// Purpose: The result of a call to GetPublishedFileDetails()
-//-----------------------------------------------------------------------------
-struct RemoteStorageGetPublishedFileDetailsResult_t
-{
-	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 10 };
-	EResult m_eResult;				// The result of the operation.
-	PublishedFileId_t m_nPublishedFileId;
-	AppId_t m_nCreatorAppID;		// ID of the app that created this file.
-	AppId_t m_nConsumerAppID;		// ID of the app that created this file.
-	char m_rgchTitle[k_cchPublishedDocumentTitleMax];		// title of document
-	char m_rgchDescription[k_cchPublishedDocumentDescriptionMax];	// description of document
-	UGCHandle_t m_hFile;			// The handle of the primary file
-	UGCHandle_t m_hPreviewFile;		// The handle of the preview file
-	uint64 m_ulSteamIDOwner;		// Steam ID of the user who created this content.
-	uint32 m_rtimeCreated;			// time when the published file was created
-	uint32 m_rtimeUpdated;			// time when the published file was last updated
-	ERemoteStoragePublishedFileVisibility m_eVisibility;
-	bool m_bBanned;
-	char m_rgchTags[k_cchTagListMax];	// comma separated list of all tags associated with this file
-	bool m_bTagsTruncated;			// whether the list of tags was too long to be returned in the provided buffer
-	char m_pchFileName[k_cchFilenameMax];		// The name of the primary file
-};
-
-
-//-----------------------------------------------------------------------------
 // Purpose: The result of a call to DeletePublishedFile()
 //-----------------------------------------------------------------------------
 struct RemoteStorageDeletePublishedFileResult_t
@@ -427,7 +325,7 @@ struct RemoteStorageUnsubscribePublishedFileResult_t
 
 
 //-----------------------------------------------------------------------------
-// Purpose: The result of a call to UpdatePublishedFile()
+// Purpose: The result of a call to CommitPublishedFileUpdate()
 //-----------------------------------------------------------------------------
 struct RemoteStorageUpdatePublishedFileResult_t
 {
@@ -450,6 +348,63 @@ struct RemoteStorageDownloadUGCResult_t
 	char m_pchFileName[k_cchFilenameMax];		// The name of the file that was downloaded. 
 	uint64 m_ulSteamIDOwner;		// Steam ID of the user who created this content.
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of a call to GetPublishedFileDetails()
+//-----------------------------------------------------------------------------
+struct RemoteStorageGetPublishedFileDetailsResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 18 };
+	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;
+	AppId_t m_nCreatorAppID;		// ID of the app that created this file.
+	AppId_t m_nConsumerAppID;		// ID of the app that will consume this file.
+	char m_rgchTitle[k_cchPublishedDocumentTitleMax];		// title of document
+	char m_rgchDescription[k_cchPublishedDocumentDescriptionMax];	// description of document
+	UGCHandle_t m_hFile;			// The handle of the primary file
+	UGCHandle_t m_hPreviewFile;		// The handle of the preview file
+	uint64 m_ulSteamIDOwner;		// Steam ID of the user who created this content.
+	uint32 m_rtimeCreated;			// time when the published file was created
+	uint32 m_rtimeUpdated;			// time when the published file was last updated
+	ERemoteStoragePublishedFileVisibility m_eVisibility;
+	bool m_bBanned;
+	char m_rgchTags[k_cchTagListMax];	// comma separated list of all tags associated with this file
+	bool m_bTagsTruncated;			// whether the list of tags was too long to be returned in the provided buffer
+	char m_pchFileName[k_cchFilenameMax];		// The name of the primary file
+	int32 m_nFileSize;				// Size of the primary file
+	int32 m_nPreviewFileSize;		// Size of the preview file
+};
+
+//
+// IMPORTANT! k_iClientRemoteStorageCallbacks + 19, 20 is used, see iclientremotestorage.h
+//
+
+
+//-----------------------------------------------------------------------------
+// Purpose: User subscribed to a file for the app (from within the app or on the web)
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishedFileSubscribed_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 21 };
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	AppId_t m_nAppID;						// ID of the app that will consume this file.
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: User unsubscribed from a file for the app (from within the app or on the web)
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishedFileUnsubscribed_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 22 };
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	AppId_t m_nAppID;						// ID of the app that will consume this file.
+};
+
+
+//
+// IMPORTANT! k_iClientRemoteStorageCallbacks + 23 is used, see iclientremotestorage.h
+//
 
 
 #pragma pack( pop )

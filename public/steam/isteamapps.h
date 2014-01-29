@@ -10,6 +10,9 @@
 #pragma once
 #endif
 
+const int k_cubAppProofOfPurchaseKeyMax = 64;			// max bytes of a legacy cd key we support
+
+
 //-----------------------------------------------------------------------------
 // Purpose: interface to app data
 //-----------------------------------------------------------------------------
@@ -47,13 +50,20 @@ public:
 	virtual void InstallDLC( AppId_t nAppID ) = 0;
 	virtual void UninstallDLC( AppId_t nAppID ) = 0;
 
+	// Request cd-key for yourself or owned DLC. If you are interested in this
+	// data then make sure you provide us with a list of valid keys to be distributed
+	// to users when they purchase the game, before the game ships.
+	// You'll receive an AppProofOfPurchaseKeyResponse_t callback when
+	// the key is available (which may be immediately).
+	virtual void RequestAppProofOfPurchaseKey( AppId_t nAppID ) = 0;
+
 #ifdef _PS3
 	// Result returned in a RegisterActivationCodeResponse_t callresult
 	virtual SteamAPICall_t RegisterActivationCode( const char *pchActivationCode ) = 0;
 #endif
 };
 
-#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION004"
+#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION005"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -89,6 +99,17 @@ struct RegisterActivationCodeResponse_t
 	enum { k_iCallback = k_iSteamAppsCallbacks + 8 };
 	ERegisterActivactionCodeResult m_eResult;
 	uint32 m_unPackageRegistered;						// package that was registered. Only set on success
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: response to RegisterActivationCode()
+//-----------------------------------------------------------------------------
+struct AppProofOfPurchaseKeyResponse_t
+{
+	enum { k_iCallback = k_iSteamAppsCallbacks + 13 };
+	EResult m_eResult;
+	uint32	m_nAppID;
+	char	m_rgchKey[ k_cubAppProofOfPurchaseKeyMax ];
 };
 
 #pragma pack( pop )

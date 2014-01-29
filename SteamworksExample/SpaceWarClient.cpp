@@ -1521,7 +1521,7 @@ void CSpaceWarClient::DrawHUDText()
 				rect.left -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
 			}
 
-			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u ", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
+			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u ", rgchPlayerName, m_rguPlayerScores[i] );
 			m_pGameEngine->BDrawString( m_hHUDFont, rect, g_rgPlayerColors[i], TEXTPOS_RIGHT|TEXTPOS_VCENTER, rgchBuffer );
 			break;
 		case 2:

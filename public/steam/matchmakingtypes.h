@@ -30,7 +30,7 @@ const int k_cbMaxGameServerMapName = 32;
 const int k_cbMaxGameServerGameDescription = 64;
 const int k_cbMaxGameServerName = 64;
 const int k_cbMaxGameServerTags = 128;
-const int k_cbMaxGameServerGameData = 128;
+const int k_cbMaxGameServerGameData = 2048;
 
 struct MatchMakingKeyValuePair_t
 {
@@ -190,7 +190,7 @@ public:
 	char m_szMap[k_cbMaxGameServerMapName];						///< current map
 	char m_szGameDescription[k_cbMaxGameServerGameDescription];	///< game description
 	uint32 m_nAppID;											///< Steam App ID of this server
-	int m_nPlayers;												///< current number of players on the server
+	int m_nPlayers;												///< total number of players currently on the server.  INCLUDES BOTS!!
 	int m_nMaxPlayers;											///< Maximum players that can join this server
 	int m_nBotPlayers;											///< Number of bots (i.e simulated players) on this server
 	bool m_bPassword;											///< true if this server needs a password to join

@@ -97,6 +97,8 @@ enum EResult
 	k_EResultFacebookQueryError = 70,			// Facebook query returned an error
 	k_EResultExpiredLoginAuthCode = 71,			// account login denied due to auth code expired
 	k_EResultIPLoginRestrictionFailed = 72,
+	k_EResultAccountLocked = 73,
+	k_EResultAccountLogonDeniedVerifiedEmailRequired = 74,
 };
 
 // Error codes for use with the voice functions
@@ -255,6 +257,9 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseCommunityBan = 9,	// Attempt to join a chat when the user has a community lock on their account
 	k_EChatRoomEnterResponseMemberBlockedYou = 10, // Join failed - some member in the chat has blocked you from joining
 	k_EChatRoomEnterResponseYouBlockedMember = 11, // Join failed - you have blocked some member already in the chat
+	k_EChatRoomEnterResponseNoRankingDataLobby = 12,  // There is no ranking data available for the lobby 
+	k_EChatRoomEnterResponseNoRankingDataUser = 13,  // There is no ranking data available for the user
+	k_EChatRoomEnterResponseRankOutOfRange = 14, // The user is out of the allowable ranking range
 };
 
 

@@ -130,6 +130,7 @@ public:
 	// strings will be used by Steam.
 	virtual void SetPSNGameBootInviteStrings( const char *pchSubject, const char *pchBody ) = 0;
 #endif
+
 };
 
 #define STEAMUTILS_INTERFACE_VERSION "SteamUtils005"

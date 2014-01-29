@@ -12,6 +12,20 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.18	7th February 2012
+----------------------------------------------------------------
+Cloud
+* Removed ISteamRemoteStorage::PublishFile() and consolidated the API to PublishWorkshopFile()
+* Updated ISteamRemoteStorage::PublishWorkshopFile() to better define the type of workshop file being published
+* Replaced ISteamRemoteStorage::UpdatePublishedFile() with a new mechanism to update existing files through CreatePublishedFileUpdateRequest() UpdatePublishedFile[Property](), and CommitPublishedFileUpdate()
+* Increased the description field for a workshop file from 256 -> 8000 characters
+* Added ISteamRemoteStorage::GetUGCDownloadProgress()
+* Added file size limit of 100MB to ISteamRemoteStorage::FileWrite()
+
+Apps:
+* Added ISteamApps::RequestAppProofOfPurchaseKey
+
+----------------------------------------------------------------
 v1.17	2nd November 2011
 ----------------------------------------------------------------
 Cloud
