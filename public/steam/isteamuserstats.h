@@ -18,9 +18,8 @@ const uint32 k_cchStatNameMax = 128;
 class ISteamUserStats
 {
 public:
-
-	// Ask the server to send down this user's data and achievements for nGameID
-	virtual bool RequestCurrentStats( ) = 0;
+	// Ask the server to send down this user's data and achievements for this game
+	virtual bool RequestCurrentStats() = 0;
 
 	// Data accessors
 	virtual bool GetStat( const char *pchName, int32 *pData ) = 0;
@@ -38,7 +37,7 @@ public:
 
 	// Store the current data on the server, will get a callback when set
 	// And one callback for every new achievement
-	virtual bool StoreStats( ) = 0;
+	virtual bool StoreStats() = 0;
 
 	// Achievement / GroupAchievement metadata
 
@@ -51,10 +50,22 @@ public:
 	// Calling this w/ N out of N progress will NOT set the achievement, the game must still do that.
 	virtual bool IndicateAchievementProgress( const char *pchName, uint32 nCurProgress, uint32 nMaxProgress ) = 0;
 
+	// Friends stats & achievements
+
+	// downloads stats for the user
+	// returns a UserStatsReceived_t received when completed
+	// if the other user has no stats, UserStatsReceived_t.m_eResult will be set to k_EResultFail
+	// these stats won't be auto-updated; you'll need to call RequestUserStats() again to refresh any data
+	virtual SteamAPICall_t RequestUserStats( CSteamID steamIDUser ) = 0;
+
+	// requests stat information for a user, usable after a successful call to RequestUserStats()
+	virtual bool GetUserStat( CSteamID steamIDUser, const char *pchName, int32 *pData ) = 0;
+	virtual bool GetUserStat( CSteamID steamIDUser, const char *pchName, float *pData ) = 0;
+	virtual bool GetUserAchievement( CSteamID steamIDUser, const char *pchName, bool *pbAchieved ) = 0;
 };
 
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION004"
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION003"
 
 //-----------------------------------------------------------------------------
 // Purpose: called when the latests stats and achievements have been received
@@ -65,6 +76,7 @@ struct UserStatsReceived_t
 	enum { k_iCallback = k_iSteamUserStatsCallbacks + 1 };
 	uint64		m_nGameID;		// Game these stats are for
 	EResult		m_eResult;		// Success / error fetching the stats
+	CSteamID	m_steamIDUser;	// The user for whom the stats are retrieved for
 };
 
 
@@ -77,6 +89,7 @@ struct UserStatsStored_t
 	uint64		m_nGameID;		// Game these stats are for
 	EResult		m_eResult;		// success / error
 };
+
 
 //-----------------------------------------------------------------------------
 // Purpose: result of a request to store the achievements for a game, or an 

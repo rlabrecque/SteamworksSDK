@@ -12,6 +12,20 @@
 
 #include "isteamclient.h"
 
+
+// Steam API call failure results
+enum ESteamAPICallFailure
+{
+	k_ESteamAPICallFailureNone = -1,			// no failure
+	k_ESteamAPICallFailureSteamGone = 0,		// the local Steam process has gone away
+	k_ESteamAPICallFailureNetworkFailure = 1,	// the network connection to Steam has been broken, or was already broken
+	// SteamServersDisconnected_t callback will be sent around the same time
+	// SteamServersConnected_t will be sent when the client is able to talk to the Steam servers again
+	k_ESteamAPICallFailureInvalidHandle = 2,	// the SteamAPICall_t handle passed in no longer exists
+	k_ESteamAPICallFailureMismatchedCallback = 3,// GetAPICallResult() was called with the wrong callback type for this API call
+};
+
+
 //-----------------------------------------------------------------------------
 // Purpose: interface to user independent utility functions
 //-----------------------------------------------------------------------------
@@ -52,6 +66,12 @@ public:
 	// Sets the position where the overlay instance for the currently calling game should show notifications.
 	// This position is per-game and if this function is called from outside of a game context it will do nothing.
 	virtual void SetOverlayNotificationPosition( ENotificationPosition eNotificationPosition ) = 0;
+
+	// API asynchronous call results
+	// can be used directly, but more commonly used via the callback dispatch API (see steam_api.h)
+	virtual bool IsAPICallCompleted( SteamAPICall_t hSteamAPICall, bool *pbFailed ) = 0;
+	virtual ESteamAPICallFailure GetAPICallFailureReason( SteamAPICall_t hSteamAPICall ) = 0;
+	virtual bool GetAPICallResult( SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed ) = 0;
 };
 
 #define STEAMUTILS_INTERFACE_VERSION "SteamUtils002"
@@ -77,5 +97,18 @@ struct LowBatteryPower_t
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 2 };
 	uint8 m_nMinutesBatteryLeft;
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: called when a SteamAsyncCall_t has completed (or failed)
+//-----------------------------------------------------------------------------
+struct SteamAPICallCompleted_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 3 };
+	SteamAPICall_t m_hAsyncCall;
+};
+
+
+
 
 #endif // ISTEAMUTILS_H

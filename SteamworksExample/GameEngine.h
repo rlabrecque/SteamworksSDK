@@ -154,6 +154,9 @@ public:
 	// Get the current state of a key
 	bool BIsKeyDown( DWORD dwVK );
 
+	// Get the first (in some arbitrary order) key down, if any
+	bool BGetFirstKeyDown( DWORD *pdwVK );
+
 	// Get current tick count for the game engine
 	uint64 GetGameTickCount() { return m_ulGameTickCount; }
 

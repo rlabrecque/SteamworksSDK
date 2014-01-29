@@ -84,7 +84,8 @@ private:
 	// Menu object
 	CLobbyBrowserMenu *m_pMenu;
 
-	STEAM_CALLBACK( CLobbyBrowser, OnLobbyMatchListCallback, LobbyMatchList_t, m_CallbackLobbyMatchList );
+	CCallResult<CLobbyBrowser, LobbyMatchList_t> m_SteamCallResultLobbyMatchList;
+	void OnLobbyMatchListCallback( LobbyMatchList_t *pLobbyMatchList, bool bIOFailure );
 	STEAM_CALLBACK( CLobbyBrowser, OnLobbyDataUpdatedCallback, LobbyDataUpdate_t, m_CallbackLobbyDataUpdated );
 
 	std::list< Lobby_t > m_ListLobbies; 

@@ -17,6 +17,7 @@
 #include "Ship.h"
 #include "steam\steam_api.h"
 #include "StatsAndAchievements.h"
+#include "RemoteStorage.h"
 #include "BaseMenu.h"
 
 // Forward class declaration
@@ -110,9 +111,9 @@ public:
 		// start joining the lobby
 		if ( selection.m_eStateToTransitionTo == k_EClientJoiningLobby )
 		{
-			SteamMatchmaking()->JoinLobby( selection.m_steamIDLobby );
-
-			// the callback LobbyEnter_t will be received when we've joined
+			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->JoinLobby( selection.m_steamIDLobby );
+			// set the function to call when this API completes
+			m_SteamCallResultLobbyEntered.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyEntered );
 		}
 
 		SetGameState( selection.m_eStateToTransitionTo );
@@ -257,14 +258,18 @@ private:
 
 	CServerBrowser *m_pServerBrowser;
 
+	CRemoteStorage *m_pRemoteStorage;
+
 	// lobby handling
-	bool m_bCreatingLobby;
 	// the name of the lobby we're connected to
 	CSteamID m_steamIDLobby;
 	// callback for when we're creating a new lobby
-	STEAM_CALLBACK( CSpaceWarClient, OnLobbyCreated, LobbyCreated_t, m_LobbyCreatedCallback );
+	void OnLobbyCreated( LobbyCreated_t *pCallback, bool bIOFailure );
+	CCallResult<CSpaceWarClient, LobbyCreated_t> m_SteamCallResultLobbyCreated;
 	// callback for when we've joined a lobby
-	STEAM_CALLBACK( CSpaceWarClient, OnLobbyEntered, LobbyEnter_t, m_LobbyEnteredCallback );
+	void OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure );
+	CCallResult<CSpaceWarClient, LobbyEnter_t> m_SteamCallResultLobbyEntered;
+
 	// callback for when the lobby game server has started
 	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t, m_LobbyGameCreated );
 	
@@ -276,6 +281,9 @@ private:
 
 	// connection handler
 	STEAM_CALLBACK( CSpaceWarClient, OnSocketStatusCallback, SocketStatusCallback_t, m_SocketStatusCallback );
+
+	// ipc failure handler
+	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t, m_IPCFailureCallback );
 };
 
 extern CSpaceWarClient *g_pSpaceWarClient;

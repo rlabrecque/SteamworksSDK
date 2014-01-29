@@ -207,7 +207,6 @@ public:
 //			just initializes base data
 //-----------------------------------------------------------------------------
 CLobbyBrowser::CLobbyBrowser( CGameEngine *pGameEngine ) :
-	m_CallbackLobbyMatchList( this, &CLobbyBrowser::OnLobbyMatchListCallback ),
 	m_CallbackLobbyDataUpdated( this, &CLobbyBrowser::OnLobbyDataUpdatedCallback )
 {
 	m_pGameEngine = pGameEngine;
@@ -247,7 +246,9 @@ void CLobbyBrowser::Refresh()
 	{
 		m_bRequestingLobbies = true;
 		// request all lobbies for this game
-		SteamMatchmaking()->RequestLobbyList();
+		SteamAPICall_t hSteamAPICall = SteamMatchmaking()->RequestLobbyList();
+		// set the function to call when this API call has completed
+		m_SteamCallResultLobbyMatchList.Set( hSteamAPICall, this, &CLobbyBrowser::OnLobbyMatchListCallback );
 	}
 }
 
@@ -255,10 +256,16 @@ void CLobbyBrowser::Refresh()
 //-----------------------------------------------------------------------------
 // Purpose: Callback, on a list of lobbies being received from the Steam back-end
 //-----------------------------------------------------------------------------
-void CLobbyBrowser::OnLobbyMatchListCallback( LobbyMatchList_t *pCallback )
+void CLobbyBrowser::OnLobbyMatchListCallback( LobbyMatchList_t *pCallback, bool bIOFailure )
 {
 	m_ListLobbies.clear();
 	m_bRequestingLobbies = false;
+
+	if ( bIOFailure )
+	{
+		// we had a Steam I/O failure - we probably timed out talking to the Steam back-end servers
+		// doesn't matter in this case, we can just act if no lobbies were received
+	}
 
 	// lobbies are returned in order of closeness to the user, so add them to the list in that order
 	for ( uint32 iLobby = 0; iLobby < pCallback->m_nLobbiesMatching; iLobby++ )

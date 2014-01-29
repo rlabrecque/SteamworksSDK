@@ -102,7 +102,7 @@ CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 	ResetPlayerShips();
 
 	// Start listening for client connections, as we now have enough info to really handle them
-	m_hSocketServer = SteamGameServerNetworking()->CreateListenSocket( 0, 0, SPACEWAR_SERVER_PORT );
+	m_hSocketServer = SteamGameServerNetworking()->CreateListenSocket( 0, 0, SPACEWAR_SERVER_PORT, true );
 	if ( !m_hSocketServer )
 	{
 		OutputDebugString( "Failed creating socket for CSpaceWarServer -- no one will be able to connect\n" );

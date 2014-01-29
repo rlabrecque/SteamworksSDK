@@ -108,6 +108,7 @@ enum EClientGameState
 	k_EClientFindLobby,
 	k_EClientJoiningLobby,
 	k_EClientFindLANServers,
+	k_EClientRemoteStorage,
 };
 
 

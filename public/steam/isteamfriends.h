@@ -73,6 +73,17 @@ enum EAvatarSize
 };
 
 
+// friend game played information
+struct FriendGameInfo_t
+{
+	CGameID m_gameID;
+	uint32 m_unGameIP;
+	uint16 m_usGamePort;
+	uint16 m_usQueryPort;
+	CSteamID m_steamIDLobby;
+};
+
+
 // maximum number of characters in a users name
 enum { k_cchPersonaNameMax = 128 };
 
@@ -125,8 +136,8 @@ public:
 
 	// gets the avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
 	virtual int GetFriendAvatar( CSteamID steamIDFriend, int eAvatarSize ) = 0;
-	// returns true if the friend is actually in a game
-	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, uint64 *pulGameID, uint32 *punGameIP, uint16 *pusGamePort, uint16 *pusQueryPort ) = 0;
+	// returns true if the friend is actually in a game, and fills in pFriendGameInfo with an extra details 
+	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, FriendGameInfo_t *pFriendGameInfo ) = 0;
 	// accesses old friends names - returns an empty string when their are no more items in the history
 	virtual const char *GetFriendPersonaNameHistory( CSteamID steamIDFriend, int iPersonaName ) = 0;
 
@@ -151,11 +162,22 @@ public:
 	// User is in a game pressing the talk button (will suppress the microphone for all voice comms from the Steam friends UI)
 	virtual void SetInGameVoiceSpeaking( CSteamID steamIDUser, bool bSpeaking ) = 0;
 
-	// activates the game overlay, with an optional dialog to open ("Friends", "Community", "Players", "Settings")
+	// activates the game overlay, with an optional dialog to open 
+	// valid options are "Friends", "Community", "Players", "Settings", "LobbyInvite", "OfficialGameGroup"
 	virtual void ActivateGameOverlay( const char *pchDialog ) = 0;
+
+	// activates game overlay to a specific place
+	// valid options are
+	//		"steamid" - opens the overlay web browser to the specified user or groups profile
+	//		"chat" - opens a chat window to the specified user, or joins the group chat 
+	virtual void ActivateGameOverlayToUser( const char *pchDialog, CSteamID steamID ) = 0;
+
+	// activates game overlay web browser directly to the specified URL
+	// full address with protocol type is required, e.g. http://www.steamgames.com/
+	virtual void ActivateGameOverlayToWebPage( const char *pchURL ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends004"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends005"
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a friends' status changes
@@ -208,5 +230,18 @@ struct GameServerChangeRequested_t
 	char m_rgchServer[64];		// server address ("127.0.0.1:27015", "tf2.valvesoftware.com")
 	char m_rgchPassword[64];	// server password, if any
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: called when the user tries to join a lobby from their friends list
+//			game client should attempt to connect to specified lobby when this is received
+//-----------------------------------------------------------------------------
+struct GameLobbyJoinRequested_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 33 };
+	CSteamID m_steamIDLobby;
+	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
+};
+
 
 #endif // ISTEAMFRIENDS_H

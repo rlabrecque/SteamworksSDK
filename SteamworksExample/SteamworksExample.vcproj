@@ -28,8 +28,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy ..\redistributable_bin\steam_api.dll .\$(ConfigurationName)\steam_api.dll&#x0D;&#x0A;"
-				Outputs=".\$(ConfigurationName)\steam_api.dll"
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -110,8 +110,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy ..\redistributable_bin\steam_api.dll .\$(ConfigurationName)\steam_api.dll&#x0D;&#x0A;"
-				Outputs=".\$(ConfigurationName)\steam_api.dll"
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -228,6 +228,10 @@
 				</File>
 				<File
 					RelativePath=".\QuitMenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RemoteStorage.cpp"
 					>
 				</File>
 				<File

@@ -45,6 +45,14 @@ enum ESNetSocketState
 
 };
 
+// describes how the socket is currently connected
+enum ESNetSocketConnectionType
+{
+	k_ESNetSocketConnectionTypeNotConnected = 0,
+	k_ESNetSocketConnectionTypeUDP = 1,
+	k_ESNetSocketConnectionTypeUDPRelay = 2,
+};
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for making connections and sending data between clients,
@@ -61,13 +69,13 @@ public:
 	//		pass in 0 if you just want the default local IP
 	// unPort is the port to use
 	//		pass in 0 if you don't want users to be able to connect via IP/Port, but expect to be always peer-to-peer connections only
-	virtual SNetListenSocket_t CreateListenSocket( int nVirtualP2PPort, uint32 nIP, uint16 nPort ) = 0;
+	virtual SNetListenSocket_t CreateListenSocket( int nVirtualP2PPort, uint32 nIP, uint16 nPort, bool bAllowUseOfPacketRelay ) = 0;
 
 	// creates a socket and begin connection to a remote destination
 	// can connect via a known steamID (client or game server), or directly to an IP
 	// on success will trigger a SocketStatusCallback_t callback
 	// on failure or timeout will trigger a SocketStatusCallback_t callback with a failure code in m_eSNetSocketState
-	virtual SNetSocket_t CreateP2PConnectionSocket( CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec ) = 0;
+	virtual SNetSocket_t CreateP2PConnectionSocket( CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay ) = 0;
 	virtual SNetSocket_t CreateConnectionSocket( uint32 nIP, uint16 nPort, int nTimeoutSec ) = 0;
 
 	// disconnects the connection to the socket, if any, and invalidates the handle
@@ -115,9 +123,14 @@ public:
 	// returns which local port the listen socket is bound to
 	// *pnIP and *pnPort will be 0 if the socket is set to listen for P2P connections only
 	virtual bool GetListenSocketInfo( SNetListenSocket_t hListenSocket, uint32 *pnIP, uint16 *pnPort ) = 0;
-	
+
+	// returns true to describe how the socket ended up connecting
+	virtual ESNetSocketConnectionType GetSocketConnectionType( SNetSocket_t hSocket ) = 0;
+
+	// max packet size, in bytes
+	virtual int GetMaxPacketSize( SNetSocket_t hSocket ) = 0;
 };
-#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking001"
+#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking002"
 
 
 // callback notification - status of a socket has changed

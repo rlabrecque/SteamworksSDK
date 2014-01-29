@@ -23,9 +23,8 @@ CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 //-----------------------------------------------------------------------------
 CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser ) :
 		m_SocketStatusCallback( this, &CSpaceWarClient::OnSocketStatusCallback ),
-		m_LobbyCreatedCallback( this, &CSpaceWarClient::OnLobbyCreated ),
-		m_LobbyEnteredCallback( this, &CSpaceWarClient::OnLobbyEntered ),
-		m_LobbyGameCreated( this, &CSpaceWarClient::OnLobbyGameCreated )
+		m_LobbyGameCreated( this, &CSpaceWarClient::OnLobbyGameCreated ),
+		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure )
 {
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
@@ -38,7 +37,6 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 	m_SteamIDLocalUser = steamIDUser;
 	m_eConnectedStatus = k_EClientNotConnected;
 	m_hSocketClient = NULL;
-	m_bCreatingLobby = false;
 	m_bTransitionedGameState = false;
 	m_rgchErrorText[0] = 0;
 	m_unServerIP = 0;
@@ -80,6 +78,9 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
+
+	// Remote Storage page
+	m_pRemoteStorage = new CRemoteStorage( pGameEngine );
 }
 
 
@@ -387,7 +388,7 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 	m_ulLastNetworkDataReceivedTime = m_ulLastConnectionAttemptRetryTime = m_pGameEngine->GetGameTickCount();
 
 	// Create UDP socket for the client to talk to the server over
-	m_hSocketClient = SteamNetworking()->CreateP2PConnectionSocket( steamIDGameServer, 0, 10 );
+	m_hSocketClient = SteamNetworking()->CreateP2PConnectionSocket( steamIDGameServer, 0, 10, true );
 	if ( !m_hSocketClient )
 	{
 		OutputDebugString( "Failed creating socket for CSpaceWarClient -- won't be able to talk to server\n" );
@@ -561,7 +562,7 @@ void CSpaceWarClient::OnReceiveServerExiting()
 //-----------------------------------------------------------------------------
 // Purpose: Finishes up entering a lobby of our own creation
 //-----------------------------------------------------------------------------
-void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback )
+void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback, bool bIOFailure )
 {
 	if ( m_eGameState != k_EClientCreatingLobby )
 		return;
@@ -570,9 +571,16 @@ void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback )
 	if ( pCallback->m_eResult == k_EResultOK )
 	{
 		// success
-		// now we just need to wait to join the job we just created
-		SetGameState( k_EClientJoiningLobby );
 		m_steamIDLobby = pCallback->m_ulSteamIDLobby;
+		m_pLobby->SetLobbySteamID( m_steamIDLobby );
+
+		// set the name of the lobby if it's ours
+		char rgchLobbyName[256];
+		_snprintf( rgchLobbyName, sizeof( rgchLobbyName ), "%s's lobby", SteamFriends()->GetPersonaName() );
+		SteamMatchmaking()->SetLobbyData( m_steamIDLobby, "name", rgchLobbyName );
+
+		// mark that we're in the lobby
+		SetGameState( k_EClientInLobby );
 	}
 	else
 	{
@@ -586,7 +594,7 @@ void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback )
 //-----------------------------------------------------------------------------
 // Purpose: Finishes up entering a lobby
 //-----------------------------------------------------------------------------
-void CSpaceWarClient::OnLobbyEntered( LobbyEnter_t *pCallback )
+void CSpaceWarClient::OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure )
 {
 	if ( m_eGameState != k_EClientJoiningLobby )
 		return;
@@ -597,14 +605,6 @@ void CSpaceWarClient::OnLobbyEntered( LobbyEnter_t *pCallback )
 	m_steamIDLobby = pCallback->m_ulSteamIDLobby;
 	m_pLobby->SetLobbySteamID( m_steamIDLobby );
 
-	// set the name of the lobby if it's ours
-	if ( m_bCreatingLobby )
-	{
-		m_bCreatingLobby = false;
-		char rgchLobbyName[256];
-		_snprintf( rgchLobbyName, sizeof( rgchLobbyName ), "%s's lobby", SteamFriends()->GetPersonaName() );
-		SteamMatchmaking()->SetLobbyData( m_steamIDLobby, "name", rgchLobbyName );
-	}
 }
 
 
@@ -685,14 +685,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 	else if ( m_eGameState == k_EClientCreatingLobby )
 	{
 		// start creating the lobby
-		if ( !m_bCreatingLobby )
+		if ( !m_SteamCallResultLobbyCreated.IsActive() )
 		{
-			m_bCreatingLobby = true;
-
 			// ask steam to create a lobby
-			SteamMatchmaking()->CreateLobby( false /* public lobby, anyone can find it */ );
-
-			// result is returned through LobbyCreated_t callback, wait for that
+			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->CreateLobby( k_ELobbyTypePublic /* public lobby, anyone can find it */ );
+			// set the function to call when this completes
+			m_SteamCallResultLobbyCreated.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyCreated );
 		}
 	}
 	else if ( m_eGameState == k_EClientFindLobby )
@@ -712,6 +710,23 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 			delete m_pServer;
 			m_pServer = NULL;
 		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles notification of a steam ipc failure
+// we may get multiple callbacks, one for each IPC operation we attempted
+// since the actual failure, so protect ourselves from alerting more than once.
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnIPCFailure( IPCFailure_t *failure )
+{
+	static bool bExiting = false;
+	if ( ! bExiting )
+	{
+		OutputDebugString( "Steam IPC Failure, shutting down\n" );
+		::MessageBoxA( NULL, "Connection to Steam Lost, Exiting", "Steam Connection Error", MB_OK );
+		m_pGameEngine->Shutdown();
+		bExiting = true;
 	}
 }
 
@@ -865,6 +880,14 @@ void CSpaceWarClient::RunFrame()
 
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );
+		break;
+	case k_EClientRemoteStorage:
+		m_pStarField->Render();
+		m_pRemoteStorage->Render();
+
+		if ( m_pRemoteStorage->BFinished() )
+			SetGameState( k_EClientGameMenu );
+
 		break;
 	case k_EClientGameStartServer:
 		m_pStarField->Render();

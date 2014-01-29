@@ -36,6 +36,7 @@ class ISteamMatchmakingServers;
 class ISteamUserStats;
 class ISteamApps;
 class ISteamNetworking;
+class ISteamRemoteStorage;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -120,6 +121,10 @@ public:
 	// 'const char *' is the text of the message
 	// callbacks will occur directly after the API function is called that generated the warning or message
 	virtual void SetWarningMessageHook( SteamAPIWarningMessageHook_t pFunction ) = 0;
+
+	// remote storage
+	virtual ISteamRemoteStorage *GetISteamRemoteStorage( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
 };
 
 #define STEAMCLIENT_INTERFACE_VERSION		"SteamClient007"

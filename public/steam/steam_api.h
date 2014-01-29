@@ -18,6 +18,7 @@
 #include "isteamuserstats.h"
 #include "isteamapps.h"
 #include "isteamnetworking.h"
+#include "isteamremotestorage.h"
 
 // Steam API export macro
 #if defined( _WIN32 ) && !defined( _X360 )
@@ -83,6 +84,7 @@ S_API ISteamUserStats *SteamUserStats();
 S_API ISteamApps *SteamApps();
 S_API ISteamNetworking *SteamNetworking();
 S_API ISteamMatchmakingServers *SteamMatchmakingServers();
+S_API ISteamRemoteStorage *SteamRemoteStorage();
 #endif // VERSION_SAFE_STEAM_API_INTERFACES
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -102,6 +104,10 @@ S_API void SteamAPI_RunCallbacks();
 // functions used by the utility CCallback objects to receive callbacks
 S_API void SteamAPI_RegisterCallback( class CCallbackBase *pCallback, int iCallback );
 S_API void SteamAPI_UnregisterCallback( class CCallbackBase *pCallback );
+// functions used by the utility CCallResult objects to receive async call results
+S_API void SteamAPI_RegisterCallResult( class CCallbackBase *pCallback, SteamAPICall_t hAPICall );
+S_API void SteamAPI_UnregisterCallResult( class CCallbackBase *pCallback, SteamAPICall_t hAPICall );
+
 
 //-----------------------------------------------------------------------------
 // Purpose: base for callbacks, 
@@ -110,17 +116,92 @@ S_API void SteamAPI_UnregisterCallback( class CCallbackBase *pCallback );
 class CCallbackBase
 {
 public:
-	CCallbackBase() { m_nCallbackFlags = 0; }
+	CCallbackBase() { m_nCallbackFlags = 0; m_iCallback = 0; }
 	// don't add a virtual destructor because we export this binary interface across dll's
 	virtual void Run( void *pvParam ) = 0;
+	virtual void Run( void *pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall ) = 0;
+	int GetICallback() { return m_iCallback; }
+	virtual int GetCallbackSizeBytes() = 0;
 
 protected:
 	enum { k_ECallbackFlagsRegistered = 0x01, k_ECallbackFlagsGameServer = 0x02 };
 	uint8 m_nCallbackFlags;
-private:
 	int m_iCallback;
 	friend class CCallbackMgr;
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: maps a steam async call result to a class member function
+//			template params: T = local class, P = parameter struct
+//-----------------------------------------------------------------------------
+template< class T, class P >
+class CCallResult : private CCallbackBase
+{
+public:
+	typedef void (T::*func_t)( P*, bool );
+
+	CCallResult()
+	{
+		m_hAPICall = 0;
+		m_pObj = NULL;
+		m_Func = NULL;
+		m_iCallback = P::k_iCallback;
+	}
+
+	void Set( SteamAPICall_t hAPICall, T *p, func_t func )
+	{
+		if ( m_hAPICall )
+			SteamAPI_UnregisterCallResult( this, m_hAPICall );
+
+		m_hAPICall = hAPICall;
+		m_pObj = p;
+		m_Func = func;
+
+		if ( hAPICall )
+			SteamAPI_RegisterCallResult( this, hAPICall );
+	}
+
+	bool IsActive()
+	{
+		return ( m_hAPICall != 0 );
+	}
+
+	void Cancel()
+	{
+		m_hAPICall = 0;
+	}
+
+	~CCallResult()
+	{
+		if ( m_hAPICall )
+			SteamAPI_UnregisterCallResult( this, m_hAPICall );
+	}
+
+private:
+	virtual void Run( void *pvParam )
+	{
+		(m_pObj->*m_Func)( (P *)pvParam, false );
+		m_hAPICall = 0;
+	}
+	void Run( void *pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall )
+	{
+		if ( hSteamAPICall == m_hAPICall )
+		{
+			(m_pObj->*m_Func)( (P *)pvParam, bIOFailure );
+			m_hAPICall = 0;
+		}
+	}
+	int GetCallbackSizeBytes()
+	{
+		return sizeof( P );
+	}
+
+	SteamAPICall_t m_hAPICall;
+	T *m_pObj;
+	func_t m_Func;
+};
+
 
 
 //-----------------------------------------------------------------------------
@@ -175,6 +256,14 @@ private:
 	virtual void Run( void *pvParam )
 	{
 		(m_pObj->*m_Func)( (P *)pvParam );
+	}
+	virtual void Run( void *pvParam, bool, SteamAPICall_t )
+	{
+		(m_pObj->*m_Func)( (P *)pvParam );
+	}
+	int GetCallbackSizeBytes()
+	{
+		return sizeof( P );
 	}
 
 	T *m_pObj;
@@ -240,6 +329,7 @@ public:
 	ISteamApps*			SteamApps()							{ return m_pSteamApps; }
 	ISteamMatchmakingServers*	SteamMatchmakingServers()	{ return m_pSteamMatchmakingServers; }
 	ISteamNetworking*	SteamNetworking()					{ return m_pSteamNetworking; }
+	ISteamRemoteStorage* SteamRemoteStorage()				{ return m_pSteamRemoteStorage; }
 
 private:
 	ISteamUser		*m_pSteamUser;
@@ -250,6 +340,7 @@ private:
 	ISteamApps			*m_pSteamApps;
 	ISteamMatchmakingServers	*m_pSteamMatchmakingServers;
 	ISteamNetworking	*m_pSteamNetworking;
+	ISteamRemoteStorage *m_pSteamRemoteStorage;
 };
 
 inline CSteamAPIContext::CSteamAPIContext()
@@ -267,6 +358,7 @@ inline void CSteamAPIContext::Clear()
 	m_pSteamApps = NULL;
 	m_pSteamMatchmakingServers = NULL;
 	m_pSteamNetworking = NULL;
+	m_pSteamRemoteStorage = NULL;
 }
 
 // This function must be inlined so the module using steam_api.dll gets the version names they want.
@@ -308,6 +400,10 @@ inline bool CSteamAPIContext::Init()
 
 	m_pSteamNetworking = SteamClient()->GetISteamNetworking( hSteamUser, hSteamPipe, STEAMNETWORKING_INTERFACE_VERSION );
 	if ( !m_pSteamNetworking )
+		return false;
+
+	m_pSteamRemoteStorage = SteamClient()->GetISteamRemoteStorage( hSteamUser, hSteamPipe, STEAMREMOTESTORAGE_INTERFACE_VERSION );
+	if ( !m_pSteamRemoteStorage )
 		return false;
 
 	return true;

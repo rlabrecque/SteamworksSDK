@@ -76,7 +76,8 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	// Generally you should use the default and not call this as users will be most comfortable with 
 	// the default position.  The API is provided in case the bottom right creates a serious conflict 
 	// with important UI in your game.
-	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
+// disabled temporarily until calling issue is resolved
+//	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose:
 //
@@ -67,6 +67,7 @@ enum EResult
 	k_EResultBlocked = 40,						// a user didn't allow it
 	k_EResultIgnored = 41,						// target is ignoring sender
 	k_EResultNoMatch = 42,						// nothing matching the request found
+	k_EResultAccountDisabled = 43,
 };
 
 // Error codes for use with the voice functions
@@ -180,71 +181,21 @@ enum EChatRoomEnterResponse
 typedef void (*PFNLegacyKeyRegistration)( const char *pchCDKey, const char *pchInstallPath );
 typedef bool (*PFNLegacyKeyInstalled)();
 
+const int k_unSteamAccountIDMask = 0xFFFFFFFF;
+const int k_unSteamAccountInstanceMask = 0x000FFFFF;
 
-//-----------------------------------------------------------------------------
-// Purpose: Persistent item constants
-//-----------------------------------------------------------------------------
-typedef int32 HNewItemRequest;			// Handle to an item generation request
-const int k_cchCreateItemLen	= 64;	// Maximum string length in item create APIs
-const uint64 INVALID_ITEM_ID	= (uint64)-1;
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Persistent item quality (rarity)
-//-----------------------------------------------------------------------------
-enum EItemQuality
+// Special flags for Chat accounts - they go in the top 8 bits
+// of the steam ID's "instance", leaving 12 for the actual instances
+enum EChatSteamIDInstanceFlags
 {
-	// If k_EItemQuality_Any is used in an item request a random quality will be chosen
-	k_EItemQuality_Any			= -1,		
-	k_EItemQuality_Normal		= 0,	
-	k_EItemQuality_Common		= 1,	
-	k_EItemQuality_Rare			= 2,	
-	k_EItemQuality_Unique		= 3,	
+	k_EChatAccountInstanceMask = 0x00000FFF, // top 8 bits are flags
 
-	//Must be last
-	k_EItemQuality_Count		= 4,
+	k_EChatInstanceFlagClan = ( k_unSteamAccountInstanceMask + 1 ) >> 1,	// top bit
+	k_EChatInstanceFlagLobby = ( k_unSteamAccountInstanceMask + 1 ) >> 2,	// next one down, etc
+
+	// Max of 8 flags
 };
 
-
-//-----------------------------------------------------------------------------
-// Purpose: Result codes for SendNewItemReqeust
-//-----------------------------------------------------------------------------
-enum EItemRequestResult
-{
-	k_EItemRequestResultOK = 0,			// Request succeeded
-	k_EItemRequestResultDenied = 1,		// Request denied
-	k_EItemRequestResultServerError = 2, // Request failed due to a temporary server error
-	k_EItemRequestResultTimeout = 3,		// Request timed out
-	k_EItemRequestResultInvalid = 4,		// Request was corrupt
-	k_EItemRequestResultNoMatch = 5,		// No item definition matched the request
-	k_EItemRequestResultUnknownError = 6,	// Request failed with an unknown error
-};
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Valid operators for BAddNewItemCriteria
-//-----------------------------------------------------------------------------
-enum EItemCriteriaOperator
-{
-	k_EOperator_String_EQ = 0,				// Field is string equal to value
-	k_EOperator_Not = 1,					// Logical not
-	k_EOperator_String_Not_EQ = 1,			// Field is not string equal to value
-	k_EOperator_Float_EQ = 2,				// Field as a float is equal to value
-	k_EOperator_Float_Not_EQ = 3,			// Field as a float is not equal to value
-	k_EOperator_Float_LT = 4,				// Field as a float is less than value
-	k_EOperator_Float_Not_LT = 5,			// Field as a float is not less than value
-	k_EOperator_Float_LTE = 6,				// Field as a float is less than or equal value
-	k_EOperator_Float_Not_LTE = 7,			// Field as a float is not less than or equal value
-	k_EOperator_Float_GT = 8,				// Field as a float is greater than value
-	k_EOperator_Float_Not_GT = 9,			// Field as a float is not greater than value
-	k_EOperator_Float_GTE = 10,				// Field as a float is greater than or equal value
-	k_EOperator_Float_Not_GTE = 11,			// Field as a float is not greater than or equal value
-	k_EOperator_Subkey_Contains = 12,		// Field contains value as a subkey
-	k_EOperator_Subkey_Not_Contains = 13,	// Field does not contain value as a subkey
-
-	// Must be last
-	k_EItemCriteriaOperator_Count = 14,
-};
 
 //-----------------------------------------------------------------------------
 // Purpose: Possible positions to tell the overlay to show notifications in
@@ -270,10 +221,10 @@ public:
 	//-----------------------------------------------------------------------------
 	CSteamID()
 	{
-		m_unAccountID = 0;
-		m_EAccountType = k_EAccountTypeInvalid;
-		m_EUniverse = k_EUniverseInvalid;
-		m_unAccountInstance = 0;
+		m_steamid.m_comp.m_unAccountID = 0;
+		m_steamid.m_comp.m_EAccountType = k_EAccountTypeInvalid;
+		m_steamid.m_comp.m_EUniverse = k_EUniverseInvalid;
+		m_steamid.m_comp.m_unAccountInstance = 0;
 	}
 
 
@@ -325,10 +276,18 @@ public:
 	//-----------------------------------------------------------------------------
 	void Set( uint32 unAccountID, EUniverse eUniverse, EAccountType eAccountType )
 	{
-		m_unAccountID = unAccountID;
-		m_EUniverse = eUniverse;
-		m_EAccountType = eAccountType;
-		m_unAccountInstance = 1;
+		m_steamid.m_comp.m_unAccountID = unAccountID;
+		m_steamid.m_comp.m_EUniverse = eUniverse;
+		m_steamid.m_comp.m_EAccountType = eAccountType;
+
+		if ( eAccountType == k_EAccountTypeClan )
+		{
+			m_steamid.m_comp.m_unAccountInstance = 0;
+		}
+		else
+		{
+			m_steamid.m_comp.m_unAccountInstance = 1;
+		}
 	}
 
 
@@ -340,10 +299,10 @@ public:
 	//-----------------------------------------------------------------------------
 	void InstancedSet( uint32 unAccountID, uint32 unInstance, EUniverse eUniverse, EAccountType eAccountType )
 	{
-		m_unAccountID = unAccountID;
-		m_EUniverse = eUniverse;
-		m_EAccountType = eAccountType;
-		m_unAccountInstance = unInstance;
+		m_steamid.m_comp.m_unAccountID = unAccountID;
+		m_steamid.m_comp.m_EUniverse = eUniverse;
+		m_steamid.m_comp.m_EAccountType = eAccountType;
+		m_steamid.m_comp.m_unAccountInstance = unInstance;
 	}
 
 
@@ -353,10 +312,10 @@ public:
 	//-----------------------------------------------------------------------------
 	void FullSet( uint64 ulIdentifier, EUniverse eUniverse, EAccountType eAccountType )
 	{
-		m_unAccountID = ( ulIdentifier & 0xFFFFFFFF );						// account ID is low 32 bits
-		m_unAccountInstance = ( ( ulIdentifier >> 32 ) & 0xFFFFF );			// account instance is next 20 bits
-		m_EUniverse = eUniverse;
-		m_EAccountType = eAccountType;
+		m_steamid.m_comp.m_unAccountID = ( ulIdentifier & 0xFFFFFFFF );						// account ID is low 32 bits
+		m_steamid.m_comp.m_unAccountInstance = ( ( ulIdentifier >> 32 ) & 0xFFFFF );			// account instance is next 20 bits
+		m_steamid.m_comp.m_EUniverse = eUniverse;
+		m_steamid.m_comp.m_EAccountType = eAccountType;
 	}
 
 
@@ -366,11 +325,7 @@ public:
 	//-----------------------------------------------------------------------------
 	void SetFromUint64( uint64 ulSteamID )
 	{
-		m_unAccountID = ( ulSteamID & 0xFFFFFFFF );							// account ID is low 32 bits
-		m_unAccountInstance = ( ( ulSteamID >> 32 ) & 0xFFFFF );			// account instance is next 20 bits
-
-		m_EAccountType = ( EAccountType ) ( ( ulSteamID >> 52 ) & 0xF );	// type is next 4 bits
-		m_EUniverse = ( EUniverse ) ( ( ulSteamID >> 56 ) & 0xFF );			// universe is next 8 bits
+		m_steamid.m_unAll64Bits = ulSteamID;
 	}
 
 
@@ -382,11 +337,11 @@ public:
 	//-----------------------------------------------------------------------------
 	void SetFromSteam2( TSteamGlobalUserID *pTSteamGlobalUserID, EUniverse eUniverse )
 	{
-		m_unAccountID = pTSteamGlobalUserID->m_SteamLocalUserID.Split.Low32bits * 2 + 
+		m_steamid.m_comp.m_unAccountID = pTSteamGlobalUserID->m_SteamLocalUserID.Split.Low32bits * 2 + 
 			pTSteamGlobalUserID->m_SteamLocalUserID.Split.High32bits;
-		m_EUniverse = eUniverse;		// set the universe
-		m_EAccountType = k_EAccountTypeIndividual; // Steam 2 accounts always map to account type of individual
-		m_unAccountInstance = 1;	// individual accounts always have an account instance ID of 1
+		m_steamid.m_comp.m_EUniverse = eUniverse;		// set the universe
+		m_steamid.m_comp.m_EAccountType = k_EAccountTypeIndividual; // Steam 2 accounts always map to account type of individual
+		m_steamid.m_comp.m_unAccountInstance = 1;	// individual accounts always have an account instance ID of 1
 	}
 
 	//-----------------------------------------------------------------------------
@@ -396,11 +351,11 @@ public:
 	void ConvertToSteam2( TSteamGlobalUserID *pTSteamGlobalUserID ) const
 	{
 		// only individual accounts have any meaning in Steam 2, only they can be mapped
-		// Assert( m_EAccountType == k_EAccountTypeIndividual );
+		// Assert( m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual );
 
 		pTSteamGlobalUserID->m_SteamInstanceID = 0;
-		pTSteamGlobalUserID->m_SteamLocalUserID.Split.High32bits = m_unAccountID % 2;
-		pTSteamGlobalUserID->m_SteamLocalUserID.Split.Low32bits = m_unAccountID / 2;
+		pTSteamGlobalUserID->m_SteamLocalUserID.Split.High32bits = m_steamid.m_comp.m_unAccountID % 2;
+		pTSteamGlobalUserID->m_SteamLocalUserID.Split.Low32bits = m_steamid.m_comp.m_unAccountID / 2;
 	}
 #endif // defined( INCLUDED_STEAM_COMMON_STEAMCOMMON_H )
 
@@ -410,8 +365,7 @@ public:
 	//-----------------------------------------------------------------------------
 	uint64 ConvertToUint64() const
 	{
-		return (uint64) ( ( ( (uint64) m_EUniverse ) << 56 ) + ( ( (uint64) m_EAccountType ) << 52 ) + 
-			( ( (uint64) m_unAccountInstance ) << 32 ) + m_unAccountID );
+		return m_steamid.m_unAll64Bits;
 	}
 
 
@@ -425,7 +379,7 @@ public:
 	uint64 GetStaticAccountKey() const
 	{
 		// note we do NOT include the account instance (which is a dynamic property) in the static account key
-		return (uint64) ( ( ( (uint64) m_EUniverse ) << 56 ) + ((uint64) m_EAccountType << 52 ) + m_unAccountID );
+		return (uint64) ( ( ( (uint64) m_steamid.m_comp.m_EUniverse ) << 56 ) + ((uint64) m_steamid.m_comp.m_EAccountType << 52 ) + m_steamid.m_comp.m_unAccountID );
 	}
 
 
@@ -434,10 +388,10 @@ public:
 	//-----------------------------------------------------------------------------
 	void CreateBlankAnonLogon( EUniverse eUniverse )
 	{
-		m_unAccountID = 0;
-		m_EAccountType = k_EAccountTypeAnonGameServer;
-		m_EUniverse = eUniverse;
-		m_unAccountInstance = 0;
+		m_steamid.m_comp.m_unAccountID = 0;
+		m_steamid.m_comp.m_EAccountType = k_EAccountTypeAnonGameServer;
+		m_steamid.m_comp.m_EUniverse = eUniverse;
+		m_steamid.m_comp.m_unAccountInstance = 0;
 	}
 
 
@@ -446,10 +400,10 @@ public:
 	//-----------------------------------------------------------------------------
 	void CreateBlankAnonUserLogon( EUniverse eUniverse )
 	{
-		m_unAccountID = 0;
-		m_EAccountType = k_EAccountTypeAnonUser;
-		m_EUniverse = eUniverse;
-		m_unAccountInstance = 0;
+		m_steamid.m_comp.m_unAccountID = 0;
+		m_steamid.m_comp.m_EAccountType = k_EAccountTypeAnonUser;
+		m_steamid.m_comp.m_EUniverse = eUniverse;
+		m_steamid.m_comp.m_unAccountInstance = 0;
 	}
 
 	//-----------------------------------------------------------------------------
@@ -457,7 +411,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BBlankAnonAccount() const
 	{
-		return m_unAccountID == 0 && BAnonAccount() && m_unAccountInstance == 0;
+		return m_steamid.m_comp.m_unAccountID == 0 && BAnonAccount() && m_steamid.m_comp.m_unAccountInstance == 0;
 	}
 
 	//-----------------------------------------------------------------------------
@@ -465,7 +419,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BGameServerAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeGameServer || m_EAccountType == k_EAccountTypeAnonGameServer;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeGameServer || m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonGameServer;
 	}
 
 	//-----------------------------------------------------------------------------
@@ -473,7 +427,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BContentServerAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeContentServer;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeContentServer;
 	}
 
 
@@ -482,7 +436,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BClanAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeClan;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeClan;
 	}
 
 
@@ -491,7 +445,16 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BChatAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeChat;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeChat;
+	}
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Is this a chat account id?
+	//-----------------------------------------------------------------------------
+	bool IsLobby() const
+	{
+		return ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeChat )
+			&& ( m_steamid.m_comp.m_unAccountInstance & k_EChatInstanceFlagLobby );
 	}
 
 
@@ -500,7 +463,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BIndividualAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeIndividual;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual;
 	}
 
 
@@ -509,36 +472,39 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BAnonAccount() const
 	{
-		return m_EAccountType == k_EAccountTypeAnonUser || m_EAccountType == k_EAccountTypeAnonGameServer;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonUser || m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonGameServer;
+	}
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Is this an anonymous user account? ( used to create an account or reset a password )
+	//-----------------------------------------------------------------------------
+	bool BAnonUserAccount() const
+	{
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonUser;
 	}
 
 
 	// simple accessors
-	void SetAccountID( uint32 unAccountID )		{ m_unAccountID = unAccountID; }
-	uint32 GetAccountID() const					{ return m_unAccountID; }
-	uint32 GetUnAccountInstance() const			{ return m_unAccountInstance; }
-	EAccountType GetEAccountType() const		{ return ( EAccountType ) m_EAccountType; }
-	EUniverse GetEUniverse() const				{ return m_EUniverse; }
-	void SetEUniverse( EUniverse eUniverse )	{ m_EUniverse = eUniverse; }
-	bool IsValid() const						{ return ( m_EAccountType != k_EAccountTypeInvalid && m_EUniverse != k_EUniverseInvalid ); }
+	void SetAccountID( uint32 unAccountID )		{ m_steamid.m_comp.m_unAccountID = unAccountID; }
+	uint32 GetAccountID() const					{ return m_steamid.m_comp.m_unAccountID; }
+	uint32 GetUnAccountInstance() const			{ return m_steamid.m_comp.m_unAccountInstance; }
+	EAccountType GetEAccountType() const		{ return ( EAccountType ) m_steamid.m_comp.m_EAccountType; }
+	EUniverse GetEUniverse() const				{ return m_steamid.m_comp.m_EUniverse; }
+	void SetEUniverse( EUniverse eUniverse )	{ m_steamid.m_comp.m_EUniverse = eUniverse; }
+	bool IsValid() const						{ return ( m_steamid.m_comp.m_EAccountType != k_EAccountTypeInvalid && m_steamid.m_comp.m_EUniverse != k_EUniverseInvalid ); }
 
 	// this set of functions is hidden, will be moved out of class
 	explicit CSteamID( const char *pchSteamID, EUniverse eDefaultUniverse = k_EUniverseInvalid );
-	char * Render() const;				// renders this steam ID to string
-	static char * Render( uint64 ulSteamID );	// static method to render a uint64 representation of a steam ID to a string
+	const char * Render() const;				// renders this steam ID to string
+	static const char * Render( uint64 ulSteamID );	// static method to render a uint64 representation of a steam ID to a string
 
 	void SetFromString( const char *pchSteamID, EUniverse eDefaultUniverse );
 	bool SetFromSteam2String( const char *pchSteam2ID, EUniverse eUniverse );
 
-	bool operator==( const CSteamID &val ) const
-	{
-		return ( ( val.m_unAccountID == m_unAccountID ) && ( val.m_unAccountInstance == m_unAccountInstance )
-			&& ( val.m_EAccountType == m_EAccountType ) &&  ( val.m_EUniverse == m_EUniverse ) );
-	} 
-
-	bool operator!=( const CSteamID &val ) const { return !operator==( val ); }
-	bool operator<( const CSteamID &val ) const { return ConvertToUint64() < val.ConvertToUint64(); }
-	bool operator>( const CSteamID &val ) const { return ConvertToUint64() > val.ConvertToUint64(); }
+	inline bool operator==( const CSteamID &val ) const { return m_steamid.m_unAll64Bits == val.m_steamid.m_unAll64Bits; } 
+	inline bool operator!=( const CSteamID &val ) const { return !operator==( val ); }
+	inline bool operator<( const CSteamID &val ) const { return m_steamid.m_unAll64Bits < val.m_steamid.m_unAll64Bits; }
+	inline bool operator>( const CSteamID &val ) const { return m_steamid.m_unAll64Bits > val.m_steamid.m_unAll64Bits; }
 
 	// DEBUG function
 	bool BValidExternalSteamID() const;
@@ -551,44 +517,20 @@ private:
 	CSteamID( uint32 );
 	CSteamID( int32 );
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable:4201)	// nameless union is nonstandard
 	// 64 bits total
-	union
+	union SteamID_t
 	{
-		struct
+		struct SteamIDComponent_t
 		{
-#endif
 			uint32				m_unAccountID : 32;			// unique account identifier
 			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID (used for multiseat type accounts only)
 			unsigned int		m_EAccountType : 4;			// type of account - can't show as EAccountType, due to signed / unsigned difference
-			EUniverse			m_EUniverse : 8;			// universe this account belongs to
-#ifdef _WIN32
-		};
+			EUniverse			m_EUniverse : 8;	// universe this account belongs to
+		} m_comp;
 
 		uint64 m_unAll64Bits;
-	};
-#pragma warning(pop)			// no more anonymous unions until next time
-#endif
+	} m_steamid;
 };
-
-const int k_unSteamAccountIDMask = 0xFFFFFFFF;
-const int k_unSteamAccountInstanceMask = 0x000FFFFF;
-
-
-// Special flags for Chat accounts - they go in the top 8 bits
-// of the steam ID's "instance", leaving 12 for the actual instances
-enum EChatSteamIDInstanceFlags
-{
-	k_EChatAccountInstanceMask = 0x00000FFF, // top 8 bits are flags
-
-	k_EChatInstanceFlagClan = ( k_unSteamAccountInstanceMask + 1 ) >> 1,	// top bit
-	k_EChatInstanceFlagLobby = ( k_unSteamAccountInstanceMask + 1 ) >> 2,	// next one down, etc
-
-	// Max of 8 flags
-};
-
 
 // generic invalid CSteamID
 const CSteamID k_steamIDNil;
@@ -609,14 +551,14 @@ const CSteamID k_steamIDNonSteamGS( 2, 0, k_EUniverseInvalid, k_EAccountTypeInva
 #ifdef STEAM
 // Returns the matching chat steamID, with the default instance of 0
 // If the steamID passed in is already of type k_EAccountTypeChat it will be returned with the same instance
-CSteamID ChatIDFromSteamID( CSteamID &steamID );
+CSteamID ChatIDFromSteamID( const CSteamID &steamID );
 // Returns the matching clan steamID, with the default instance of 0
 // If the steamID passed in is already of type k_EAccountTypeClan it will be returned with the same instance
-CSteamID ClanIDFromSteamID( CSteamID &steamID );
+CSteamID ClanIDFromSteamID( const CSteamID &steamID );
 // Asserts steamID type before conversion
-CSteamID ChatIDFromClanID( CSteamID &steamIDClan );
+CSteamID ChatIDFromClanID( const CSteamID &steamIDClan );
 // Asserts steamID type before conversion
-CSteamID ClanIDFromChatID( CSteamID &steamIDChat );
+CSteamID ClanIDFromChatID( const CSteamID &steamIDChat );
 
 #endif // _STEAM
 
@@ -662,8 +604,8 @@ public:
 
 	// Hidden functions used only by Steam
 	explicit CGameID( const char *pchGameID );
-	char *Render() const;						// render this Game ID to string
-	static char *Render( uint64 ulGameID );		// static method to render a uint64 representation of a Game ID to a string
+	const char *Render() const;					// render this Game ID to string
+	static const char *Render( uint64 ulGameID );		// static method to render a uint64 representation of a Game ID to a string
 
 	// must include checksum_crc.h first to get this functionality
 #if defined( CHECKSUM_CRC_H )

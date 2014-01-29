@@ -89,9 +89,21 @@ public:
 
 	// Ask if a user has a specific achievement for this game, will get a callback on reply
 	virtual bool BGetUserAchievementStatus( CSteamID steamID, const char *pchAchievementName ) = 0;
+
+	// Ask for the gameplay stats for the server. Results returned in a callback
+	virtual void GetGameplayStats( ) = 0;
+
+	// Ask if a user in in the specified group, results returns async by GSUserGroupStatus_t
+	// returns false if we're not connected to the steam servers and thus cannot ask
+	virtual bool RequestUserGroupStatus( CSteamID steamIDUser, CSteamID steamIDGroup ) = 0;
+
+	// Returns the public IP of the server according to Steam, useful when the server is 
+	// behind NAT and you want to advertise its IP in a lobby for other clients to directly
+	// connect to
+	virtual uint32 GetPublicIP() = 0;
 };
 
-#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer005"
+#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer008"
 
 // game server flags
 const uint32 k_unServerFlagNone			= 0x00;
@@ -156,6 +168,25 @@ struct GSPolicyResponse_t
 	uint8 m_bSecure;
 };
 
+// GS gameplay stats info
+struct GSGameplayStats_t
+{
+	enum { k_iCallback = k_iSteamGameServerCallbacks + 7 };
+	EResult m_eResult;					// Result of the call
+	int32	m_nRank;					// Overall rank of the server (0-based)
+	uint32	m_unTotalConnects;			// Total number of clients who have ever connected to the server
+	uint32	m_unTotalMinutesPlayed;		// Total number of minutes ever played on the server
+};
+
+// send as a reply to RequestUserGroupStatus()
+struct GSClientGroupStatus_t
+{
+	enum { k_iCallback = k_iSteamGameServerCallbacks + 8 };
+	CSteamID m_SteamIDUser;
+	CSteamID m_SteamIDGroup;
+	bool m_bMember;
+	bool m_bOfficer;
+};
 
 
 #endif // ISTEAMGAMESERVER_H

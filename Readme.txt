@@ -1,8 +1,8 @@
-This is the Steamworks SDK v1.02
+This is the Steamworks SDK v1.03
 
 ================================================================
 
-Copyright © 1996-2008, Valve Corporation, All rights reserved.
+Copyright © 1996-2009, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -13,9 +13,47 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+----------------------------------------------------------------
+v1.03	16th Jan 2009
+----------------------------------------------------------------
+
+Major changes:
+* ISteamRemoteStorage interface has been added, which contains functions to store per-user data in the Steam Cloud back-end. 
+** To use this, you must first use the partner web site to enable Cloud for your game. 
+** The current setting is allowing 1MB of storage per-game per-user (we hope to increase this over time).
+
+Lobby & Matchmaking related changes:
+* ISteamFriends::GetFriendGamePlayed() now also return the steamID of the lobby the friend is in, if any. It now takes a pointer to a new FriendGameInfo_t struct, which it fills 
+* Removed ISteamFriends::GetFriendsLobbies(), since this is now redundant to ISteamFriends::GetFriendGamePlayed()
+* Added enum ELobbyComparison, to set the comparison operator in ISteamMatchmaking::AddRequestLobbyListNumericalFilter()
+* Changed ISteamMatchmaking::CreateLobby(), JoinLobby() and RequestLobbyList() to now return SteamAPICall_t handles, so you can easily track if a particular call has completed (see below)
+* Added ISteamMatchmaking::SetLobbyType(), which can switch a lobby between searchable (public) and friends-only
+* Added ISteamMatchmaking::GetLobbyOwner(), which returns the steamID of the user who is currently the owner of the lobby. The back-end ensures that one and only one user is ever the owner. If that user leaves the lobby, another user will become the owner.
+
+Steam game-overlay interaction:
+* Added a new callback GameLobbyJoinRequested_t, which is sent to the game if the user selects 'Join friends game' from the Steam friends list, and that friend is in a lobby. The game should initiate connection to that lobby.
+* Changed ISteamFriends::ActivateGameOverlay() can now go to "Friends", "Community", "Players", "Settings", "LobbyInvite", "OfficialGameGroup"
+* Added ISteamFriends::ActivateGameOverlayToUser(), which can open a either a chat dialog or another users Steam community profile
+* Added ISteamFriends::ActivateGameOverlayToWebPage(), which opens the Steam game-overlay web browser to the specified url
+
+Stats system changes:
+* Added ISteamUserStats::RequestUserStats(), to download the current game stats of another user
+* Added ISteamUserStats::GetUserStat() and ISteamUserStats::GetUserAchievement() to access the other users stats, once they've been downloaded
+
+Callback system changes:
+* Added new method for handling asynchronous call results, currently used by CreateLobby(), JoinLobby(), RequestLobbyList(), and RequestUserStats(). Each of these functions returns a handle, SteamAPICall_t, that can be used to track the completion state of a call.
+* Added new object CCallResult<>, which can map the completion of a SteamAPICall_t to a function, and include the right data. See SteamworksExample for a usage example.
+* Added ISteamUtils::IsAPICallCompleted(), GetAPICallFailureReason(), and GetAPICallResult(), which can be used to track the state of a SteamAPICall_t (although it is recommended to use CCallResult<>, which wraps these up nicely)
+
+Other:
+* Added ISteamGameServer::GetPublicIP(), which is the IP address of a game server as seen by the Steam back-end
+* Added "allow relay" parameter to ISteamNetworking::CreateP2PConnectionSocket() and CreateListenSocket(), which specified if being bounced through Steam relay servers is OK if a direct p2p connection fails (will have a much higher latency, but increases chance of making a connection)
+* Added IPCFailure_t callback, which will be posted to the game if Steam itself has crashed, or if Steam_RunCallbacks() hasn't been called in a long time
+
+
 
 ----------------------------------------------------------------
-v1.02	09/04/08
+v1.02	4th Sep 2008
 ----------------------------------------------------------------
 
 The following interfaces have been updated:
@@ -90,7 +128,7 @@ This function now takes an eAvatarSize parameter, which can be k_EAvatarSize32x3
 
 
 ----------------------------------------------------------------
-v1.01  	08/08/08
+v1.01  	8th Aug 2008
 ----------------------------------------------------------------
 
 The Steamworks SDK has been updated to simplfy game server authentication and better expose application state

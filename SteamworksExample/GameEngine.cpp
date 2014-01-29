@@ -1591,6 +1591,24 @@ bool CGameEngine::BIsKeyDown( DWORD dwVK )
 	return false;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Get a down key value
+//-----------------------------------------------------------------------------
+bool CGameEngine::BGetFirstKeyDown( DWORD *pdwVK )
+{
+	std::set<DWORD>::iterator iter;
+	iter = m_SetKeysDown.begin();
+	if ( iter != m_SetKeysDown.end() )
+	{
+		*pdwVK = *iter;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Find the engine instance tied to a given hwnd

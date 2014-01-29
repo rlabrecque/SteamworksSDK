@@ -81,4 +81,10 @@ typedef uint32 RTime32;
 
 typedef uint32 CellID_t;
 
+// handle to a Steam API call
+typedef uint64 SteamAPICall_t;
+
+
+
+
 #endif // STEAMTYPES_H

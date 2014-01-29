@@ -13,7 +13,9 @@
 #endif
 
 #ifdef POSIX
+#ifndef _snprintf
 #define _snprintf snprintf
+#endif
 #endif
 
 #include <stdio.h>

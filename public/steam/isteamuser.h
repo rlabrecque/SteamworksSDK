@@ -158,10 +158,15 @@ struct ClientGameServerDeny_t
 //			When getting this message the client should disconnect from Steam, reset any stored Steam state and reconnect.
 //			This usually occurs in the rare event the Steam client has some kind of fatal error.
 //-----------------------------------------------------------------------------
-struct CallbackPipeFailure_t
+struct IPCFailure_t
 {
 	enum { k_iCallback = k_iSteamUserCallbacks + 17 };
+	enum EFailureType 
+	{ 
+		k_EFailureFlushedCallbackQueue, 
+		k_EFailurePipeFail,
+	};
+	uint8 m_eFailureType;
 };
-
 
 #endif // ISTEAMUSER_H
