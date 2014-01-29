@@ -99,6 +99,8 @@ public:
 
 #define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION001"
 
+// callbacks
+#pragma pack( push, 8 )
 
 struct HTTPRequestCompleted_t
 {
@@ -120,5 +122,6 @@ struct HTTPRequestCompleted_t
 	EHTTPStatusCode m_eStatusCode;
 };
 
+#pragma pack( pop )
 
 #endif // ISTEAMHTTP_H

@@ -27,6 +27,7 @@ class CServerBrowser;
 class CLobbyBrowser;
 class CLobby;
 class CLeaderboards;
+class CClanChatRoom;
 class CP2PAuthPlayer;
 class CP2PAuthedGame;
 class CVoiceChat;
@@ -264,6 +265,7 @@ private:
 	CSteamID m_steamIDGameServer;
 	uint32 m_unServerIP;
 	uint16 m_usServerPort;
+	HAuthTicket m_hAuthTicket;
 
 	// simple class to marshal callbacks from pinging a game server
 	class CGameServerPing : public ISteamMatchmakingPingResponse
@@ -337,7 +339,7 @@ private:
 	CStatsAndAchievements *m_pStatsAndAchievements;
 
 	CLeaderboards *m_pLeaderboards;
-
+	CClanChatRoom *m_pClanChatRoom;
 	CServerBrowser *m_pServerBrowser;
 
 	CRemoteStorage *m_pRemoteStorage;

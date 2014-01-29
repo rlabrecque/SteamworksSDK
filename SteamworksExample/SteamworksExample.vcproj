@@ -386,6 +386,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\clanchatroom.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\connectingmenu.cpp"
 					>
 				</File>
@@ -485,6 +489,10 @@
 				>
 				<File
 					RelativePath=".\BaseMenu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\clanchatroom.h"
 					>
 				</File>
 				<File

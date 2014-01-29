@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright (C) 1996-2008, Valve Corporation, All rights reserved. =====
 //
 // Purpose: interface to both friends list data and general information about users
 //
@@ -27,13 +27,16 @@ enum EFriendRelationship
 	k_EFriendRelationshipIgnored = 5,
 	k_EFriendRelationshipIgnoredFriend = 6,
 	k_EFriendRelationshipSuggested = 7,
+
+	// keep this updated
+	k_EFriendRelationshipMax = 8,
 };
 
 // maximum length of friend group name (not including terminating nul!)
-const int k_cchMaxFriendGroupName = 64;
+const int k_cchMaxFriendsGroupName = 64;
 
 // maximum number of groups a single user is allowed
-const int k_cFriendGroupLimit = 100;
+const int k_cFriendsGroupLimit = 100;
 
 
 //-----------------------------------------------------------------------------
@@ -46,6 +49,8 @@ enum EPersonaState
 	k_EPersonaStateBusy = 2,			// user is on, but busy
 	k_EPersonaStateAway = 3,			// auto-away feature
 	k_EPersonaStateSnooze = 4,			// auto-away for a long time
+	k_EPersonaStateLookingToTrade = 5,	// Online, trading
+	k_EPersonaStateLookingToPlay = 6,	// Online, wanting to play
 	k_EPersonaStateMax,
 };
 
@@ -176,6 +181,10 @@ public:
 	virtual CSteamID GetClanByIndex( int iClan ) = 0;
 	virtual const char *GetClanName( CSteamID steamIDClan ) = 0;
 	virtual const char *GetClanTag( CSteamID steamIDClan ) = 0;
+	// returns the most recent information we have about what's happening in a clan
+	virtual bool GetClanActivityCounts( CSteamID steamIDClan, int *pnOnline, int *pnInGame, int *pnChatting ) = 0;
+	// for clans a user is a member of, they will have reasonably up-to-date information, but for others you'll have to download the info to have the latest
+	virtual SteamAPICall_t DownloadClanActivityCounts( CSteamID *psteamIDClans, int cClansToRequest ) = 0;
 
 	// iterators for getting users in a chat room, lobby, game server or clan
 	// note that large clans that cannot be iterated by the local user
@@ -198,6 +207,7 @@ public:
 	// valid options are
 	//		"steamid" - opens the overlay web browser to the specified user or groups profile
 	//		"chat" - opens a chat window to the specified user, or joins the group chat 
+	//		"tradeinvite" - opens a chat window to the specified user and invites them to trade
 	//		"stats" - opens the overlay web browser to the specified user's stats
 	//		"achievements" - opens the overlay web browser to the specified user's achievements
 	virtual void ActivateGameOverlayToUser( const char *pchDialog, CSteamID steamID ) = 0;
@@ -270,6 +280,8 @@ public:
 	virtual const char *GetFriendRichPresence( CSteamID steamIDFriend, const char *pchKey ) = 0;
 	virtual int GetFriendRichPresenceKeyCount( CSteamID steamIDFriend ) = 0;
 	virtual const char *GetFriendRichPresenceKeyByIndex( CSteamID steamIDFriend, int iKey ) = 0;
+	// Requests rich presence for a specific user.
+	virtual void RequestFriendRichPresence( CSteamID steamIDFriend ) = 0;
 
 	// rich invite support
 	// if the target accepts the invite, the pchConnectString gets added to the command-line for launching the game
@@ -284,9 +296,32 @@ public:
 	virtual CSteamID GetCoplayFriend( int iCoplayFriend ) = 0;
 	virtual int GetFriendCoplayTime( CSteamID steamIDFriend ) = 0;
 	virtual AppId_t GetFriendCoplayGame( CSteamID steamIDFriend ) = 0;
+
+	// chat interface for games
+	// this allows in-game access to group (clan) chats from in the game
+	// the behavior is somewhat sophisticated, because the user may or may not be already in the group chat from outside the game or in the overlay
+	// use ActivateGameOverlayToUser( "chat", steamIDClan ) to open the in-game overlay version of the chat
+	virtual SteamAPICall_t JoinClanChatRoom( CSteamID steamIDClan ) = 0;
+	virtual bool LeaveClanChatRoom( CSteamID steamIDClan ) = 0;
+	virtual int GetClanChatMemberCount( CSteamID steamIDClan ) = 0;
+	virtual CSteamID GetChatMemberByIndex( CSteamID steamIDClan, int iUser ) = 0;
+	virtual bool SendClanChatMessage( CSteamID steamIDClanChat, const char *pchText ) = 0;
+	virtual int GetClanChatMessage( CSteamID steamIDClanChat, int iMessage, void *prgchText, int cchTextMax, EChatEntryType *, CSteamID * ) = 0;
+	virtual bool IsClanChatAdmin( CSteamID steamIDClanChat, CSteamID steamIDUser ) = 0;
+
+	// interact with the Steam (game overlay / desktop)
+	virtual bool IsClanChatWindowOpenInSteam( CSteamID steamIDClanChat ) = 0;
+	virtual bool OpenClanChatWindowInSteam( CSteamID steamIDClanChat ) = 0;
+	virtual bool CloseClanChatWindowInSteam( CSteamID steamIDClanChat ) = 0;
+
+	// peer-to-peer chat interception
+	// this is so you can show P2P chats inline in the game
+	virtual bool SetListenForFriendsMessages( bool bInterceptEnabled ) = 0;
+	virtual bool ReplyToFriendMessage( CSteamID steamIDFriend, const char *pchMsgToSend ) = 0;
+	virtual int GetFriendMessage( CSteamID steamIDFriend, int iMessageID, void *pvData, int cubData, EChatEntryType *peChatEntryType ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends009"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends011"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -388,6 +423,7 @@ struct ClanOfficerListResponse_t
 	uint8 m_bSuccess;
 };
 
+
 //-----------------------------------------------------------------------------
 // Purpose: callback indicating updated data about friends rich presence information
 //-----------------------------------------------------------------------------
@@ -397,6 +433,7 @@ struct FriendRichPresenceUpdate_t
 	CSteamID m_steamIDFriend;	// friend who's rich presence has changed
 	AppId_t m_nAppID;			// the appID of the game (should always be the current game)
 };
+
 
 //-----------------------------------------------------------------------------
 // Purpose: called when the user tries to join a game from their friends list
@@ -411,14 +448,71 @@ struct GameRichPresenceJoinRequested_t
 
 
 //-----------------------------------------------------------------------------
-// Purpose: called when the user requests the history of player names on a given account
+// Purpose: a chat message has been received for a clan chat the game has joined
 //-----------------------------------------------------------------------------
-struct NameHistoryResponse_t
+struct GameConnectedClanChatMsg_t
 {
 	enum { k_iCallback = k_iSteamFriendsCallbacks + 38 };
-	int m_cSuccessfulLookups;		// number of lookups that were successful
-	int m_cFailedLookups;			// number of lookups that failed for one reason or another
+	CSteamID m_steamIDClanChat;
+	CSteamID m_steamIDUser;
+	int m_iMessageID;
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: a user has joined a clan chat
+//-----------------------------------------------------------------------------
+struct GameConnectedChatJoin_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 39 };
+	CSteamID m_steamIDClanChat;
+	CSteamID m_steamIDUser;
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: a user has left the chat we're in
+//-----------------------------------------------------------------------------
+struct GameConnectedChatLeave_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 40 };
+	CSteamID m_steamIDClanChat;
+	CSteamID m_steamIDUser;
+	bool m_bKicked;		// true if admin kicked
+	bool m_bDropped;	// true if Steam connection dropped
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: a DownloadClanActivityCounts() call has finished
+//-----------------------------------------------------------------------------
+struct DownloadClanActivityCountsResult_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 41 };
+	bool m_bSuccess;
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: a JoinClanChatRoom() call has finished
+//-----------------------------------------------------------------------------
+struct JoinClanChatRoomCompletionResult_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 42 };
+	CSteamID m_steamIDClanChat;
+	EChatRoomEnterResponse m_eChatRoomEnterResponse;
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: a chat message has been received from a user
+//-----------------------------------------------------------------------------
+struct GameConnectedFriendChatMsg_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 43 };
+	CSteamID m_steamIDUser;
+	int m_iMessageID;
+};
+
 
 #pragma pack( pop )
 

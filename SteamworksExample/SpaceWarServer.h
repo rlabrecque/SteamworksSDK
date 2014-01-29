@@ -82,14 +82,7 @@ private:
 	//
 
 	// Tells us a client has been authenticated and approved to play by Steam (passes auth, license check, VAC status, etc...)
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnGSClientApprove, GSClientApprove_t, m_CallbackGSClientApprove );
-
-	// Tells us we should deny a player from accessing the server
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnGSClientDeny, GSClientDeny_t, m_CallbackGSClientDeny );
-
-	// Tells us we should kick a player who was previously allowed to play (maybe they are no longer connected
-	// to steam so their VAC status cannot be verified)
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnGSClientKick, GSClientKick_t, m_CallbackGSClientKick );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnValidateAuthTicketResponse, ValidateAuthTicketResponse_t, m_CallbackGSAuthTicketResponse );
 
 	// client connection state
 	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionRequest, P2PSessionRequest_t, m_CallbackP2PSessionRequest );

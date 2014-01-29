@@ -77,6 +77,7 @@ enum ERegisterActivactionCodeResult
 	k_ERegisterActivactionCodeResultFail = 1,
 	k_ERegisterActivactionCodeResultAlreadyRegistered = 2,
 	k_ERegisterActivactionCodeResultTimeout = 3,
+	k_ERegisterActivactionCodeAlreadyOwned = 4
 };
 
 

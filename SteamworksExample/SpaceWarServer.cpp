@@ -26,9 +26,7 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 	m_CallbackSteamServersDisconnected( this, &CSpaceWarServer::OnSteamServersDisconnected ),
 	m_CallbackSteamServersConnectFailure( this, &CSpaceWarServer::OnSteamServersConnectFailure ),
 	m_CallbackPolicyResponse( this, &CSpaceWarServer::OnPolicyResponse ),
-	m_CallbackGSClientApprove( this, &CSpaceWarServer::OnGSClientApprove ),
-	m_CallbackGSClientDeny( this, &CSpaceWarServer::OnGSClientDeny ),
-	m_CallbackGSClientKick( this, &CSpaceWarServer::OnGSClientKick ),
+	m_CallbackGSAuthTicketResponse( this, &CSpaceWarServer::OnValidateAuthTicketResponse ),
 	m_CallbackP2PSessionConnectFail( this, &CSpaceWarServer::OnP2PSessionConnectFail ),
 	m_CallbackP2PSessionRequest( this, &CSpaceWarServer::OnP2PSessionRequest )
 {
@@ -37,7 +35,6 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 
 	char *pchGameDir = "spacewar";
 	uint32 unIP = INADDR_ANY;
-	uint16 usSpectatorPort = 0; // We don't support specators in our game
 	uint16 usMasterServerUpdaterPort = SPACEWAR_MASTER_SERVER_UPDATER_PORT;
 
 #ifdef USE_GS_AUTH_API
@@ -49,37 +46,51 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 	// Initialize the SteamGameServer interface, we tell it some info about us, and we request support
 	// for both Authentication (making sure users own games) and secure mode, VAC running in our game
 	// and kicking users who are VAC banned
+
+	// !FIXME! We need a way to pass the dedicated server flag here!
+
 #ifdef _PS3
-	if ( !SteamGameServer_Init( &g_SteamPS3Params, unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eMode, pchGameDir, SPACEWAR_SERVER_VERSION ) )
+	if ( !SteamGameServer_Init( &g_SteamPS3Params, unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
 #else
-	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eMode, pchGameDir, SPACEWAR_SERVER_VERSION ) )
+	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
 #endif
 	{
 		OutputDebugString( "SteamGameServer_Init call failed\n" );
 	}
 
-#ifdef USE_GS_AUTH_API
-	// We want to actively update the master server with our presence so players can
-	// find us via the steam matchmaking/server browser interfaces
-	if ( SteamMasterServerUpdater() )
+	if ( SteamGameServer() )
 	{
-		/*
-		// hack to force local master server use for debugging
-		while( SteamMasterServerUpdater()->GetNumMasterServers() > 0 )
-		{
-			char address[256];
-			SteamMasterServerUpdater()->GetMasterServerAddress( 0, address, 256 );
-		}
-		SteamMasterServerUpdater()->AddMasterServer( "127.0.0.1:27011" );
-		*/
 
-		SteamMasterServerUpdater()->SetActive( true );
+		// Set the "game dir".
+		// This is currently required for all games.  However, soon we will be
+		// using the AppID for most purposes, and this string will only be needed
+		// for mods.  it may not be changed after the server has logged on
+		SteamGameServer()->SetModDir( pchGameDir );
+
+		// These fields are currently required, but will go away soon.
+		// See their documentation for more info
+		SteamGameServer()->SetProduct( "SteamworksExample" );
+		SteamGameServer()->SetGameDescription( "Steamworks Example" );
+
+		// We don't support specators in our game.
+		// .... but if we did:
+		//SteamGameServer()->SetSpectatorPort( ... );
+		//SteamGameServer()->SetSpectatorServerName( ... );
+
+		// Initiate Anonymous logon.
+		// Coming soon: Logging into authenticated, persistent game server account
+		SteamGameServer()->LogOnAnonymous();
+
+		// We want to actively update the master server with our presence so players can
+		// find us via the steam matchmaking/server browser interfaces
+		#ifdef USE_GS_AUTH_API
+			SteamGameServer()->EnableHeartbeats( true );
+		#endif
 	}
 	else
 	{
-		OutputDebugString( "SteamMasterServerUpdater() interface is invalid\n" );
+		OutputDebugString( "SteamGameServer() interface is invalid\n" );
 	}
-#endif
 
 	m_uPlayerCount = 0;
 	m_pGameEngine = pGameEngine;
@@ -118,7 +129,7 @@ CSpaceWarServer::~CSpaceWarServer()
 {
 #ifdef USE_GS_AUTH_API
 	// Notify Steam master server we are going offline
-	SteamMasterServerUpdater()->SetActive( false );
+	SteamGameServer()->EnableHeartbeats( false );
 #endif
 
 	delete m_pSun;
@@ -136,10 +147,8 @@ CSpaceWarServer::~CSpaceWarServer()
 		}
 	}
 
-#ifdef USE_GS_AUTH_API
 	// Disconnect from the steam servers
 	SteamGameServer()->LogOff();
-#endif
 
 	// release our reference to the steam client library
 	SteamGameServer_Shutdown();
@@ -255,17 +264,15 @@ void CSpaceWarServer::OnClientBeginAuthentication( CSteamID steamIDClient, void 
 			m_rgPendingClientData[i].m_ulTickCountLastData = m_pGameEngine->GetGameTickCount();
 #ifdef USE_GS_AUTH_API
 			// authenticate the user with the Steam back-end servers
-
-			// we use the server-seen IP address of the client as an extra bit of data for the authentication
-			P2PSessionState_t p2pSessionState;
-			SteamNetworking()->GetP2PSessionState( m_rgPendingClientData[i].m_SteamIDUser, &p2pSessionState );
-
-			m_rgPendingClientData[i].m_bActive = SteamGameServer()->SendUserConnectAndAuthenticate( p2pSessionState.m_nRemoteIP, pToken, uTokenLen, &m_rgPendingClientData[i].m_SteamIDUser ); 
-			if ( !m_rgPendingClientData[i].m_bActive )
+			if ( k_EBeginAuthSessionResultOK != SteamGameServer()->BeginAuthSession( pToken, uTokenLen, steamIDClient ) )
 			{
 				MsgServerFailAuthentication_t msg;
-				SteamGameServerNetworking()->SendP2PPacket( m_rgPendingClientData[i].m_SteamIDUser, &msg, sizeof( msg ), k_EP2PSendReliable );
+				SteamGameServerNetworking()->SendP2PPacket( steamIDClient, &msg, sizeof( msg ), k_EP2PSendReliable );
+				break;
 			}
+
+			m_rgPendingClientData[i].m_SteamIDUser = steamIDClient;
+			m_rgPendingClientData[i].m_bActive = true;
 			break;
 #else
 			m_rgPendingClientData[i].m_bActive = true;
@@ -295,7 +302,7 @@ void CSpaceWarServer::OnAuthCompleted( bool bAuthSuccessful, uint32 iPendingAuth
 	{
 #ifdef USE_GS_AUTH_API
 		// Tell the GS the user is leaving the server
-		SteamGameServer()->SendUserDisconnect( m_rgPendingClientData[iPendingAuthIndex].m_SteamIDUser );
+		SteamGameServer()->EndAuthSession( m_rgPendingClientData[iPendingAuthIndex].m_SteamIDUser );
 #endif
 		// Send a deny for the client, and zero out the pending data
 		MsgServerFailAuthentication_t msg;
@@ -443,7 +450,7 @@ void CSpaceWarServer::RemovePlayerFromServer( uint32 uShipPosition )
 
 #ifdef USE_GS_AUTH_API
 	// Tell the GS the user is leaving the server
-	SteamGameServer()->SendUserDisconnect( m_rgClientData[uShipPosition].m_SteamIDUser );
+	SteamGameServer()->EndAuthSession( m_rgClientData[uShipPosition].m_SteamIDUser );
 #endif
 	memset( &m_rgClientData[uShipPosition], 0, sizeof( ClientConnectionData_t ) );
 }
@@ -911,19 +918,6 @@ void CSpaceWarServer::OnSteamServersConnectFailure( SteamServerConnectFailure_t 
 void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 {
 
-#ifdef USE_GS_AUTH_API
-	// Tell the Steam Master Server about our game
-	SteamMasterServerUpdater()->SetBasicServerData( 
-		7,		// Protocol version to talk to the master server with, use the magic number 7
-		true,	// Are we a dedicated server? Lie and say yes for our game since we don't have dedicated servers.
-		"255",  // Region name is unused, use the magic value "255" always
-		"SteamworksExample", // Our game name
-		4,		// Maximum number of players for our server
-		false,	// Does our server require a password?
-		"Steamworks Example" // Description of our game
-	);
-#endif
-
 	// Tell the Steam authentication servers about our game
 	char rgchServerName[128];
 	if ( SpaceWarClient() )
@@ -938,15 +932,20 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 	}
 	m_sServerName = rgchServerName;
 
+	//
+	// Set state variables, relevant to any master server updates or client pings
+	//
+
+	// These server state variables may be changed at any time.  Note that there is no lnoger a mechanism
+	// to send the player count.  The player count is maintained by steam and you should use the player
+	// creation/authentication functions to maintain your player count.
+	SteamGameServer()->SetMaxPlayerCount( 4 );
+	SteamGameServer()->SetPasswordProtected( false );
+	SteamGameServer()->SetServerName( m_sServerName.c_str() );
+	SteamGameServer()->SetBotPlayerCount( 0 ); // optional, defaults to zero
+	SteamGameServer()->SetMapName( "MilkyWay" );
+
 #ifdef USE_GS_AUTH_API
-	SteamGameServer()->UpdateServerStatus(  
-		m_uPlayerCount,				// Current player count
-		4,							// Maximum number of players
-		0,							// Number of AI/Bot players
-		m_sServerName.c_str(),		// Server name
-		"",							// Spectator server name, unused for us
-		"MilkyWay"					// Map name
-		);
 
 	// Update all the players names/scores
 	for( uint32 i=0; i < MAX_PLAYERS_PER_SERVER; ++i )
@@ -972,66 +971,40 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 //-----------------------------------------------------------------------------
 // Purpose: Tells us Steam3 (VAC and newer license checking) has accepted the user connection
 //-----------------------------------------------------------------------------
-void CSpaceWarServer::OnGSClientApprove( GSClientApprove_t *pGSClientApprove )
+void CSpaceWarServer::OnValidateAuthTicketResponse( ValidateAuthTicketResponse_t *pResponse )
 {
-	// This is the final approval, and means we should let the client play (find the pending auth by steamid)
-	for ( uint32 i = 0; i<MAX_PLAYERS_PER_SERVER; ++i )
+	if ( pResponse->m_eAuthSessionResponse == k_EAuthSessionResponseOK )
 	{
-		if ( !m_rgPendingClientData[i].m_bActive )
-			continue;
-		else if ( m_rgPendingClientData[i].m_SteamIDUser == pGSClientApprove->m_SteamID )
+		// This is the final approval, and means we should let the client play (find the pending auth by steamid)
+		for ( uint32 i = 0; i<MAX_PLAYERS_PER_SERVER; ++i )
 		{
-			OutputDebugString( "Auth completed for a client\n" );
-			OnAuthCompleted( true, i );
-			return;
-		}
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Callback indicating that Steam has told us to deny a user connection
-//-----------------------------------------------------------------------------
-void CSpaceWarServer::OnGSClientDeny( GSClientDeny_t *pGSClientDeny )
-{
-	// Looks like we shouldn't let this user play, kick them
-	for ( uint32 i = 0; i<MAX_PLAYERS_PER_SERVER; ++i )
-	{
-		if ( !m_rgPendingClientData[i].m_bActive )
-			continue;
-		else if ( m_rgPendingClientData[i].m_SteamIDUser == pGSClientDeny->m_SteamID )
-		{
-			switch( pGSClientDeny->m_eDenyReason )
+			if ( !m_rgPendingClientData[i].m_bActive )
+				continue;
+			else if ( m_rgPendingClientData[i].m_SteamIDUser == pResponse->m_SteamID )
 			{
-			case k_EDenySteamValidationStalled:
-				// k_EDenySteamValidationStalled means we couldn't get a timely response from Steam 
-				// as to whether this client should really be allowed to play, but we did at least validate
-				// that they are who they say they are... As such, we'll decide that we should let them play
-				// as this may just mean the Steam auth servers are down.
-				OutputDebugString( "Auth stalled for a client, let them play anyway\n" );
+				OutputDebugString( "Auth completed for a client\n" );
 				OnAuthCompleted( true, i );
-				break;
-			default:
-				OnAuthCompleted( false, i );
-				break;
+				return;
 			}
-			
-			return;
+		}
+	}
+	else
+	{
+		// Looks like we shouldn't let this user play, kick them
+		for ( uint32 i = 0; i<MAX_PLAYERS_PER_SERVER; ++i )
+		{
+			if ( !m_rgPendingClientData[i].m_bActive )
+				continue;
+			else if ( m_rgPendingClientData[i].m_SteamIDUser == pResponse->m_SteamID )
+			{
+				OutputDebugString( "Auth failed for a client\n" );
+				OnAuthCompleted( false, i );
+				return;
+			}
 		}
 	}
 }
 
-
-//-----------------------------------------------------------------------------
-// Purpose: Steam is telling us to kick a client (they probably lost connection to 
-// Steam and now VAC can't verify them...)
-//-----------------------------------------------------------------------------
-void CSpaceWarServer::OnGSClientKick( GSClientKick_t *pGSClientKick )
-{
-	char buffer[128];
-	_snprintf( buffer, 128, "Steam told us to kick: %u - %u\n", CSteamID( pGSClientKick->m_SteamID ).GetAccountID(), pGSClientKick->m_eDenyReason );
-	OutputDebugString( buffer );
-}
 
 
 //-----------------------------------------------------------------------------

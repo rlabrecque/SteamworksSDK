@@ -182,6 +182,7 @@ enum EClientGameState
 	k_EClientLinkSteamAccount,
 	k_EClientAutoCreateAccount,
 	k_EClientRetrySteamConnection,
+	k_EClientClanChatRoom,
 };
 
 

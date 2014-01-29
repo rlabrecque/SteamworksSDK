@@ -35,7 +35,6 @@ class ISteamFriends;
 class ISteamUtils;
 class ISteamMatchmaking;
 class ISteamContentServer;
-class ISteamMasterServerUpdater;
 class ISteamMatchmakingServers;
 class ISteamUserStats;
 class ISteamApps;
@@ -93,9 +92,6 @@ public:
 	// returns the ISteamMatchmaking interface
 	virtual ISteamMatchmaking *GetISteamMatchmaking( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
-	// returns the ISteamMasterServerUpdater interface
-	virtual ISteamMasterServerUpdater *GetISteamMasterServerUpdater( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
-
 	// returns the ISteamMatchmakingServers interface
 	virtual ISteamMatchmakingServers *GetISteamMatchmakingServers( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
@@ -150,7 +146,7 @@ public:
 
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient011"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient012"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must

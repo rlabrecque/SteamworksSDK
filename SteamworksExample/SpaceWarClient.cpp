@@ -15,6 +15,7 @@
 #include "time.h"
 #include "ServerBrowser.h"
 #include "Leaderboards.h"
+#include "clanchatroom.h"
 #include "Lobby.h"
 #include "p2pauth.h"
 #include "voicechat.h"
@@ -128,6 +129,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
 	m_pLeaderboards = new CLeaderboards( pGameEngine );
+	m_pClanChatRoom = new CClanChatRoom( pGameEngine );
 
 	// Remote Storage page
 	m_pRemoteStorage = new CRemoteStorage( pGameEngine );
@@ -199,7 +201,13 @@ void CSpaceWarClient::DisconnectFromServer()
 {
 	if ( m_eConnectedStatus != k_EClientNotConnected )
 	{
-		SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
+#ifdef USE_GS_AUTH_API
+		if ( m_hAuthTicket != k_HAuthTicketInvalid )
+			SteamUser()->CancelAuthTicket( m_hAuthTicket );
+		m_hAuthTicket = k_HAuthTicketInvalid;
+#else
+		SteamUser()->AdvertiseGame( k_steamIDNil, 0, 0 );
+#endif
 
 		MsgClientLeavingServer_t msg;
 		BSendServerData( &msg, sizeof(msg) );
@@ -246,19 +254,21 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	MsgClientBeginAuthentication_t msg;
 #ifdef USE_GS_AUTH_API
 	char rgchToken[1024];
-	uint32 unTokenLen = SteamUser()->InitiateGameConnection( (void*)&rgchToken, ARRAYSIZE( rgchToken ), steamIDGameServer, m_unServerIP, m_usServerPort, bVACSecure );
+	uint32 unTokenLen = 0;
+	m_hAuthTicket = SteamUser()->GetAuthSessionTicket( rgchToken, sizeof( rgchToken ), &unTokenLen );
 	msg.SetToken( rgchToken, unTokenLen );
+
 #else
-	// When you aren't using Steam auth you still call InitiateGameConnection() so you can communicate presence data to the friends
-	// system. Make sure to pass k_steamIDNonSteamGS so Steam won't try to authenticate your user.
-	uint32 unTokenLen = SteamUser()->InitiateGameConnection( NULL, 0, k_steamIDNonSteamGS, m_unServerIP, m_usServerPort, false );
+	// When you aren't using Steam auth you can still call AdvertiseGame() so you can communicate presence data to the friends
+	// system. Make sure to pass k_steamIDNonSteamGS
+	uint32 unTokenLen = SteamUser()->AdvertiseGame( k_steamIDNonSteamGS, m_unServerIP, m_usServerPort );
 	msg.SetSteamID( SteamUser()->GetSteamID().ConvertToUint64() );
 #endif
 
 	Steamworks_TestSecret();
 
 	if ( msg.GetTokenLen() < 1 )
-		OutputDebugString( "Warning: Looks like InitiateGameConnection didn't give us a good token\n" );
+		OutputDebugString( "Warning: Looks like GetAuthSessionTicket didn't give us a good ticket\n" );
 
 	BSendServerData( &msg, sizeof(msg) );
 }
@@ -712,14 +722,19 @@ void CSpaceWarClient::OnReceiveServerExiting()
 {
 	if ( m_pP2PAuthedGame )
 		m_pP2PAuthedGame->EndGame();
+
+#ifdef USE_GS_AUTH_API
+	if ( m_hAuthTicket != k_HAuthTicketInvalid )
+	{
+		SteamUser()->CancelAuthTicket( m_hAuthTicket );
+	}
+	m_hAuthTicket = k_HAuthTicketInvalid;
+#else
+	SteamUser()->AdvertiseGame( k_steamIDNil, 0, 0 );
+#endif
+
 	if ( m_eGameState != k_EClientGameActive )
 		return;
-
-	if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated )
-	{
-		SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
-	}
-
 	m_eConnectedStatus = k_EClientNotConnected;
 
 	SetConnectionFailureText( "Game server has exited." );
@@ -944,6 +959,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		// we've switched to the leaderboard menu
 		m_pLeaderboards->Show();
 		SteamFriends()->SetRichPresence( "status", "Viewing leaderboards" );
+	}
+	else if ( m_eGameState == k_EClientClanChatRoom )
+	{
+		// we've switched to the leaderboard menu
+		m_pClanChatRoom->Show();
+		SteamFriends()->SetRichPresence( "status", "Chatting" );
 	}
 	else if ( m_eGameState == k_EClientGameActive )
 	{
@@ -1235,6 +1256,14 @@ void CSpaceWarClient::RunFrame()
 	case k_EClientLeaderboards:
 		m_pStarField->Render();
 		m_pLeaderboards->RunFrame();		
+
+		if ( bEscapePressed )
+			SetGameState( k_EClientGameMenu );
+		break;
+
+	case k_EClientClanChatRoom:
+		m_pStarField->Render();
+		m_pClanChatRoom->RunFrame();		
 
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );

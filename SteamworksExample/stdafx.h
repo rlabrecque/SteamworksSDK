@@ -90,6 +90,7 @@ typedef unsigned __int64 uint64;
 
 	#endif
 
+#define ARRAYSIZE(A) ( sizeof(A)/sizeof(A[0]) )
 // Need to define some types on POSIX
 typedef short int16;
 typedef unsigned short uint16;
@@ -187,7 +188,7 @@ extern const char *GetUserSaveDataPath();
 #define _snprintf snprintf
 #endif
 
-#define ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
+#define Q_ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
 
 #endif	// POSIX
 

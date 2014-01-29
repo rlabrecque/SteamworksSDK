@@ -264,7 +264,7 @@ int main(int argc, const char **argv)
 {
     char szCmdLine[1024];
     char *pszStart = szCmdLine;
-    char * const pszEnd = szCmdLine + ARRAYSIZE(szCmdLine);
+    char * const pszEnd = szCmdLine + Q_ARRAYSIZE(szCmdLine);
 
     *szCmdLine = '\0';
     
@@ -283,7 +283,7 @@ int main(int argc, const char **argv)
             *pszStart++ = ' ';
     }
     
-    szCmdLine[ARRAYSIZE(szCmdLine) - 1] = '\0';
+    szCmdLine[Q_ARRAYSIZE(szCmdLine) - 1] = '\0';
     
     return RealMain( szCmdLine, 0, 0 );
 }

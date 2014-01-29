@@ -21,10 +21,13 @@
 #define STEAM_PS3_COMMUNICATION_SIG_MAX 160
 #define STEAM_PS3_LANGUAGE_MAX 64
 #define STEAM_PS3_REGION_CODE_MAX 16
+#define STEAM_PS3_CURRENT_PARAMS_VER 1
 struct SteamPS3Params_t
 {
+	uint32 m_unVersion;										// set to STEAM_PS3_CURRENT_PARAMS_VER
+	
 	void *pReserved;
-	uint32 m_nAppId;
+	uint32 m_nAppId;										// set to your game's appid
 
 	char m_rgchInstallationPath[ STEAM_PS3_PATH_MAX ];		// directory containing latest steam prx's and sdata. Can be read only (BDVD)
 	char m_rgchSystemCache[ STEAM_PS3_PATH_MAX ];			// temp working cache, not persistent 

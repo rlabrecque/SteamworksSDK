@@ -301,6 +301,16 @@ struct EncryptedAppTicketResponse_t
 	EResult m_eResult;
 };
 
+//-----------------------------------------------------------------------------
+// callback for GetAuthSessionTicket
+//-----------------------------------------------------------------------------
+struct GetAuthSessionTicketResponse_t
+{
+	enum { k_iCallback = k_iSteamUserCallbacks + 63 };
+	HAuthTicket m_hAuthTicket;
+	EResult m_eResult;
+};
+
 #pragma pack( pop )
 
 #endif // ISTEAMUSER_H

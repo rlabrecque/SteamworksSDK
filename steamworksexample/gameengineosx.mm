@@ -326,8 +326,6 @@ bool CGameEngineGL::BInitializeGraphics()
 											 backing:NSBackingStoreBuffered
 											   defer:NO];
 
-	[app setDelegate: app];
-	[m_window setDelegate: app];
 	[m_window setAcceptsMouseMovedEvents:YES];
 	
 	GLint swapInt = 1;

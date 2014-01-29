@@ -36,6 +36,7 @@
 		503C6DB41269002800B66E3B /* libsteam_api.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 503C6DB31269002800B66E3B /* libsteam_api.dylib */; };
 		504EDCBC126901EC00F96D63 /* libsteam_api.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 503C6DB31269002800B66E3B /* libsteam_api.dylib */; };
 		504EDCC21269026C00F96D63 /* steam_appid.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 504EDCC01269025A00F96D63 /* steam_appid.txt */; };
+		50D642871461EF3200A5739B /* clanchatroom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50D642851461EF3200A5739B /* clanchatroom.cpp */; };
 		50E77DEB1362190C000FC072 /* cglmbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD11362190C000FC072 /* cglmbuffer.cpp */; };
 		50E77DEC1362190C000FC072 /* cglmfbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD31362190C000FC072 /* cglmfbo.cpp */; };
 		50E77DED1362190C000FC072 /* cglmprogram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD51362190C000FC072 /* cglmprogram.cpp */; };
@@ -123,6 +124,8 @@
 		503C6DB31269002800B66E3B /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = ../redistributable_bin/osx32/libsteam_api.dylib; sourceTree = "<absolute>"; };
 		504EDCB4126900D600F96D63 /* steamworksexample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "steamworksexample-Info.plist"; path = "osx/steamworksexample-Info.plist"; sourceTree = "<group>"; };
 		504EDCC01269025A00F96D63 /* steam_appid.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = steam_appid.txt; path = osx/steam_appid.txt; sourceTree = "<group>"; };
+		50D642851461EF3200A5739B /* clanchatroom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clanchatroom.cpp; sourceTree = "<group>"; };
+		50D642861461EF3200A5739B /* clanchatroom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clanchatroom.h; sourceTree = "<group>"; };
 		50E77DD11362190C000FC072 /* cglmbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmbuffer.cpp; path = ../glmgr/cglmbuffer.cpp; sourceTree = "<group>"; };
 		50E77DD21362190C000FC072 /* cglmbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmbuffer.h; path = ../glmgr/cglmbuffer.h; sourceTree = "<group>"; };
 		50E77DD31362190C000FC072 /* cglmfbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmfbo.cpp; path = ../glmgr/cglmfbo.cpp; sourceTree = "<group>"; };
@@ -199,6 +202,7 @@
 				503C6D0B1268F49F00B66E3B /* VectorEntity.cpp */,
 				503C6D0D1268F49F00B66E3B /* voicechat.cpp */,
 				503C6CD91268F49F00B66E3B /* BaseMenu.cpp */,
+				50D642851461EF3200A5739B /* clanchatroom.cpp */,
 				503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */,
 				503C6CE01268F49F00B66E3B /* gameengineosx.mm */,
 				503C6CE21268F49F00B66E3B /* glstringosx.mm */,
@@ -242,6 +246,7 @@
 		503C6D291268F4EE00B66E3B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				50D642861461EF3200A5739B /* clanchatroom.h */,
 				503C6CEE1268F49F00B66E3B /* p2pauth.h */,
 				503C6CF01268F49F00B66E3B /* PhotonBeam.h */,
 				503C6CF21268F49F00B66E3B /* QuitMenu.h */,
@@ -399,6 +404,7 @@
 				50E77DF41362190C000FC072 /* glmgrcocoa.mm in Sources */,
 				50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */,
 				50E77DF61362190C000FC072 /* mathlite.cpp in Sources */,
+				50D642871461EF3200A5739B /* clanchatroom.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

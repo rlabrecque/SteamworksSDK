@@ -37,7 +37,8 @@ public:
 	// Adds a screenshot to the user's screenshot library from disk.  If a thumbnail is provided, it must be 200 pixels wide and the same aspect ratio
 	// as the screenshot, otherwise a thumbnail will be generated if the user uploads the screenshot.  The screenshots must be in either JPEG or TGA format.
 	// The return value is a handle that is valid for the duration of the game process and can be used to apply tags.
-	virtual ScreenshotHandle AddScreenshotToLibrary( const char *pchJpegOrTGAFilename, const char *pchJpegOrTGAThumbFilename, int nWidth, int nHeight ) = 0;
+	// JPEG, TGA, and PNG formats are supported.
+	virtual ScreenshotHandle AddScreenshotToLibrary( const char *pchFilename, const char *pchThumbnailFilename, int nWidth, int nHeight ) = 0;
 
 	// Causes the Steam overlay to take a screenshot.  If screenshots are being hooked by the game then a ScreenshotRequested_t callback is sent back to the game instead. 
 	virtual void TriggerScreenshot() = 0;

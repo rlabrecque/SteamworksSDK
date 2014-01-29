@@ -233,7 +233,7 @@ enum EChatEntryType
 	k_EChatEntryTypeTyping = 2,			// Another user is typing (not used in multi-user chat)
 	k_EChatEntryTypeInviteGame = 3,		// Invite from other user into that users current game
 	k_EChatEntryTypeEmote = 4,			// text emote message
-	k_EChatEntryTypeLobbyGameStart = 5,	// lobby game is starting
+	//k_EChatEntryTypeLobbyGameStart = 5,	// lobby game is starting (dead - listen for LobbyGameCreated_t callback instead)
 	k_EChatEntryTypeLeftConversation = 6, // user has left the conversation ( closed chat window )
 	// Above are previous FriendMsgType entries, now merged into more generic chat entry types
 };
@@ -253,6 +253,8 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseLimited = 7,		// Joining this chat is not allowed because you are a limited user (no value on account)
 	k_EChatRoomEnterResponseClanDisabled = 8,	// Attempt to join a clan chat when the clan is locked or disabled
 	k_EChatRoomEnterResponseCommunityBan = 9,	// Attempt to join a chat when the user has a community lock on their account
+	k_EChatRoomEnterResponseMemberBlockedYou = 10, // Join failed - some member in the chat has blocked you from joining
+	k_EChatRoomEnterResponseYouBlockedMember = 11, // Join failed - you have blocked some member already in the chat
 };
 
 
@@ -273,9 +275,10 @@ typedef bool (*PFNLegacyKeyInstalled)();
 
 const unsigned int k_unSteamAccountIDMask = 0xFFFFFFFF;
 const unsigned int k_unSteamAccountInstanceMask = 0x000FFFFF;
-// we allow 2 simultaneous user account instances right now, 1= desktop, 2 = console, 0 = all
-const unsigned int k_unSteamUserDesktopInstance = 1;	 
-const unsigned int k_unSteamUserConsoleInstance = 2;
+// we allow 3 simultaneous user account instances right now, 1= desktop, 2 = console, 4 = web, 0 = all
+const unsigned int k_unSteamUserDesktopInstance	= 1;	 
+const unsigned int k_unSteamUserConsoleInstance	= 2;
+const unsigned int k_unSteamUserWebInstance		= 4;
 
 // Special flags for Chat accounts - they go in the top 8 bits
 // of the steam ID's "instance", leaving 12 for the actual instances
@@ -361,7 +364,7 @@ public:
 	CSteamID( uint32 unAccountID, unsigned int unAccountInstance, EUniverse eUniverse, EAccountType eAccountType )
 	{
 #if defined(_SERVER) && defined(Assert)
-		Assert( ! ( ( k_EAccountTypeIndividual == eAccountType ) && ( unAccountInstance > k_unSteamUserConsoleInstance ) ) );	// enforce that for individual accounts, instance is always 1
+		Assert( ! ( ( k_EAccountTypeIndividual == eAccountType ) && ( unAccountInstance > k_unSteamUserWebInstance ) ) );	// enforce that for individual accounts, instance is always 1
 #endif // _SERVER
 		InstancedSet( unAccountID, unAccountInstance, eUniverse, eAccountType );
 	}
@@ -527,11 +530,27 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	// Purpose: Is this a game server account id?
+	// Purpose: Is this a game server account id?  (Either persistent or anonymous)
 	//-----------------------------------------------------------------------------
 	bool BGameServerAccount() const
 	{
 		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeGameServer || m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonGameServer;
+	}
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Is this a persistent (not anonymous) game server account id?
+	//-----------------------------------------------------------------------------
+	bool BPersistentGameServerAccount() const
+	{
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeGameServer;
+	}
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Is this an anonymous game server account id?
+	//-----------------------------------------------------------------------------
+	bool BAnonGameServerAccount() const
+	{
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonGameServer;
 	}
 
 	//-----------------------------------------------------------------------------
@@ -608,7 +627,7 @@ public:
 	void SetAccountInstance( uint32 unInstance ){ m_steamid.m_comp.m_unAccountInstance = unInstance; }
 	void ClearIndividualInstance()				{ if ( BIndividualAccount() ) m_steamid.m_comp.m_unAccountInstance = 0; }
 	bool HasNoIndividualInstance() const		{ return BIndividualAccount() && (m_steamid.m_comp.m_unAccountInstance==0); }
-	uint32 GetAccountID() const					{ return m_steamid.m_comp.m_unAccountID; }
+	AccountID_t GetAccountID() const			{ return m_steamid.m_comp.m_unAccountID; }
 	uint32 GetUnAccountInstance() const			{ return m_steamid.m_comp.m_unAccountInstance; }
 	EAccountType GetEAccountType() const		{ return ( EAccountType ) m_steamid.m_comp.m_EAccountType; }
 	EUniverse GetEUniverse() const				{ return m_steamid.m_comp.m_EUniverse; }
@@ -671,7 +690,7 @@ inline bool CSteamID::IsValid() const
 
 	if ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual )
 	{
-		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance > k_unSteamUserConsoleInstance )
+		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance > k_unSteamUserWebInstance )
 			return false;
 	}
 
@@ -679,6 +698,13 @@ inline bool CSteamID::IsValid() const
 	{
 		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance != 0 )
 			return false;
+	}
+
+	if ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeGameServer )
+	{
+		if ( m_steamid.m_comp.m_unAccountID == 0 )
+			return false;
+		// Any limit on instances?  We use them for local users and bots
 	}
 	return true;
 }
