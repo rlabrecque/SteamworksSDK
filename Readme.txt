@@ -11,7 +11,12 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+----------------------------------------------------------------
+v1.23a	25th February 2013
+----------------------------------------------------------------
 
+Windows:
+* Fix passing command-line parameters across SteamApi_RestartAppIfNeccessary()
 
 ----------------------------------------------------------------
 v1.23	19th February 2013
