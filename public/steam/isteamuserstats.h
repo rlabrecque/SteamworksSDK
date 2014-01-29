@@ -212,6 +212,41 @@ public:
 	// This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
 	virtual SteamAPICall_t GetNumberOfCurrentPlayers() = 0;
 
+	// Requests that Steam fetch data on the percentage of players who have received each achievement
+	// for the game globally.
+	// This call is asynchronous, with the result returned in GlobalAchievementPercentagesReady_t.
+	virtual SteamAPICall_t RequestGlobalAchievementPercentages() = 0;
+
+	// Get the info on the most achieved achievement for the game, returns an iterator index you can use to fetch
+	// the next most achieved afterwards.  Will return -1 if there is no data on achievement 
+	// percentages (ie, you haven't called RequestGlobalAchievementPercentages and waited on the callback).
+	virtual int GetMostAchievedAchievementInfo( char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved ) = 0;
+
+	// Get the info on the next most achieved achievement for the game. Call this after GetMostAchievedAchievementInfo or another
+	// GetNextMostAchievedAchievementInfo call passing the iterator from the previous call. Returns -1 after the last
+	// achievement has been iterated.
+	virtual int GetNextMostAchievedAchievementInfo( int iIteratorPrevious, char *pchName, uint32 unNameBufLen, float *pflPercent, bool *pbAchieved ) = 0;
+
+	// Returns the percentage of users who have achieved the specified achievement.
+	virtual bool GetAchievementAchievedPercent( const char *pchName, float *pflPercent ) = 0;
+
+	// Requests global stats data, which is available for stats marked as "aggregated".
+	// This call is asynchronous, with the results returned in GlobalStatsReceived_t.
+	// nHistoryDays specifies how many days of day-by-day history to retrieve in addition
+	// to the overall totals. The limit is 60.
+	virtual SteamAPICall_t RequestGlobalStats( int nHistoryDays ) = 0;
+
+	// Gets the lifetime totals for an aggregated stat
+	virtual bool GetGlobalStat( const char *pchStatName, int64 *pData ) = 0;
+	virtual bool GetGlobalStat( const char *pchStatName, double *pData ) = 0;
+
+	// Gets history for an aggregated stat. pData will be filled with daily values, starting with today.
+	// So when called, pData[0] will be today, pData[1] will be yesterday, and pData[2] will be two days ago, 
+	// etc. cubData is the size in bytes of the pubData buffer. Returns the number of 
+	// elements actually set.
+	virtual int32 GetGlobalStatHistory( const char *pchStatName, int64 *pData, uint32 cubData ) = 0;
+	virtual int32 GetGlobalStatHistory( const char *pchStatName, double *pData, uint32 cubData ) = 0;
+
 #ifdef _PS3
 	// Call to kick off installation of the PS3 trophies. This call is asynchronous, and the results will be returned in a PS3TrophiesInstalled_t
 	// callback.
@@ -233,7 +268,7 @@ public:
 #endif
 };
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION009"
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION010"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -353,9 +388,18 @@ struct UserAchievementIconFetched_t
 	int			m_nIconHandle;		// Handle to the image, which can be used in ClientUtils()->GetImageRGBA(), 0 means no image is set for the achievement
 };
 
-//
-// IMPORTANT! k_iSteamUserStatsCallbacks + 10 is used, see iclientuserstats.h
-//
+
+//-----------------------------------------------------------------------------
+// Purpose: Callback indicating that global achievement percentages are fetched
+//-----------------------------------------------------------------------------
+struct GlobalAchievementPercentagesReady_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 10 };
+
+	uint64		m_nGameID;				// Game this is for
+	EResult		m_eResult;				// Result of the operation
+};
+
 
 //-----------------------------------------------------------------------------
 // Purpose: call result indicating UGC has been uploaded, returned as a result of SetLeaderboardUGC()
@@ -378,6 +422,18 @@ struct PS3TrophiesInstalled_t
 	EResult m_eResult;				// The result of the operation
 	uint64 m_ulRequiredDiskSpace;	// If m_eResult is k_EResultDiskFull, will contain the amount of space needed to install trophies
 
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: callback indicating global stats have been received.
+//	Returned as a result of RequestGlobalStats()
+//-----------------------------------------------------------------------------
+struct GlobalStatsReceived_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 12 };
+	uint64	m_nGameID;				// Game global stats were requested for
+	EResult	m_eResult;				// The result of the request
 };
 
 #pragma pack( pop )

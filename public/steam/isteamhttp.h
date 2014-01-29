@@ -85,6 +85,11 @@ public:
 	// Releases an HTTP response handle, should always be called to free resources after receiving a HTTPRequestCompleted_t
 	// callback and finishing using the response.
 	virtual bool ReleaseHTTPRequest( HTTPRequestHandle hRequest ) = 0;
+
+	// Gets progress on downloading the body for the request.  This will be zero unless a response header has already been
+	// received which included a content-length field.  For responses that contain no content-length it will report
+	// zero for the duration of the request as the size is unknown until the connection closes.
+	virtual bool GetHTTPDownloadProgressPct( HTTPRequestHandle hRequest, float *pflPercentOut ) = 0;
 };
 
 #define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION001"

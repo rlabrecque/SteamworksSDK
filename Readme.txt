@@ -12,6 +12,24 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.14	16th May 2011
+----------------------------------------------------------------
+
+Stats and Achievements
+* Added a set of functions for accessing global achievement unlock percentages
+** RequestGlobalAchievementPercentages() to request the completion percentages from the backend
+** GetMostAchievedAchievementInfo() and GetNextMostAchievedAchievementInfo() to iterate achievement completion percentages
+** GetAchievementAchievedPercent() to query the global unlock percentage for a specific achievement
+* Added a set of functions for accessing global stats values. To enable a global stats set stats as "aggregated" from the Steamworks admin page.
+** RequestGlobalStats() to request the global stats data from the backend
+** GetGlobalStat() to get the global total for a stat
+** GetGlobalStatHistory() to get per day totals for a stat
+
+HTTP
+* added ISteamHTTP::GetHTTPDownloadProgressPct() get the progress of an HTTP request
+
+
+----------------------------------------------------------------
 v1.13	26th April 2011
 ----------------------------------------------------------------
 

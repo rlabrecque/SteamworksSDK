@@ -287,8 +287,8 @@ bool CGameEngineGL::BInitializeAudio()
 
 bool CGameEngineGL::BInitializeGraphics()
 {
-	m_nWindowWidth = 800;
-	m_nWindowHeight = 600;
+	m_nWindowWidth = 1024;
+	m_nWindowHeight = 768;
 
 	AutoReleasePool pool;
 
@@ -328,6 +328,7 @@ bool CGameEngineGL::BInitializeGraphics()
 
 	[app setDelegate: app];
 	[m_window setDelegate: app];
+	[m_window setAcceptsMouseMovedEvents:YES];
 	
 	GLint swapInt = 1;
 	[[m_view openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
