@@ -130,6 +130,12 @@ public:
 	// Calling this w/ N out of N progress will NOT set the achievement, the game must still do that.
 	virtual bool IndicateAchievementProgress( const char *pchName, uint32 nCurProgress, uint32 nMaxProgress ) = 0;
 
+	// Used for iterating achievements. In general games should not need these functions because they should have a
+	// list of existing achievements compiled into them
+	virtual uint32 GetNumAchievements() = 0;
+	// Get achievement name iAchievement in [0,GetNumAchievements)
+	virtual const char *GetAchievementName( uint32 iAchievement ) = 0;
+
 	// Friends stats & achievements
 
 	// downloads stats for the user
@@ -271,7 +277,7 @@ public:
 #endif
 };
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION010"
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION011"
 
 // callbacks
 #pragma pack( push, 8 )

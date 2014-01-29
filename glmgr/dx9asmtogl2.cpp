@@ -6,7 +6,7 @@
 #include "DX9AsmToGL2.h"
 
 
-void Error( char *fmt, ... )
+void Error( const char *fmt, ... )
 {
 }
 
@@ -168,7 +168,7 @@ void GetParamNameWithoutSwizzle( const char *pParam, char *pOut, int nOutLen )
 	// The test against ')' here is for stuff like vec4( gl_Normal, 0.0 ) - we want to treat that as a whole param name.
 	if ( pDot  )
 	{
-		int nToCopy = std::min( nOutLen-1, pDot - pParam );
+		int nToCopy = std::min<ptrdiff_t>( nOutLen-1, pDot - pParam );
 		memcpy( pOut, pParam, nToCopy );
 		pOut[nToCopy] = 0;
 	}
@@ -317,7 +317,7 @@ bool D3DToGL::OpenIntrinsic( uint32 inst, char* buff, int nBufLen, uint32 destDi
 		case D3DSIO_SLT:
 			if ( nArgumentDimension == 1 )
 			{
-				V_snprintf( buff, nBufLen, "float( ", nArgumentDimension ); // lessThan doesn't have a scalar version
+				V_snprintf( buff, nBufLen, "float( " ); // lessThan doesn't have a scalar version
 			}
 			else
 			{
@@ -328,7 +328,7 @@ bool D3DToGL::OpenIntrinsic( uint32 inst, char* buff, int nBufLen, uint32 destDi
 		case D3DSIO_SGE:
 			if ( nArgumentDimension == 1 )
 			{
-				V_snprintf( buff, nBufLen, "float( ", nArgumentDimension ); // greaterThanEqual doesn't have a scalar version
+				V_snprintf( buff, nBufLen, "float( " ); // greaterThanEqual doesn't have a scalar version
 			}
 			else
 			{
@@ -1133,7 +1133,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 				{
 					Assert( dwRegNum == 0 );
 
-					V_snprintf( buff, sizeof( buff ), "va_r", dwRegNum );
+					V_snprintf( buff, sizeof( buff ), "va_r" );
 				}
 				else
 				{
@@ -1204,11 +1204,11 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 			{
 				if ( dwRegNum == 0 )
 				{
-					V_snprintf( buff, sizeof( buff ), "gl_FrontColor", dwRegNum );
+					V_snprintf( buff, sizeof( buff ), "gl_FrontColor" );
 				}
 				else if ( dwRegNum == 1 )
 				{
-					V_snprintf( buff, sizeof( buff ), "gl_FrontSecondaryColor", dwRegNum );
+					V_snprintf( buff, sizeof( buff ), "gl_FrontSecondaryColor" );
 				}
 				else
 				{
@@ -1527,7 +1527,7 @@ void D3DToGL::AddTokenHexCodeToBuffer( char *pBuffer, int nSize, int nLastStrlen
 	char szHex[512];
 	szHex[0] = '\n';
 	V_snprintf( &szHex[1], sizeof( szHex )-1, HEXCODE_HEADER );
-	int nTokens = std::min( 10, m_pdwNextToken - m_pRecordedInputTokenStart );
+	int nTokens = std::min<ptrdiff_t>( 10, m_pdwNextToken - m_pRecordedInputTokenStart );
 	for ( int i=0; i < nTokens; i++ )
 	{
 		char szTemp[32];

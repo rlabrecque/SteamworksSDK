@@ -96,7 +96,7 @@ CGLMProgram::~CGLMProgram( )
 	GLMShaderDesc *glslDesc = &m_descs[kGLMGLSL];
 	if (glslDesc->m_object.glsl)
 	{
-		glDeleteShader( (uint)glslDesc->m_object.glsl );	// why do I need a cast here again ?
+		glDeleteShader( (uintptr_t)glslDesc->m_object.glsl );	// why do I need a cast here again ?
 		GLMCheckError();
 		glslDesc->m_object.glsl = 0;
 	}
@@ -516,7 +516,7 @@ struct GLMShaderLimitDesc
 };
 
 // macro to help make the table of what to check
-#ifndef	LMD( val, limit, flags )
+#ifndef	LMD
 #define	LMD( val, flags )	{ GL_PROGRAM_##val##_ARB, GL_MAX_PROGRAM_##val##_ARB, #val, flags }
 #else
 #error you need to use a different name for this macro.
@@ -679,11 +679,11 @@ void	CGLMProgram::LogSlow( EGLMProgramLang lang )
 	if (!desc->m_slowMark)
 	{
 		// log it
-		printf(	"\n-------------- Slow %s ( CGLMProgram @ %08x, lang %s, name %d ) : \n%s \n",
+		printf(	"\n-------------- Slow %s ( CGLMProgram @ %p, lang %s, name %d ) : \n%s \n",
 				m_type==kGLMVertexProgram ? "VS" : "FS",
 				this,
 				lang==kGLMGLSL ? "GLSL" : "ARB",
-				(int)(lang==kGLMGLSL ? (int)desc->m_object.glsl : (int)desc->m_object.arb),
+				(int)(uintptr_t)(lang==kGLMGLSL ? (uintptr_t)desc->m_object.glsl : (uintptr_t)desc->m_object.arb),
 				m_text
 		);
 	}
@@ -692,11 +692,11 @@ void	CGLMProgram::LogSlow( EGLMProgramLang lang )
 		if ( (desc->m_slowMark & (desc->m_slowMark-1)) == 0 )
 		{
 			// short blurb
-			printf(	"\n               Slow %s ( CGLMProgram @ %08x, lang %s, name %d ) (%d times)",
+			printf(	"\n               Slow %s ( CGLMProgram @ %p, lang %s, name %d ) (%d times)",
 					m_type==kGLMVertexProgram ? "VS" : "FS",
 					this,
 					lang==kGLMGLSL ? "GLSL" : "ARB",
-					(int)(lang==kGLMGLSL ? (int)desc->m_object.glsl : (int)desc->m_object.arb),
+					(int)(lang==kGLMGLSL ? (uintptr_t)desc->m_object.glsl : (uintptr_t)desc->m_object.arb),
 					desc->m_slowMark+1
 			);
 		}

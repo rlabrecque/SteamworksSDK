@@ -351,7 +351,7 @@ void	GLMContext::DumpCaps( void )
 	#define	dumpfield_hex( fff )	printf( "\n  %-30s : 0x%08x", #fff, (int) m_caps.fff )
 	#define	dumpfield_str( fff )	printf( "\n  %-30s : %s", #fff, m_caps.fff )
 
-	printf("\n-------------------------------- context caps for context %08x", (uint)this);
+	printf("\n-------------------------------- context caps for context %p", this);
 
 	dumpfield( m_fullscreen );
 	dumpfield( m_accelerated );
@@ -3181,7 +3181,7 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 					m_boundPairProgram = newPairProgram;
 					m_boundPairRevision = newPairRevision;
 
-					glUseProgram( (GLuint)newPairProgram );
+					glUseProgram( (uintptr_t)newPairProgram );
 					GLMCheckError();
 					
 					// set the dirty levels appropriately since the program changed and has never seen any of the current values.
@@ -4881,7 +4881,7 @@ void	GLMContext::DrawRangeElements(	GLenum mode, GLuint start, GLuint end, GLsiz
 	if (m_drawIndexBuffer->m_pseudo)
 	{
 		// you have to pass actual address, not offset... shhh... secret
-		indicesActual = (void*)((int)indicesActual + (int)m_drawIndexBuffer->m_pseudoBuf);
+		indicesActual = (void*)((uintptr_t)indicesActual + (uintptr_t)m_drawIndexBuffer->m_pseudoBuf);
 	}
 	
 #if GLMDEBUG

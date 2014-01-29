@@ -102,7 +102,7 @@ private:
 
 	// Keep track of which temps are used so they can be declared
 	uint32 m_dwTempUsageMask;
-	bool m_bOutputColorRegister[2];
+	bool m_bOutputColorRegister[4];
 	bool m_bOutputDepthRegister;
 
 	// Declaration of integer and bool constants

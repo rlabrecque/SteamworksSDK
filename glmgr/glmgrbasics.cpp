@@ -2705,9 +2705,9 @@ bool	GLMDetectOGLP( void )
 	if (result)
 	{
 		// enable a breakpoint on color4sv
-		int oglp_bkpt[3] = { kCGLFEglColor4sv, kCGLProfBreakBefore, 1 };
+		GLint oglp_bkpt[3] = { kCGLFEglColor4sv, kCGLProfBreakBefore, 1 };
 		
-		CGLSetOption( kCGLGOEnableBreakpoint, (GLint)oglp_bkpt );			
+		CGLSetGlobalOption( kCGLGOEnableBreakpoint, oglp_bkpt );			
 	}
 	
 	return result;
@@ -2954,14 +2954,14 @@ void GLMEnableTrace( bool on )
 	
 void	GLMStringOut( char *string )
 {
-	if ( GLMDebugChannelMask() & ( (1<<ePrintf) || (1<<eDebugger) ) )
+	if ( GLMDebugChannelMask() & ( (1<<ePrintf) | (1<<eDebugger) ) )
 	{
 		puts( string );
 	}
 
 	if ( GLMDebugChannelMask() & (1<<eGLProfiler) )
 	{
-		CGLSetOption( kCGLGOComment, (GLint)string );
+		CGLSetGlobalOption( kCGLGOComment, (GLint*)string );
 	}
 }
 

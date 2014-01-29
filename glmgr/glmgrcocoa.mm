@@ -446,7 +446,7 @@ void	GLMDisplayInfo::PopulateModes( void )
 
 void	GLMDisplayInfo::Dump( int which )
 {
-	GLMPRINTF(("\n         #%d: GLMDisplayInfo @ %08x, cg-id=%08x  display-mask=%08x  pixwidth=%d  pixheight=%d", which, (int)this, m_info.m_cgDisplayID, m_info.m_glDisplayMask, m_info.m_displayPixelWidth,  m_info.m_displayPixelHeight ));
+	GLMPRINTF(("\n         #%d: GLMDisplayInfo @ %08x, cg-id=%p  display-mask=%08x  pixwidth=%d  pixheight=%d", which, this, m_info.m_cgDisplayID, m_info.m_glDisplayMask, m_info.m_displayPixelWidth,  m_info.m_displayPixelHeight ));
 
 	int i=0;
 	for( std::vector< GLMDisplayMode * >::iterator p = m_modes->begin(); p != m_modes->end(); p++ )
@@ -983,7 +983,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 					{
 						// grab the OS version
 
-						long vMajor = 0;	long vMinor = 0;	long vMinorMinor = 0;
+						SInt32 vMajor = 0;	SInt32 vMinor = 0;	SInt32 vMinorMinor = 0;
 						
 						OSStatus gestalt_err = 0;
 						gestalt_err = Gestalt(gestaltSystemVersionMajor, &vMajor);

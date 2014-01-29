@@ -38,6 +38,10 @@ typedef uint64 PublishedFileId_t;
 const UGCHandle_t k_UGCHandleInvalid = 0xffffffffffffffffull;
 const PublishedFileUpdateHandle_t k_PublishedFileUpdateHandleInvalid = 0xffffffffffffffffull;
 
+// Handle for writing to Steam Cloud
+typedef uint64 UGCFileWriteStreamHandle_t;
+const UGCFileWriteStreamHandle_t k_UGCFileStreamHandleInvalid = 0xffffffffffffffffull;
+
 const uint32 k_cchPublishedDocumentTitleMax = 128 + 1;
 const uint32 k_cchPublishedDocumentDescriptionMax = 8000;
 const uint32 k_cchPublishedDocumentChangeDescriptionMax = 256;
@@ -107,6 +111,19 @@ enum EWorkshopEnumerationType
 	k_EWorkshopEnumerationTypeRecentFromFollowedUsers = 6,
 };
 
+enum EWorkshopActionOnDuplicateTitle
+{
+	k_EWorkshopActionOnDuplicateTitleReject = 0,
+	k_EWorkshopActionOnDuplicateTitleUpdate = 1,
+	k_EWorkshopActionOnDuplicateTitleNew = 2,
+};
+
+enum EWorkshopVideoProvider
+{
+	k_EWorkshopVideoProviderNone = 0,
+	k_EWorkshopVideoProviderYoutube = 1
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing, reading and writing files stored remotely 
 //			and cached locally
@@ -128,6 +145,12 @@ class ISteamRemoteStorage
 		virtual bool	FileDelete( const char *pchFile ) = 0;
 		virtual SteamAPICall_t FileShare( const char *pchFile ) = 0;
 		virtual bool	SetSyncPlatforms( const char *pchFile, ERemoteStoragePlatform eRemoteStoragePlatform ) = 0;
+
+		// file operations that cause network IO
+		virtual UGCFileWriteStreamHandle_t FileWriteStreamOpen( const char *pchFile ) = 0;
+		virtual bool FileWriteStreamWriteChunk( UGCFileWriteStreamHandle_t writeHandle, const void *pvData, int32 cubData ) = 0;
+		virtual bool FileWriteStreamClose( UGCFileWriteStreamHandle_t writeHandle ) = 0;
+		virtual bool FileWriteStreamCancel( UGCFileWriteStreamHandle_t writeHandle ) = 0;
 
 		// file information
 		virtual bool	FileExists( const char *pchFile ) = 0;
@@ -205,14 +228,14 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t	UpdateUserPublishedItemVote( PublishedFileId_t unPublishedFileId, bool bVoteUp ) = 0;
 		virtual SteamAPICall_t	GetUserPublishedItemVoteDetails( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual SteamAPICall_t	EnumerateUserSharedWorkshopFiles( CSteamID steamId, uint32 unStartIndex, SteamParamStringArray_t *pRequiredTags, SteamParamStringArray_t *pExcludedTags ) = 0;
-		virtual SteamAPICall_t	PublishVideo( const char *pchVideoURL, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags ) = 0;
+		virtual SteamAPICall_t	PublishVideo( EWorkshopVideoProvider eVideoProvider, const char *pchVideoAccount, const char *pchVideoIdentifier, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags ) = 0;
 		virtual SteamAPICall_t	SetUserPublishedFileAction( PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction ) = 0;
 		virtual SteamAPICall_t	EnumeratePublishedFilesByUserAction( EWorkshopFileAction eAction, uint32 unStartIndex ) = 0;
 		// this method enumerates the public view of workshop files
 		virtual SteamAPICall_t	EnumeratePublishedWorkshopFiles( EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION006"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION008"
 
 
 // callbacks
@@ -416,6 +439,7 @@ struct RemoteStorageGetPublishedFileDetailsResult_t
 	int32 m_nFileSize;				// Size of the primary file
 	int32 m_nPreviewFileSize;		// Size of the preview file
 	char m_rgchURL[k_cchPublishedFileURLMax];	// URL (for a video or a website)
+	EWorkshopFileType m_eFileType;	// Type of the file
 };
 
 
@@ -466,9 +490,15 @@ struct RemoteStoragePublishedFileUnsubscribed_t
 };
 
 
-//
-// IMPORTANT! k_iClientRemoteStorageCallbacks + 23 is free to use
-//
+//-----------------------------------------------------------------------------
+// Purpose: Published file that a user owns was deleted (from within the app or the web)
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishedFileDeleted_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 23 };
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	AppId_t m_nAppID;						// ID of the app that will consume this file.
+};
 
 
 //-----------------------------------------------------------------------------

@@ -5,8 +5,6 @@
 //
 //===============================================================================
 
-#pragma once
-
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
 #include <mach-o/dyld.h>

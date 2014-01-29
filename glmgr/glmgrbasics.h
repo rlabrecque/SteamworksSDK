@@ -29,7 +29,7 @@
 #include "imageformat.h"
 #include "glmdebug.h"
 
-#ifndef Assert(x)
+#ifndef Assert
 #define Assert(x)
 #endif
 

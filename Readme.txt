@@ -12,31 +12,58 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.20	30th August 2012
+----------------------------------------------------------------
+
+SteamPipe
+* Added local server and builder tools for new content system.
+
+Mac
+* OSX Supports 64 bit build targets.
+* Spacewar has been updated to be buildable as a 64 bit OSX sample application.
+
+Friends
+* Added a callback for the result of ISteamFriends::SetPersonaName().
+* Changed ISteamFriends::ActivateGameOverlayToStore() to take an additional parameter so app can be directly added to the cart.
+
+Cloud
+* Added ISteamRemoteStorage::FileWriteStreamOpen(), FileWriteStreamWriteChunk(), FileWriteStreamClose() and FileWriteStreamCancel() for streaming operations.
+* Changed parameters to ISteamRemoteStorage::PublisheVideo().
+* Added file type to ISteamRemoteStorage::GetPublishedFileDetails() callback result (RemoteStorageGetPublishedFileDetailsResult_t).
+* Added a callback to indicate that a published file that a user owns was deleted (RemoteStoragePublishedFileDeleted_t).
+
+ISteamUserStats
+* Added ISteamUserStats::GetNumAchievements() and ISteamUserStats::GetAchievementName().
+
+
+----------------------------------------------------------------
 v1.19	22nd March 2012
 ----------------------------------------------------------------
+
 Friends
 * Added ISteamFriends::GetFollowerCount()
 * Added ISteamFriends::IsFollowing()
 * Added ISteamFriends::EnumerateFollowingList()
 
 Cloud
-*Added ISteamRemoteStorage::UpdatePublishedFileSetChangeDescription()
-*Added ISteamRemoteStorage::GetPublishedItemVoteDetails()
-*Added ISteamRemoteStorage::UpdateUserPublishedItemVote()
-*Added ISteamRemoteStorage::GetUserPublishedItemVoteDetails()
-*Added ISteamRemoteStorage::EnumerateUserSharedWorkshopFiles()
-*Added ISteamRemoteStorage::PublishVideo()
-*Added ISteamRemoteStorage::SetUserPublishedFileAction()
-*Added ISteamRemoteStorage::EnumeratePublishedFilesByUserAction()
-*Added ISteamRemoteStorage::EnumeratePublishedWorkshopFiles()
+* Added ISteamRemoteStorage::UpdatePublishedFileSetChangeDescription()
+* Added ISteamRemoteStorage::GetPublishedItemVoteDetails()
+* Added ISteamRemoteStorage::UpdateUserPublishedItemVote()
+* Added ISteamRemoteStorage::GetUserPublishedItemVoteDetails()
+* Added ISteamRemoteStorage::EnumerateUserSharedWorkshopFiles()
+* Added ISteamRemoteStorage::PublishVideo()
+* Added ISteamRemoteStorage::SetUserPublishedFileAction()
+* Added ISteamRemoteStorage::EnumeratePublishedFilesByUserAction()
+* Added ISteamRemoteStorage::EnumeratePublishedWorkshopFiles()
 
 ISteamGameServer
-*Updated callback for SteamGameServer::ComputeNewPlayerCompatibility to include the steam id the compatibility was calculated for
+* Updated callback for SteamGameServer::ComputeNewPlayerCompatibility to include the steam id the compatibility was calculated for
 
 
 ----------------------------------------------------------------
 v1.18	7th February 2012
 ----------------------------------------------------------------
+
 Cloud
 * Removed ISteamRemoteStorage::PublishFile() and consolidated the API to PublishWorkshopFile()
 * Updated ISteamRemoteStorage::PublishWorkshopFile() to better define the type of workshop file being published
@@ -51,6 +78,7 @@ Apps:
 ----------------------------------------------------------------
 v1.17	2nd November 2011
 ----------------------------------------------------------------
+
 Cloud
 * Added ISteamRemoteStorage::PublishFile(), PublishWorkshopFile(), UpdatePublishedFile(), DeletePublishedFile() which enables sharing, updating, and unsharing of cloud content with the Steam community
 * Added ISteamRemoteStorage::EnumerateUserPublishedFiles to enumerate content that a user has shared with the Steam community
@@ -77,6 +105,7 @@ Tools
 ----------------------------------------------------------------
 v1.16	29th July 2011
 ----------------------------------------------------------------
+
 HTTP
 * added ISteamHTTP::SetHTTPRequestRawPostBody() to set the raw body of a POST request
 Screenshots

@@ -183,7 +183,7 @@ enum EUniverse
 	k_EUniverseBeta = 2,
 	k_EUniverseInternal = 3,
 	k_EUniverseDev = 4,
-	k_EUniverseRC = 5,
+	// k_EUniverseRC = 5,				// no such universe anymore
 	k_EUniverseMax
 };
 
@@ -204,6 +204,33 @@ enum EAccountType
 
 	// Max of 16 items in this field
 	k_EAccountTypeMax
+};
+
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+enum EAppReleaseState
+{
+	k_EAppReleaseState_Unknown			= 0,	// unknown, required appinfo or license info is missing
+	k_EAppReleaseState_Unavailable		= 1,	// even if user 'just' owns it, can see game at all
+	k_EAppReleaseState_Prerelease		= 2,	// can be purchased and is visible in games list, nothing else. Common appInfo section released
+	k_EAppReleaseState_PreloadOnly		= 3,	// owners can preload app, not play it. AppInfo fully released.
+	k_EAppReleaseState_Released			= 4,	// owners can download and play app.
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+enum EAppOwernshipFlags
+{
+	k_EAppOwernshipFlags_None				= 0,	// unknown
+	k_EAppOwernshipFlags_OwnsLicense		= 1,	// owns license for this game
+	k_EAppOwernshipFlags_FreeLicense		= 2,	// not paid for game
+	k_EAppOwernshipFlags_RegionRestricted	= 4,	// owns app, but not allowed to play in current region
+	k_EAppOwernshipFlags_LowViolence		= 8,	// only low violence version
 };
 
 
