@@ -78,7 +78,7 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 //-----------------------------------------------------------------------------
 // Purpose: Extracts some feature from the command line
 //-----------------------------------------------------------------------------
-void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID )
+void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID, bool *pbUseVR )
 {
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find
@@ -102,6 +102,12 @@ void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, c
 		// Address should be right after the +connect, +1 on the end to skip the space
 		*ppchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
 	}
+
+	// look for -vr on command line. Switch to VR mode if it's thre
+	const char *pchVRParam = "-vr";
+	const char *pchVR = strstr( pchCmdLine, pchVRParam );
+	if ( pchVR )
+		*pbUseVR = true;
 }
 
 
@@ -221,16 +227,20 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #endif
 	SteamController()->Init( rgchFullPath );
 
+	bool bUseVR = false;
 	const char *pchServerAddress, *pchLobbyID;
-	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
+	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID, &bUseVR );
+
 	// do a DRM self check
 	Steamworks_SelfCheck();
+
+	// init VR before we make the window
 
 	// Construct a new instance of the game engine 
 	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
 	IGameEngine *pGameEngine = 
 #if defined(_WIN32)
-        new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
+        new CGameEngineWin32( hInstance, nCmdShow, 1024, 768, bUseVR );
 #elif defined(OSX)
         CreateGameEngineOSX();
 #elif defined(SDL)

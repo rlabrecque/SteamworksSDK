@@ -1,0 +1,39 @@
+float c_rg_to_rb_ratio = 0.522;
+
+sampler2D BaseTextureSampler : register(s0);
+sampler2D DistortMapTextureSampler : register(s1);
+
+struct Fullscreen_Quad_Vert {
+	float4 position : SV_POSITION;
+	float2 texcoord: TEXCOORD0;
+	float4 color : COLOR;
+};
+
+struct Distort_Out
+{
+	float4 color: COLOR;
+};
+
+Distort_Out PS(Fullscreen_Quad_Vert input)
+{
+	float2 vOriginal = input.texcoord;
+
+	float4 vRead = tex2D( DistortMapTextureSampler, vOriginal );
+
+	float2 vGreen;
+	vGreen.r = ( vRead.x + vRead.z ) / 2;
+	vGreen.g = ( vRead.y + vRead.w ) / 2;
+
+	float4 vFinal;
+	vFinal.r = tex2D( BaseTextureSampler, vRead.xy ).r;
+	vFinal.ga = tex2D( BaseTextureSampler, vGreen ).ga;
+	vFinal.b = tex2D( BaseTextureSampler, vRead.zw ).b;
+	
+	float fBoundsCheck = saturate( dot( (vGreen.xy < float2(0.05,0.05)), float2(1,1)) + dot( (vGreen.xy > float2(0.95,0.95)), float2(1,1)) );
+	vFinal.xyz = lerp( vFinal.xyz, float3(0,0,0), fBoundsCheck );
+
+	Distort_Out o;
+	o.color = vFinal;
+	return o;
+}
+

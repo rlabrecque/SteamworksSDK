@@ -762,8 +762,9 @@ void CSpaceWarClient::OnGameJoinRequested( GameRichPresenceJoinRequested_t *pCal
 {
 	// parse out the connect 
 	const char *pchServerAddress, *pchLobbyID;
-	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID );
-	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID );
+	bool bUseVR = false;
+	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID, bool *pbUseVR );
+	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID, &bUseVR );
 
 	// exec
 	ExecCommandLineConnect( pchServerAddress, pchLobbyID );

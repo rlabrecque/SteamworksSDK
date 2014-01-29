@@ -59,10 +59,18 @@ struct PointVertex_t
 	DWORD color;
 };
 
-// Vertex struct for textured quads
+// Vertex struct for textured quads in pixel space
 struct TexturedQuadVertex_t
 {
 	float x, y, z, rhw;
+	DWORD color;
+	float u, v; // texture coordinates
+};
+
+// Vertex struct for textured quads in 3D space
+struct Textured3DQuadVertex_t
+{
+	float x, y, z;
 	DWORD color;
 	float u, v; // texture coordinates
 };
@@ -82,7 +90,7 @@ public:
 	static void RemoveInstanceFromHWNDMap( HWND hWnd );
 
 	// Constructor
-	CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32 nWindowWidth, int32 nWindowHeight );
+	CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32 nWindowWidth, int32 nWindowHeight, bool bUseVR );
 
 	// Destructor
 	~CGameEngineWin32() { Shutdown(); }
@@ -143,6 +151,24 @@ public:
 	// Flush any still cached quad buffers
 	bool BFlushQuadBuffer();
 
+	// Draw a textured rectangle with full 3D points
+	bool BDraw3DTexturedQuad( Textured3DQuadVertex_t vert[4], HGAMETEXTURE hTexture );
+
+	// Flush any still cached quad buffers
+	bool BFlush3DQuadBuffer();
+
+	// sets the texture as the 0th one to draw with
+	bool BSetTexture( HGAMETEXTURE hTexture  );
+
+	// sets the texture as a render target. 
+	bool BSetRenderTarget( HGAMETEXTURE hTexture );
+
+	// sets the render target back to the frame buffer
+	bool BUnsetRenderTarget();
+	
+	// make sure the texture is created on the device and ready to use
+	bool BReadyTexture( HGAMETEXTURE hTexture );
+
 	// Get the current state of a key
 	bool BIsKeyDown( DWORD dwVK );
 
@@ -177,6 +203,10 @@ public:
 	void RecordKeyUp( DWORD dwVK );
 
 private:
+	// Create a new texture returning our internal handle value for it (0 means failure)
+	HGAMETEXTURE HCreateTextureInternal( byte *pRGBAData, uint32 uWidth, uint32 uHeight, D3DFORMAT eFormat );
+
+
 	// Creates the hwnd for the game
 	bool BCreateGameWindow( int nShowCommand );
 
@@ -213,6 +243,8 @@ private:
 	// Handle reseting the d3d device (ie, acquire resources again)
 	bool BHandleResetDevice();
 
+	// Loads the VR distortion shader off disk
+	bool BInitializeVRShader();
 
 private:
 	// Tracks whether the engine is ready for use
@@ -220,6 +252,9 @@ private:
 
 	// Tracks if we are shutting down
 	bool m_bShuttingDown;
+
+	// if this is not NULL we are in VR mode
+	vr::IHmd *m_pVRHmd;
 
 	// Color we clear the background of the window to each frame
 	DWORD m_dwBackgroundColor;
@@ -235,6 +270,9 @@ private:
 
 	// IDirect3DDevice9 interface
 	IDirect3DDevice9 *m_pD3D9Device;
+
+	// Depth/stencil surface associated with the back buffer
+	IDirect3DSurface9 *m_pBackbufferDepth;
 
 	// Size of the window to display the game in
 	int32 m_nWindowWidth;
@@ -270,8 +308,16 @@ private:
 		uint32 m_uWidth;
 		uint32 m_uHeight;
 		LPDIRECT3DTEXTURE9 m_pTexture;
+		LPDIRECT3DSURFACE9 m_pDepthSurface; // render targets only
+		D3DFORMAT m_eFormat;
 	};
 	std::map<HGAMETEXTURE, TextureData_t> m_MapTextures;
+
+	// the render target we draw the 2D game into for VR
+	HGAMETEXTURE m_hVR2DRenderTarget;
+
+	// the render target we draw the 3D scene into for VR
+	HGAMETEXTURE m_hVRSceneRenderTarget;
 
 	// Vertex buffer for textured quads
 	HGAMEVERTBUF m_hQuadBuffer;
@@ -287,6 +333,21 @@ private:
 
 	// Where does the current batch begin
 	DWORD m_dwQuadBufferBatchPos;
+
+	// Vertex buffer for textured quads
+	HGAMEVERTBUF m_h3DQuadBuffer;
+
+	// Last texture used in drawing a batched quad
+	HGAMETEXTURE m_h3DLastTexture;
+
+	// Pointer to quad 3D vertex data
+	Textured3DQuadVertex_t *m_p3DQuadVertexes;
+
+	// How many 3D quads are awaiting flushing
+	DWORD m_dw3DQuadsToFlush;
+
+	// Where does the current 3D batch begin
+	DWORD m_dw3DQuadBufferBatchPos;
 
 	// White texture used when drawing filled quads
 	HGAMETEXTURE m_hTextureWhite;
@@ -348,6 +409,12 @@ private:
 	// Map of font handles to font objects
 	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
 	uint32 m_unVoiceChannelCount;
+
+	// Pixel shader for VR distortion correction
+	IDirect3DPixelShader9* m_pVRDistortionPixelShader;
+
+	// the distortion map used by the VR distortion pixel shader (one per eye)
+	HGAMETEXTURE m_hVRDistortionMap[2];
 };
 
 #endif // GAMEENGINEWIN32_H

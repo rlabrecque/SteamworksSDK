@@ -1,6 +1,6 @@
 ================================================================
 
-Copyright © 1996-2012, Valve Corporation, All rights reserved.
+Copyright © 1996-2014, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -10,6 +10,15 @@ website at: http://partner.steamgames.com
 
 
 Revision History:
+
+----------------------------------------------------------------
+v1.28 28th January 2014
+----------------------------------------------------------------
+
+* Added Steamworks Virtual Reality API via steamvr.h.
+* Added ISteamUtils::IsSteamRunningInVRMode, which returns true if the Steam Client is running in VR mode.
+* Deprecated ISteamGameserver::GetGameplayStats and ISteamGameserver::GetServerReputation. These calls already return no data and will be removed in a future SDK update.
+* Added result code k_EResultRateLimitExceeded, which can now be returned if a user has too many outstanding friend requests.
 
 ----------------------------------------------------------------
 v1.26a 14th November 2013

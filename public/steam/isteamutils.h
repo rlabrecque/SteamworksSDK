@@ -157,6 +157,9 @@ public:
 
 	// returns the language the steam client is running in, you probably want ISteamApps::GetCurrentGameLanguage instead, this is for very special usage cases
 	virtual const char *GetSteamUILanguage() = 0;
+
+	// returns true if Steam itself is running in VR mode
+	virtual bool IsSteamRunningInVR() = 0;
 };
 
 #define STEAMUTILS_INTERFACE_VERSION "SteamUtils006"

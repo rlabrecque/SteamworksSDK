@@ -192,15 +192,10 @@ public:
 	// returns false if we're not connected to the steam servers and thus cannot ask
 	virtual bool RequestUserGroupStatus( CSteamID steamIDUser, CSteamID steamIDGroup ) = 0;
 
-//
-// Query steam for server data
-//
 
-	// Ask for the gameplay stats for the server. Results returned in a callback
+	// these two functions s are deprecated, and will not return results
+	// they will be removed in a future version of the SDK
 	virtual void GetGameplayStats( ) = 0;
-
-	// Gets the reputation score for the game server. This API also checks if the server or some
-	// other server on the same IP is banned from the Steam master servers.
 	virtual SteamAPICall_t GetServerReputation( ) = 0;
 
 	// Returns the public IP of the server according to Steam, useful when the server is 

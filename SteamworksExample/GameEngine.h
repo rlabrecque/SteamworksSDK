@@ -37,6 +37,9 @@ typedef int HGAMEVOICECHANNEL;
 #define VOICE_OUTPUT_SAMPLE_RATE_IDEAL		11025
 #define BYTES_PER_SAMPLE					2
 
+// used for VR support
+namespace vr { class IHmd; }
+
 //
 // Interface that needs to be implemented for game engines on all platforms
 //
