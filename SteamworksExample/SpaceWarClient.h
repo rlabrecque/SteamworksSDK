@@ -267,6 +267,9 @@ private:
 	uint16 m_usServerPort;
 	HAuthTicket m_hAuthTicket;
 
+	// keep track of if we opened the overlay for a gamewebcallback
+	bool m_bSentWebOpen;
+
 	// simple class to marshal callbacks from pinging a game server
 	class CGameServerPing : public ISteamMatchmakingPingResponse
 	{
@@ -365,6 +368,9 @@ private:
 	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t, m_SteamServerConnectFailure );
 	STEAM_CALLBACK( CSpaceWarClient, OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
 	
+	// callback when getting the results of a web call
+	STEAM_CALLBACK( CSpaceWarClient, OnGameWebCallback, GameWebCallback_t, m_CallbackGameWebCallback );
+
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;
 

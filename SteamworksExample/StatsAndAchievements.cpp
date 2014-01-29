@@ -324,7 +324,8 @@ void CStatsAndAchievements::OnUserStatsReceived( UserStatsReceived_t *pCallback 
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, 128, "RequestStats - failed, %d\n", pCallback->m_eResult );
+			_snprintf( buffer, sizeof(buffer), "RequestStats - failed, %d\n", pCallback->m_eResult );
+			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
 	}
@@ -358,7 +359,8 @@ void CStatsAndAchievements::OnUserStatsStored( UserStatsStored_t *pCallback )
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, 128, "StoreStats - failed, %d\n", pCallback->m_eResult );
+			_snprintf( buffer, sizeof(buffer), "StoreStats - failed, %d\n", pCallback->m_eResult );
+			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
 	}
@@ -375,14 +377,16 @@ void CStatsAndAchievements::OnAchievementStored( UserAchievementStored_t *pCallb
 		if ( 0 == pCallback->m_nMaxProgress )
 		{
 			char buffer[128];
-			_snprintf( buffer, 128, "Achievement '%s' unlocked!", pCallback->m_rgchAchievementName );
+			_snprintf( buffer, sizeof(buffer), "Achievement '%s' unlocked!", pCallback->m_rgchAchievementName );
+			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, 128, "Achievement '%s' progress callback, (%d,%d)\n", 
+			_snprintf( buffer, sizeof(buffer), "Achievement '%s' progress callback, (%d,%d)\n", 
 				pCallback->m_rgchAchievementName, pCallback->m_nCurProgress, pCallback->m_nMaxProgress );
+			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
 	}
@@ -407,6 +411,7 @@ void CStatsAndAchievements::OnPS3TrophiesInstalled( PS3TrophiesInstalled_t *pCal
 			else
 				_snprintf( buffer, 256, "Failed to install PS3 trophies (%d)", pCallback->m_eResult );
 
+			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 			exit( 1 );
 		}

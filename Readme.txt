@@ -13,6 +13,24 @@ Revision History:
 
 
 ----------------------------------------------------------------
+v1.22	12th December 2012
+----------------------------------------------------------------
+
+Apps
+* Added new API call ISteamApps::MarkContentCorrupt() so a game can hint Steam that some of it's local content seems corrupt. Steam will verify the content next time the game is started.
+* Added new API call ISteamApps::GetCurrentBetaName() so a game can get the current content beta branch name if the user chose to opt-in to a content beta.
+
+Cloud 
+* Added an offset parameter to ISteamRemoteStorage::UGCRead() to allow reading files in chunks, and increased the limit from 100MB to 200MB when downloading files this way.
+
+HTTP
+* Added support for streaming HTTP requests with ISteamHTTP::SendHTTPRequestAndStreamResponse() and ISteamHTTP::GetHTTPStreamingResponseBodyData()
+
+Linux
+* Updated libsteam_api.so to find Steam in its new install location
+
+
+----------------------------------------------------------------
 v1.21	25th October 2012
 ----------------------------------------------------------------
 

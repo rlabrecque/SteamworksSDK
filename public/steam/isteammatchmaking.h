@@ -398,16 +398,74 @@ public:
 	// RefreshComplete callback is not posted when request is released.
 	virtual void ReleaseRequest( HServerListRequest hServerListRequest ) = 0;
 
-	/* the filters that are available in the ppchFilters params are:
+	/* the filter operation codes that go in the key part of MatchMakingKeyValuePair_t should be one of these:
 
-		"map"		- map the server is running, as set in the dedicated server api
-		"dedicated" - reports bDedicated from the API
-		"secure"	- VAC-enabled
-		"full"		- not full
-		"empty"		- not empty
-		"noplayers" - is empty
-		"proxy"		- a relay server
+		"map"
+			- Server passes the filter if the server is playing the specified map.
+		"gamedataand"
+			- Server passes the filter if the server's game data (ISteamGameServer::SetGameData) contains all of the
+			specified strings.  The value field is a comma-delimited list of strings to match.
+		"gamedataor"
+			- Server passes the filter if the server's game data (ISteamGameServer::SetGameData) contains at least one of the
+			specified strings.  The value field is a comma-delimited list of strings to match.
+		"gamedatanor"
+			- Server passes the filter if the server's game data (ISteamGameServer::SetGameData) does not contain any
+			of the specified strings.  The value field is a comma-delimited list of strings to check.
+		"gametagsand"
+			- Server passes the filter if the server's game tags (ISteamGameServer::SetGameTags) contains all
+			of the specified strings.  The value field is a comma-delimited list of strings to check.
+		"gametagsnor"
+			- Server passes the filter if the server's game tags (ISteamGameServer::SetGameTags) does not contain any
+			of the specified strings.  The value field is a comma-delimited list of strings to check.
+		"and" (x1 && x2 && ... && xn)
+		"or" (x1 || x2 || ... || xn)
+		"nand" !(x1 && x2 && ... && xn)
+		"nor" !(x1 || x2 || ... || xn)
+			- Performs Boolean operation on the following filters.  The operand to this filter specifies
+			the "size" of the Boolean inputs to the operation, in Key/value pairs.  (The keyvalue
+			pairs must immediately follow, i.e. this is a prefix logical operator notation.)
+			In the simplest case where Boolean expressions are not nested, this is simply
+			the number of operands.
 
+			For example, to match servers on a particular map or with a particular tag, would would
+			use these filters.
+
+				( server.map == "cp_dustbowl" || server.gametags.contains("payload") )
+				"or", "2"
+				"map", "cp_dustbowl"
+				"gametagsand", "payload"
+
+			If logical inputs are nested, then the operand specifies the size of the entire
+			"length" of its operands, not the number of immediate children.
+
+				( server.map == "cp_dustbowl" || ( server.gametags.contains("payload") && !server.gametags.contains("payloadrace") ) )
+				"or", "4"
+				"map", "cp_dustbowl"
+				"and", "2"
+				"gametagsand", "payload"
+				"gametagsnor", "payloadrace"
+
+			Unary NOT can be achieved using either "nand" or "nor" with a single operand.
+
+		"addr"
+			- Server passes the filter if the server's query address matches the specified IP or IP:port.
+		"gameaddr"
+			- Server passes the filter if the server's game address matches the specified IP or IP:port.
+
+		The following filter operations ignore the "value" part of MatchMakingKeyValuePair_t
+
+		"dedicated"
+			- Server passes the filter if it passed true to SetDedicatedServer.
+		"secure"
+			- Server passes the filter if the server is VAC-enabled.
+		"notfull"
+			- Server passes the filter if the player count is less than the reported max player count.
+		"hasplayers"
+			- Server passes the filter if the player count is greater than zero.
+		"noplayers"
+			- Server passes the filter if it doesn't have any players.
+		"linux"
+			- Server passes the filter if it's a linux server
 	*/
 
 	// Get details on a given server in the list, you can get the valid range of index

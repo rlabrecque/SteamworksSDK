@@ -100,6 +100,8 @@ enum EResult
 	k_EResultAccountLockedDown = 73,
 	k_EResultAccountLogonDeniedVerifiedEmailRequired = 74,
 	k_EResultNoMatchingURL = 75,
+	k_EResultBadResponse = 76,					// parse failure, missing field, etc.
+	k_EResultRequirePasswordReEntry = 77,		// The user cannot complete the action until they re-enter their password
 };
 
 // Error codes for use with the voice functions
@@ -231,6 +233,26 @@ enum EAppOwernshipFlags
 	k_EAppOwernshipFlags_FreeLicense		= 2,	// not paid for game
 	k_EAppOwernshipFlags_RegionRestricted	= 4,	// owns app, but not allowed to play in current region
 	k_EAppOwernshipFlags_LowViolence		= 8,	// only low violence version
+	k_EAppOwernshipFlags_InvalidPlatform	= 16,	// app not supported on current platform
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: designed as flags to allow filters masks
+//-----------------------------------------------------------------------------
+enum EAppType
+{
+	k_EAppType_Invalid				= 0x000,	// unknown / invalid
+	k_EAppType_Game					= 0x001,	// playable game, default type
+	k_EAppType_Application			= 0x002,	// software application
+	k_EAppType_Tool					= 0x004,	// SDKs, editors & dedicated servers
+	k_EAppType_Demo					= 0x008,	// game demo
+	k_EAppType_Media				= 0x010,	// media trailer
+	k_EAppType_DLC					= 0x020,	// down loadable content
+	k_EAppType_Guide				= 0x040,	// game guide, PDF etc
+	
+	k_EAppType_Shortcut				= 0x40000000,	// just a shortcut, client side only
+	k_EAppType_DepotOnly			= 0x80000000,	// placeholder since depots and apps share the same namespace
 };
 
 
@@ -266,6 +288,11 @@ enum EChatEntryType
 	//k_EChatEntryTypeLobbyGameStart = 5,	// lobby game is starting (dead - listen for LobbyGameCreated_t callback instead)
 	k_EChatEntryTypeLeftConversation = 6, // user has left the conversation ( closed chat window )
 	// Above are previous FriendMsgType entries, now merged into more generic chat entry types
+	k_EChatEntryTypeEntered = 7,		// user has entered the conversation (used in multi-user chat and group chat)
+	k_EChatEntryTypeWasKicked = 8,		// user was kicked (data: 64-bit steamid of actor performing the kick)
+	k_EChatEntryTypeWasBanned = 9,		// user was banned (data: 64-bit steamid of actor performing the ban)
+	k_EChatEntryTypeDisconnected = 10,	// user disconnected
+
 };
 
 

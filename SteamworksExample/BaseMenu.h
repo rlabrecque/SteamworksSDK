@@ -125,6 +125,8 @@ public:
 				g_ulLastKeyDownTick = ulCurrentTickCount;
 				if ( m_uSelectedItem < m_VecMenuItems.size() - 1 )
 					m_uSelectedItem++;
+				else
+					m_uSelectedItem = 0;
 			}
 		}
 		else if ( m_pGameEngine->BIsKeyDown( VK_UP ) )
@@ -135,6 +137,8 @@ public:
 				g_ulLastKeyUpTick = ulCurrentTickCount;
 				if ( m_uSelectedItem > 0 )
 					m_uSelectedItem--;
+				else
+					m_uSelectedItem = (uint32)m_VecMenuItems.size() - 1;
 			}
 		}
 

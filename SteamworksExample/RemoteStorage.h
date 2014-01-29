@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
 //
-// Purpose: Class for tracking stats and achievements
+// Purpose: Class for manipulating Steam Cloud
 //
 // $NoKeywords: $
 //=============================================================================
@@ -64,7 +64,7 @@ private:
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Screen where user can enter their custom messasge
+// Purpose: Screen where user can enter their custom message
 //-----------------------------------------------------------------------------
 class CRemoteStorageScreen
 {

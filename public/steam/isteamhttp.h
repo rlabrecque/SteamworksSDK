@@ -55,6 +55,11 @@ public:
 	// header and only do a local cache lookup rather than sending any actual remote request.
 	virtual bool SendHTTPRequest( HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle ) = 0;
 
+	// Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
+	// asyncronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
+	// HTTPRequestDataReceived_t callbacks while streaming.
+	virtual bool SendHTTPRequestAndStreamResponse( HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle ) = 0;
+
 	// Defers a request you have sent, the actual HTTP client code may have many requests queued, and this will move
 	// the specified request to the tail of the queue.  Returns false on invalid handle, or if the request is not yet sent.
 	virtual bool DeferHTTPRequest( HTTPRequestHandle hRequest ) = 0;
@@ -78,9 +83,14 @@ public:
 	virtual bool GetHTTPResponseBodySize( HTTPRequestHandle hRequest, uint32 *unBodySize ) = 0;
 
 	// Gets the body data from a HTTP response given a handle from HTTPRequestCompleted_t, will return false if the 
-	// handle is invalid or if the provided buffer is not the correct size.  Use BGetHTTPResponseBodySize first to find out
+	// handle is invalid or is to a streaming response, or if the provided buffer is not the correct size.  Use BGetHTTPResponseBodySize first to find out
 	// the correct buffer size to use.
 	virtual bool GetHTTPResponseBodyData( HTTPRequestHandle hRequest, uint8 *pBodyDataBuffer, uint32 unBufferSize ) = 0;
+
+	// Gets the body data from a streaming HTTP response given a handle from HTTPRequestCompleted_t. Will return false if the 
+	// handle is invalid or is to a non-streaming response (meaning it wasn't sent with SendHTTPRequestAndStreamResponse), or if the buffer size and offset 
+	// do not match the size and offset sent in HTTPRequestDataReceived_t.
+	virtual bool GetHTTPStreamingResponseBodyData( HTTPRequestHandle hRequest, uint32 cOffset, uint8 *pBodyDataBuffer, uint32 unBufferSize ) = 0;
 
 	// Releases an HTTP response handle, should always be called to free resources after receiving a HTTPRequestCompleted_t
 	// callback and finishing using the response.
@@ -97,7 +107,7 @@ public:
 	virtual bool SetHTTPRequestRawPostBody( HTTPRequestHandle hRequest, const char *pchContentType, uint8 *pubBody, uint32 unBodyLen ) = 0;
 };
 
-#define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION001"
+#define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION002"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -121,6 +131,39 @@ struct HTTPRequestCompleted_t
 	// OK response, if you get something else you probably need to treat it as a failure.
 	EHTTPStatusCode m_eStatusCode;
 };
+
+
+struct HTTPRequestHeadersReceived_t
+{
+	enum { k_iCallback = k_iClientHTTPCallbacks + 2 };
+
+	// Handle value for the request that has received headers.
+	HTTPRequestHandle m_hRequest;
+
+	// Context value that the user defined on the request that this callback is associated with, 0 if
+	// no context value was set.
+	uint64 m_ulContextValue;
+};
+
+struct HTTPRequestDataReceived_t
+{
+	enum { k_iCallback = k_iClientHTTPCallbacks + 3 };
+
+	// Handle value for the request that has received data.
+	HTTPRequestHandle m_hRequest;
+
+	// Context value that the user defined on the request that this callback is associated with, 0 if
+	// no context value was set.
+	uint64 m_ulContextValue;
+
+
+	// Offset to provide to GetHTTPStreamingResponseBodyData to get this chunk of data
+	uint32 m_cOffset;
+
+	// Size to provide to GetHTTPStreamingResponseBodyData to get this chunk of data
+	uint32 m_cBytesReceived;
+};
+
 
 #pragma pack( pop )
 

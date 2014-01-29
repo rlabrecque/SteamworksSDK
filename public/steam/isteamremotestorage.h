@@ -79,12 +79,21 @@ enum ERemoteStoragePublishedFileVisibility
 
 enum EWorkshopFileType
 {
+	k_EWorkshopFileTypeFirst = 0,
+
 	k_EWorkshopFileTypeCommunity = 0,
 	k_EWorkshopFileTypeMicrotransaction = 1,
 	k_EWorkshopFileTypeCollection = 2,
 	k_EWorkshopFileTypeArt = 3,
 	k_EWorkshopFileTypeVideo = 4,
 	k_EWorkshopFileTypeScreenshot = 5,
+	k_EWorkshopFileTypeGame = 6,
+	k_EWorkshopFileTypeSoftware = 7,
+	k_EWorkshopFileTypeConcept = 8,
+
+	// Update k_EWorkshopFileTypeMax if you add values
+	k_EWorkshopFileTypeMax = 9
+	
 };
 
 enum EWorkshopVote
@@ -109,13 +118,6 @@ enum EWorkshopEnumerationType
 	k_EWorkshopEnumerationTypeVotedByFriends = 4,
 	k_EWorkshopEnumerationTypeContentByFriends = 5,
 	k_EWorkshopEnumerationTypeRecentFromFollowedUsers = 6,
-};
-
-enum EWorkshopActionOnDuplicateTitle
-{
-	k_EWorkshopActionOnDuplicateTitleReject = 0,
-	k_EWorkshopActionOnDuplicateTitleUpdate = 1,
-	k_EWorkshopActionOnDuplicateTitleNew = 2,
 };
 
 enum EWorkshopVideoProvider
@@ -171,8 +173,10 @@ class ISteamRemoteStorage
 
 		// user generated content
 
-		// Downloads a UGC file
-		virtual SteamAPICall_t UGCDownload( UGCHandle_t hContent ) = 0;
+		// Downloads a UGC file.  A priority value of 0 will download the file immediately,
+		// otherwise it will wait to download the file until all downloads with a lower priority
+		// value are completed.  Downloads with equal priority will occur simultaneously.
+		virtual SteamAPICall_t UGCDownload( UGCHandle_t hContent, uint32 unPriority ) = 0;
 
 		// Gets the amount of data downloaded so far for a piece of content. pnBytesExpected can be 0 if function returns false
 		// or if the transfer hasn't started yet, so be careful to check for that before dividing to get a percentage
@@ -182,7 +186,7 @@ class ISteamRemoteStorage
 		virtual bool	GetUGCDetails( UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner ) = 0;
 
 		// After download, gets the content of the file
-		virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead ) = 0;
+		virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead, uint32 cOffset ) = 0;
 
 		// Functions to iterate through UGC that has finished downloading but has not yet been read via UGCRead()
 		virtual int32	GetCachedUGCCount() = 0;
@@ -235,7 +239,7 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t	EnumeratePublishedWorkshopFiles( EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION008"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION010"
 
 
 // callbacks

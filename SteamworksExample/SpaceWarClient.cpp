@@ -20,6 +20,13 @@
 #include "p2pauth.h"
 #include "voicechat.h"
 #include "steam/steamencryptedappticket.h"
+#ifdef WIN32
+#include <direct.h>
+#else
+#define MAX_PATH PATH_MAX
+#define _getcwd getcwd
+#endif
+
 
 CSpaceWarClient *g_pSpaceWarClient = NULL;
 CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
@@ -42,7 +49,8 @@ CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine ) :
 		m_SteamServersDisconnected( this, &CSpaceWarClient::OnSteamServersDisconnected ),
 		m_SteamServerConnectFailure( this, &CSpaceWarClient::OnSteamServerConnectFailure ),
 		m_GameJoinRequested( this, &CSpaceWarClient::OnGameJoinRequested ),
-		m_CallbackGameOverlayActivated( this, &CSpaceWarClient::OnGameOverlayActivated )
+		m_CallbackGameOverlayActivated( this, &CSpaceWarClient::OnGameOverlayActivated ),
+		m_CallbackGameWebCallback( this, &CSpaceWarClient::OnGameWebCallback )
 {
 	Init( pGameEngine );
 }
@@ -84,6 +92,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	m_unServerIP = 0;
 	m_usServerPort = 0;
 	m_ulPingSentTime = 0;
+	m_bSentWebOpen = false;
 
 	for( uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i )
 	{
@@ -682,6 +691,7 @@ void CSpaceWarClient::ReceiveNetworkData()
 					uint64 ulTimePassedMS = m_pGameEngine->GetGameTickCount() - m_ulPingSentTime;
 					char rgchT[256];
 					_snprintf( rgchT, sizeof(rgchT), "Round-trip ping time to server %d ms\n", (int)ulTimePassedMS );
+					rgchT[ sizeof(rgchT) - 1 ] = 0;
 					OutputDebugString( rgchT );
 					m_ulPingSentTime = 0;
 				}
@@ -1056,6 +1066,20 @@ void CSpaceWarClient::OnGameOverlayActivated( GameOverlayActivated_t *callback )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handle the callback from the user clicking a steam://gamewebcallback/ link in the overlay browser
+//	You can use this to add support for external site signups where you want to pop back into the browser
+//  after some web page signup sequence, and optionally get back some detail about that.
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnGameWebCallback( GameWebCallback_t *callback )
+{
+	m_bSentWebOpen = false;
+	char rgchString[256];
+	_snprintf( rgchString, sizeof(rgchString), "User submitted following url: %s\n", callback->m_szURL );
+	OutputDebugString( rgchString );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Handles notification that we are failed to connected to Steam
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnSteamServerConnectFailure( SteamServerConnectFailure_t *callback )
@@ -1345,6 +1369,22 @@ void CSpaceWarClient::RunFrame()
 		DisconnectFromServer();
 		m_pGameEngine->Shutdown();
 		return;
+	case k_EClientWebCallback:
+		m_pStarField->Render();
+
+		if ( !m_bSentWebOpen )
+		{
+			m_bSentWebOpen = true;
+			char szCurDir[MAX_PATH];
+			_getcwd( szCurDir, sizeof(szCurDir) );
+			char szURL[MAX_PATH];
+			_snprintf( szURL, sizeof(szURL), "file:///%s/test.html", szCurDir );
+			// load the test html page, it just has a steam://gamewebcallback link in it
+			SteamFriends()->ActivateGameOverlayToWebPage( szURL );
+			SetGameState( k_EClientGameMenu );
+		}
+
+		break;
 	default:
 		OutputDebugString( "Unhandled game state in CSpaceWar::RunFrame\n" );
 	}

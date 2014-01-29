@@ -621,6 +621,7 @@ void CSpaceWarServer::ReceiveNetworkData()
 		default:
 			char rgch[128];
 			_snprintf( rgch, 128, "Invalid message %x\n", eMsg );
+			rgch[ sizeof(rgch) - 1 ] = 0;
 			OutputDebugString( rgch );
 		}
 	}
@@ -887,6 +888,7 @@ void CSpaceWarServer::OnPolicyResponse( GSPolicyResponse_t *pPolicyResponse )
 	}
 	char rgch[128];
 	_snprintf( rgch, 128, "Game server SteamID: %llu\n", SteamGameServer()->GetSteamID().ConvertToUint64() );
+	rgch[ sizeof(rgch) - 1 ] = 0;
 	OutputDebugString( rgch );
 #endif
 }

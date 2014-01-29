@@ -311,6 +311,17 @@ struct GetAuthSessionTicketResponse_t
 	EResult m_eResult;
 };
 
+
+//-----------------------------------------------------------------------------
+// Purpose: sent to your game in response to a steam://gamewebcallback/ command
+//-----------------------------------------------------------------------------
+struct GameWebCallback_t
+{
+	enum { k_iCallback = k_iSteamUserCallbacks + 64 };
+	char m_szURL[256];
+};
+
+
 #pragma pack( pop )
 
 #endif // ISTEAMUSER_H

@@ -25,8 +25,8 @@ enum EHTTPMethod
 	// a compliant general purpose server.  We'll likely add more as we find uses for them.
 
 	// k_EHTTPMethodOPTIONS,
-	// k_EHTTPMethodPUT,
-	// k_EHTTPMethodDELETE,
+	k_EHTTPMethodPUT,
+	k_EHTTPMethodDELETE,
 	// k_EHTTPMethodTRACE,
 	// k_EHTTPMethodCONNECT
 };
