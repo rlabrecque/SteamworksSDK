@@ -26,7 +26,14 @@ enum EFriendRelationship
 	k_EFriendRelationshipRequestInitiator = 4,
 	k_EFriendRelationshipIgnored = 5,
 	k_EFriendRelationshipIgnoredFriend = 6,
+	k_EFriendRelationshipSuggested = 7,
 };
+
+// maximum length of friend group name (not including terminating nul!)
+const int k_cchMaxFriendGroupName = 64;
+
+// maximum number of groups a single user is allowed
+const int k_cFriendGroupLimit = 100;
 
 
 //-----------------------------------------------------------------------------
@@ -60,6 +67,7 @@ enum EFriendFlags
 	k_EFriendFlagRequestingInfo = 0x100,
 	k_EFriendFlagIgnored		= 0x200,
 	k_EFriendFlagIgnoredFriend	= 0x400,
+	k_EFriendFlagSuggested		= 0x800,
 	k_EFriendFlagAll			= 0xFFFF,
 };
 
@@ -171,6 +179,7 @@ public:
 
 	// iterators for getting users in a chat room, lobby, game server or clan
 	// note that large clans that cannot be iterated by the local user
+	// note that the current user must be in a lobby to retrieve CSteamIDs of other users in that lobby
 	// steamIDSource can be the steamID of a group, game server, lobby or chat room
 	virtual int GetFriendCountFromSource( CSteamID steamIDSource ) = 0;
 	virtual CSteamID GetFriendFromSourceByIndex( CSteamID steamIDSource, int iFriend ) = 0;
@@ -309,6 +318,7 @@ enum EPersonaChange
 	k_EPersonaChangeLeftSource	= 0x100,
 	k_EPersonaChangeRelationshipChanged = 0x200,
 	k_EPersonaChangeNameFirstSet = 0x400,
+	k_EPersonaChangeFacebookInfo = 0x800,
 };
 
 
@@ -343,7 +353,13 @@ struct GameLobbyJoinRequested_t
 {
 	enum { k_iCallback = k_iSteamFriendsCallbacks + 33 };
 	CSteamID m_steamIDLobby;
-	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
+
+	// The friend they did the join via (will be invalid if not directly via a friend)
+	//
+	// On PS3, the friend will be invalid if this was triggered by a PSN invite via the XMB, but
+	// the account type will be console user so you can tell at least that this was from a PSN friend
+	// rather than a Steam friend.
+	CSteamID m_steamIDFriend;		
 };
 
 
@@ -391,6 +407,17 @@ struct GameRichPresenceJoinRequested_t
 	enum { k_iCallback = k_iSteamFriendsCallbacks + 37 };
 	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
 	char m_rgchConnect[k_cchMaxRichPresenceValueLength];
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: called when the user requests the history of player names on a given account
+//-----------------------------------------------------------------------------
+struct NameHistoryResponse_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 38 };
+	int m_cSuccessfulLookups;		// number of lookups that were successful
+	int m_cFailedLookups;			// number of lookups that failed for one reason or another
 };
 
 #pragma pack( pop )

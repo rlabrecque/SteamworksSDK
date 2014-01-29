@@ -23,6 +23,7 @@
 #include <OpenGL/CGLCurrent.h>
 #include <OpenGL/CGLProfiler.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <ApplicationServices/ApplicationServices.h>
 
 #include "imageformat.h"
@@ -35,6 +36,15 @@
 //===============================================================================
 
 // some portability shims to eliminate dependencies on partcular segments of Valve code
+
+typedef int8_t int8;
+typedef uint8_t uint8;
+typedef int16_t int16;
+typedef uint16_t uint16;
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int64_t int64;
+typedef uint64_t uint64;
 
 class CUtlBuffer
 {
@@ -151,9 +161,6 @@ private:
 #define __cdecl
 
 #define Q_memset(dst,count,val)	memset(dst,count,val)
-
-typedef int int32;
-typedef unsigned int uint32;
 
 int			V_stricmp(const char *s1, const char *s2 );
 char const* V_stristr( char const* pStr, char const* pSearch );
@@ -304,7 +311,7 @@ inline void GLMDebugger( void )
 {
 	if (GLMDebugChannelMask() & (1<<eDebugger))
 	{
-		asm {int 3 };
+		asm ( "int $3" );
 	}
 	
 	if (GLMDebugChannelMask() & (1<<eGLProfiler))

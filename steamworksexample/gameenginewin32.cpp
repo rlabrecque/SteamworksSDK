@@ -191,7 +191,7 @@ CGameEngineWin32::CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32
 	// initialzie XAudio2 interface
 	if( FAILED( XAudio2Create( &m_pXAudio2, 0 ) ) )
 	{
-		::MessageBoxA( NULL, "Failed to init XAudio2 engine", "SteamworksExample - Fatal error", MB_OK | MB_ICONERROR );
+		::MessageBoxA( NULL, "Failed to init XAudio2 engine (grab the latest \"DirectX End-User Runtime Web Installer\" )", "SteamworksExample - Fatal error", MB_OK | MB_ICONERROR );
 		return;
 	}
 

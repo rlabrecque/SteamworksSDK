@@ -12,6 +12,14 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.16	29th July 2011
+----------------------------------------------------------------
+HTTP
+* added ISteamHTTP::SetHTTPRequestRawPostBody() to set the raw body of a POST request
+Screenshots
+* added ISteamScreenshots interface, which enables adding screenshots to the user's screenshot library and tagging them with location data or relevant players that are visible in the screenshot.  A game can provide screenshots based on game events using WriteScreenshot, AddScreenshotToLibrary, or TriggerScreenshot.  A game can also choose to provide its own screenshots when the Steam screenshot hotkey is pressed by calling HookScreenshots() and listening for the ScreenshotRequested_t callback.
+
+----------------------------------------------------------------
 v1.15	1st June 2011
 ----------------------------------------------------------------
 

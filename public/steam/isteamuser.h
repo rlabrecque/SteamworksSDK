@@ -90,6 +90,7 @@ public:
 	// data is not the raw feed from the microphone: data may only be available if audible 
 	// levels of speech are detected.
 	// nUncompressedVoiceDesiredSampleRate is necessary to know the number of bytes to return in pcbUncompressed - can be set to 0 if you don't need uncompressed (the usual case)
+	// If you're upgrading from an older Steamworks API, you'll want to pass in 11025 to nUncompressedVoiceDesiredSampleRate
 	virtual EVoiceResult GetAvailableVoice(uint32 *pcbCompressed, uint32 *pcbUncompressed, uint32 nUncompressedVoiceDesiredSampleRate) = 0;
 
 	// Gets the latest voice data from the microphone. Compressed data is an arbitrary format, and is meant to be handed back to 
@@ -102,6 +103,7 @@ public:
 	// You must grab both compressed and uncompressed here at the same time, if you want both.
 	// Matching data that is not read during this call will be thrown away.
 	// GetAvailableVoice() can be used to determine how much data is actually available.
+	// If you're upgrading from an older Steamworks API, you'll want to pass in 11025 to nUncompressedVoiceDesiredSampleRate
 	virtual EVoiceResult GetVoice( bool bWantCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, bool bWantUncompressed, void *pUncompressedDestBuffer, uint32 cbUncompressedDestBufferSize, uint32 *nUncompressBytesWritten, uint32 nUncompressedVoiceDesiredSampleRate ) = 0;
 
 	// Decompresses a chunk of compressed data produced by GetVoice().
@@ -109,6 +111,7 @@ public:
 	// In that case, nBytesWritten is set to the size of the buffer required to decompress the given
 	// data. The suggested buffer size for the destination buffer is 22 kilobytes.
 	// The output format of the data is 16-bit signed at the requested samples per second.
+	// If you're upgrading from an older Steamworks API, you'll want to pass in 11025 to nDesiredSampleRate
 	virtual EVoiceResult DecompressVoice( const void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, uint32 nDesiredSampleRate ) = 0;
 
 	// This returns the frequency of the voice data as it's stored internally; calling DecompressVoice() with this size will yield the best results
@@ -156,7 +159,7 @@ public:
 	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
 	//
 	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
-	// may return with EResult k_EResultPSNAccountUnlinked if the PSN account is unknown to Steam.  You should
+	// may return with EResult k_EResultExternalAccountUnlinked if the PSN account is unknown to Steam.  You should
 	// then call LogOnAndLinkSteamAccountToPSN() after prompting the user for credentials to establish a link. 
 	// Future calls to LogOn() after the one time link call should succeed as long as the user is connected to PSN.
 	virtual void LogOn( bool bInteractive ) = 0;
@@ -169,7 +172,7 @@ public:
 	// should be the users Steam username, and pchPassword should be the users Steam password.
 	// 
 	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
-	// may return with EResult k_EResultPSNAccountAlreadyLinked if already linked to another account. 
+	// may return with EResult k_EResultOtherAccountAlreadyLinked if already linked to another account. 
 	virtual void LogOnAndLinkSteamAccountToPSN( bool bInteractive, const char *pchUserName, const char *pchPassword ) = 0;
 
 	// Final logon option for PS3, this logs into an existing account if already linked, but if not already linked

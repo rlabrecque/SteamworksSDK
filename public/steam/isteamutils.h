@@ -125,6 +125,10 @@ public:
 	virtual void PostPS3SysutilCallback( uint64_t status, uint64_t param, void* userdata ) = 0;
 	virtual bool BIsReadyToShutdown() = 0;
 	virtual bool BIsPSNOnline() = 0;
+
+	// Call this with localized strings for the language the game is running in, otherwise default english
+	// strings will be used by Steam.
+	virtual void SetPSNGameBootInviteStrings( const char *pchSubject, const char *pchBody ) = 0;
 #endif
 };
 

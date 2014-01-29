@@ -36,6 +36,7 @@ public:
 	// This function will return false for users who have a retail or other type of license
 	// Before using, please ask your Valve technical contact how to package and secure your free weekened
 	virtual bool BIsSubscribedFromFreeWeekend() = 0;
+
 	// Returns the number of DLC pieces for the running app
 	virtual int GetDLCCount() = 0;
 
@@ -64,6 +65,29 @@ struct DlcInstalled_t
 {
 	enum { k_iCallback = k_iSteamAppsCallbacks + 5 };
 	AppId_t m_nAppID;		// AppID of the DLC
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: possible results when registering an activation code
+//-----------------------------------------------------------------------------
+enum ERegisterActivactionCodeResult
+{
+	k_ERegisterActivactionCodeResultOK = 0,
+	k_ERegisterActivactionCodeResultFail = 1,
+	k_ERegisterActivactionCodeResultAlreadyRegistered = 2,
+	k_ERegisterActivactionCodeResultTimeout = 3,
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: response to RegisterActivationCode()
+//-----------------------------------------------------------------------------
+struct RegisterActivationCodeResponse_t
+{
+	enum { k_iCallback = k_iSteamAppsCallbacks + 8 };
+	ERegisterActivactionCodeResult m_eResult;
+	uint32 m_unPackageRegistered;						// package that was registered. Only set on success
 };
 
 #pragma pack( pop )

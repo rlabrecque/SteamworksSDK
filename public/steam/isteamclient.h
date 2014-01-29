@@ -41,6 +41,7 @@ class ISteamUserStats;
 class ISteamApps;
 class ISteamNetworking;
 class ISteamRemoteStorage;
+class ISteamScreenshots;
 class ISteamGameServerStats;
 class ISteamPS3OverlayRender;
 class ISteamHTTP;
@@ -116,6 +117,10 @@ public:
 	// remote storage
 	virtual ISteamRemoteStorage *GetISteamRemoteStorage( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
+	// user screenshots
+	virtual ISteamScreenshots *GetISteamScreenshots( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
+
 	// this needs to be called every frame to process matchmaking results
 	// redundant if you're already calling SteamAPI_RunCallbacks()
 	virtual void RunFrame() = 0;
@@ -145,7 +150,7 @@ public:
 
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient010"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient011"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -172,5 +177,8 @@ enum { k_iSteamGameServerStatsCallbacks = 1800 };
 enum { k_iSteam2AsyncCallbacks = 1900 };
 enum { k_iSteamGameStatsCallbacks = 2000 };
 enum { k_iClientHTTPCallbacks = 2100 };
+enum { k_iClientScreenshotsCallbacks = 2200 };
+enum { k_iSteamScreenshotsCallbacks = 2300 };
+enum { k_iClientAudioCallbacks = 2400 };
 
 #endif // ISTEAMCLIENT_H

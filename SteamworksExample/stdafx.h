@@ -130,6 +130,7 @@ typedef unsigned char uint8;
 #define VK_RIGHT          0x27
 #define VK_DOWN           0x28
 #define VK_SELECT         0x29
+#define VK_F5			  0x74
 
 #ifndef VALVE_RECT_DEFINED
 #define VALVE_RECT_DEFINED

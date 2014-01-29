@@ -38,11 +38,11 @@ enum ELobbyComparison
 	k_ELobbyComparisonNotEqual = 3,
 };
 
-// lobby search distance
+// lobby search distance. Lobby results are sorted from closest to farthest.
 enum ELobbyDistanceFilter
 {
 	k_ELobbyDistanceFilterClose,		// only lobbies in the same immediate region will be returned
-	k_ELobbyDistanceFilterDefault,		// only lobbies in the same region or close, but looking further if the current region has infrequent lobby activity (the default)
+	k_ELobbyDistanceFilterDefault,		// only lobbies in the same region or near by regions
 	k_ELobbyDistanceFilterFar,			// for games that don't have many latency requirements, will return lobbies about half-way around the globe
 	k_ELobbyDistanceFilterWorldwide,	// no filtering, will match lobbies as far as India to NY (not recommended, expect multiple seconds of latency between the clients)
 };
@@ -160,6 +160,7 @@ public:
 	virtual int GetNumLobbyMembers( CSteamID steamIDLobby ) = 0;
 	// returns the CSteamID of a user in the lobby
 	// iMember is of range [0,GetNumLobbyMembers())
+	// note that the current user must be in a lobby to retrieve CSteamIDs of other users in that lobby
 	virtual CSteamID GetLobbyMemberByIndex( CSteamID steamIDLobby, int iMember ) = 0;
 
 	// Get data associated with this lobby

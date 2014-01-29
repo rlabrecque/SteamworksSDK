@@ -281,7 +281,7 @@ void CSpaceWarServer::OnClientBeginAuthentication( CSteamID steamIDClient, void 
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Handle a new client connecting
+// Purpose: A new client that connected has had their authentication processed
 //-----------------------------------------------------------------------------
 void CSpaceWarServer::OnAuthCompleted( bool bAuthSuccessful, uint32 iPendingAuthIndex )
 {
@@ -864,7 +864,7 @@ void CSpaceWarServer::OnSteamServersConnected( SteamServersConnected_t *pLogonSu
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Callback from Steam3 when logon is fully completed and VAC secure policy is set
+// Purpose: Callback from Steam when logon is fully completed and VAC secure policy is set
 //-----------------------------------------------------------------------------
 void CSpaceWarServer::OnPolicyResponse( GSPolicyResponse_t *pPolicyResponse )
 {

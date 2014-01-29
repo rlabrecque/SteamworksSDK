@@ -79,6 +79,12 @@ public:
 	// should then ignore all the input until BHandleCellPadData once again returns false, which
 	// will mean the overlay is deactivated.
 	virtual bool BHandleCellPadData( const CellPadData &padData ) = 0;
+
+	// Call this if you detect no controllers connected or that the XMB is intercepting input
+	// 
+	// This is important to clear input state for the overlay, so keys left down during XMB activation
+	// are not continued to be processed.
+	virtual bool BResetInputState() = 0;
 };
 
 

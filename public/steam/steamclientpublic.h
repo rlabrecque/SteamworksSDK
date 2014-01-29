@@ -81,9 +81,9 @@ enum EResult
 	k_EResultDiskFull = 54,						// Operation canceled - not enough disk space.
 	k_EResultRemoteCallFailed = 55,				// an remote call or IPC call failed
 	k_EResultPasswordUnset = 56,				// Password could not be verified as it's unset server side
-	k_EResultPSNAccountUnlinked = 57,			// Attempt to logon from a PS3 failed because the PSN online id is not linked to a Steam account
+	k_EResultExternalAccountUnlinked = 57,		// External account (PSN, Facebook...) is not linked to a Steam account
 	k_EResultPSNTicketInvalid = 58,				// PSN ticket was invalid
-	k_EResultPSNAccountAlreadyLinked = 59,		// PSN account is already linked to some other account, must explicitly request to replace/delete the link first
+	k_EResultExternalAccountAlreadyLinked = 59,	// External account (PSN, Facebook...) is already linked to some other account, must explicitly request to replace/delete the link first
 	k_EResultRemoteFileConflict = 60,			// The sync cannot resume due to a conflict between the local and remote files
 	k_EResultIllegalPassword = 61,				// The requested new password is not legal
 	k_EResultSameAsPreviousValue = 62,			// new value is the same as the old one ( secret question and answer )
@@ -93,7 +93,10 @@ enum EResult
 	k_EResultAccountLogonDeniedNoMail = 66,		// account login denied due to 2nd factor auth failure - and no mail has been sent
 	k_EResultHardwareNotCapableOfIPT = 67,		// 
 	k_EResultIPTInitError = 68,					// 
+	k_EResultParentalControlRestricted = 69,	// operation failed due to parental control restrictions for current user
+	k_EResultFacebookQueryError = 70,			// Facebook query returned an error
 	k_EResultExpiredLoginAuthCode = 71,			// account login denied due to auth code expired
+	k_EResultIPLoginRestrictionFailed = 72,
 };
 
 // Error codes for use with the voice functions

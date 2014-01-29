@@ -19,6 +19,7 @@
 #include "isteamapps.h"
 #include "isteamnetworking.h"
 #include "isteamremotestorage.h"
+#include "isteamscreenshots.h"
 #include "isteamhttp.h"
 
 #if defined( _PS3 )
@@ -120,6 +121,7 @@ S_API ISteamApps *SteamApps();
 S_API ISteamNetworking *SteamNetworking();
 S_API ISteamMatchmakingServers *SteamMatchmakingServers();
 S_API ISteamRemoteStorage *SteamRemoteStorage();
+S_API ISteamScreenshots *SteamScreenshots();
 S_API ISteamHTTP *SteamHTTP();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender * SteamPS3OverlayRender();
@@ -221,6 +223,7 @@ public:
 		Cancel();
 	}
 
+	void SetGameserverFlag() { m_nCallbackFlags |= k_ECallbackFlagsGameServer; }
 private:
 	virtual void Run( void *pvParam )
 	{
@@ -397,6 +400,7 @@ public:
 	ISteamMatchmakingServers*	SteamMatchmakingServers()	{ return m_pSteamMatchmakingServers; }
 	ISteamNetworking*	SteamNetworking()					{ return m_pSteamNetworking; }
 	ISteamRemoteStorage* SteamRemoteStorage()				{ return m_pSteamRemoteStorage; }
+	ISteamScreenshots*	SteamScreenshots()					{ return m_pSteamScreenshots; }
 	ISteamHTTP*			SteamHTTP()							{ return m_pSteamHTTP; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
@@ -412,6 +416,7 @@ private:
 	ISteamMatchmakingServers	*m_pSteamMatchmakingServers;
 	ISteamNetworking	*m_pSteamNetworking;
 	ISteamRemoteStorage *m_pSteamRemoteStorage;
+	ISteamScreenshots	*m_pSteamScreenshots;
 	ISteamHTTP			*m_pSteamHTTP;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
@@ -434,6 +439,7 @@ inline void CSteamAPIContext::Clear()
 	m_pSteamMatchmakingServers = NULL;
 	m_pSteamNetworking = NULL;
 	m_pSteamRemoteStorage = NULL;
+	m_pSteamScreenshots = NULL;
 }
 
 // This function must be inlined so the module using steam_api.dll gets the version names they want.
@@ -479,6 +485,10 @@ inline bool CSteamAPIContext::Init()
 
 	m_pSteamRemoteStorage = SteamClient()->GetISteamRemoteStorage( hSteamUser, hSteamPipe, STEAMREMOTESTORAGE_INTERFACE_VERSION );
 	if ( !m_pSteamRemoteStorage )
+		return false;
+
+	m_pSteamScreenshots = SteamClient()->GetISteamScreenshots( hSteamUser, hSteamPipe, STEAMSCREENSHOTS_INTERFACE_VERSION );
+	if ( !m_pSteamScreenshots )
 		return false;
 
 	m_pSteamHTTP = SteamClient()->GetISteamHTTP( hSteamUser, hSteamPipe, STEAMHTTP_INTERFACE_VERSION );

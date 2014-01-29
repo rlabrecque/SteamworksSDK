@@ -244,12 +244,12 @@ void CRemoteStorageSync::OnMenuSelection( ERemoteStorageSyncMenuCommand selectio
 
 	case k_EMenuCommandKeepClient:
 		m_menu.ShowSyncProgress( m_eSyncOperation, 0.0 );
-		SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepClient );		
+		//SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepClient );		
 		break;
 
 	case k_EMenuCommandKeepServer:
 		m_menu.ShowSyncProgress( m_eSyncOperation, 0.0 );
-		SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepServer );
+		//SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepServer );
 		break;
 	}
 }

@@ -49,7 +49,7 @@ CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine ) :
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Shared initialization for both constructors
+// Purpose: initialize our client for use
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 {
@@ -78,7 +78,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	m_pServer = NULL;
 	m_uPlayerShipIndex = 0;
 	m_eConnectedStatus = k_EClientNotConnected;
-	m_bTransitionedGameState = false;
+	m_bTransitionedGameState = true;
 	m_rgchErrorText[0] = 0;
 	m_unServerIP = 0;
 	m_usServerPort = 0;
@@ -483,7 +483,7 @@ void CSpaceWarClient::SetGameState( EClientGameState eState )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Used to transition game state
+// Purpose: set the error string to display in the UI
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::SetConnectionFailureText( const char *pchErrorText )
 {
@@ -553,7 +553,7 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: steam callback, trigger when our connection state changes
+// Purpose: steam callback, triggered when our connection to another client fails
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnP2PSessionConnectFail( P2PSessionConnectFail_t *pCallback )
 {
@@ -894,10 +894,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 	{
 		// If we are just opening the find servers screen, then start a refresh
 		m_pServerBrowser->RefreshInternetServers();
+		SteamFriends()->SetRichPresence( "status", "Finding an internet game" );
 	}
 	else if ( m_eGameState == k_EClientFindLANServers )
 	{
 		m_pServerBrowser->RefreshLANServers();
+		SteamFriends()->SetRichPresence( "status", "Finding a LAN game" );
 	}
 	else if ( m_eGameState == k_EClientCreatingLobby )
 	{
@@ -909,10 +911,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 			// set the function to call when this completes
 			m_SteamCallResultLobbyCreated.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyCreated );
 		}
+		SteamFriends()->SetRichPresence( "status", "Creating a lobby" );
 	}
 	else if ( m_eGameState == k_EClientFindLobby )
 	{
 		m_pLobbyBrowser->Refresh();
+		SteamFriends()->SetRichPresence( "status", "Main menu: finding lobbies" );
 	}
 	else if ( m_eGameState == k_EClientGameMenu )
 	{
@@ -927,6 +931,8 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 			delete m_pServer;
 			m_pServer = NULL;
 		}
+
+		SteamFriends()->SetRichPresence( "status", "Main menu" );
 	}
 	else if ( m_eGameState == k_EClientGameWinner || m_eGameState == k_EClientGameDraw )
 	{
@@ -937,16 +943,19 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 	{
 		// we've switched to the leaderboard menu
 		m_pLeaderboards->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing leaderboards" );
 	}
 	else if ( m_eGameState == k_EClientGameActive )
 	{
 		// start voice chat 
 		m_pVoiceChat->StartVoiceChat();
+		SteamFriends()->SetRichPresence( "status", "In match" );
 	}
 	else if ( m_eGameState == k_EClientRemoteStorage )
 	{
 		// we've switched to the remote storage menu
 		m_pRemoteStorage->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing remote storage" );
 	}
 }
 
@@ -1026,7 +1035,7 @@ void CSpaceWarClient::OnGameOverlayActivated( GameOverlayActivated_t *callback )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Handles notification that we are now connected to Steam
+// Purpose: Handles notification that we are failed to connected to Steam
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnSteamServerConnectFailure( SteamServerConnectFailure_t *callback )
 {

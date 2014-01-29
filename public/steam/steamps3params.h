@@ -19,8 +19,8 @@
 #define STEAM_PS3_SERVICE_ID_MAX 32
 #define STEAM_PS3_COMMUNICATION_ID_MAX 10
 #define STEAM_PS3_COMMUNICATION_SIG_MAX 160
-#define STEAM_PS3_GAMEBOOT_INVITE_SUBJECT_MAX 18
-#define STEAM_PS3_GAMEBOOT_INVITE_BODY_MAX 512
+#define STEAM_PS3_LANGUAGE_MAX 64
+#define STEAM_PS3_REGION_CODE_MAX 16
 struct SteamPS3Params_t
 {
 	void *pReserved;
@@ -33,9 +33,27 @@ struct SteamPS3Params_t
 	char m_rgchNpCommunicationID[ STEAM_PS3_COMMUNICATION_ID_MAX ];
 	char m_rgchNpCommunicationSig[ STEAM_PS3_COMMUNICATION_SIG_MAX ];
 
-	char m_rgchGameBootInviteSubject[ STEAM_PS3_GAMEBOOT_INVITE_SUBJECT_MAX ];
-	char m_rgchGameBootInviteBody[ STEAM_PS3_GAMEBOOT_INVITE_BODY_MAX ];
+	// Language should be one of the following. must be zero terminated
+	// danish
+	// dutch
+	// english
+	// finnish
+	// french
+	// german
+	// italian
+	// korean
+	// norwegian
+	// polish
+	// portuguese
+	// russian
+	// schinese
+	// spanish
+	// swedish
+	// tchinese
+	char m_rgchSteamLanguage[ STEAM_PS3_LANGUAGE_MAX ];
 
+	// region codes are "SCEA", "SCEE", "SCEJ". must be zero terminated
+	char m_rgchRegionCode[ STEAM_PS3_REGION_CODE_MAX ];
 
 	// Should be SYS_TTYP3 through SYS_TTYP10, if it's 0 then Steam won't spawn a 
 	// thread to read console input at all.  Using this let's you use Steam console commands

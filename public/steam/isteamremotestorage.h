@@ -84,11 +84,21 @@ class ISteamRemoteStorage
 		virtual	UGCHandle_t GetCachedUGCHandle( int32 iCachedContent ) = 0;
 
 		// The following functions are only necessary on the Playstation 3. On PC & Mac, the Steam client will handle these operations for you
-#if _PS3
-		// synchronization
+		// On Playstation 3, the game controls which files are stored in the cloud, via FilePersist, FileFetch, and FileForget.
+			
+#if defined(_PS3) || defined(_SERVER)
+		// Connect to Steam and get a list of files in the Cloud - results in a RemoteStorageAppSyncStatusCheck_t callback
+		virtual void GetFileListFromServer() = 0;
+		// Indicate this file should be downloaded in the next sync
+		virtual bool FileFetch( const char *pchFile ) = 0;
+		// Indicate this file should be persisted in the next sync
+		virtual bool FilePersist( const char *pchFile ) = 0;
+		// Pull any requested files down from the Cloud - results in a RemoteStorageAppSyncedClient_t callback
 		virtual bool SynchronizeToClient() = 0;
+		// Upload any requested files to the Cloud - results in a RemoteStorageAppSyncedServer_t callback
 		virtual bool SynchronizeToServer() = 0;
-		virtual bool ResolveSyncConflict( EResolveConflict eResolveConflict ) = 0;
+		// Reset any fetch/persist/etc requests
+		virtual bool ResetFileRequestState() = 0;
 #endif
 };
 
@@ -136,8 +146,20 @@ struct RemoteStorageAppSyncProgress_t
 };
 
 //
-// IMPORTANT! k_iClientRemoteStorageCallbacks + 4-5 are used, see iclientremotestorage.h
+// IMPORTANT! k_iClientRemoteStorageCallbacks + 4 is used, see iclientremotestorage.h
 //
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Sent after we've determined the list of files that are out of sync
+//          with the server.
+//-----------------------------------------------------------------------------
+struct RemoteStorageAppSyncStatusCheck_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 5 };
+	AppId_t m_nAppID;
+	EResult m_eResult;
+};
 
 //-----------------------------------------------------------------------------
 // Purpose: Sent after a conflict resolution attempt.

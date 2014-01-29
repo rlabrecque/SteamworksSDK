@@ -115,12 +115,15 @@ public:
 
 	// Achievement / GroupAchievement metadata
 
-	// Gets the icon of the achievement, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set. 
+	// Gets the icon of the achievement, which is a handle to be used in ISteamUtils::GetImageRGBA(), or 0 if none set. 
 	// A return value of 0 may indicate we are still fetching data, and you can wait for the UserAchievementIconFetched_t callback
 	// which will notify you when the bits are ready. If the callback still returns zero, then there is no image set for the
 	// specified achievement.
 	virtual int GetAchievementIcon( const char *pchName ) = 0;
-	// Get general attributes (display name, desc, etc) for an Achievement
+
+	// Get general attributes for an achievement. Accepts the following keys:
+	// - "name" and "desc" for retrieving the localized achievement name and description (returned in UTF8)
+	// - "hidden" for retrieving if an achievement is hidden (returns "0" when not hidden, "1" when hidden)
 	virtual const char *GetAchievementDisplayAttribute( const char *pchName, const char *pchKey ) = 0;
 
 	// Achievement progress - triggers an AchievementProgress callback, that is all.
@@ -385,7 +388,7 @@ struct UserAchievementIconFetched_t
 	CGameID		m_nGameID;				// Game this is for
 	char		m_rgchAchievementName[k_cchStatNameMax];		// name of the achievement
 	bool		m_bAchieved;		// Is the icon for the achieved or not achieved version?
-	int			m_nIconHandle;		// Handle to the image, which can be used in ClientUtils()->GetImageRGBA(), 0 means no image is set for the achievement
+	int			m_nIconHandle;		// Handle to the image, which can be used in SteamUtils()->GetImageRGBA(), 0 means no image is set for the achievement
 };
 
 
