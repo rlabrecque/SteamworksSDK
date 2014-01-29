@@ -75,21 +75,37 @@ public:
 	// this will usually be something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local"
 	virtual bool GetUserDataFolder( char *pchBuffer, int cubBuffer ) = 0;
 
-	// Starts voice recording. Once started, use GetCompressedVoice() to get the data
+	// Starts voice recording. Once started, use GetVoice() to get the data
 	virtual void StartVoiceRecording( ) = 0;
 
 	// Stops voice recording. Because people often release push-to-talk keys early, the system will keep recording for
-	// a little bit after this function is called. GetCompressedVoice() should continue to be called until it returns
+	// a little bit after this function is called. GetVoice() should continue to be called until it returns
 	// k_eVoiceResultNotRecording
 	virtual void StopVoiceRecording( ) = 0;
 
-	// Gets the latest voice data. It should be called as often as possible once recording has started.
-	// nBytesWritten is set to the number of bytes written to pDestBuffer. 
-	virtual EVoiceResult GetCompressedVoice( void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
+	// Determine the amount of captured audio data that is available in bytes.
+	// This provides both the compressed and uncompressed data. Please note that the uncompressed
+	// data is not the raw feed from the microphone: data may only be available if audible 
+	// levels of speech are detected.
+	virtual EVoiceResult GetAvailableVoice(uint32 *pcbCompressed, uint32 *pcbUncompressed) = 0;
 
-	// Decompresses a chunk of data produced by GetCompressedVoice(). nBytesWritten is set to the 
-	// number of bytes written to pDestBuffer. The output format of the data is 16-bit signed at 
-	// 11025 samples per second.
+	// Gets the latest voice data from the microphone. Compressed data is an arbitrary format, and is meant to be handed back to 
+	// DecompressVoice() for playback later as a binary blob. Uncompressed data is 16-bit, signed integer, 11025Hz PCM format.
+	// Please note that the uncompressed data is not the raw feed from the microphone: data may only be available if audible 
+	// levels of speech are detected, and may have passed through denoising filters, etc.
+	// This function should be called as often as possible once recording has started; once per frame at least.
+	// nBytesWritten is set to the number of bytes written to pDestBuffer. 
+	// nUncompressedBytesWritten is set to the number of bytes written to pUncompressedDestBuffer. 
+	// You must grab both compressed and uncompressed here at the same time, if you want both.
+	// Matching data that is not read during this call will be thrown away.
+	// GetAvailableVoice() can be used to determine how much data is actually available.
+	virtual EVoiceResult GetVoice( bool bWantCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, bool bWantUncompressed, void *pUncompressedDestBuffer, uint32 cbUncompressedDestBufferSize, uint32 *nUncompressBytesWritten ) = 0;
+
+	// Decompresses a chunk of compressed data produced by GetVoice().
+	// nBytesWritten is set to the number of bytes written to pDestBuffer unless the return value is k_EVoiceResultBufferTooSmall.
+	// In that case, nBytesWritten is set to the size of the buffer required to decompress the given
+	// data. The suggested buffer size for the destination buffer is 22 kilobytes.
+	// The output format of the data is 16-bit signed at 11025 samples per second.
 	virtual EVoiceResult DecompressVoice( void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
 
 	// Retrieve ticket to be sent to the entity who wishes to authenticate you. 
@@ -111,7 +127,7 @@ public:
 	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser012"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser013"
 
 
 // callbacks
@@ -196,8 +212,6 @@ struct ValidateAuthTicketResponse_t
 	CSteamID m_SteamID;
 	EAuthSessionResponse m_eAuthSessionResponse;
 };
-
-
 
 
 #endif // ISTEAMUSER_H

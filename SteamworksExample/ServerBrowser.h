@@ -66,9 +66,9 @@ public:
 	void RunFrame();
 
 	// ISteamMatchmakingServerListResponse
-	void ServerResponded( int iServer );
-	void ServerFailedToRespond( int iServer );
-	void RefreshComplete( EMatchMakingServerResponse response );
+	void ServerResponded( HServerListRequest hReq, int iServer );
+	void ServerFailedToRespond( HServerListRequest hReq, int iServer );
+	void RefreshComplete( HServerListRequest hReq, EMatchMakingServerResponse response );
 
 private:
 
@@ -81,8 +81,8 @@ private:
 	// Track whether we are in the middle of a refresh or not
 	bool m_bRequestingServers;
 
-	// Track what type of servers we are currently displaying
-	EMatchMakingType m_ServerType;
+	// Track what server list request is currently running
+	HServerListRequest m_hServerListRequest;
 
 	// Menu object
 	CServerBrowserMenu *m_pMenu;

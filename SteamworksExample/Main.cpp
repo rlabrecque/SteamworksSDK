@@ -54,12 +54,22 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
+	/*
+	if ( !SteamAPI_IsSteamRunning() )
+	{
+		// if Steam is not running, SteamAPI_RestartApp starts the local Steam client and also launches this game again
+		// Once you get a public Steam AppID assigned for this game, you need to replace k_uAppIdInvalid with it.
+		SteamAPI_RestartApp( k_uAppIdInvalid );
+		return EXIT_FAILURE;
+	}
+	*/
+
 	// Init Steam CEG
 	if ( !Steamworks_InitCEGLibrary() )
 	{
 		OutputDebugString( "Steamworks_InitCEGLibrary() failed\n" );
 		::MessageBox( NULL, "Steam must be running to play this game (InitDrmLibrary() failed).\n", "Fatal Error", MB_OK );
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	// Initialize SteamAPI, if this fails we bail out since we depend on Steam for lots of stuff.
@@ -73,7 +83,7 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	{
 		OutputDebugString( "SteamAPI_Init() failed\n" );
 		::MessageBox( NULL, "Steam must be running to play this game (SteamAPI_Init() failed).\n", "Fatal Error", MB_OK );
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	// set our debug handler
@@ -231,7 +241,7 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	Steamworks_TermCEGLibrary();
 
 	// exit
-	return 0;	
+	return EXIT_SUCCESS;	
 }
 
 

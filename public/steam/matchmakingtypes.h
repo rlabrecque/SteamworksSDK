@@ -41,18 +41,6 @@ enum EMatchMakingServerResponse
 	eNoServersListedOnMasterServer // for the Internet query type, returned in response callback if no servers of this type match
 };
 
-enum EMatchMakingType
-{
-	eInternetServer = 0,
-	eLANServer,
-	eFriendsServer,
-	eFavoritesServer,
-	eHistoryServer,
-	eSpectatorServer,
-	eInvalidServer 
-};
-
-
 // servernetadr_t is all the addressing info the serverbrowser needs to know about a game server,
 // namely: its IP, its connection port, and its query port.
 class servernetadr_t 

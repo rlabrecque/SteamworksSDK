@@ -73,6 +73,8 @@ enum EResult
 	k_EResultAdministratorOK = 46,				// allowed to take this action, but only because requester is admin
 	k_EResultContentVersion = 47,				// A Version mismatch in content transmitted within the Steam protocol.
 	k_EResultTryAnotherCM = 48,					// The current CM can't service the user making a request, user should try another.
+	k_EResultPasswordRequiredToKickSession = 49,		// You are already logged in elsewhere, this cached credential login has failed.
+	k_EResultAlreadyLoggedInElsewhere = 50		// You are already logged in elsewhere, you must wait
 
 };
 

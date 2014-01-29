@@ -11,6 +11,32 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+
+----------------------------------------------------------------
+v1.06	30th September 2009
+----------------------------------------------------------------
+
+Voice
+* ISteamUser::GetCompressedVoice() has been replaced with ISteamUser::GetVoice which can be used to retrieve compressed and uncompressed voice data
+* Added ISteamUser::GetAvailableVoice() to retrieve the amount of captured audio data that is available
+
+Matchmaking
+* Added a new callback LobbyKicked_t that is sent when a user has been disconnected from a lobby
+* Through ISteamMatchmakingServers, multiple server list requests of the same type can now be outstanding at the same time
+
+Steamworks Setup Application:
+* Streamlined configuration process
+* Now supports EULAs greater than 32k bytes
+
+Content Tool
+* Added DLC checkbox to depot creation wizard
+
+Other
+* Added SteamAPI_IsSteamRunning()
+* Added SteamAPI_RestartApp() so CEG users can restart their game through Steam if launched through Windows Games Explorer
+
+
+
 ----------------------------------------------------------------
 v1.05	11th June 2009
 ----------------------------------------------------------------

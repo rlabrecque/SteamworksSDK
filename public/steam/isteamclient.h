@@ -146,6 +146,7 @@ enum { k_iClientRemoteStorageCallbacks = 1300 };
 enum { k_iSteamUserItemsCallbacks = 1400 };
 enum { k_iSteamGameServerItemsCallbacks = 1500 };
 enum { k_iClientUtilsCallbacks = 1600 };
+enum { k_iSteamGameCoordinatorCallbacks = 1700 };
 
 
 #endif // ISTEAMCLIENT_H

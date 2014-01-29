@@ -20,7 +20,7 @@ root\autorun.inf :
 root\splash.tga : 
   Image displayed by Steam while installing files from disk (392x165 pixel)
   
-root\resources\setup_default.ini :
+root\setup.ini :
   This is the first config file loaded by Setup regardless the chosen
   language. This file configures any language independent settings for this
   game like AppID or menu appearance. The syntax is "parameter" "value", a full
@@ -38,21 +38,18 @@ root\resources\SteamInstall_<language>.msi :
   Steam MSIs that install Steam on the users machine. Can be removed if no
   matching setup_<language>.ini is provided.
   
-root\resources\steam.inf :
-  This file configures the Steam installer MSIs. Update the files GameName,
-  RequiredSize and RequiredString according to your game.  
-  
 root\resources\installscript.vdf :
   This is a script file in KeyValues format to run 3rd party installers before 
-  Steam and the game are installed. If you don't need to run any other installers,
-  set "ScriptFile" to "" and remove this file and SteamService.exe.
+  Steam and the game are installed. This file is optional and can be removed.
 
 root\resources\eula.rtf :
-  The end user license agreement shown before the user installs the game. If no
-  EULA is required, set "EulaFile" to "" and remove this file.
+  The end user license agreement shown before the user installs the game.
+  This file is optional. If you have localized versions of this file,
+  name them eula_<language>.rtf
   
 root\resources\setup.bmp :
-  The Setup background image as 640x480 pixel BMP file. 
+  The Setup background image as 640x480 pixel BMP file.  If you have 
+  localized versions of this file, name them setup_<language>.bmp
 
 root\resources\click.wav :
   Played when a button is click. Delete file to play no sound.
@@ -70,14 +67,7 @@ Setup_*.ini configuration values:
 "Game"       : game name as it appears in the Setup menu
 "AppID"      : Steam AppID for this game
 "Language"   : overrides current language, usually not needed
-"ImageFile"  : menu background image BMP 640x480. If not set at all, 
-               "resources\setup_<language>.bmp" will be used.
-"EulaFile"   : end user license as RTF file, set to "" for none. If not set at
-               all, "resources\eula_<language>.rtf" will be used.
-"ScriptFile" : script file for 3rd party installers, set to "" for none. If not
-               set at all, "resources\script_<language>.vdf" will be used.
-"MSIFile"    : specifies the SteamInstaller to be used, usually not needed to
-               be set and defaults to "resources\steaminstall_<language>.msi"
+"RequiredSize" : Required free disc space in KB
 "URL"        : target web URL for technical support button
 "FontName"   : menu Windows font like "Impact" or "Arial"
 "FontHeight" : menu font height, eg "24"

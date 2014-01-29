@@ -6,6 +6,7 @@
 		{
 			"process 1"		"%INSTALLDIR%\\redist\\vcredist_x86.exe"
 			"command 1"		"/q:a"
+			"Description"	"Microsoft VC Redist Package"
 			"NoCleanUp"		"1"
 		}
 	}

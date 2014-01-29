@@ -88,6 +88,7 @@ const DepotId_t k_uDepotIdInvalid = 0x0;
 typedef uint32 RTime32;
 
 typedef uint32 CellID_t;
+const CellID_t k_uCellIDInvalid = 0xFFFFFFFF;
 
 // handle to a Steam API call
 typedef uint64 SteamAPICall_t;

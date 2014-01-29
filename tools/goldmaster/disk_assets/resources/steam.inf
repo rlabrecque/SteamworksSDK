@@ -1,8 +1,0 @@
-[Ident]
-Version=1.0.0.0
-PatchVersion=1.0.0.0
-Title=The Example Game
-GameName=Example Game
-RequiredSize=4500000
-RequiredString=4.5
-

@@ -42,10 +42,9 @@ CServerBrowser::CServerBrowser( CGameEngine *pGameEngine )
 	m_pGameEngine = pGameEngine;
 	m_nServers = 0;
 	m_bRequestingServers = false;
-	m_ServerType = eInternetServer;
+	m_hServerListRequest = NULL;
 	m_pMenu->Rebuild( m_ListGameServers, m_bRequestingServers );
 	m_pMenu->SetHeading( "Internet Server browser" );
-
 }
 
 
@@ -54,6 +53,12 @@ CServerBrowser::CServerBrowser( CGameEngine *pGameEngine )
 //-----------------------------------------------------------------------------
 CServerBrowser::~CServerBrowser()
 {
+	if ( m_hServerListRequest )
+	{
+		SteamMatchmakingServers()->ReleaseRequest( m_hServerListRequest );
+		m_hServerListRequest = NULL;
+	}
+
 	if ( m_pMenu )
 		delete m_pMenu;
 	// ...
@@ -69,10 +74,16 @@ void CServerBrowser::RefreshInternetServers()
 	if ( m_bRequestingServers )
 		return;
 
+	// If another request is outstanding, make sure we release it properly
+	if ( m_hServerListRequest )
+	{
+		SteamMatchmakingServers()->ReleaseRequest( m_hServerListRequest );
+		m_hServerListRequest = NULL;
+	}
+
 	OutputDebugString( "Refreshing internet servers\n" );
 	// Track that we are now in a refresh, what type of refresh, and reset our server count
 	m_bRequestingServers = true;
-	m_ServerType = eInternetServer;
 	m_nServers = 0;
 	m_ListGameServers.clear();
 	m_pMenu->SetHeading( "Internet Server browser" );
@@ -101,7 +112,7 @@ void CServerBrowser::RefreshInternetServers()
 
 	// bugbug jmccaskey - passing just the appid without filters results in getting all servers rather than
 	// servers filtered by appid alone.  So, we'll use the filters to filter the results better.
-	SteamMatchmakingServers()->RequestInternetServerList( SteamUtils()->GetAppID(), &pFilter, ARRAYSIZE(pFilters), this );
+	m_hServerListRequest = SteamMatchmakingServers()->RequestInternetServerList( SteamUtils()->GetAppID(), &pFilter, ARRAYSIZE(pFilters), this );
 }
 
 
@@ -114,10 +125,16 @@ void CServerBrowser::RefreshLANServers()
 	if ( m_bRequestingServers )
 		return;
 
-	OutputDebugString( "Refreshing internet servers\n" );
+	// If another request is outstanding, make sure we release it properly
+	if ( m_hServerListRequest )
+	{
+		SteamMatchmakingServers()->ReleaseRequest( m_hServerListRequest );
+		m_hServerListRequest = NULL;
+	}
+
+	OutputDebugString( "Refreshing LAN servers\n" );
 	// Track that we are now in a refresh, what type of refresh, and reset our server count
 	m_bRequestingServers = true;
-	m_ServerType = eLANServer;
 	m_nServers = 0;
 	m_ListGameServers.clear();
 	m_pMenu->SetHeading( "LAN Server browser" );
@@ -125,16 +142,18 @@ void CServerBrowser::RefreshLANServers()
 	m_pMenu->Rebuild( m_ListGameServers, m_bRequestingServers );
 
 	// LAN refresh doesn't accept filters like internet above does
-	SteamMatchmakingServers()->RequestLANServerList( SteamUtils()->GetAppID(), this );
+	m_hServerListRequest = SteamMatchmakingServers()->RequestLANServerList( SteamUtils()->GetAppID(), this );
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback from Steam telling us about a server that has responded
 //-----------------------------------------------------------------------------
-void CServerBrowser::ServerResponded( int iServer )
+void CServerBrowser::ServerResponded( HServerListRequest hReq, int iServer )
 {
-	gameserveritem_t *pServer = SteamMatchmakingServers()->GetServerDetails( m_ServerType, iServer );
+	// Assert( hReq == m_hServerListRequest );
+
+	gameserveritem_t *pServer = SteamMatchmakingServers()->GetServerDetails( hReq, iServer );
 	if ( pServer )
 	{
 		// Filter out servers that don't match our appid here (might get these in LAN calls since we can't put more filters on it)
@@ -153,8 +172,10 @@ void CServerBrowser::ServerResponded( int iServer )
 //-----------------------------------------------------------------------------
 // Purpose: Callback from Steam telling us about a server that has failed to respond
 //-----------------------------------------------------------------------------
-void CServerBrowser::ServerFailedToRespond( int iServer )
+void CServerBrowser::ServerFailedToRespond( HServerListRequest hReq, int iServer )
 {
+	// Assert( hReq == m_hServerListRequest );
+
 	// bugbug jmccaskey - why would we ever need this?  Remove servers from our list I guess?
 }
 
@@ -162,10 +183,12 @@ void CServerBrowser::ServerFailedToRespond( int iServer )
 //-----------------------------------------------------------------------------
 // Purpose: Callback from Steam telling us a refresh is complete
 //-----------------------------------------------------------------------------
-void CServerBrowser::RefreshComplete( EMatchMakingServerResponse response ) 
+void CServerBrowser::RefreshComplete( HServerListRequest hReq, EMatchMakingServerResponse response ) 
 {
+	// Assert( hReq == m_hServerListRequest );
+
 	// Doesn't really matter to us whether the response tells us the refresh succeeded or failed,
-	// we just rack whether we are done refreshing or not
+	// we just track whether we are done refreshing or not
 	m_bRequestingServers = false; 
 }
 

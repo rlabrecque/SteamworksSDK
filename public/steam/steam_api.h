@@ -53,6 +53,13 @@
 // S_API void SteamAPI_Init(); (see below)
 S_API void SteamAPI_Shutdown();
 
+// checks if a local Steam client is running 
+S_API bool SteamAPI_IsSteamRunning();
+
+// restart your app through Steam to enable required Steamworks features
+S_API bool SteamAPI_RestartApp( uint32 unOwnAppID );
+
+
 // crash dump recording functions
 S_API void SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID );
 S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
@@ -229,12 +236,16 @@ public:
 
 	~CCallback()
 	{
-		Unregister();
+		if ( m_nCallbackFlags & k_ECallbackFlagsRegistered )
+			Unregister();
 	}
 
 	// manual registration of the callback
 	void Register( T *pObj, func_t func )
 	{
+		if ( !pObj || !func )
+			return;
+
 		if ( m_nCallbackFlags & k_ECallbackFlagsRegistered )
 			Unregister();
 
@@ -244,11 +255,13 @@ public:
 		}
 		m_pObj = pObj;
 		m_Func = func;
+		// SteamAPI_RegisterCallback sets k_ECallbackFlagsRegistered
 		SteamAPI_RegisterCallback( this, P::k_iCallback );
 	}
 
 	void Unregister()
 	{
+		// SteamAPI_UnregisterCallback removes k_ECallbackFlagsRegistered
 		SteamAPI_UnregisterCallback( this );
 	}
 
