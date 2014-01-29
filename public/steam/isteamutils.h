@@ -26,7 +26,7 @@ enum ESteamAPICallFailure
 };
 
 // function prototype for warning message hook
-#if defined( POSIX ) && !defined( _CYGWIN )
+#if defined( POSIX )
 #define __cdecl
 #endif
 extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);

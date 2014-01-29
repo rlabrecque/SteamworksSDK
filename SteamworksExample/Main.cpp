@@ -264,7 +264,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( IsDebuggerPresent() )
 	{
-		// We don't want to mask exceptions (or report them to Steam!) when debugging
+		// We don't want to mask exceptions (or report them to Steam!) when debugging.
+		// If you would like to step through the exception handler, attach a debugger
+		// after running the game outside of the debugger.
 		return RealMain( hInstance, hPrevInstance, lpCmdLine, nCmdShow );
 	}
 

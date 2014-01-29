@@ -92,13 +92,26 @@ public:
 	virtual bool SetAchievement( const char *pchName ) = 0;
 	virtual bool ClearAchievement( const char *pchName ) = 0;
 
+	// Get the achievement status, and the time it was unlocked if unlocked.
+	// If the return value is true, but the unlock time is zero, that means it was unlocked before Steam 
+	// began tracking achievement unlock times (December 2009). Time is seconds since January 1, 1970.
+	virtual bool GetAchievementAndUnlockTime( const char *pchName, bool *pbAchieved, uint32 *punUnlockTime ) = 0;
+
 	// Store the current data on the server, will get a callback when set
 	// And one callback for every new achievement
+	//
+	// If the callback has a result of k_EResultInvalidParam, one or more stats 
+	// uploaded has been rejected, either because they broke constraints
+	// or were out of date. In this case the server sends back updated values.
+	// The stats should be re-iterated to keep in sync.
 	virtual bool StoreStats() = 0;
 
 	// Achievement / GroupAchievement metadata
 
-	// Gets the icon of the achievement, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
+	// Gets the icon of the achievement, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set. 
+	// A return value of 0 may indicate we are still fetching data, and you can wait for the UserAchievementIconReady_t callback
+	// which will notify you when the bits are actually read.  If the callback still returns zero, then there is no image set
+	// and there never will be.
 	virtual int GetAchievementIcon( const char *pchName ) = 0;
 	// Get general attributes (display name / text, etc) for an Achievement
 	virtual const char *GetAchievementDisplayAttribute( const char *pchName, const char *pchKey ) = 0;
@@ -119,6 +132,8 @@ public:
 	virtual bool GetUserStat( CSteamID steamIDUser, const char *pchName, int32 *pData ) = 0;
 	virtual bool GetUserStat( CSteamID steamIDUser, const char *pchName, float *pData ) = 0;
 	virtual bool GetUserAchievement( CSteamID steamIDUser, const char *pchName, bool *pbAchieved ) = 0;
+	// See notes for GetAchievementAndUnlockTime above
+	virtual bool GetUserAchievementAndUnlockTime( CSteamID steamIDUser, const char *pchName, bool *pbAchieved, uint32 *punUnlockTime ) = 0;
 
 	// Reset stats 
 	virtual bool ResetAllStats( bool bAchievementsToo ) = 0;
@@ -180,9 +195,10 @@ public:
 	// Retrieves the number of players currently playing your game (online + offline)
 	// This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
 	virtual SteamAPICall_t GetNumberOfCurrentPlayers() = 0;
+
 };
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION006"
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION007"
 
 
 //-----------------------------------------------------------------------------
@@ -274,4 +290,27 @@ struct NumberOfCurrentPlayers_t
 };
 
 
+//-----------------------------------------------------------------------------
+// Purpose: Callback indicating that a user's stats have been unloaded.
+//  Call RequestUserStats again to access stats for this user
+//-----------------------------------------------------------------------------
+struct UserStatsUnloaded_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 8 };
+	CSteamID	m_steamIDUser;	// User whose stats have been unloaded
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Callback indicating that an achievement icon has been fetched
+//-----------------------------------------------------------------------------
+struct UserAchievementIconFetched_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 9 };
+
+	CGameID		m_nGameID;				// Game this is for
+	char		m_rgchAchievementName[k_cchStatNameMax];		// name of the achievement
+	bool		m_bAchieved;		// Is the icon for the achieved or not achieved version?
+	int			m_nIconHandle;		// Handle to the image, which can be used in ClientUtils()->GetImageRGBA(), 0 means no image is set for the achievement
+};
 #endif // ISTEAMUSER_H

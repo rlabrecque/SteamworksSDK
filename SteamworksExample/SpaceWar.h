@@ -115,6 +115,7 @@ enum EClientGameState
 	k_EClientFindLANServers,
 	k_EClientRemoteStorage,
 	k_EClientLeaderboards,
+	k_EClientMinidump,
 };
 
 

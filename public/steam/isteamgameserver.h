@@ -12,6 +12,7 @@
 
 #include "isteamclient.h"
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Functions for authenticating users via Steam to play on a game server
 //-----------------------------------------------------------------------------
@@ -87,11 +88,12 @@ public:
 	// it allows users to filter in the matchmaking/server-browser interfaces based on the value
 	virtual void SetGameType( const char *pchGameType ) = 0; 
 
-	// Ask if a user has a specific achievement for this game, will get a callback on reply
-	virtual bool BGetUserAchievementStatus( CSteamID steamID, const char *pchAchievementName ) = 0;
-
 	// Ask for the gameplay stats for the server. Results returned in a callback
 	virtual void GetGameplayStats( ) = 0;
+
+	// Gets the reputation score for the game server. This API also checks if the server or some
+	// other server on the same IP is banned from the Steam master servers.
+	virtual SteamAPICall_t GetServerReputation( ) = 0;
 
 	// Ask if a user in in the specified group, results returns async by GSUserGroupStatus_t
 	// returns false if we're not connected to the steam servers and thus cannot ask
@@ -113,7 +115,7 @@ public:
 	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
 };
 
-#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer009"
+#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer010"
 
 // game server flags
 const uint32 k_unServerFlagNone			= 0x00;
@@ -198,5 +200,24 @@ struct GSClientGroupStatus_t
 	bool m_bOfficer;
 };
 
+// Sent as a reply to GetServerReputation()
+struct GSReputation_t
+{
+	enum { k_iCallback = k_iSteamGameServerCallbacks + 9 };
+	EResult	m_eResult;				// Result of the call;
+	uint32	m_unReputationScore;	// The reputation score for the game server
+	bool	m_bBanned;				// True if the server is banned from the Steam
+									// master servers
+
+	// The following members are only filled out if m_bBanned is true. They will all 
+	// be set to zero otherwise. Master server bans are by IP so it is possible to be
+	// banned even when the score is good high if there is a bad server on another port.
+	// This information can be used to determine which server is bad.
+
+	uint32	m_unBannedIP;		// The IP of the banned server
+	uint16	m_usBannedPort;		// The port of the banned server
+	uint64	m_ulBannedGameID;	// The game ID the banned server is serving
+	uint32	m_unBanExpires;		// Time the ban expires, expressed in the Unix epoch (seconds since 1/1/1970)
+};
 
 #endif // ISTEAMGAMESERVER_H

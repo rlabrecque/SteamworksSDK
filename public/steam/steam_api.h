@@ -168,7 +168,7 @@ public:
 			SteamAPI_RegisterCallResult( this, hAPICall );
 	}
 
-	bool IsActive()
+	bool IsActive() const
 	{
 		return ( m_hAPICall != 0 );
 	}
@@ -264,6 +264,7 @@ public:
 		SteamAPI_UnregisterCallback( this );
 	}
 
+	void SetGameserverFlag() { m_nCallbackFlags |= k_ECallbackFlagsGameServer; }
 private:
 	virtual void Run( void *pvParam )
 	{

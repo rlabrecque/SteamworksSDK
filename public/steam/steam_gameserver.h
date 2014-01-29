@@ -13,6 +13,7 @@
 #include "steam_api.h"
 #include "isteamgameserver.h"
 #include "isteammasterserverupdater.h"
+#include "isteamgameserverstats.h"
 
 enum EServerMode
 {
@@ -37,6 +38,7 @@ S_API ISteamGameServer *SteamGameServer();
 S_API ISteamUtils *SteamGameServerUtils();
 S_API ISteamMasterServerUpdater *SteamMasterServerUpdater();
 S_API ISteamNetworking *SteamGameServerNetworking();
+S_API ISteamGameServerStats *SteamGameServerStats();
 #endif
 
 S_API void SteamGameServer_Shutdown();
@@ -78,12 +80,14 @@ public:
 	ISteamUtils *SteamGameServerUtils() { return m_pSteamGameServerUtils; }
 	ISteamMasterServerUpdater *SteamMasterServerUpdater() { return m_pSteamMasterServerUpdater; }
 	ISteamNetworking *SteamGameServerNetworking() { return m_pSteamGameServerNetworking; }
+	ISteamGameServerStats *SteamGameServerStats() { return m_pSteamGameServerStats; }
 
 private:
 	ISteamGameServer			*m_pSteamGameServer;
 	ISteamUtils					*m_pSteamGameServerUtils;
 	ISteamMasterServerUpdater	*m_pSteamMasterServerUpdater;
 	ISteamNetworking			*m_pSteamGameServerNetworking;
+	ISteamGameServerStats		*m_pSteamGameServerStats;
 };
 
 inline CSteamGameServerAPIContext::CSteamGameServerAPIContext()
@@ -97,6 +101,7 @@ inline void CSteamGameServerAPIContext::Clear()
 	m_pSteamGameServerUtils = NULL;
 	m_pSteamMasterServerUpdater = NULL;
 	m_pSteamGameServerNetworking = NULL;
+	m_pSteamGameServerStats = NULL;
 }
 
 S_API ISteamClient *g_pSteamClientGameServer;
@@ -123,6 +128,10 @@ inline bool CSteamGameServerAPIContext::Init()
 
 	m_pSteamGameServerNetworking = g_pSteamClientGameServer->GetISteamNetworking( hSteamUser, hSteamPipe, STEAMNETWORKING_INTERFACE_VERSION );
 	if ( !m_pSteamGameServerNetworking )
+		return false;
+
+	m_pSteamGameServerStats = g_pSteamClientGameServer->GetISteamGameServerStats( hSteamUser, hSteamPipe, STEAMGAMESERVERSTATS_INTERFACE_VERSION );
+	if ( !m_pSteamGameServerStats )
 		return false;
 
 	return true;

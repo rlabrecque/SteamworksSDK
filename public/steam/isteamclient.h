@@ -19,7 +19,7 @@ typedef int32 HSteamPipe;
 // handle to single instance of a steam user
 typedef int32 HSteamUser;
 // function prototype
-#if defined( POSIX ) && !defined( _CYGWIN )
+#if defined( POSIX )
 #define __cdecl
 #endif
 extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);
@@ -37,6 +37,7 @@ class ISteamUserStats;
 class ISteamApps;
 class ISteamNetworking;
 class ISteamRemoteStorage;
+class ISteamGameServerStats;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -97,6 +98,9 @@ public:
 	// returns the ISteamUserStats interface
 	virtual ISteamUserStats *GetISteamUserStats( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
+	// returns the ISteamGameServerStats interface
+	virtual ISteamGameServerStats *GetISteamGameServerStats( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
 	// returns apps interface
 	virtual ISteamApps *GetISteamApps( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
@@ -124,7 +128,7 @@ public:
 
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient008"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient009"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -147,6 +151,9 @@ enum { k_iSteamUserItemsCallbacks = 1400 };
 enum { k_iSteamGameServerItemsCallbacks = 1500 };
 enum { k_iClientUtilsCallbacks = 1600 };
 enum { k_iSteamGameCoordinatorCallbacks = 1700 };
-
+enum { k_iSteamGameServerStatsCallbacks = 1800 };
+enum { k_iSteam2AsyncCallbacks = 1900 };
+enum { k_iSteamGameStatsCallbacks = 2000 };
+enum { k_iClientHTTPCallbacks = 2100 };
 
 #endif // ISTEAMCLIENT_H

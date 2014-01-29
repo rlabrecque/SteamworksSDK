@@ -73,9 +73,13 @@ enum EResult
 	k_EResultAdministratorOK = 46,				// allowed to take this action, but only because requester is admin
 	k_EResultContentVersion = 47,				// A Version mismatch in content transmitted within the Steam protocol.
 	k_EResultTryAnotherCM = 48,					// The current CM can't service the user making a request, user should try another.
-	k_EResultPasswordRequiredToKickSession = 49,		// You are already logged in elsewhere, this cached credential login has failed.
-	k_EResultAlreadyLoggedInElsewhere = 50		// You are already logged in elsewhere, you must wait
-
+	k_EResultPasswordRequiredToKickSession = 49,// You are already logged in elsewhere, this cached credential login has failed.
+	k_EResultAlreadyLoggedInElsewhere = 50,		// You are already logged in elsewhere, you must wait
+	k_EResultSuspended = 51,					// Long running operation (content download) suspended/paused
+	k_EResultCancelled = 52,					// Operation canceled (typically by user: content download)
+	k_EResultDataCorruption = 53,				// Operation canceled because data is ill formed or unrecoverable
+	k_EResultDiskFull = 54,						// Operation canceled - not enough disk space.
+	k_EResultRemoteCallFailed = 55,				// an remote call or IPC call failed
 };
 
 // Error codes for use with the voice functions
@@ -869,10 +873,6 @@ private:
 #pragma pack( pop )
 
 const int k_cchGameExtraInfoMax = 64;
-
-
-// Max number of credit cards stored for one account
-const int k_nMaxNumCardsPerAccount = 1;
 
 
 //-----------------------------------------------------------------------------

@@ -85,8 +85,14 @@ struct FriendGameInfo_t
 };
 
 
-// maximum number of characters in a users name
-enum { k_cchPersonaNameMax = 128 };
+// maximum number of characters in a user's name. Two flavors; one for UTF-8 and one for UTF-16.
+// The UTF-8 version has to be very generous to accomodate characters that get large when encoded
+// in UTF-8.
+enum
+{
+	k_cchPersonaNameMax = 128,
+	k_cwchPersonaNameMax = 32,
+};
 
 // size limit on chat room or member metadata
 const uint32 k_cubChatMetadataMax = 8192;

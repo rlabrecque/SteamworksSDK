@@ -497,7 +497,7 @@ void CSpaceWarClient::ReceiveNetworkData()
 	char rgchRecvBuf[MAX_SPACEWAR_PACKET_SIZE];
 	char *pchRecvBuf = rgchRecvBuf;
 	uint32 cubMsgSize;
-	while ( 1 )
+	for (;;)
 	{
 		// reset the receive buffer
 		if ( pchRecvBuf != rgchRecvBuf )
@@ -1018,8 +1018,16 @@ void CSpaceWarClient::RunFrame()
 
 		if ( m_pRemoteStorage->BFinished() )
 			SetGameState( k_EClientGameMenu );
-
 		break;
+
+	case k_EClientMinidump:
+		RaiseException( EXCEPTION_NONCONTINUABLE_EXCEPTION,
+			EXCEPTION_NONCONTINUABLE,
+			0, NULL );
+
+		SetGameState( k_EClientGameMenu );
+		break;
+
 	case k_EClientGameStartServer:
 		m_pStarField->Render();
 		if ( !m_pServer )

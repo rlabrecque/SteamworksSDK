@@ -15,6 +15,12 @@
 typedef unsigned char uint8;
 #endif
 
+#if defined( __GNUC__ ) && !defined(POSIX)
+	#if __GNUC__ < 4
+		#error "Steamworks requires GCC 4.X (4.2 or 4.4 have been tested)"
+	#endif
+	#define POSIX 1
+#endif
 
 #if defined(__x86_64__) || defined(_WIN64)
 #define X64BITS
@@ -61,12 +67,31 @@ typedef unsigned int uintp;
 const int k_cubSaltSize   = 8;
 typedef	uint8 Salt_t[ k_cubSaltSize ];
 
-typedef uint64 GID_t;		// globally unique identifier
+//-----------------------------------------------------------------------------
+// GID (GlobalID) stuff
+// This is a globally unique identifier.  It's guaranteed to be unique across all
+// racks and servers for as long as a given universe persists.
+//-----------------------------------------------------------------------------
+// NOTE: for GID parsing/rendering and other utils, see gid.h
+typedef uint64 GID_t;
+
+const GID_t k_GIDNil = 0xffffffffffffffffull;
+
+// For convenience, we define a number of types that are just new names for GIDs
+typedef GID_t JobID_t;			// Each Job has a unique ID
+typedef GID_t TxnID_t;			// Each financial transaction has a unique ID
+
+const GID_t k_TxnIDNil = k_GIDNil;
+const GID_t k_TxnIDUnknown = 0;
+
 
 // this is baked into client messages and interfaces as an int, 
 // make sure we never break this.
 typedef uint32 PackageId_t;
+const PackageId_t k_uPackageIdFreeSub = 0x0;
 const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
+const PackageId_t k_uPackageIdWallet = 0xFFFFFFFE;
+const PackageId_t k_uPackageIdMicroTxn = 0xFFFFFFFD;
 
 
 // this is baked into client messages and interfaces as an int, 

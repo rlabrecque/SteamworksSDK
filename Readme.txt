@@ -1,6 +1,6 @@
 ================================================================
 
-Copyright © 1996-2009, Valve Corporation, All rights reserved.
+Copyright © 1996-2010, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -11,10 +11,29 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+----------------------------------------------------------------
+v1.08	27st January 2010
+----------------------------------------------------------------
+
+Matchmaking
+* added function ISteamMatching::AddRequestLobbyListDistanceFilter(), to specify how far geographically you want to search for other lobbies
+* added function ISteamMatching::AddRequestLobbyListResultCountFilter(), to specify how the maximum number of lobby you results you need (less is faster)
+
+Stats & Achievements
+* added interface ISteamGameServerStats, which enables access to stats and achievements for users to the game server
+* removed function ISteamGameServer::BGetUserAchievementStatus(), now handled by ISteamGameServerStats
+* added ISteamUserStats::GetAchievementAndUnlockTime(), which returns if and when a user unlocked an achievement
+
+Other
+* added new constant k_cwchPersonaNameMax (32), which is the maximum number of unicode characters a users name can be
+* removed ISteamRemoteStorage::FileDelete() - NOTE: it will be back, it's only removed since it hadn't been implemented on the back-end yet
+* added function ISteamGameServer::GetServerReputation(), gives returns a game server reputation score based on how long users typically play on the server
+
 
 ----------------------------------------------------------------
 v1.07	16th December 2009
 ----------------------------------------------------------------
+
 * Replaced SteamAPI_RestartApp() with SteamAPI_RestartAppIfNecessary(). This new function detects if the process was started through Steam, and starts the current game through Steam if necessary.
 * Added ISteamUtils::BOverlayNeedsPresent() so games with event driven rendering can determine when the Steam overlay needs to draw
 
