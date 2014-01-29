@@ -241,6 +241,10 @@ public:
 	//		"jointrade" - opens a window to a Steam Trading session that was started with the ISteamEconomy/StartTrade Web API
 	//		"stats" - opens the overlay web browser to the specified user's stats
 	//		"achievements" - opens the overlay web browser to the specified user's achievements
+	//		"friendadd" - opens the overlay in minimal mode prompting the user to add the target user as a friend
+	//		"friendremove" - opens the overlay in minimal mode prompting the user to remove the target friend
+	//		"friendrequestaccept" - opens the overlay in minimal mode prompting the user to accept an incoming friend invite
+	//		"friendrequestignore" - opens the overlay in minimal mode prompting the user to ignore an incoming friend invite
 	virtual void ActivateGameOverlayToUser( const char *pchDialog, CSteamID steamID ) = 0;
 
 	// activates game overlay web browser directly to the specified URL

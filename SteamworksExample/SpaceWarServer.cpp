@@ -33,7 +33,7 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 	m_bConnectedToSteam = false;
 
 
-	char *pchGameDir = "spacewar";
+	const char *pchGameDir = "spacewar";
 	uint32 unIP = INADDR_ANY;
 	uint16 usMasterServerUpdaterPort = SPACEWAR_MASTER_SERVER_UPDATER_PORT;
 
@@ -620,7 +620,7 @@ void CSpaceWarServer::ReceiveNetworkData()
 			}
 		default:
 			char rgch[128];
-			_snprintf( rgch, 128, "Invalid message %x\n", eMsg );
+			sprintf_safe( rgch, "Invalid message %x\n", eMsg );
 			rgch[ sizeof(rgch) - 1 ] = 0;
 			OutputDebugString( rgch );
 		}
@@ -887,7 +887,7 @@ void CSpaceWarServer::OnPolicyResponse( GSPolicyResponse_t *pPolicyResponse )
 		OutputDebugString( "SpaceWarServer is not VAC Secure!\n" );
 	}
 	char rgch[128];
-	_snprintf( rgch, 128, "Game server SteamID: %llu\n", SteamGameServer()->GetSteamID().ConvertToUint64() );
+	sprintf_safe( rgch, "Game server SteamID: %llu\n", SteamGameServer()->GetSteamID().ConvertToUint64() );
 	rgch[ sizeof(rgch) - 1 ] = 0;
 	OutputDebugString( rgch );
 #endif
@@ -926,11 +926,11 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 	{
 		// If a client is running (should always be since we don't support a dedicated server)
 		// then we'll form the name based off of it
-		_snprintf( rgchServerName, ARRAYSIZE( rgchServerName ), "%s's game", SpaceWarClient()->GetLocalPlayerName() );
+		sprintf_safe( rgchServerName, "%s's game", SpaceWarClient()->GetLocalPlayerName() );
 	}
 	else
 	{
-		_snprintf( rgchServerName, ARRAYSIZE( rgchServerName ), "%s", "Spacewar!" );
+		sprintf_safe( rgchServerName, "%s", "Spacewar!" );
 	}
 	m_sServerName = rgchServerName;
 

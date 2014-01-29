@@ -305,9 +305,9 @@ void CStatsAndAchievements::OnUserStatsReceived( UserStatsReceived_t *pCallback 
 			{
 				Achievement_t &ach = g_rgAchievements[iAch];
 				m_pSteamUserStats->GetAchievement( ach.m_pchAchievementID, &ach.m_bAchieved );
-				_snprintf( ach.m_rgchName, sizeof( ach.m_rgchName ), "%s", 
+				sprintf_safe( ach.m_rgchName, "%s", 
 					m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "name" ) );
-				_snprintf( ach.m_rgchDescription, sizeof( ach.m_rgchDescription ), "%s", 
+				sprintf_safe( ach.m_rgchDescription, "%s", 
 					m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "desc" ) );			
 			}
 
@@ -324,7 +324,7 @@ void CStatsAndAchievements::OnUserStatsReceived( UserStatsReceived_t *pCallback 
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, sizeof(buffer), "RequestStats - failed, %d\n", pCallback->m_eResult );
+			sprintf_safe( buffer, "RequestStats - failed, %d\n", pCallback->m_eResult );
 			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
@@ -359,7 +359,7 @@ void CStatsAndAchievements::OnUserStatsStored( UserStatsStored_t *pCallback )
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, sizeof(buffer), "StoreStats - failed, %d\n", pCallback->m_eResult );
+			sprintf_safe( buffer, "StoreStats - failed, %d\n", pCallback->m_eResult );
 			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
@@ -377,14 +377,14 @@ void CStatsAndAchievements::OnAchievementStored( UserAchievementStored_t *pCallb
 		if ( 0 == pCallback->m_nMaxProgress )
 		{
 			char buffer[128];
-			_snprintf( buffer, sizeof(buffer), "Achievement '%s' unlocked!", pCallback->m_rgchAchievementName );
+			sprintf_safe( buffer, "Achievement '%s' unlocked!", pCallback->m_rgchAchievementName );
 			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
 		}
 		else
 		{
 			char buffer[128];
-			_snprintf( buffer, sizeof(buffer), "Achievement '%s' progress callback, (%d,%d)\n", 
+			sprintf_safe( buffer, "Achievement '%s' progress callback, (%d,%d)\n", 
 				pCallback->m_rgchAchievementName, pCallback->m_nCurProgress, pCallback->m_nMaxProgress );
 			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
@@ -407,9 +407,9 @@ void CStatsAndAchievements::OnPS3TrophiesInstalled( PS3TrophiesInstalled_t *pCal
 			// could not display that error, you should display the appropriate message to the user then exit.
 			char buffer[256];
 			if ( pCallback->m_eResult == k_EResultDiskFull )
-				_snprintf( buffer, 256, "Failed to install PS3 trophies because the HD is full (required space=%llu)\n", pCallback->m_ulRequiredDiskSpace );
+				sprintf_safe( buffer, "Failed to install PS3 trophies because the HD is full (required space=%llu)\n", pCallback->m_ulRequiredDiskSpace );
 			else
-				_snprintf( buffer, 256, "Failed to install PS3 trophies (%d)", pCallback->m_eResult );
+				sprintf_safe( buffer, "Failed to install PS3 trophies (%d)", pCallback->m_eResult );
 
 			buffer[ sizeof(buffer) - 1 ] = 0;
 			OutputDebugString( buffer );
@@ -442,7 +442,7 @@ void CStatsAndAchievements::Render()
 		rect.right = width;
 
 		char rgchBuffer[256];
-		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Unable to retrieve data from Steam\n" );
+		sprintf_safe( rgchBuffer, "Unable to retrieve data from Steam\n" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 
@@ -451,7 +451,7 @@ void CStatsAndAchievements::Render()
 		rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
-		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 	}
@@ -541,7 +541,7 @@ void CStatsAndAchievements::Render()
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
 		char rgchBuffer[256];
-		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 	}
@@ -570,7 +570,7 @@ void CStatsAndAchievements::DrawAchievementInfo( RECT &rect, Achievement_t &ach 
 
 	// todo: divide up so can draw image
 	char rgchBuffer[256];
-	_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s: %s\n%s", 
+	sprintf_safe( rgchBuffer, "%s: %s\n%s", 
 		ach.m_rgchName,
 		ach.m_bAchieved ? "Unlocked" : "Locked",
 		ach.m_rgchDescription );
@@ -582,7 +582,7 @@ void CStatsAndAchievements::DrawStatInfo( RECT &rect, const char *pchName, float
 {
 	// todo: divide up so can draw image
 	char rgchBuffer[256];
-	_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s: %.1f", pchName, flValue );
+	sprintf_safe( rgchBuffer, "%s: %.1f", pchName, flValue );
 	m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
 }
 

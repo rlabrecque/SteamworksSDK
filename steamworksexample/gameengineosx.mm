@@ -1744,7 +1744,7 @@ HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint
 //-----------------------------------------------------------------------------
 // Purpose: Creates a new font
 //-----------------------------------------------------------------------------
-HGAMEFONT CGameEngineGL::HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont )
+HGAMEFONT CGameEngineGL::HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont )
 {
 	#if DX9MODE
 		extern unsigned char g_glmDebugFontMap[ 128 * 128 ];		// raster order

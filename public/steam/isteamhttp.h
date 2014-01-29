@@ -87,7 +87,7 @@ public:
 	// the correct buffer size to use.
 	virtual bool GetHTTPResponseBodyData( HTTPRequestHandle hRequest, uint8 *pBodyDataBuffer, uint32 unBufferSize ) = 0;
 
-	// Gets the body data from a streaming HTTP response given a handle from HTTPRequestCompleted_t. Will return false if the 
+	// Gets the body data from a streaming HTTP response given a handle from HTTPRequestDataReceived_t. Will return false if the 
 	// handle is invalid or is to a non-streaming response (meaning it wasn't sent with SendHTTPRequestAndStreamResponse), or if the buffer size and offset 
 	// do not match the size and offset sent in HTTPRequestDataReceived_t.
 	virtual bool GetHTTPStreamingResponseBodyData( HTTPRequestHandle hRequest, uint32 cOffset, uint8 *pBodyDataBuffer, uint32 unBufferSize ) = 0;

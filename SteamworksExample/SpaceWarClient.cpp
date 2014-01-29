@@ -506,7 +506,7 @@ void CSpaceWarClient::SetGameState( EClientGameState eState )
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::SetConnectionFailureText( const char *pchErrorText )
 {
-	_snprintf( m_rgchErrorText, sizeof( m_rgchErrorText ), "%s", pchErrorText );
+	sprintf_safe( m_rgchErrorText, "%s", pchErrorText );
 }
 
 
@@ -690,7 +690,7 @@ void CSpaceWarClient::ReceiveNetworkData()
 				{
 					uint64 ulTimePassedMS = m_pGameEngine->GetGameTickCount() - m_ulPingSentTime;
 					char rgchT[256];
-					_snprintf( rgchT, sizeof(rgchT), "Round-trip ping time to server %d ms\n", (int)ulTimePassedMS );
+					sprintf_safe( rgchT, "Round-trip ping time to server %d ms\n", (int)ulTimePassedMS );
 					rgchT[ sizeof(rgchT) - 1 ] = 0;
 					OutputDebugString( rgchT );
 					m_ulPingSentTime = 0;
@@ -785,7 +785,7 @@ void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback, bool bIOFailure
 
 		// set the name of the lobby if it's ours
 		char rgchLobbyName[256];
-		_snprintf( rgchLobbyName, sizeof( rgchLobbyName ), "%s's lobby", SteamFriends()->GetPersonaName() );
+		sprintf_safe( rgchLobbyName, "%s's lobby", SteamFriends()->GetPersonaName() );
 		SteamMatchmaking()->SetLobbyData( m_steamIDLobby, "name", rgchLobbyName );
 
 		// mark that we're in the lobby
@@ -1074,8 +1074,7 @@ void CSpaceWarClient::OnGameWebCallback( GameWebCallback_t *callback )
 {
 	m_bSentWebOpen = false;
 	char rgchString[256];
-	_snprintf( rgchString, sizeof(rgchString), "User submitted following url: %s\n", callback->m_szURL );
-	rgchString[ sizeof(rgchString) - 1 ] = 0;
+	sprintf_safe( rgchString, "User submitted following url: %s\n", callback->m_szURL );
 	OutputDebugString( rgchString );
 }
 
@@ -1086,7 +1085,7 @@ void CSpaceWarClient::OnGameWebCallback( GameWebCallback_t *callback )
 void CSpaceWarClient::OnSteamServerConnectFailure( SteamServerConnectFailure_t *callback )
 {
 	char rgchString[256];
-	_snprintf( rgchString, 256, "SteamServerConnectFailure_t: %d\n", callback->m_eResult );
+	sprintf_safe( rgchString, "SteamServerConnectFailure_t: %d\n", callback->m_eResult );
 
 	m_pConnectingMenu->OnConnectFailure();
 }
@@ -1380,7 +1379,7 @@ void CSpaceWarClient::RunFrame()
 			char szCurDir[MAX_PATH];
 			_getcwd( szCurDir, sizeof(szCurDir) );
 			char szURL[MAX_PATH];
-			_snprintf( szURL, sizeof(szURL), "file:///%s/test.html", szCurDir );
+			sprintf_safe( szURL, "file:///%s/test.html", szCurDir );
 			// load the test html page, it just has a steam://gamewebcallback link in it
 			SteamFriends()->ActivateGameOverlayToWebPage( szURL );
 			SetGameState( k_EClientGameMenu );
@@ -1514,18 +1513,18 @@ void CSpaceWarClient::DrawHUDText()
 
 		if ( m_rgSteamIDPlayers[i].IsValid() )
 		{
-			_snprintf( rgchPlayerName, ARRAYSIZE( rgchPlayerName ), "%s", SteamFriends()->GetFriendPersonaName( playerSteamID ) );
+			sprintf_safe( rgchPlayerName, "%s", SteamFriends()->GetFriendPersonaName( playerSteamID ) );
 		}
 		else
 		{
-			_snprintf( rgchPlayerName, ARRAYSIZE( rgchPlayerName ), "Unknown Player" );
+			sprintf_safe( rgchPlayerName, "Unknown Player" );
 		}
 
 		// We also want to use the Steam Avatar image inside the HUD if it is available.
 		// We look it up via GetMediumFriendAvatar, which returns an image index we use
 		// to look up the actual RGBA data below.
 		int iImage = SteamFriends()->GetMediumFriendAvatar( playerSteamID );
-		HGAMETEXTURE hTexture = NULL;
+		HGAMETEXTURE hTexture = 0;
 		if ( iImage != -1 )
 			hTexture = GetSteamImageAsTexture( iImage );
 
@@ -1546,7 +1545,7 @@ void CSpaceWarClient::DrawHUDText()
 				rect.right += nAvatarWidth + nSpaceBetweenAvatarAndScore;
 			}
 			
-			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
+			sprintf_safe( rgchBuffer, "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
 			m_pGameEngine->BDrawString( m_hHUDFont, rect, g_rgPlayerColors[i], TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
 			break;
 		case 1:
@@ -1564,7 +1563,7 @@ void CSpaceWarClient::DrawHUDText()
 				rect.left -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
 			}
 
-			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u ", rgchPlayerName, m_rguPlayerScores[i] );
+			sprintf_safe( rgchBuffer, "%s\nScore: %2u ", rgchPlayerName, m_rguPlayerScores[i] );
 			m_pGameEngine->BDrawString( m_hHUDFont, rect, g_rgPlayerColors[i], TEXTPOS_RIGHT|TEXTPOS_VCENTER, rgchBuffer );
 			break;
 		case 2:
@@ -1581,7 +1580,7 @@ void CSpaceWarClient::DrawHUDText()
 				rect.left += nAvatarWidth + nSpaceBetweenAvatarAndScore;
 			}
 
-			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
+			sprintf_safe( rgchBuffer, "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
 			m_pGameEngine->BDrawString( m_hHUDFont, rect, g_rgPlayerColors[i], TEXTPOS_LEFT|TEXTPOS_BOTTOM, rgchBuffer );
 			break;
 		case 3:
@@ -1598,7 +1597,7 @@ void CSpaceWarClient::DrawHUDText()
 				rect.left -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
 			}
 
-			_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
+			sprintf_safe( rgchBuffer, "%s\nScore: %2u %s", rgchPlayerName, m_rguPlayerScores[i], pszVoiceState );
 			m_pGameEngine->BDrawString( m_hHUDFont, rect, g_rgPlayerColors[i], TEXTPOS_RIGHT|TEXTPOS_BOTTOM, rgchBuffer );
 			break;
 		default:
@@ -1624,9 +1623,9 @@ void CSpaceWarClient::DrawInstructions()
 
 	char rgchBuffer[256];
 #ifdef _PS3
-	_snprintf( rgchBuffer, sizeof( rgchBuffer), "Turn Ship Left: 'Left'\nTurn Ship Right: 'Right'\nForward Thrusters: 'R2'\nReverse Thrusters: 'L2'\nFire Photon Beams: 'Cross'" );
+	sprintf_safe( rgchBuffer, "Turn Ship Left: 'Left'\nTurn Ship Right: 'Right'\nForward Thrusters: 'R2'\nReverse Thrusters: 'L2'\nFire Photon Beams: 'Cross'" );
 #else
-	_snprintf( rgchBuffer, sizeof( rgchBuffer), "Turn Ship Left: 'A'\nTurn Ship Right: 'D'\nForward Thrusters: 'W'\nReverse Thrusters: 'S'\nFire Photon Beams: 'Space'" );
+	sprintf_safe( rgchBuffer, "Turn Ship Left: 'A'\nTurn Ship Right: 'D'\nForward Thrusters: 'W'\nReverse Thrusters: 'S'\nFire Photon Beams: 'Space'" );
 #endif
 
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
@@ -1637,7 +1636,7 @@ void CSpaceWarClient::DrawInstructions()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
+	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 }
@@ -1660,16 +1659,16 @@ void CSpaceWarClient::DrawConnectionAttemptText()
 
 	char rgchTimeoutString[256];
 	if ( uSecondsLeft < 25 )
-		_snprintf( rgchTimeoutString, sizeof( rgchTimeoutString ), ", timeout in %u...\n", uSecondsLeft );
+		sprintf_safe( rgchTimeoutString, ", timeout in %u...\n", uSecondsLeft );
 	else
-		_snprintf( rgchTimeoutString, sizeof( rgchTimeoutString ), "...\n" );
+		sprintf_safe( rgchTimeoutString, "...\n" );
 		
 
 	char rgchBuffer[256];
 	if ( m_eGameState == k_EClientJoiningLobby )
-		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Connecting to lobby%s", rgchTimeoutString );
+		sprintf_safe( rgchBuffer, "Connecting to lobby%s", rgchTimeoutString );
 	else
-		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Connecting to server%s", rgchTimeoutString );
+		sprintf_safe( rgchBuffer, "Connecting to server%s", rgchTimeoutString );
 
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 }
@@ -1689,7 +1688,7 @@ void CSpaceWarClient::DrawConnectionFailureText()
 	rect.right = width;
 
 	char rgchBuffer[256];
-	_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s\n", m_rgchErrorText );
+	sprintf_safe( rgchBuffer, "%s\n", m_rgchErrorText );
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 	rect.left = 0;
@@ -1697,7 +1696,7 @@ void CSpaceWarClient::DrawConnectionFailureText()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
+	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 }
 
@@ -1718,12 +1717,12 @@ void CSpaceWarClient::DrawWinnerDrawOrWaitingText()
 	char rgchBuffer[256];
 	if ( m_eGameState == k_EClientGameWaitingForPlayers )
 	{
-		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Server is waiting for players.\n\nStarting in %d seconds...", nSecondsToRestart );
+		sprintf_safe( rgchBuffer, "Server is waiting for players.\n\nStarting in %d seconds...", nSecondsToRestart );
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 	} 
 	else if ( m_eGameState == k_EClientGameDraw )
 	{
-		_snprintf( rgchBuffer, sizeof( rgchBuffer), "The round is a draw!\n\nStarting again in %d seconds...", nSecondsToRestart );
+		sprintf_safe( rgchBuffer, "The round is a draw!\n\nStarting again in %d seconds...", nSecondsToRestart );
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 	} 
 	else if ( m_eGameState == k_EClientGameWinner )
@@ -1737,14 +1736,14 @@ void CSpaceWarClient::DrawWinnerDrawOrWaitingText()
 		char rgchPlayerName[128];
 		if ( m_rgSteamIDPlayers[m_uPlayerWhoWonGame].IsValid() )
 		{
-			_snprintf( rgchPlayerName, ARRAYSIZE( rgchPlayerName ), "%s", SteamFriends()->GetFriendPersonaName( m_rgSteamIDPlayers[m_uPlayerWhoWonGame] ) );
+			sprintf_safe( rgchPlayerName, "%s", SteamFriends()->GetFriendPersonaName( m_rgSteamIDPlayers[m_uPlayerWhoWonGame] ) );
 		}
 		else
 		{
-			_snprintf( rgchPlayerName, ARRAYSIZE( rgchPlayerName ), "Unknown Player" );
+			sprintf_safe( rgchPlayerName, "Unknown Player" );
 		}
 
-		_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s wins!\n\nStarting again in %d seconds...", rgchPlayerName, nSecondsToRestart );
+		sprintf_safe( rgchBuffer, "%s wins!\n\nStarting again in %d seconds...", rgchPlayerName, nSecondsToRestart );
 		
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 	}
@@ -1798,7 +1797,7 @@ float CSpaceWarClient::PixelsToFeet( float flPixels )
 //-----------------------------------------------------------------------------
 HGAMETEXTURE CSpaceWarClient::GetSteamImageAsTexture( int iImage )
 {
-	HGAMETEXTURE hTexture = NULL;
+	HGAMETEXTURE hTexture = 0;
 
 	// iImage of 0 from steam means no avatar is set
 	if ( iImage )
@@ -1917,12 +1916,12 @@ void CSpaceWarClient::UpdateRichPresenceConnectionInfo()
 	if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated && m_unServerIP && m_usServerPort )
 	{
 		// game server connection method
-		_snprintf( rgchConnectString, sizeof(rgchConnectString), "+connect %d:%d", m_unServerIP, m_usServerPort );
+		sprintf_safe( rgchConnectString, "+connect %d:%d", m_unServerIP, m_usServerPort );
 	}
 	else if ( m_steamIDLobby.IsValid() )
 	{
 		// lobby connection method
-		_snprintf( rgchConnectString, sizeof(rgchConnectString), "+connect_lobby %llu", m_steamIDLobby.ConvertToUint64() );
+		sprintf_safe( rgchConnectString, "+connect_lobby %llu", m_steamIDLobby.ConvertToUint64() );
 	}
 
 	SteamFriends()->SetRichPresence( "connect", rgchConnectString );
@@ -1942,7 +1941,7 @@ void CSpaceWarClient::ExecCommandLineConnect( const char *pchServerAddress, cons
 		if ( nConverted == 5 )
 		{
 			char rgchIPAddress[128];
-			_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
+			sprintf_safe( rgchIPAddress, "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
 			uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
 			InitiateServerConnection( unIPAddress, uPort );
 		}

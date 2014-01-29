@@ -5,6 +5,7 @@
 //=============================================================================
 
 #include "stdafx.h"
+#include "steam/steam_api.h"
 
 #if defined(WIN32)
     #include "gameenginewin32.h"
@@ -12,6 +13,9 @@
 #elif defined(OSX)
 	#include "GameEngine.h"
 	extern IGameEngine *CreateGameEngineOSX();
+#elif defined(SDL)
+	#include "GameEngine.h"
+	extern IGameEngine *CreateGameEngineSDL();
 #endif
 
 #include "SpaceWarClient.h"
@@ -208,6 +212,10 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
         new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
 #elif defined(OSX)
         CreateGameEngineOSX();
+#elif defined(SDL)
+	CreateGameEngineSDL();
+#else
+#error	Need CreateGameEngine()
 #endif
     
 	// This call will block and run until the game exits
@@ -285,6 +293,29 @@ int main(int argc, const char **argv)
     
     szCmdLine[Q_ARRAYSIZE(szCmdLine) - 1] = '\0';
     
+    return RealMain( szCmdLine, 0, 0 );
+}
+#endif
+#ifdef SDL
+int main(int argc, const char **argv)
+{
+    char szCmdLine[1024];
+    char *pszStart = szCmdLine;
+    char * const pszEnd = szCmdLine + Q_ARRAYSIZE(szCmdLine);
+    *szCmdLine = '\0';
+    for ( int i = 1; i < argc; i++ )
+    {
+        const char *parm = argv[i];
+        while ( *parm && (pszStart < pszEnd) )
+        {
+            *pszStart++ = *parm++;
+        }
+        if ( pszStart >= pszEnd )
+            break;
+        if ( i < argc-1 )
+            *pszStart++ = ' ';
+    }
+    szCmdLine[Q_ARRAYSIZE(szCmdLine) - 1] = '\0';
     return RealMain( szCmdLine, 0, 0 );
 }
 #endif

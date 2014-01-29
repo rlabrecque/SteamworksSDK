@@ -97,7 +97,7 @@ void CVoiceChat::RunFrame()
 					const uint8* pVoiceData = (const uint8*) buffer;
 					pVoiceData += sizeof(MsgVoiceChatData_t);
 
-					EVoiceResult res = SteamUser()->DecompressVoice( pVoiceData , nBytesWritten,
+					res = SteamUser()->DecompressVoice( pVoiceData , nBytesWritten,
 						m_ubUncompressedVoice, sizeof( m_ubUncompressedVoice ), &numUncompressedBytes, VOICE_OUTPUT_SAMPLE_RATE );
 
 					if ( res == k_EVoiceResultOK && numUncompressedBytes > 0 )
@@ -193,7 +193,7 @@ void CVoiceChat::MarkPlayerAsActive( CSteamID steamID )
 	}
 
 	/*char szText[100];
-	_snprintf(szText, 100, "CVoiceChat::AddPlayerToSession: %s.\n", SteamFriends()->GetFriendPersonaName( steamID ) );
+	sprintf_safe(szText, "CVoiceChat::AddPlayerToSession: %s.\n", SteamFriends()->GetFriendPersonaName( steamID ) );
 	OutputDebugString( szText ); */
 
 	VoiceChatConnection_t session;

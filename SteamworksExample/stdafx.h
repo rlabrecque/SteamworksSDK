@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <stdarg.h>
 
 #define MAX(a,b)  (((a) > (b)) ? (a) : (b))
 #define MIN(a,b)  (((a) < (b)) ? (a) : (b))
@@ -73,8 +75,10 @@ typedef unsigned __int64 uint64;
 
 #elif defined(POSIX)
 
+#include <limits.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include <string>
 #include <sys/socket.h>
@@ -183,14 +187,38 @@ extern void OutputDebugString( const char *pchMsg );
 extern int Alert( const char *lpCaption, const char *lpText );
 extern const char *GetUserSaveDataPath();
 
-// No _snprintf on POSIX, use snprintf
-#ifndef _snprintf
-#define _snprintf snprintf
-#endif
-
 #define Q_ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
 
 #endif	// POSIX
+
+// OUT_Z_ARRAY indicates an output array that will be null-terminated.
+#if _MSC_VER >= 1600
+       // Include the annotation header file.
+       #include <sal.h>
+       #if _MSC_VER >= 1700
+              // VS 2012+
+              #define OUT_Z_ARRAY _Post_z_
+       #else
+              // VS 2010
+              #define OUT_Z_ARRAY _Deref_post_z_
+       #endif
+#else
+       // gcc, clang, old versions of VS
+       #define OUT_Z_ARRAY
+#endif
+ 
+template <size_t maxLenInChars> void sprintf_safe(OUT_Z_ARRAY char (&pDest)[maxLenInChars], const char *pFormat, ... )
+{
+	va_list params;
+	va_start( params, pFormat );
+#ifdef POSIX
+	vsnprintf( pDest, maxLenInChars, pFormat, params );
+#else
+	_vsnprintf( pDest, maxLenInChars, pFormat, params );
+#endif
+	pDest[maxLenInChars - 1] = '\0';
+	va_end( params );
+}
 
 #ifdef STEAM_CEG
 // Steam DRM header file

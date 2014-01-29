@@ -5,7 +5,7 @@
 //=============================================================================
 
 #include "stdafx.h"
-#include "leaderboards.h"
+#include "Leaderboards.h"
 #include "BaseMenu.h"
 #include <math.h>
 
@@ -124,7 +124,7 @@ public:
 			{
 				char rgchMenuText[256];
 				const char *pchName = SteamFriends()->GetFriendPersonaName( m_leaderboardEntries[index].m_steamIDUser );
-				_snprintf( rgchMenuText, sizeof( rgchMenuText ), "(%d) %s - %d", m_leaderboardEntries[index].m_nGlobalRank, 
+				sprintf_safe( rgchMenuText, "(%d) %s - %d", m_leaderboardEntries[index].m_nGlobalRank, 
 					pchName, m_leaderboardEntries[index].m_nScore );
 
 				AddMenuItem( MenuItem_t( std::string( rgchMenuText ), menuItemEmpty ) );

@@ -158,6 +158,14 @@ public:
 	// retrieve a finished ticket
 	virtual bool GetEncryptedAppTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
 
+	// Trading Card badges data access
+	// if you only have one set of cards, the series will be 1
+	// the user has can have two different badges for a series; the regular (max level 5) and the foil (max level 1)
+	virtual int GetGameBadgeLevel( int nSeries, bool bFoil ) = 0;
+
+	// gets the Steam Level of the user, as shown on their profile
+	virtual int GetPlayerSteamLevel() = 0;
+
 #ifdef _PS3
 	// Initiates PS3 Logon request using just PSN ticket.  
 	//
@@ -197,7 +205,7 @@ public:
 
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser016"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser017"
 
 
 // callbacks

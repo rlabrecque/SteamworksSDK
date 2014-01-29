@@ -20,7 +20,7 @@
 // interface layer, no need to include anything about the implementation.
 
 #include "steamtypes.h"
-
+#include "steamuniverse.h"
 
 // General result codes
 enum EResult
@@ -178,18 +178,6 @@ typedef enum
 } EUserHasLicenseForAppResult;
 
 
-// Steam universes.  Each universe is a self-contained Steam instance.
-enum EUniverse
-{
-	k_EUniverseInvalid = 0,
-	k_EUniversePublic = 1,
-	k_EUniverseBeta = 2,
-	k_EUniverseInternal = 3,
-	k_EUniverseDev = 4,
-	// k_EUniverseRC = 5,				// no such universe anymore
-	k_EUniverseMax
-};
-
 // Steam account types
 enum EAccountType
 {
@@ -235,6 +223,9 @@ enum EAppOwernshipFlags
 	k_EAppOwernshipFlags_RegionRestricted	= 4,	// owns app, but not allowed to play in current region
 	k_EAppOwernshipFlags_LowViolence		= 8,	// only low violence version
 	k_EAppOwernshipFlags_InvalidPlatform	= 16,	// app not supported on current platform
+	k_EAppOwernshipFlags_SharedLicense		= 32,	// license was granted by authorized local device
+	k_EAppOwernshipFlags_FreeWeekend		= 64,	// owned by a free weekend licenses
+	k_EAppOwernshipFlags_LicenseLocked		= 128,	// shared license is locked (in use) by other user
 };
 
 
@@ -252,7 +243,8 @@ enum EAppType
 	k_EAppType_DLC					= 0x020,	// down loadable content
 	k_EAppType_Guide				= 0x040,	// game guide, PDF etc
 	k_EAppType_Driver				= 0x080,	// hardware driver updater (ATI, Razor etc)
-	
+	k_EAppType_Config				= 0x100,	// hidden app used to config Steam features (backpack, sales, etc)
+		
 	k_EAppType_Shortcut				= 0x40000000,	// just a shortcut, client side only
 	k_EAppType_DepotOnly			= 0x80000000,	// placeholder since depots and apps share the same namespace
 };
@@ -448,6 +440,12 @@ public:
 	{
 		SetFromUint64( ulSteamID );
 	}
+#ifdef INT64_DIFFERENT_FROM_INT64_T
+	CSteamID( uint64_t ulSteamID )
+	{
+		SetFromUint64( (uint64)ulSteamID );
+	}
+#endif
 
 
 	//-----------------------------------------------------------------------------
@@ -509,6 +507,18 @@ public:
 	void SetFromUint64( uint64 ulSteamID )
 	{
 		m_steamid.m_unAll64Bits = ulSteamID;
+	}
+
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Clear all fields, leaving an invalid ID.
+	//-----------------------------------------------------------------------------
+    void Clear()
+	{
+		m_steamid.m_comp.m_unAccountID = 0;
+		m_steamid.m_comp.m_EAccountType = k_EAccountTypeInvalid;
+		m_steamid.m_comp.m_EUniverse = k_EUniverseInvalid;
+		m_steamid.m_comp.m_unAccountInstance = 0;
 	}
 
 
@@ -708,6 +718,12 @@ public:
 	static const char * Render( uint64 ulSteamID );	// static method to render a uint64 representation of a steam ID to a string
 
 	void SetFromString( const char *pchSteamID, EUniverse eDefaultUniverse );
+    // SetFromString allows many partially-correct strings, constraining how
+    // we might be able to change things in the future.
+    // SetFromStringStrict requires the exact string forms that we support
+    // and is preferred when the caller knows it's safe to be strict.
+    // Returns whether the string parsed correctly.
+	bool SetFromStringStrict( const char *pchSteamID, EUniverse eDefaultUniverse );
 	bool SetFromSteam2String( const char *pchSteam2ID, EUniverse eUniverse );
 
 	inline bool operator==( const CSteamID &val ) const { return m_steamid.m_unAll64Bits == val.m_steamid.m_unAll64Bits; } 
@@ -826,6 +842,12 @@ public:
 	{
 		m_ulGameID = ulGameID;
 	}
+#ifdef INT64_DIFFERENT_FROM_INT64_T
+	CGameID( uint64_t ulGameID )
+	{
+		m_ulGameID = (uint64)ulGameID;
+	}
+#endif
 
 	explicit CGameID( int32 nAppID )
 	{

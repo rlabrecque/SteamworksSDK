@@ -49,7 +49,7 @@ public:
 				LobbyMenuItem_t menuItem = { steamIDLobbyMember, LobbyMenuItem_t::k_ELobbyMenuItemUser };
 
 				char rgchMenuText[256];
-				_snprintf( rgchMenuText, sizeof( rgchMenuText ), "%s %s", pchName, bReady ? "(READY)" : "" );
+				sprintf_safe( rgchMenuText, "%s %s", pchName, bReady ? "(READY)" : "" );
 				AddMenuItem( MenuItem_t( std::string( rgchMenuText ), menuItem ) );
 			}
 		}
@@ -327,14 +327,14 @@ void CLobbyBrowser::OnLobbyMatchListCallback( LobbyMatchList_t *pCallback, bool 
 		if ( pchLobbyName && pchLobbyName[0] )
 		{
 			// set the lobby name
-			_snprintf( lobby.m_rgchName, sizeof( lobby.m_rgchName ), "%s", pchLobbyName );
+			sprintf_safe( lobby.m_rgchName, "%s", pchLobbyName );
 		}
 		else
 		{
 			// we don't have info about the lobby yet, request it
 			SteamMatchmaking()->RequestLobbyData( steamIDLobby );
 			// results will be returned via LobbyDataUpdate_t callback
-			_snprintf( lobby.m_rgchName, sizeof( lobby.m_rgchName ), "Lobby %d", steamIDLobby.GetAccountID() );
+			sprintf_safe( lobby.m_rgchName, "Lobby %d", steamIDLobby.GetAccountID() );
 		}
 
 		m_ListLobbies.push_back( lobby );
@@ -360,7 +360,7 @@ void CLobbyBrowser::OnLobbyDataUpdatedCallback( LobbyDataUpdate_t *pCallback )
 			const char *pchLobbyName = SteamMatchmaking()->GetLobbyData( iter->m_steamIDLobby, "name" );
 			if ( pchLobbyName[0] )
 			{
-				_snprintf( iter->m_rgchName, sizeof( iter->m_rgchName ), "%s", pchLobbyName );
+				sprintf_safe( iter->m_rgchName, "%s", pchLobbyName );
 				// update the menu
 				m_pMenu->Rebuild( m_ListLobbies );
 			}

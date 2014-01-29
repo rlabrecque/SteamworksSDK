@@ -1537,7 +1537,7 @@ HGAMETEXTURE CGameEngineWin32::HCreateTexture( byte *pRGBAData, uint32 uWidth, u
 //-----------------------------------------------------------------------------
 // Purpose: Creates a new font
 //-----------------------------------------------------------------------------
-HGAMEFONT CGameEngineWin32::HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont )
+HGAMEFONT CGameEngineWin32::HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont )
 {
 	if ( !m_pD3D9Device )
 		return 0;

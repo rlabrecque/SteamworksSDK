@@ -27,7 +27,7 @@ CGameServer::CGameServer( gameserveritem_t *pGameServerItem )
 	m_bSecure = pGameServerItem->m_bSecure;
 	m_nServerVersion = pGameServerItem->m_nServerVersion;
 	strncpy( m_szServerName, pGameServerItem->GetName(), ARRAYSIZE( m_szServerName ) );
-	_snprintf( m_szServerString, ARRAYSIZE( m_szServerString ), "%s (%i/%i) at %s ping(%d)", pGameServerItem->GetName(), pGameServerItem->m_nPlayers, pGameServerItem->m_nMaxPlayers, pGameServerItem->m_NetAdr.GetConnectionAddressString(), pGameServerItem->m_nPing );
+	sprintf_safe( m_szServerString, "%s (%i/%i) at %s ping(%d)", pGameServerItem->GetName(), pGameServerItem->m_nPlayers, pGameServerItem->m_nMaxPlayers, pGameServerItem->m_NetAdr.GetConnectionAddressString(), pGameServerItem->m_nPing );
 	m_steamID = pGameServerItem->m_steamID;
 }
 

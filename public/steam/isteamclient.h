@@ -222,6 +222,13 @@ enum { k_iClientScreenshotsCallbacks = 2200 };
 enum { k_iSteamScreenshotsCallbacks = 2300 };
 enum { k_iClientAudioCallbacks = 2400 };
 enum { k_iClientUnifiedMessagesCallbacks = 2500 };
+enum { k_iSteamStreamLauncherCallbacks = 2600 };
+enum { k_iClientControllerCallbacks = 2700 };
+enum { k_iSteamControllerCallbacks = 2800 };
+enum { k_iClientParentalSettingsCallbacks = 2900 };
+enum { k_iClientDeviceAuthCallbacks = 3000 };
+enum { k_iClientNetworkDeviceManagerCallbacks = 3100 };
+enum { k_iClientMusicCallbacks = 3200 };
 
 
 //-----------------------------------------------------------------------------

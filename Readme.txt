@@ -12,6 +12,23 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.24	17th July 2013
+----------------------------------------------------------------
+
+User:
+* Added ISteamUser::GetBadgeLevel and ISteamUser::GetPlayerSteamLevel functions
+
+Friends:
+* Games can now initiate Steam Friend requests, removals, request -accepts and request-ignores via ISteamFriends’ ActivateGameOverlayToUser API. This prompts the user for confirmation before action is taken.
+
+Mac:
+* Updated the OS X Content Prep tool and game wrapper for improved compatibility with OS X 10.8 (Mountain Lion).
+
+Linux:
+* Added install script for the Steam Linux Runtime tools (run "bash tools/linux/setup.sh" to install), see tools/linux/README.txt for details.
+* SteamworksExample is now available on Linux
+
+----------------------------------------------------------------
 v1.23a	25th February 2013
 ----------------------------------------------------------------
 

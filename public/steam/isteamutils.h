@@ -154,9 +154,12 @@ public:
 	// Returns previously entered text & length
 	virtual uint32 GetEnteredGamepadTextLength() = 0;
 	virtual bool GetEnteredGamepadTextInput( char *pchText, uint32 cchText ) = 0;	
+
+	// returns the language the steam client is running in, you probably want ISteamApps::GetCurrentGameLanguage instead, this is for very special usage cases
+	virtual const char *GetSteamUILanguage() = 0;
 };
 
-#define STEAMUTILS_INTERFACE_VERSION "SteamUtils005"
+#define STEAMUTILS_INTERFACE_VERSION "SteamUtils006"
 
 
 // callbacks
@@ -294,6 +297,7 @@ struct GamepadTextInputDismissed_t
 	uint32 m_unSubmittedText;
 };
 
+// k_iSteamUtilsCallbacks + 15 is taken
 
 #pragma pack( pop )
 

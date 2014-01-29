@@ -22,6 +22,7 @@
 #include "isteamscreenshots.h"
 #include "isteamhttp.h"
 #include "isteamunifiedmessages.h"
+#include "isteamcontroller.h"
 
 #if defined( _PS3 )
 #include "steamps3params.h"
@@ -413,6 +414,7 @@ private:
 	ISteamScreenshots	*m_pSteamScreenshots;
 	ISteamHTTP			*m_pSteamHTTP;
 	ISteamUnifiedMessages*m_pSteamUnifiedMessages;
+	ISteamController	*m_pController;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -510,8 +512,8 @@ inline bool CSteamAPIContext::Init()
 
 #if defined(USE_BREAKPAD_HANDLER) || defined(STEAM_API_EXPORTS)
 // this should be called before the game initialized the steam APIs
-// pchDate should be of the format "Mmm dd yyyy" (such as from the __DATE__ macro )
-// pchTime should be of the format "hh:mm:ss" (such as from the __TIME__ macro )
+// pchDate should be of the format "Mmm dd yyyy" (such as from the __DATE __ macro )
+// pchTime should be of the format "hh:mm:ss" (such as from the __TIME __ macro )
 // bFullMemoryDumps (Win32 only) -- writes out a uuid-full.dmp in the client/dumps folder
 // pvContext-- can be NULL, will be the void * context passed into m_pfnPreMinidumpCallback
 // PFNPreMinidumpCallback m_pfnPreMinidumpCallback   -- optional callback which occurs just before a .dmp file is written during a crash.  Applications can hook this to allow adding additional information into the .dmp comment stream.

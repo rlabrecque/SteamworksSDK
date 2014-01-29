@@ -1035,6 +1035,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						if(vendorID)
 						{
 							fields.m_pciVendorID = *((UInt32*)CFDataGetBytePtr(vendorID));
+                            CFRelease( vendorID );
 						}
 						else
 						{
@@ -1044,6 +1045,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						if(deviceID)
 						{
 							fields.m_pciDeviceID = *((UInt32*)CFDataGetBytePtr(deviceID));
+                            CFRelease( deviceID );
 						}
 						else
 						{
@@ -1055,6 +1057,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 							int length = CFDataGetLength(model);
 							char *data = (char*)CFDataGetBytePtr(model);
 							strncpy( fields.m_pciModelString, data, sizeof(fields.m_pciModelString) );
+                            CFRelease( model );
 						}
 						else
 						{

@@ -76,7 +76,7 @@ public:
 	virtual bool BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWORD dwFormat, const char *pchText ) = 0;
 
 	// Create a new font returning our internal handle value for it (0 means failure)
-	virtual HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont ) = 0;
+	virtual HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont ) = 0;
 
 	// Create a new texture returning our internal handle value for it (0 means failure)
 	virtual HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight ) = 0;

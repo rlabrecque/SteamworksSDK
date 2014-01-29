@@ -141,7 +141,7 @@ public:
 	bool BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWORD dwFormat, const char *pchText );
 
 	// Create a new font returning our internal handle value for it (0 means failure)
-	HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont );
+	HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont );
 	
 	// Create a new texture returning our internal handle value for it (0 means failure)
 	HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight );

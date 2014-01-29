@@ -198,12 +198,12 @@ public:
 				if ( i == m_uSelectedItem )
 				{
 					dwColor = D3DCOLOR_ARGB( 255, 25, 200, 25 );
-					_snprintf( rgchBuffer, sizeof( rgchBuffer), "{ %s }", m_VecMenuItems[i].first.c_str() );
+					sprintf_safe( rgchBuffer, "{ %s }", m_VecMenuItems[i].first.c_str() );
 				}
 				else
 				{
 					dwColor = D3DCOLOR_ARGB( 255, 255, 255, 255 );
-					_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s", m_VecMenuItems[i].first.c_str() );
+					sprintf_safe( rgchBuffer, "%s", m_VecMenuItems[i].first.c_str() );
 				}
 				m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 			}
