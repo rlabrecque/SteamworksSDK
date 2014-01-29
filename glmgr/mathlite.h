@@ -19,7 +19,7 @@
 
 #define FastSqrt(x) sqrt(x)
 
-#ifndef Assert(x)
+#ifndef Assert
 #define Assert(x)
 #endif
 

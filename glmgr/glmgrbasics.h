@@ -223,8 +223,8 @@ typedef enum
 
 }	GLMThing_t;
 
-char* GLMDecode( GLMThing_t type, unsigned long value );		// decode a numeric const
-char* GLMDecodeMask( GLMThing_t type, unsigned long value );	// decode a bitmask
+const char* GLMDecode( GLMThing_t type, unsigned long value );		// decode a numeric const
+const char* GLMDecodeMask( GLMThing_t type, unsigned long value );	// decode a bitmask
 
 void GLMStop( void );	// aka Debugger()
 void GLMCheckError( bool noStop = false, bool noLog= false );

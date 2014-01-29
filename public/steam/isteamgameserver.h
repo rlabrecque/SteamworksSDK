@@ -376,6 +376,7 @@ struct ComputeNewPlayerCompatibilityResult_t
 	int m_cPlayersThatDontLikeCandidate;
 	int m_cPlayersThatCandidateDoesntLike;
 	int m_cClanPlayersThatDontLikeCandidate;
+	CSteamID m_SteamIDCandidate;
 };
 
 

@@ -102,6 +102,8 @@ const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 typedef uint32 AppId_t;
 const AppId_t k_uAppIdInvalid = 0x0;
 
+typedef uint64 AssetClassId_t;
+const AssetClassId_t k_ulAssetClassIdInvalid = 0x0;
 
 typedef uint32 PhysicalItemId_t;
 const PhysicalItemId_t k_uPhysicalItemIdInvalid = 0x0;

@@ -148,7 +148,7 @@ int gl_singlecontext = 1;
 typedef struct
 {
 	unsigned long	value;
-	char			*name;
+	const char		*name;
 }	GLMValueEntry_t;
 
 #define	TERMVALUE	0x31415926
@@ -2597,7 +2597,7 @@ GLMValueEntry_t g_gl_renderers[] =
 char	s_glmStrScratch[65536];
 int		s_glmStrCursor = 0;
 
-char *	GLMDecode( GLMThing_t thingtype, unsigned long value )
+const char *	GLMDecode( GLMThing_t thingtype, unsigned long value )
 {
 	GLMValueEntry_t *table = NULL;
 	char			isflags = 0;
@@ -2657,7 +2657,7 @@ char *	GLMDecode( GLMThing_t thingtype, unsigned long value )
 	return "UNKNOWN";
 }
 
-char	*GLMDecodeMask( GLMThing_t kind, unsigned long value )
+const char	*GLMDecodeMask( GLMThing_t kind, unsigned long value )
 {
 	// if cursor to scratch buffer is within 1K of EOB, rewind
 	// nobody is going to decode 63K of flag string values in a single call..
@@ -2906,8 +2906,8 @@ void	GLMCheckError( bool noStop, bool noLog )	// caller can force off, but not o
 		GLenum errorcode2 = 0;
 		if (errorcode != GL_NO_ERROR)
 		{
-			char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
-			char	*decodedStr2 = "";
+			const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+			const char	*decodedStr2 = "";
 					
 			if (errorcode == GL_INVALID_FRAMEBUFFER_OPERATION_EXT)
 			{

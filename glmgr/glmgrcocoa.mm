@@ -824,7 +824,7 @@ char *CheesyRendererDecode( uint value )
 	}
 }
 
-extern char *GLMDecode( GLMThing_t thingtype, unsigned long value );
+extern const char *GLMDecode( GLMThing_t thingtype, unsigned long value );
 
 void	GLMRendererInfo::Dump( int which )
 {

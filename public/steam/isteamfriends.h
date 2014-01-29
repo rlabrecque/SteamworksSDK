@@ -38,6 +38,8 @@ const int k_cchMaxFriendsGroupName = 64;
 // maximum number of groups a single user is allowed
 const int k_cFriendsGroupLimit = 100;
 
+const int k_cEnumerateFollowersMax = 50;
+
 
 //-----------------------------------------------------------------------------
 // Purpose: list of states a friend can be in
@@ -329,6 +331,11 @@ public:
 	virtual bool SetListenForFriendsMessages( bool bInterceptEnabled ) = 0;
 	virtual bool ReplyToFriendMessage( CSteamID steamIDFriend, const char *pchMsgToSend ) = 0;
 	virtual int GetFriendMessage( CSteamID steamIDFriend, int iMessageID, void *pvData, int cubData, EChatEntryType *peChatEntryType ) = 0;
+
+	// following apis
+	virtual SteamAPICall_t GetFollowerCount( CSteamID steamID ) = 0;
+	virtual SteamAPICall_t IsFollowing( CSteamID steamID ) = 0;
+	virtual SteamAPICall_t EnumerateFollowingList( uint32 unStartIndex ) = 0;
 };
 
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends011"
@@ -523,6 +530,33 @@ struct GameConnectedFriendChatMsg_t
 	int m_iMessageID;
 };
 
+
+struct FriendsGetFollowerCount_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 44 };
+	EResult m_eResult;
+	CSteamID m_steamID;
+	int m_nCount;
+};
+
+
+struct FriendsIsFollowing_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 45 };
+	EResult m_eResult;
+	CSteamID m_steamID;
+	bool m_bIsFollowing;
+};
+
+
+struct FriendsEnumerateFollowingList_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 46 };
+	EResult m_eResult;
+	CSteamID m_rgSteamID[ k_cEnumerateFollowersMax ];
+	int32 m_nResultsReturned;
+	int32 m_nTotalResultCount;
+};
 
 #pragma pack( pop )
 

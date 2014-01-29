@@ -97,8 +97,9 @@ enum EResult
 	k_EResultFacebookQueryError = 70,			// Facebook query returned an error
 	k_EResultExpiredLoginAuthCode = 71,			// account login denied due to auth code expired
 	k_EResultIPLoginRestrictionFailed = 72,
-	k_EResultAccountLocked = 73,
+	k_EResultAccountLockedDown = 73,
 	k_EResultAccountLogonDeniedVerifiedEmailRequired = 74,
+	k_EResultNoMatchingURL = 75,
 };
 
 // Error codes for use with the voice functions

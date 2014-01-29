@@ -21,7 +21,7 @@
 #define STEAM_PS3_COMMUNICATION_SIG_MAX 160
 #define STEAM_PS3_LANGUAGE_MAX 64
 #define STEAM_PS3_REGION_CODE_MAX 16
-#define STEAM_PS3_CURRENT_PARAMS_VER 1
+#define STEAM_PS3_CURRENT_PARAMS_VER 2
 struct SteamPS3Params_t
 {
 	uint32 m_unVersion;										// set to STEAM_PS3_CURRENT_PARAMS_VER
@@ -86,6 +86,7 @@ struct SteamPS3Params_t
 		bool m_bNeedInit;
 	} m_sysSysUtilUserInfo;
 
+	bool m_bIncludeNewsPage;
 };
 
 

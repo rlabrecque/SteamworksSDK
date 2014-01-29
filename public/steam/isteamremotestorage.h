@@ -40,9 +40,11 @@ const PublishedFileUpdateHandle_t k_PublishedFileUpdateHandleInvalid = 0xfffffff
 
 const uint32 k_cchPublishedDocumentTitleMax = 128 + 1;
 const uint32 k_cchPublishedDocumentDescriptionMax = 8000;
+const uint32 k_cchPublishedDocumentChangeDescriptionMax = 256;
 const uint32 k_unEnumeratePublishedFilesMaxResults = 50;
 const uint32 k_cchTagListMax = 1024 + 1;
 const uint32 k_cchFilenameMax = 260;
+const uint32 k_cchPublishedFileURLMax = 256;
 
 // Ways to handle a synchronization conflict
 enum EResolveConflict
@@ -55,7 +57,7 @@ enum ERemoteStoragePlatform
 {
 	k_ERemoteStoragePlatformNone		= 0,
 	k_ERemoteStoragePlatformWindows		= (1 << 0),
-	k_ERemoteStoragePlatformOSX			= (1 << 1 ),
+	k_ERemoteStoragePlatformOSX			= (1 << 1),
 	k_ERemoteStoragePlatformPS3			= (1 << 2),
 	k_ERemoteStoragePlatformReserved1	= (1 << 3),
 	k_ERemoteStoragePlatformReserved2	= (1 << 4),
@@ -75,6 +77,34 @@ enum EWorkshopFileType
 {
 	k_EWorkshopFileTypeCommunity = 0,
 	k_EWorkshopFileTypeMicrotransaction = 1,
+	k_EWorkshopFileTypeCollection = 2,
+	k_EWorkshopFileTypeArt = 3,
+	k_EWorkshopFileTypeVideo = 4,
+	k_EWorkshopFileTypeScreenshot = 5,
+};
+
+enum EWorkshopVote
+{
+	k_EWorkshopVoteUnvoted = 0,
+	k_EWorkshopVoteFor = 1,
+	k_EWorkshopVoteAgainst = 2,
+};
+
+enum EWorkshopFileAction
+{
+	k_EWorkshopFileActionPlayed = 0,
+	k_EWorkshopFileActionCompleted = 1,
+};
+
+enum EWorkshopEnumerationType
+{
+	k_EWorkshopEnumerationTypeRankedByVote = 0,
+	k_EWorkshopEnumerationTypeRecent = 1,
+	k_EWorkshopEnumerationTypeTrending = 2,
+	k_EWorkshopEnumerationTypeFavoritesOfFriends = 3,
+	k_EWorkshopEnumerationTypeVotedByFriends = 4,
+	k_EWorkshopEnumerationTypeContentByFriends = 5,
+	k_EWorkshopEnumerationTypeRecentFromFollowedUsers = 6,
 };
 
 //-----------------------------------------------------------------------------
@@ -165,10 +195,21 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t	CommitPublishedFileUpdate( PublishedFileUpdateHandle_t updateHandle ) = 0;
 		virtual SteamAPICall_t	GetPublishedFileDetails( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual SteamAPICall_t	DeletePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
+		// enumerate the files that the current user published with this app
 		virtual SteamAPICall_t	EnumerateUserPublishedFiles( uint32 unStartIndex ) = 0;
 		virtual SteamAPICall_t	SubscribePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual SteamAPICall_t	EnumerateUserSubscribedFiles( uint32 unStartIndex ) = 0;
 		virtual SteamAPICall_t	UnsubscribePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
+		virtual bool UpdatePublishedFileSetChangeDescription( PublishedFileUpdateHandle_t updateHandle, const char *pchChangeDescription ) = 0;
+		virtual SteamAPICall_t	GetPublishedItemVoteDetails( PublishedFileId_t unPublishedFileId ) = 0;
+		virtual SteamAPICall_t	UpdateUserPublishedItemVote( PublishedFileId_t unPublishedFileId, bool bVoteUp ) = 0;
+		virtual SteamAPICall_t	GetUserPublishedItemVoteDetails( PublishedFileId_t unPublishedFileId ) = 0;
+		virtual SteamAPICall_t	EnumerateUserSharedWorkshopFiles( CSteamID steamId, uint32 unStartIndex, SteamParamStringArray_t *pRequiredTags, SteamParamStringArray_t *pExcludedTags ) = 0;
+		virtual SteamAPICall_t	PublishVideo( const char *pchVideoURL, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags ) = 0;
+		virtual SteamAPICall_t	SetUserPublishedFileAction( PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction ) = 0;
+		virtual SteamAPICall_t	EnumeratePublishedFilesByUserAction( EWorkshopFileAction eAction, uint32 unStartIndex ) = 0;
+		// this method enumerates the public view of workshop files
+		virtual SteamAPICall_t	EnumeratePublishedWorkshopFiles( EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags ) = 0;
 };
 
 #define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION006"
@@ -374,11 +415,34 @@ struct RemoteStorageGetPublishedFileDetailsResult_t
 	char m_pchFileName[k_cchFilenameMax];		// The name of the primary file
 	int32 m_nFileSize;				// Size of the primary file
 	int32 m_nPreviewFileSize;		// Size of the preview file
+	char m_rgchURL[k_cchPublishedFileURLMax];	// URL (for a video or a website)
 };
 
-//
-// IMPORTANT! k_iClientRemoteStorageCallbacks + 19, 20 is used, see iclientremotestorage.h
-//
+
+struct RemoteStorageEnumerateWorkshopFilesResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 19 };
+	EResult m_eResult;
+	int32 m_nResultsReturned;
+	int32 m_nTotalResultCount;
+	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
+	float m_rgScore[ k_unEnumeratePublishedFilesMaxResults ];
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of GetPublishedItemVoteDetails
+//-----------------------------------------------------------------------------
+struct RemoteStorageGetPublishedItemVoteDetailsResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 20 };
+	EResult m_eResult;
+	PublishedFileId_t m_unPublishedFileId;
+	int32 m_nVotesFor;
+	int32 m_nVotesAgainst;
+	int32 m_nReports;
+	float m_fScore;
+};
 
 
 //-----------------------------------------------------------------------------
@@ -403,8 +467,59 @@ struct RemoteStoragePublishedFileUnsubscribed_t
 
 
 //
-// IMPORTANT! k_iClientRemoteStorageCallbacks + 23 is used, see iclientremotestorage.h
+// IMPORTANT! k_iClientRemoteStorageCallbacks + 23 is free to use
 //
+
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of a call to UpdateUserPublishedItemVote()
+//-----------------------------------------------------------------------------
+struct RemoteStorageUpdateUserPublishedItemVoteResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 24 };
+	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of a call to GetUserPublishedItemVoteDetails()
+//-----------------------------------------------------------------------------
+struct RemoteStorageUserVoteDetails_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 25 };
+	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	EWorkshopVote m_eVote;			// what the user voted
+};
+
+struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 26 };
+	EResult m_eResult;				// The result of the operation.
+	int32 m_nResultsReturned;
+	int32 m_nTotalResultCount;
+	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
+};
+
+struct RemoteStorageSetUserPublishedFileActionResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 27 };
+	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	EWorkshopFileAction m_eAction;	// the action that was attempted
+};
+
+struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 28 };
+	EResult m_eResult;				// The result of the operation.
+	EWorkshopFileAction m_eAction;	// the action that was filtered on
+	int32 m_nResultsReturned;
+	int32 m_nTotalResultCount;
+	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
+	uint32 m_rgRTimeUpdated[ k_unEnumeratePublishedFilesMaxResults ];
+};
 
 
 #pragma pack( pop )

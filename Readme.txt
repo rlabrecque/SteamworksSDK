@@ -12,6 +12,29 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.19	22nd March 2012
+----------------------------------------------------------------
+Friends
+* Added ISteamFriends::GetFollowerCount()
+* Added ISteamFriends::IsFollowing()
+* Added ISteamFriends::EnumerateFollowingList()
+
+Cloud
+*Added ISteamRemoteStorage::UpdatePublishedFileSetChangeDescription()
+*Added ISteamRemoteStorage::GetPublishedItemVoteDetails()
+*Added ISteamRemoteStorage::UpdateUserPublishedItemVote()
+*Added ISteamRemoteStorage::GetUserPublishedItemVoteDetails()
+*Added ISteamRemoteStorage::EnumerateUserSharedWorkshopFiles()
+*Added ISteamRemoteStorage::PublishVideo()
+*Added ISteamRemoteStorage::SetUserPublishedFileAction()
+*Added ISteamRemoteStorage::EnumeratePublishedFilesByUserAction()
+*Added ISteamRemoteStorage::EnumeratePublishedWorkshopFiles()
+
+ISteamGameServer
+*Updated callback for SteamGameServer::ComputeNewPlayerCompatibility to include the steam id the compatibility was calculated for
+
+
+----------------------------------------------------------------
 v1.18	7th February 2012
 ----------------------------------------------------------------
 Cloud

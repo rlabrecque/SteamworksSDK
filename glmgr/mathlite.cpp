@@ -714,7 +714,7 @@ void Vector4DMultiplyPosition( const VMatrix& src1, Vector const& src2, Vector4D
 {
 	// Make sure it works if src2 == dst
 	Vector tmp;
-	Vector const&v = ( &src2 == &dst.AsVector3D() ) ? static_cast<const Vector>(tmp) : src2;
+	Vector const&v = ( &src2 == &dst.AsVector3D() ) ? tmp : src2;
 
 	if (&src2 == &dst.AsVector3D())
 	{
@@ -737,7 +737,7 @@ void Vector3DMultiply( const VMatrix &src1, const Vector &src2, Vector &dst )
 {
 	// Make sure it works if src2 == dst
 	Vector tmp;
-	const Vector &v = (&src2 == &dst) ?  static_cast<const Vector>(tmp) : src2;
+	const Vector &v = (&src2 == &dst) ?  tmp : src2;
 
 	if( &src2 == &dst )
 	{
@@ -758,7 +758,7 @@ void Vector3DMultiplyPositionProjective( const VMatrix& src1, const Vector &src2
 {
 	// Make sure it works if src2 == dst
 	Vector tmp;
-	const Vector &v = (&src2 == &dst) ? static_cast<const Vector>(tmp): src2;
+	const Vector &v = (&src2 == &dst) ? tmp: src2;
 	if( &src2 == &dst )
 	{
 		VectorCopy( src2, tmp );
@@ -785,7 +785,7 @@ void Vector3DMultiplyProjective( const VMatrix& src1, const Vector &src2, Vector
 {
 	// Make sure it works if src2 == dst
 	Vector tmp;
-	const Vector &v = (&src2 == &dst) ? static_cast<const Vector>(tmp) : src2;
+	const Vector &v = (&src2 == &dst) ? tmp : src2;
 	if( &src2 == &dst )
 	{
 		VectorCopy( src2, tmp );
@@ -838,7 +838,7 @@ void Vector3DMultiplyTranspose( const VMatrix& src1, const Vector& src2, Vector&
 	bool srcEqualsDst = (&src2 == &dst);
 
 	Vector tmp;
-	const Vector&v = srcEqualsDst ? static_cast<const Vector>(tmp) : src2;
+	const Vector&v = srcEqualsDst ? tmp : src2;
 
 	if (srcEqualsDst)
 	{

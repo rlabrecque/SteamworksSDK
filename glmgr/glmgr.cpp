@@ -6421,7 +6421,7 @@ void	GLMTester::Present( int seed )
 	
 }
 
-void	GLMTester::CheckGLError( char *comment )
+void	GLMTester::CheckGLError( const char *comment )
 {
 	char errbuf[1024];
 
@@ -6436,8 +6436,8 @@ void	GLMTester::CheckGLError( char *comment )
 	GLenum errorcode2 = 0;
 	if ( errorcode != GL_NO_ERROR )
 	{
-		char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
-		char	*decodedStr2 = "";
+		const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+		const char	*decodedStr2 = "";
 				
 		if ( errorcode == GL_INVALID_FRAMEBUFFER_OPERATION_EXT )
 		{
@@ -6465,7 +6465,7 @@ void	GLMTester::CheckGLError( char *comment )
 	}
 }
 
-void	GLMTester::InternalError( int errcode, char *comment )
+void	GLMTester::InternalError( int errcode, const char *comment )
 {
 	if (errcode)
 	{

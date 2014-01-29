@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright (c) 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Base class for various game menu screens
 //
@@ -159,12 +159,12 @@ public:
 		if ( m_sHeading.length() )
 		{
 			DWORD dwColor = D3DCOLOR_ARGB( 255, 255, 128, 128 );
-			RECT rect;
-			rect.top = 10;
-			rect.bottom = rect.top + MENU_FONT_HEIGHT + ( MENU_ITEM_PADDING * 2 );
-			rect.left = 0;
-			rect.right = m_pGameEngine->GetViewportWidth();
-			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, m_sHeading.c_str() );
+			RECT rectHeader;
+			rectHeader.top = 10;
+			rectHeader.bottom = rectHeader.top + MENU_FONT_HEIGHT + ( MENU_ITEM_PADDING * 2 );
+			rectHeader.left = 0;
+			rectHeader.right = m_pGameEngine->GetViewportWidth();
+			m_pGameEngine->BDrawString( g_hMenuFont, rectHeader, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, m_sHeading.c_str() );
 		}
 
 		int32 iStartItem = 0;

@@ -67,7 +67,7 @@ CGLMQuery::CGLMQuery( GLMContext *ctx, GLMQueryParams *params )
 			GLenum errorcode = GetQueryError();
 			if (errorcode)
 			{
-				char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+				const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 				printf( "\nCGLMQuery::CGLMQuery (OQ) saw %s error (%d) from glGenQueriesARB", decodedStr, errorcode  );
 				m_name = 0;
 			}			
@@ -82,7 +82,7 @@ CGLMQuery::CGLMQuery( GLMContext *ctx, GLMQueryParams *params )
 			GLenum errorcode = GetQueryError();
 			if (errorcode)
 			{
-				char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+				const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 				printf( "\nCGLMQuery::CGLMQuery (fence) saw %s error (%d) from glGenFencesAPPLE", decodedStr, errorcode  );
 				m_name = 0;
 			}
@@ -111,7 +111,7 @@ CGLMQuery::~CGLMQuery()
 			GLenum errorcode = GetQueryError();
 			if (errorcode)
 			{
-				char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+				const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 				printf( "\nCGLMQuery::~CGLMQuery (OQ) saw %s error (%d) from glDeleteQueries", decodedStr, errorcode  );
 			}
 		}
@@ -126,7 +126,7 @@ CGLMQuery::~CGLMQuery()
 			GLenum errorcode = GetQueryError();
 			if (errorcode)
 			{
-				char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+				const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 				printf( "\nCGLMQuery::~CGLMQuery (fence) saw %s error (%d) from glDeleteFencesAPPLE", decodedStr, errorcode  );
 			}
 		}
@@ -172,7 +172,7 @@ void	CGLMQuery::Start( void )		// "start counting"
 				GLenum errorcode = GetQueryError();
 				if (errorcode)
 				{
-					char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+					const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 					printf( "\nCGLMQuery::Start(OQ) saw %s error (%d) from glBeginQueryARB (GL_SAMPLES_PASSED_ARB) name=%d", decodedStr, errorcode, m_name  );
 				}
 			}
@@ -185,7 +185,7 @@ void	CGLMQuery::Start( void )		// "start counting"
 			GLenum errorcode = GetQueryError();
 			if (errorcode)
 			{
-				char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+				const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 				printf( "\nCGLMQuery::Start(fence) saw %s error (%d) from glSetFenceAPPLE name=%d", decodedStr, errorcode, m_name  );
 			}
 			
@@ -219,7 +219,7 @@ void	CGLMQuery::Stop( void )			// "stop counting"
 				GLenum errorcode = GetQueryError();
 				if (errorcode)
 				{
-					char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+					const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 					printf( "\nCGLMQuery::Stop(OQ) saw %s error (%d) from glEndQueryARB( GL_SAMPLES_PASSED_ARB ) name=%d", decodedStr, errorcode, m_name  );
 				}
 			}
@@ -264,7 +264,7 @@ bool	CGLMQuery::IsDone( void )
 					GLenum errorcode = GetQueryError();
 					if (errorcode)
 					{
-						char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+						const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 						printf( "\nCGLMQuery::IsDone saw %s error (%d) from glGetQueryObjectivARB(a2) name=%d", decodedStr, errorcode, m_name  );
 					}
 
@@ -279,7 +279,7 @@ bool	CGLMQuery::IsDone( void )
 				GLenum errorcode = GetQueryError();
 				if (errorcode)
 				{
-					char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+					const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 					printf( "\nCGLMQuery::IsDone saw %s error (%d) from glTestFenceAPPLE(b) name=%d", decodedStr, errorcode, m_name  );
 				}
 
@@ -290,7 +290,7 @@ bool	CGLMQuery::IsDone( void )
 					errorcode = GetQueryError();
 					if (errorcode)
 					{
-						char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+						const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 						printf( "\nCGLMQuery::IsDone saw %s error (%d) from glFinishFenceAPPLE(b) name=%d", decodedStr, errorcode, m_name  );
 					}
 				}
@@ -332,7 +332,7 @@ void	CGLMQuery::Complete( uint *result )
 				
 				if (errorcode)
 				{
-					char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+					const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 					printf( "\nCGLMQuery::Complete saw %s error (%d) from glGetQueryObjectivARB GL_QUERY_RESULT_AVAILABLE_ARB name=%d", decodedStr, errorcode, m_name  );
 
 					resultval=0;
@@ -350,10 +350,10 @@ void	CGLMQuery::Complete( uint *result )
 					
 					glGetQueryObjectuivARB( m_name, GL_QUERY_RESULT_ARB, &resultval);
 					
-					GLenum errorcode = GetQueryError();
+					errorcode = GetQueryError();
 					if (errorcode)
 					{
-						char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+						const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 						printf( "\nCGLMQuery::Complete saw %s error (%d) from glGetQueryObjectivARB GL_QUERY_RESULT_ARB name=%d", decodedStr, errorcode, m_name  );
 						
 						resultval=0;
@@ -377,7 +377,7 @@ void	CGLMQuery::Complete( uint *result )
 				GLenum errorcode = GetQueryError();
 				if (errorcode)
 				{
-					char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
+					const char	*decodedStr = GLMDecode( eGL_ERROR, errorcode );
 					printf( "\nCGLMQuery::Complete saw %s error (%d) from glFinishFenceAPPLE (EFence) name=%d", decodedStr, errorcode, m_name  );
 				}
 				

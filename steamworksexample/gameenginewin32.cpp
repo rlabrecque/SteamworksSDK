@@ -1115,7 +1115,7 @@ bool CGameEngineWin32::BDrawPoint( float xPos, float yPos, DWORD dwColor )
 	// Lock the vertex buffer into memory
 	if ( !m_pPointVertexes )
 	{
-		if ( !BLockEntireVertexBuffer( m_hPointBuffer, (void**)&m_pPointVertexes, m_dwPointBufferBatchPos+m_dwPointsToFlush ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) )
+		if ( !BLockEntireVertexBuffer( m_hPointBuffer, (void**)&m_pPointVertexes, (m_dwPointBufferBatchPos+m_dwPointsToFlush) ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) )
 		{
 			m_pPointVertexes = NULL;
 			OutputDebugString( "BDrawPoint failed because locking vertex buffer failed\n" );
