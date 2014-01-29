@@ -14,10 +14,10 @@
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Defines the largest allowed file size. Cloud files cannot be
-//	larger than 100MB.
+// Purpose: Defines the largest allowed file size. Cloud files cannot be written
+// in a single chunk over 100MB (and cannot be over 200MB total.)
 //-----------------------------------------------------------------------------
-const uint32 k_unMaxCloudFileSize = 100 * 1024 * 1024;
+const uint32 k_unMaxCloudFileChunkSize = 100 * 1024 * 1024;
 
 
 //-----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ const UGCFileWriteStreamHandle_t k_UGCFileStreamHandleInvalid = 0xffffffffffffff
 
 const uint32 k_cchPublishedDocumentTitleMax = 128 + 1;
 const uint32 k_cchPublishedDocumentDescriptionMax = 8000;
-const uint32 k_cchPublishedDocumentChangeDescriptionMax = 256;
+const uint32 k_cchPublishedDocumentChangeDescriptionMax = 8000;
 const uint32 k_unEnumeratePublishedFilesMaxResults = 50;
 const uint32 k_cchTagListMax = 1024 + 1;
 const uint32 k_cchFilenameMax = 260;
@@ -69,7 +69,7 @@ enum ERemoteStoragePlatform
 	k_ERemoteStoragePlatformWindows		= (1 << 0),
 	k_ERemoteStoragePlatformOSX			= (1 << 1),
 	k_ERemoteStoragePlatformPS3			= (1 << 2),
-	k_ERemoteStoragePlatformReserved1	= (1 << 3),
+	k_ERemoteStoragePlatformLinux		= (1 << 3),
 	k_ERemoteStoragePlatformReserved2	= (1 << 4),
 
 	k_ERemoteStoragePlatformAll = 0xffffffff
@@ -87,20 +87,23 @@ enum EWorkshopFileType
 {
 	k_EWorkshopFileTypeFirst = 0,
 
-	k_EWorkshopFileTypeCommunity = 0,
-	k_EWorkshopFileTypeMicrotransaction = 1,
-	k_EWorkshopFileTypeCollection = 2,
-	k_EWorkshopFileTypeArt = 3,
-	k_EWorkshopFileTypeVideo = 4,
-	k_EWorkshopFileTypeScreenshot = 5,
-	k_EWorkshopFileTypeGame = 6,
-	k_EWorkshopFileTypeSoftware = 7,
-	k_EWorkshopFileTypeConcept = 8,
-	k_EWorkshopFileTypeWebGuide = 9,
-	k_EWorkshopFileTypeIntegratedGuide = 10,
+	k_EWorkshopFileTypeCommunity			  = 0,
+	k_EWorkshopFileTypeMicrotransaction		  = 1,
+	k_EWorkshopFileTypeCollection			  = 2,
+	k_EWorkshopFileTypeArt					  = 3,
+	k_EWorkshopFileTypeVideo				  = 4,
+	k_EWorkshopFileTypeScreenshot			  = 5,
+	k_EWorkshopFileTypeGame					  = 6,
+	k_EWorkshopFileTypeSoftware				  = 7,
+	k_EWorkshopFileTypeConcept				  = 8,
+	k_EWorkshopFileTypeWebGuide				  = 9,
+	k_EWorkshopFileTypeIntegratedGuide		  = 10,
+	k_EWorkshopFileTypeMerch				  = 11,
+	k_EWorkshopFileTypeControllerBinding	  = 12,
+	k_EWorkshopFileTypeSteamworksAccessInvite = 13,
 
 	// Update k_EWorkshopFileTypeMax if you add values
-	k_EWorkshopFileTypeMax = 11
+	k_EWorkshopFileTypeMax = 14
 
 };
 
@@ -133,6 +136,28 @@ enum EWorkshopVideoProvider
 	k_EWorkshopVideoProviderNone = 0,
 	k_EWorkshopVideoProviderYoutube = 1
 };
+
+enum
+{
+	k_WorkshopForceLoadPublishedFileDetailsFromCache = -1
+};
+
+enum EUGCReadAction
+{
+	// Keeps the file handle open unless the last byte is read.  You can use this when reading large files (over 100MB) in sequential chunks.
+	// If the last byte is read, this will behave the same as k_EUGCRead_Close.  Otherwise, it behaves the same as k_EUGCRead_ContinueReading.
+	// This value maintains the same behavior as before the EUGCReadAction parameter was introduced.
+	k_EUGCRead_ContinueReadingUntilFinished = 0,
+
+	// Keeps the file handle open.  Use this when using UGCRead to seek to different parts of the file.
+	// When you are done seeking around the file, make a final call with k_EUGCRead_Close to close it.
+	k_EUGCRead_ContinueReading = 1,
+
+	// Frees the file handle.  Use this when you're done reading the content.  
+	// To read the file from Steam again you will need to call UGCDownload again. 
+	k_EUGCRead_Close = 2,	
+};
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing, reading and writing files stored remotely 
@@ -193,7 +218,12 @@ public:
 	// Gets metadata for a file after it has been downloaded. This is the same metadata given in the RemoteStorageDownloadUGCResult_t call result
 	virtual bool	GetUGCDetails( UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner ) = 0;
 
-	// After download, gets the content of the file
+	// After download, gets the content of the file.  
+	// Small files can be read all at once by calling this function with an offset of 0 and cubDataToRead equal to the size of the file.
+	// Larger files can be read in chunks to reduce memory usage (since both sides of the IPC client and the game itself must allocate
+	// enough memory for each chunk).  Once the last byte is read, the file is implicitly closed and further calls to UGCRead will fail
+	// unless UGCDownload is called again.
+	// For especially large files (anything over 100MB) it is a requirement that the file is read in chunks.
 	virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead, uint32 cOffset ) = 0;
 
 	// Functions to iterate through UGC that has finished downloading but has not yet been read via UGCRead()
@@ -228,7 +258,10 @@ public:
 	virtual bool UpdatePublishedFileVisibility( PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility ) = 0;
 	virtual bool UpdatePublishedFileTags( PublishedFileUpdateHandle_t updateHandle, SteamParamStringArray_t *pTags ) = 0;
 	virtual SteamAPICall_t	CommitPublishedFileUpdate( PublishedFileUpdateHandle_t updateHandle ) = 0;
-	virtual SteamAPICall_t	GetPublishedFileDetails( PublishedFileId_t unPublishedFileId ) = 0;
+	// Gets published file details for the given publishedfileid.  If unMaxSecondsOld is greater than 0,
+	// cached data may be returned, depending on how long ago it was cached.  A value of 0 will force a refresh.
+	// A value of k_WorkshopForceLoadPublishedFileDetailsFromCache will use cached data if it exists, no matter how old it is.
+	virtual SteamAPICall_t	GetPublishedFileDetails( PublishedFileId_t unPublishedFileId, uint32 unMaxSecondsOld ) = 0;
 	virtual SteamAPICall_t	DeletePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 	// enumerate the files that the current user published with this app
 	virtual SteamAPICall_t	EnumerateUserPublishedFiles( uint32 unStartIndex ) = 0;
@@ -249,7 +282,7 @@ public:
 	virtual SteamAPICall_t UGCDownloadToLocation( UGCHandle_t hContent, const char *pchLocation, uint32 unPriority ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION010"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION011"
 
 
 // callbacks
@@ -347,6 +380,7 @@ struct RemoteStoragePublishFileResult_t
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 9 };
 	EResult m_eResult;				// The result of the operation.
 	PublishedFileId_t m_nPublishedFileId;
+	bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
 };
 
 
@@ -425,6 +459,7 @@ struct RemoteStorageUpdatePublishedFileResult_t
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 16 };
 	EResult m_eResult;				// The result of the operation.
 	PublishedFileId_t m_nPublishedFileId;
+	bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
 };
 
 
@@ -480,6 +515,8 @@ struct RemoteStorageEnumerateWorkshopFilesResult_t
 	int32 m_nTotalResultCount;
 	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
 	float m_rgScore[ k_unEnumeratePublishedFilesMaxResults ];
+	AppId_t m_nAppId;
+	uint32 m_unStartIndex;
 };
 
 
@@ -589,6 +626,18 @@ struct RemoteStoragePublishFileProgress_t
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 29 };
 	double m_dPercentFile;
 	bool m_bPreview;
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when the content for a published file is updated
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishedFileUpdated_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 30 };
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	AppId_t m_nAppID;						// ID of the app that will consume this file.
+	UGCHandle_t m_hFile;					// The new content
 };
 
 

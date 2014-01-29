@@ -12,6 +12,11 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.25 1st October 2013
+----------------------------------------------------------------
+* Fixed a crash in the 1.24 SDK update when attempting to call ISteamRemoteStorage::GetPublishedFileDetails by adding a missing parameter unMaxSecondsOld, which allows a game to request potentially-cached details (passing a value of 0 retains the previous behavior).
+
+----------------------------------------------------------------
 v1.24	17th July 2013
 ----------------------------------------------------------------
 
