@@ -56,12 +56,27 @@ S_API void SteamAPI_Shutdown();
 // checks if a local Steam client is running 
 S_API bool SteamAPI_IsSteamRunning();
 
-// restart your app through Steam to enable required Steamworks features
+// Detects if your executable was launched through the Steam client, and restarts your game through 
+// the client if necessary. The Steam client will be started if it is not running.
+//
+// Returns: true if your executable was NOT launched through the Steam client. This function will
+//          then start your application through the client. Your current process should exit.
+//
+//          false if your executable was started through the Steam client or a steam_appid.txt file
+//          is present in your game's directory (for development). Your current process should continue.
+//
+// NOTE: This function should be used only if you are using CEG or not using Steam's DRM. Once applied
+//       to your executable, Steam's DRM will handle restarting through Steam if necessary.
 S_API bool SteamAPI_RestartAppIfNecessary( uint32 unOwnAppID );
 
 // crash dump recording functions
 S_API void SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID );
 S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
+
+// this should be called before the game initialized the steam APIs
+// pchDate should be of the format "Mmm dd yyyy" (such as from the __DATE__ macro )
+// pchTime should be of the format "hh:mm:ss" (such as from the __TIME__ macro )
+S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const *pchDate, char const *pchTime );
 
 // interface pointers, configured by SteamAPI_Init()
 S_API ISteamClient *SteamClient();
@@ -149,7 +164,7 @@ public:
 
 	CCallResult()
 	{
-		m_hAPICall = 0;
+		m_hAPICall = k_uAPICallInvalid;
 		m_pObj = NULL;
 		m_Func = NULL;
 		m_iCallback = P::k_iCallback;
@@ -170,31 +185,35 @@ public:
 
 	bool IsActive() const
 	{
-		return ( m_hAPICall != 0 );
+		return ( m_hAPICall != k_uAPICallInvalid );
 	}
 
 	void Cancel()
 	{
-		m_hAPICall = 0;
+		if ( m_hAPICall != k_uAPICallInvalid )
+		{
+			SteamAPI_UnregisterCallResult( this, m_hAPICall );
+			m_hAPICall = k_uAPICallInvalid;
+		}
+		
 	}
 
 	~CCallResult()
 	{
-		if ( m_hAPICall )
-			SteamAPI_UnregisterCallResult( this, m_hAPICall );
+		Cancel();
 	}
 
 private:
 	virtual void Run( void *pvParam )
 	{
-		m_hAPICall = 0;
+		m_hAPICall = k_uAPICallInvalid; // caller unregisters for us
 		(m_pObj->*m_Func)( (P *)pvParam, false );		
 	}
 	void Run( void *pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall )
 	{
 		if ( hSteamAPICall == m_hAPICall )
 		{
-			m_hAPICall = 0;
+			m_hAPICall = k_uAPICallInvalid; // caller unregisters for us
 			(m_pObj->*m_Func)( (P *)pvParam, bIOFailure );			
 		}
 	}

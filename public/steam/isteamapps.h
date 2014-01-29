@@ -32,6 +32,9 @@ public:
 
 #define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION003"
 
+// callbacks
+#pragma pack( push, 8 )
+
 //-----------------------------------------------------------------------------
 // Purpose: posted after the user gains ownership of DLC & that DLC is installed
 //-----------------------------------------------------------------------------
@@ -41,5 +44,6 @@ struct DlcInstalled_t
 	AppId_t m_nAppID;		// AppID of the DLC
 };
 
+#pragma pack( pop )
 
 #endif // ISTEAMAPPS_H

@@ -25,6 +25,12 @@ public:
 		PushSelectedItem();
 		ClearMenuItems();
 
+		if ( !steamIDLobby.IsValid() )
+		{
+			PopSelectedItem();
+			return;
+		}
+
 		// list of users in lobby
 		// iterate all the users in the lobby and show their details
 		int cLobbyMembers = SteamMatchmaking()->GetNumLobbyMembers( steamIDLobby );

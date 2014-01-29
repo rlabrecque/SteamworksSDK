@@ -12,6 +12,18 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.09	12th May 2010
+----------------------------------------------------------------
+
+Mac Steamworks!
+* new binaries in the sdk/redistributable_bin/osx/ folder
+
+Other
+* explicit pragma( pack, 8 ) added around all callbacks and structures, for devs who have use a different default packing
+* renamed function ISteamGameServer::SetGameType() to the more accurate ISteamGameServer::SetGameTags()
+
+
+----------------------------------------------------------------
 v1.08	27st January 2010
 ----------------------------------------------------------------
 

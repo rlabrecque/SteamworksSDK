@@ -176,7 +176,7 @@ enum EAccountType
 	k_EAccountTypeContentServer = 6,	// content server
 	k_EAccountTypeClan = 7,
 	k_EAccountTypeChat = 8,
-	k_EAccountTypeP2PSuperSeeder = 9,	// a fake steamid used by superpeers to seed content to users of Steam P2P stuff
+	// k_EAccountTypeP2PSuperSeeder = 9,	// unused
 	k_EAccountTypeAnonUser = 10,
 
 	// Max of 16 items in this field
@@ -256,9 +256,27 @@ enum EChatSteamIDInstanceFlags
 
 	k_EChatInstanceFlagClan = ( k_unSteamAccountInstanceMask + 1 ) >> 1,	// top bit
 	k_EChatInstanceFlagLobby = ( k_unSteamAccountInstanceMask + 1 ) >> 2,	// next one down, etc
+	k_EChatInstanceFlagMMSLobby = ( k_unSteamAccountInstanceMask + 1 ) >> 3,	// next one down, etc
 
 	// Max of 8 flags
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Marketing message flags that change how a client should handle them
+//-----------------------------------------------------------------------------
+enum EMarketingMessageFlags
+{
+	k_EMarketingMessageFlagsNone = 0,
+	k_EMarketingMessageFlagsHighPriority = 1 << 0,
+	k_EMarketingMessageFlagsPlatformWindows = 1 << 1,
+	k_EMarketingMessageFlagsPlatformMac = 1 << 2,
+
+	//aggregate flags
+	k_EMarketingMessageFlagsPlatformRestrictions = 
+		k_EMarketingMessageFlagsPlatformWindows | k_EMarketingMessageFlagsPlatformMac,
+};
+
 
 
 //-----------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 	m_CallbackSteamServersConnected( this, &CSpaceWarServer::OnSteamServersConnected ),
 	m_CallbackSteamServersDisconnected( this, &CSpaceWarServer::OnSteamServersDisconnected ),
+	m_CallbackSteamServersConnectFailure( this, &CSpaceWarServer::OnSteamServersConnectFailure ),
 	m_CallbackPolicyResponse( this, &CSpaceWarServer::OnPolicyResponse ),
 	m_CallbackGSClientApprove( this, &CSpaceWarServer::OnGSClientApprove ),
 	m_CallbackGSClientDeny( this, &CSpaceWarServer::OnGSClientDeny ),
@@ -873,6 +874,16 @@ void CSpaceWarServer::OnSteamServersDisconnected( SteamServersDisconnected_t *pL
 {
 	m_bConnectedToSteam = false;
 	OutputDebugString( "SpaceWarServer got logged out of Steam\n" );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when an attempt to login to Steam fails
+//-----------------------------------------------------------------------------
+void CSpaceWarServer::OnSteamServersConnectFailure( SteamServerConnectFailure_t *pConnectFailure )
+{
+	m_bConnectedToSteam = false;
+	OutputDebugString( "SpaceWarServer failed to connect to Steam\n" );
 }
 
 

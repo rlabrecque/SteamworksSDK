@@ -75,6 +75,7 @@ enum EAvatarSize
 
 
 // friend game played information
+#pragma pack( push, 8 )
 struct FriendGameInfo_t
 {
 	CGameID m_gameID;
@@ -83,6 +84,7 @@ struct FriendGameInfo_t
 	uint16 m_usQueryPort;
 	CSteamID m_steamIDLobby;
 };
+#pragma pack( pop )
 
 
 // maximum number of characters in a user's name. Two flavors; one for UTF-8 and one for UTF-16.
@@ -185,9 +187,16 @@ public:
 
 	// activates game overlay to store page for app
 	virtual void ActivateGameOverlayToStore( AppId_t nAppID ) = 0;
+
+	// Mark a target user as 'played with'. This is a client-side only feature that requires that the calling user is 
+	// in game 
+	virtual void SetPlayedWith( CSteamID steamIDUserPlayedWith ) = 0;
 };
 
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends005"
+
+// callbacks
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a friends' status changes
@@ -253,5 +262,6 @@ struct GameLobbyJoinRequested_t
 	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
 };
 
+#pragma pack( pop )
 
 #endif // ISTEAMFRIENDS_H

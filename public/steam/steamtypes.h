@@ -90,8 +90,6 @@ const GID_t k_TxnIDUnknown = 0;
 typedef uint32 PackageId_t;
 const PackageId_t k_uPackageIdFreeSub = 0x0;
 const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
-const PackageId_t k_uPackageIdWallet = 0xFFFFFFFE;
-const PackageId_t k_uPackageIdMicroTxn = 0xFFFFFFFD;
 
 
 // this is baked into client messages and interfaces as an int, 
@@ -117,6 +115,7 @@ const CellID_t k_uCellIDInvalid = 0xFFFFFFFF;
 
 // handle to a Steam API call
 typedef uint64 SteamAPICall_t;
+const SteamAPICall_t k_uAPICallInvalid = 0x0;
 
 
 

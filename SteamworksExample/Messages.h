@@ -10,6 +10,9 @@
 
 #include <map>
 
+// Would normally set this to 1 byte, however we use 8 byte to support older clients that didn't specify packing
+#pragma pack( push, 8 )
+
 // Network message types
 enum EMessage
 {
@@ -144,5 +147,7 @@ struct MsgP2PSendingTicket_t
 	char m_rgchToken[1024];
 	CSteamID m_SteamID;
 };
+
+#pragma pack( pop )
 
 #endif // MESSAGES_H

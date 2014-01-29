@@ -469,7 +469,7 @@ enum EChatMemberStateChange
 
 //-----------------------------------------------------------------------------
 // Callbacks for ISteamMatchmaking (which go through the regular Steam callback registration system)
-
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: a server was added/removed from the favorites list, you should refresh now
@@ -627,7 +627,7 @@ struct LobbyCreated_t
 
 // used by now obsolete RequestFriendsLobbiesResponse_t
 // enum { k_iCallback = k_iSteamMatchmakingCallbacks + 14 };
-
+#pragma pack( pop )
 
 
 

@@ -123,8 +123,6 @@ public:
 			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->JoinLobby( selection.m_steamIDLobby );
 			// set the function to call when this API completes
 			m_SteamCallResultLobbyEntered.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyEntered );
-			m_SteamCallResultLobbyDataChange.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyDataChange );
-			m_SteamCallResultLobbyChatUpdate.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyChatUpdate );
 		}
 
 		SetGameState( selection.m_eStateToTransitionTo );

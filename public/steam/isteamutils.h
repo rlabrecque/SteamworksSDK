@@ -114,7 +114,7 @@ public:
 
 
 // callbacks
-
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: The country of the user changed
@@ -153,5 +153,6 @@ struct SteamShutdown_t
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 4 };
 };
 
+#pragma pack( pop )
 
 #endif // ISTEAMUTILS_H

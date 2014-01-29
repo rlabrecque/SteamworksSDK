@@ -23,6 +23,8 @@ enum EP2PSessionError
 	k_EP2PSessionErrorNoRightsToApp = 2,			// local user doesn't own the app that is running
 	k_EP2PSessionErrorDestinationNotLoggedIn = 3,	// target user isn't connected to Steam
 	k_EP2PSessionErrorTimeout = 4,					// target isn't responding, perhaps not calling AcceptP2PSessionWithUser()
+													// corporate firewalls can also block this (NAT traversal is not firewall traversal)
+													// make sure that UDP ports 3478, 4379, and 4380 are open in an outbound direction
 
 };
 
@@ -56,6 +58,7 @@ enum EP2PSend
 
 // connection state to a specified user, returned by GetP2PSessionState()
 // this is under-the-hood info about what's going on with a SendP2PPacket(), shouldn't be needed except for debuggin
+#pragma pack( push, 8 )
 struct P2PSessionState_t
 {
 	uint8 m_bConnectionActive;		// true if we've got an active open connection
@@ -67,6 +70,7 @@ struct P2PSessionState_t
 	uint32 m_nRemoteIP;				// potential IP:Port of remote host. Could be TURN server. 
 	uint16 m_nRemotePort;			// Only exists for compatibility with older authentication api's
 };
+#pragma pack( pop )
 
 
 // handle to a socket
@@ -235,6 +239,8 @@ public:
 };
 #define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking003"
 
+// callbacks
+#pragma pack( push, 8 )
 
 // callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
 // in response, a call to AcceptP2PPacketsFromUser() needs to be made, if you want to talk with them
@@ -267,5 +273,6 @@ struct SocketStatusCallback_t
 	int m_eSNetSocketState;				// socket state, ESNetSocketState
 };
 
+#pragma pack( pop )
 
 #endif // ISTEAMNETWORKING

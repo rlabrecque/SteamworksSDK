@@ -1,4 +1,4 @@
-//====== Copyright © Valve Corporation, All rights reserved. ==================
+//====== Copyright © Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface for game servers to steam stats and achievements
 //
@@ -13,7 +13,7 @@
 #include "isteamclient.h"
 
 //-----------------------------------------------------------------------------
-// Purpose: interface for game servers to Steam users stats and achievements
+// Purpose: Functions for authenticating users via Steam to play on a game server
 //-----------------------------------------------------------------------------
 class ISteamGameServerStats
 {
@@ -53,6 +53,7 @@ public:
 #define STEAMGAMESERVERSTATS_INTERFACE_VERSION "SteamGameServerStats001"
 
 // callbacks
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: called when the latests stats and achievements have been received
@@ -86,7 +87,7 @@ struct GSStatsUnloaded_t
 	CSteamID	m_steamIDUser;	// User whose stats have been unloaded
 };
 
-
+#pragma pack( pop )
 
 
 #endif // ISTEAMGAMESERVERSTATS_H

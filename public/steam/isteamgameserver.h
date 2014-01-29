@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright (c) 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to steam for game servers
 //
@@ -84,9 +84,9 @@ public:
 	// This can be called if spectator goes away or comes back (passing 0 means there is no spectator server now).
 	virtual void UpdateSpectatorPort( uint16 unSpectatorPort ) = 0;
 
-	// Sets a string defining the "gametype" for this server, this is optional, but if it is set
+	// Sets a string defining the "gametags" for this server, this is optional, but if it is set
 	// it allows users to filter in the matchmaking/server-browser interfaces based on the value
-	virtual void SetGameType( const char *pchGameType ) = 0; 
+	virtual void SetGameTags( const char *pchGameTags ) = 0; 
 
 	// Ask for the gameplay stats for the server. Results returned in a callback
 	virtual void GetGameplayStats( ) = 0;
@@ -131,6 +131,7 @@ const uint32 k_unServerFlagPrivate		= 0x20;		// server shouldn't list on master 
 
 
 // callbacks
+#pragma pack( push, 8 )
 
 
 // client has been approved to connect to this game server
@@ -219,5 +220,7 @@ struct GSReputation_t
 	uint64	m_ulBannedGameID;	// The game ID the banned server is serving
 	uint32	m_unBanExpires;		// Time the ban expires, expressed in the Unix epoch (seconds since 1/1/1970)
 };
+
+#pragma pack( pop )
 
 #endif // ISTEAMGAMESERVER_H

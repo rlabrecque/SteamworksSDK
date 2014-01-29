@@ -60,6 +60,8 @@ enum ELeaderboardUploadScoreMethod
 };
 
 // a single entry in a leaderboard, as returned by GetDownloadedLeaderboardEntry()
+#pragma pack( push, 8 )
+
 struct LeaderboardEntry_t
 {
 	CSteamID m_steamIDUser; // user with the entry - use SteamFriends()->GetFriendPersonaName() & SteamFriends()->GetFriendAvatar() to get more info
@@ -67,6 +69,8 @@ struct LeaderboardEntry_t
 	int32 m_nScore;			// score as set in the leaderboard
 	int32 m_cDetails;		// number of int32 details available for this entry
 };
+
+#pragma pack( pop )
 
 
 //-----------------------------------------------------------------------------
@@ -200,6 +204,8 @@ public:
 
 #define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION007"
 
+// callbacks
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: called when the latests stats and achievements have been received
@@ -301,6 +307,7 @@ struct UserStatsUnloaded_t
 };
 
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Callback indicating that an achievement icon has been fetched
 //-----------------------------------------------------------------------------
@@ -313,4 +320,12 @@ struct UserAchievementIconFetched_t
 	bool		m_bAchieved;		// Is the icon for the achieved or not achieved version?
 	int			m_nIconHandle;		// Handle to the image, which can be used in ClientUtils()->GetImageRGBA(), 0 means no image is set for the achievement
 };
+
+//
+// IMPORTANT! k_iSteamUserStatsCallbacks + 10 is used, see iclientuserstats.h
+//
+
+#pragma pack( pop )
+
+
 #endif // ISTEAMUSER_H

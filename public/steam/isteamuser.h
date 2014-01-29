@@ -14,6 +14,7 @@
 
 // structure that contains client callback data
 // see callbacks documentation for more details
+#pragma pack( push, 8 )
 struct CallbackMsg_t
 {
 	HSteamUser m_hSteamUser;
@@ -21,6 +22,7 @@ struct CallbackMsg_t
 	uint8 *m_pubParam;
 	int m_cubParam;
 };
+#pragma pack( pop )
 
 // reference to a steam call, to filter results by
 typedef int32 HSteamCall;
@@ -131,7 +133,7 @@ public:
 
 
 // callbacks
-
+#pragma pack( push, 8 )
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a connections to the Steam back-end has been established
@@ -213,5 +215,19 @@ struct ValidateAuthTicketResponse_t
 	EAuthSessionResponse m_eAuthSessionResponse;
 };
 
+
+//-----------------------------------------------------------------------------
+// Purpose: called when a user has responded to a microtransaction authorization request
+//-----------------------------------------------------------------------------
+struct MicroTxnAuthorizationResponse_t
+{
+	enum { k_iCallback = k_iSteamUserCallbacks + 52 };
+	
+	uint32 m_unAppID;			// AppID for this microtransaction
+	uint64 m_ulOrderID;			// OrderID provided for the microtransaction
+	uint8 m_bAuthorized;		// if user authorized transaction
+};
+
+#pragma pack( pop )
 
 #endif // ISTEAMUSER_H

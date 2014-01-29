@@ -69,6 +69,9 @@ private:
 	// Tells us when we have successfully connected to Steam
 	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnected, SteamServersConnected_t, m_CallbackSteamServersConnected );
 
+	// Tells us when there was a failure to connect to Steam
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnectFailure, SteamServerConnectFailure_t, m_CallbackSteamServersConnectFailure );
+
 	// Tells us when we have been logged out of Steam
 	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersDisconnected, SteamServersDisconnected_t, m_CallbackSteamServersDisconnected );
 
