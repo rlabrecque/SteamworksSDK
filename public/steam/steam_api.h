@@ -20,6 +20,10 @@
 #include "isteamnetworking.h"
 #include "isteamremotestorage.h"
 
+#if defined( _PS3 )
+#include "steamps3params.h"
+#endif
+
 // Steam API export macro
 #if defined( _WIN32 ) && !defined( _X360 )
 	#if defined( STEAM_API_EXPORTS )
@@ -85,43 +89,6 @@ S_API void SteamAPI_SetBreakpadAppID( uint32 unAppID );
 // interface pointers, configured by SteamAPI_Init()
 S_API ISteamClient *SteamClient();
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-//	PlayStation 3 initialization parameters
-//
-//	The following structure must be passed to when loading steam_api_ps3.prx
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-#define STEAM_PS3_PATH_MAX 1055
-#define STEAM_PS3_SERVICE_ID_MAX 32
-struct SteamPS3Params_t
-{
-	void *pReserved;
-	AppId_t m_nAppId;
-
-	char m_rgchInstallationPath[ STEAM_PS3_PATH_MAX ];
-	char m_rgchSystemCache[ STEAM_PS3_PATH_MAX ];	// temp working cache, not persistent 
-	char m_rgchGameData[ STEAM_PS3_PATH_MAX ];		// persistent game data path for storing user data
-	char m_rgchNpServiceID[ STEAM_PS3_SERVICE_ID_MAX ];
-
-	// Should be SYS_TTYP3 through SYS_TTYP10, if it's 0 then Steam won't spawn a 
-	// thread to read console input at all.  Using this let's you use Steam console commands
-	// like: profile_on, profile_off, profile_dump, mem_stats, mem_validate.
-	unsigned int m_cSteamInputTTY;
-
-	struct Ps3netInit_t
-	{
-		bool m_bNeedInit;
-		bool m_bNeedInitEx;
-		void *m_pMemory;
-		int m_nMemorySize;
-		int m_flags;
-	} m_sysNetInitInfo;
-
-	struct Ps3jpgInit_t
-	{
-		bool m_bNeedInit;
-	} m_sysJpgInitInfo;
-};
-
 
 //
 // VERSION_SAFE_STEAM_API_INTERFACES is usually not necessary, but it provides safety against releasing
@@ -152,6 +119,9 @@ S_API ISteamApps *SteamApps();
 S_API ISteamNetworking *SteamNetworking();
 S_API ISteamMatchmakingServers *SteamMatchmakingServers();
 S_API ISteamRemoteStorage *SteamRemoteStorage();
+#ifdef _PS3
+S_API ISteamPS3OverlayRender * SteamPS3OverlayRender();
+#endif
 #endif // VERSION_SAFE_STEAM_API_INTERFACES
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -425,6 +395,9 @@ public:
 	ISteamMatchmakingServers*	SteamMatchmakingServers()	{ return m_pSteamMatchmakingServers; }
 	ISteamNetworking*	SteamNetworking()					{ return m_pSteamNetworking; }
 	ISteamRemoteStorage* SteamRemoteStorage()				{ return m_pSteamRemoteStorage; }
+#ifdef _PS3
+	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
+#endif
 
 private:
 	ISteamUser		*m_pSteamUser;
@@ -436,6 +409,9 @@ private:
 	ISteamMatchmakingServers	*m_pSteamMatchmakingServers;
 	ISteamNetworking	*m_pSteamNetworking;
 	ISteamRemoteStorage *m_pSteamRemoteStorage;
+#ifdef _PS3
+	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
+#endif
 };
 
 inline CSteamAPIContext::CSteamAPIContext()
@@ -500,6 +476,10 @@ inline bool CSteamAPIContext::Init()
 	m_pSteamRemoteStorage = SteamClient()->GetISteamRemoteStorage( hSteamUser, hSteamPipe, STEAMREMOTESTORAGE_INTERFACE_VERSION );
 	if ( !m_pSteamRemoteStorage )
 		return false;
+
+#ifdef _PS3
+	m_pSteamPS3OverlayRender = SteamClient()->GetISteamPS3OverlayRender();
+#endif
 
 	return true;
 }

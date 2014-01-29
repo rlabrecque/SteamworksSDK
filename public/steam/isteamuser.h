@@ -89,7 +89,8 @@ public:
 	// This provides both the compressed and uncompressed data. Please note that the uncompressed
 	// data is not the raw feed from the microphone: data may only be available if audible 
 	// levels of speech are detected.
-	virtual EVoiceResult GetAvailableVoice(uint32 *pcbCompressed, uint32 *pcbUncompressed) = 0;
+	// nUncompressedVoiceDesiredSampleRate is necessary to know the number of bytes to return in pcbUncompressed - can be set to 0 if you don't need uncompressed (the usual case)
+	virtual EVoiceResult GetAvailableVoice(uint32 *pcbCompressed, uint32 *pcbUncompressed, uint32 nUncompressedVoiceDesiredSampleRate) = 0;
 
 	// Gets the latest voice data from the microphone. Compressed data is an arbitrary format, and is meant to be handed back to 
 	// DecompressVoice() for playback later as a binary blob. Uncompressed data is 16-bit, signed integer, 11025Hz PCM format.
@@ -101,14 +102,17 @@ public:
 	// You must grab both compressed and uncompressed here at the same time, if you want both.
 	// Matching data that is not read during this call will be thrown away.
 	// GetAvailableVoice() can be used to determine how much data is actually available.
-	virtual EVoiceResult GetVoice( bool bWantCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, bool bWantUncompressed, void *pUncompressedDestBuffer, uint32 cbUncompressedDestBufferSize, uint32 *nUncompressBytesWritten ) = 0;
+	virtual EVoiceResult GetVoice( bool bWantCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, bool bWantUncompressed, void *pUncompressedDestBuffer, uint32 cbUncompressedDestBufferSize, uint32 *nUncompressBytesWritten, uint32 nUncompressedVoiceDesiredSampleRate ) = 0;
 
 	// Decompresses a chunk of compressed data produced by GetVoice().
 	// nBytesWritten is set to the number of bytes written to pDestBuffer unless the return value is k_EVoiceResultBufferTooSmall.
 	// In that case, nBytesWritten is set to the size of the buffer required to decompress the given
 	// data. The suggested buffer size for the destination buffer is 22 kilobytes.
-	// The output format of the data is 16-bit signed at 11025 samples per second.
-	virtual EVoiceResult DecompressVoice( const void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
+	// The output format of the data is 16-bit signed at the requested samples per second.
+	virtual EVoiceResult DecompressVoice( const void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten, uint32 nDesiredSampleRate ) = 0;
+
+	// This returns the frequency of the voice data as it's stored internally; calling DecompressVoice() with this size will yield the best results
+	virtual uint32 GetVoiceOptimalSampleRate() = 0;
 
 	// Retrieve ticket to be sent to the entity who wishes to authenticate you. 
 	// pcbTicket retrieves the length of the actual ticket.
@@ -176,11 +180,15 @@ public:
 	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
 	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
 	virtual void LogOnAndCreateNewSteamAccountIfNeeded( bool bInteractive ) = 0;
+
+	// Returns a special SteamID that represents the user's PSN information. Can be used to query the user's PSN avatar,
+	// online name, etc. through the standard Steamworks interfaces.
+	virtual CSteamID GetConsoleSteamID() = 0;
 #endif
 
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser014"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser016"
 
 
 // callbacks

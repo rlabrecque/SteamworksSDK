@@ -131,13 +131,19 @@ typedef unsigned char uint8;
 #define VK_DOWN           0x28
 #define VK_SELECT         0x29
 
-typedef struct tagRECT
-{
-	LONG    left;
-	LONG    top;
-	LONG    right;
-	LONG    bottom;
-} RECT;
+#ifndef VALVE_RECT_DEFINED
+#define VALVE_RECT_DEFINED
+
+	typedef struct tagRECT
+	{
+		LONG    left;
+		LONG    top;
+		LONG    right;
+		LONG    bottom;
+	} RECT;
+
+	#define _RECT tagRECT
+#endif
 
 #define D3DCOLOR_ARGB(a,r,g,b) \
 	((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
@@ -161,6 +167,9 @@ typedef struct tagRECT
 #define DWARGB_TO_DWABGR(color) \
 	((DWORD)(( (((((color)>>24)&0xff))<<24)|(((((color))&0xff))<<16)|(((color>>8)&0xff)<<8)|((color)>>16)&0xff)))
 
+#define DWRGBA_TO_DWARGB(color) \
+	((DWORD)(( (((((color))&0xff))<<24)|(((((color>>24))&0xff))<<16)|(((color>>16)&0xff)<<8)|((color)>>8)&0xff)))
+
 // steam api header file
 #include "steam/steam_api.h"
 #include "steam/isteamuserstats.h"
@@ -169,6 +178,8 @@ typedef struct tagRECT
 #include "steam/steam_gameserver.h"
 
 extern void OutputDebugString( const char *pchMsg );
+extern int Alert( const char *lpCaption, const char *lpText );
+extern const char *GetUserSaveDataPath();
 
 // No _snprintf on POSIX, use snprintf
 #ifndef _snprintf
@@ -184,8 +195,8 @@ extern void OutputDebugString( const char *pchMsg );
 #include "cegclient.h"
 #else
 #define Steamworks_InitCEGLibrary() (true)
-#define Steamworks_TermCEGLibrary() (true)
-#define Steamworks_TestSecret() (true)
-#define Steamworks_SelfCheck() (true)
+#define Steamworks_TermCEGLibrary()
+#define Steamworks_TestSecret()
+#define Steamworks_SelfCheck()
 #endif
 

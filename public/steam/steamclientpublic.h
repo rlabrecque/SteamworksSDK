@@ -85,6 +85,14 @@ enum EResult
 	k_EResultPSNTicketInvalid = 58,				// PSN ticket was invalid
 	k_EResultPSNAccountAlreadyLinked = 59,		// PSN account is already linked to some other account, must explicitly request to replace/delete the link first
 	k_EResultRemoteFileConflict = 60,			// The sync cannot resume due to a conflict between the local and remote files
+	k_EResultIllegalPassword = 61,				// The requested new password is not legal
+	k_EResultSameAsPreviousValue = 62,			// new value is the same as the old one ( secret question and answer )
+	k_EResultAccountLogonDenied = 63,			// account login denied due to 2nd factor authentication failure
+	k_EResultCannotUseOldPassword = 64,			// The requested new password is not legal
+	k_EResultInvalidLoginAuthCode = 65,			// account login denied due to auth code invalid
+	k_EResultAccountLogonDeniedNoMail = 66,		// account login denied due to 2nd factor auth failure - and no mail has been sent
+	k_EResultHardwareNotCapableOfIPT = 67,		// 
+	k_EResultIPTInitError = 68,					// 
 };
 
 // Error codes for use with the voice functions
@@ -97,6 +105,7 @@ enum EVoiceResult
 	k_EVoiceResultBufferTooSmall = 4,
 	k_EVoiceResultDataCorrupted = 5,
 	k_EVoiceResultRestricted = 6,
+	k_EVoiceResultUnsupportedCodec = 7,
 
 };
 
@@ -183,7 +192,7 @@ enum EAccountType
 	k_EAccountTypeContentServer = 6,	// content server
 	k_EAccountTypeClan = 7,
 	k_EAccountTypeChat = 8,
-	// k_EAccountTypeP2PSuperSeeder = 9,	// unused
+	k_EAccountTypeConsoleUser = 9,		// Fake SteamID for local PSN account on PS3 or Live account on 360, etc.
 	k_EAccountTypeAnonUser = 10,
 
 	// Max of 16 items in this field
@@ -258,8 +267,11 @@ enum EStatusDepotVersion
 typedef void (*PFNLegacyKeyRegistration)( const char *pchCDKey, const char *pchInstallPath );
 typedef bool (*PFNLegacyKeyInstalled)();
 
-const int k_unSteamAccountIDMask = 0xFFFFFFFF;
-const int k_unSteamAccountInstanceMask = 0x000FFFFF;
+const unsigned int k_unSteamAccountIDMask = 0xFFFFFFFF;
+const unsigned int k_unSteamAccountInstanceMask = 0x000FFFFF;
+// we allow 2 simultaneous user account instances right now, 1= desktop, 2 = console, 0 = all
+const unsigned int k_unSteamUserDesktopInstance = 1;	 
+const unsigned int k_unSteamUserConsoleInstance = 2;
 
 // Special flags for Chat accounts - they go in the top 8 bits
 // of the steam ID's "instance", leaving 12 for the actual instances
@@ -345,7 +357,7 @@ public:
 	CSteamID( uint32 unAccountID, unsigned int unAccountInstance, EUniverse eUniverse, EAccountType eAccountType )
 	{
 #if defined(_SERVER) && defined(Assert)
-		Assert( ! ( ( k_EAccountTypeIndividual == eAccountType ) && ( 1 != unAccountInstance ) ) );	// enforce that for individual accounts, instance is always 1
+		Assert( ! ( ( k_EAccountTypeIndividual == eAccountType ) && ( unAccountInstance > k_unSteamUserConsoleInstance ) ) );	// enforce that for individual accounts, instance is always 1
 #endif // _SERVER
 		InstancedSet( unAccountID, unAccountInstance, eUniverse, eAccountType );
 	}
@@ -381,7 +393,8 @@ public:
 		}
 		else
 		{
-			m_steamid.m_comp.m_unAccountInstance = 1;
+			// by default we pick the desktop instance
+			m_steamid.m_comp.m_unAccountInstance = k_unSteamUserDesktopInstance;
 		}
 	}
 
@@ -407,8 +420,8 @@ public:
 	//-----------------------------------------------------------------------------
 	void FullSet( uint64 ulIdentifier, EUniverse eUniverse, EAccountType eAccountType )
 	{
-		m_steamid.m_comp.m_unAccountID = ( ulIdentifier & 0xFFFFFFFF );						// account ID is low 32 bits
-		m_steamid.m_comp.m_unAccountInstance = ( ( ulIdentifier >> 32 ) & 0xFFFFF );			// account instance is next 20 bits
+		m_steamid.m_comp.m_unAccountID = ( ulIdentifier & k_unSteamAccountIDMask );						// account ID is low 32 bits
+		m_steamid.m_comp.m_unAccountInstance = ( ( ulIdentifier >> 32 ) & k_unSteamAccountInstanceMask );			// account instance is next 20 bits
 		m_steamid.m_comp.m_EUniverse = eUniverse;
 		m_steamid.m_comp.m_EAccountType = eAccountType;
 	}
@@ -436,7 +449,7 @@ public:
 			pTSteamGlobalUserID->m_SteamLocalUserID.Split.High32bits;
 		m_steamid.m_comp.m_EUniverse = eUniverse;		// set the universe
 		m_steamid.m_comp.m_EAccountType = k_EAccountTypeIndividual; // Steam 2 accounts always map to account type of individual
-		m_steamid.m_comp.m_unAccountInstance = 1;	// individual accounts always have an account instance ID of 1
+		m_steamid.m_comp.m_unAccountInstance = k_unSteamUserDesktopInstance; // Steam2 only knew desktop instances
 	}
 
 	//-----------------------------------------------------------------------------
@@ -558,7 +571,7 @@ public:
 	//-----------------------------------------------------------------------------
 	bool BIndividualAccount() const
 	{
-		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual;
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual || m_steamid.m_comp.m_EAccountType == k_EAccountTypeConsoleUser;
 	}
 
 
@@ -578,9 +591,19 @@ public:
 		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeAnonUser;
 	}
 
+	//-----------------------------------------------------------------------------
+	// Purpose: Is this a faked up Steam ID for a PSN friend account?
+	//-----------------------------------------------------------------------------
+	bool BConsoleUserAccount() const
+	{
+		return m_steamid.m_comp.m_EAccountType == k_EAccountTypeConsoleUser;
+	}
 
 	// simple accessors
 	void SetAccountID( uint32 unAccountID )		{ m_steamid.m_comp.m_unAccountID = unAccountID; }
+	void SetAccountInstance( uint32 unInstance ){ m_steamid.m_comp.m_unAccountInstance = unInstance; }
+	void ClearIndividualInstance()				{ if ( BIndividualAccount() ) m_steamid.m_comp.m_unAccountInstance = 0; }
+	bool HasNoIndividualInstance() const		{ return BIndividualAccount() && (m_steamid.m_comp.m_unAccountInstance==0); }
 	uint32 GetAccountID() const					{ return m_steamid.m_comp.m_unAccountID; }
 	uint32 GetUnAccountInstance() const			{ return m_steamid.m_comp.m_unAccountInstance; }
 	EAccountType GetEAccountType() const		{ return ( EAccountType ) m_steamid.m_comp.m_EAccountType; }
@@ -620,11 +643,11 @@ private:
 #ifdef VALVE_BIG_ENDIAN
 			EUniverse			m_EUniverse : 8;	// universe this account belongs to
 			unsigned int		m_EAccountType : 4;			// type of account - can't show as EAccountType, due to signed / unsigned difference
-			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID (used for multiseat type accounts only)
+			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID
 			uint32				m_unAccountID : 32;			// unique account identifier
 #else
 			uint32				m_unAccountID : 32;			// unique account identifier
-			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID (used for multiseat type accounts only)
+			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID
 			unsigned int		m_EAccountType : 4;			// type of account - can't show as EAccountType, due to signed / unsigned difference
 			EUniverse			m_EUniverse : 8;	// universe this account belongs to
 #endif
@@ -644,7 +667,7 @@ inline bool CSteamID::IsValid() const
 
 	if ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual )
 	{
-		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance != 1 )
+		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance > k_unSteamUserConsoleInstance )
 			return false;
 	}
 

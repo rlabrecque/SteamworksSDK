@@ -36,6 +36,19 @@
 		503C6DB41269002800B66E3B /* libsteam_api.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 503C6DB31269002800B66E3B /* libsteam_api.dylib */; };
 		504EDCBC126901EC00F96D63 /* libsteam_api.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 503C6DB31269002800B66E3B /* libsteam_api.dylib */; };
 		504EDCC21269026C00F96D63 /* steam_appid.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 504EDCC01269025A00F96D63 /* steam_appid.txt */; };
+		50E77DEB1362190C000FC072 /* cglmbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD11362190C000FC072 /* cglmbuffer.cpp */; };
+		50E77DEC1362190C000FC072 /* cglmfbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD31362190C000FC072 /* cglmfbo.cpp */; };
+		50E77DED1362190C000FC072 /* cglmprogram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD51362190C000FC072 /* cglmprogram.cpp */; };
+		50E77DEE1362190C000FC072 /* cglmquery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD71362190C000FC072 /* cglmquery.cpp */; };
+		50E77DEF1362190C000FC072 /* cglmtex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DD91362190C000FC072 /* cglmtex.cpp */; };
+		50E77DF01362190C000FC072 /* dx9asmtogl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DDB1362190C000FC072 /* dx9asmtogl2.cpp */; };
+		50E77DF11362190C000FC072 /* dxabstract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DDD1362190C000FC072 /* dxabstract.cpp */; };
+		50E77DF21362190C000FC072 /* glmgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE11362190C000FC072 /* glmgr.cpp */; };
+		50E77DF31362190C000FC072 /* glmgrbasics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE31362190C000FC072 /* glmgrbasics.cpp */; };
+		50E77DF41362190C000FC072 /* glmgrcocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE51362190C000FC072 /* glmgrcocoa.mm */; };
+		50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE61362190C000FC072 /* glmgrext.cpp */; };
+		50E77DF61362190C000FC072 /* mathlite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE91362190C000FC072 /* mathlite.cpp */; };
+		50E77DF813621991000FC072 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50E77DF713621991000FC072 /* IOKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -107,9 +120,36 @@
 		503C6D0E1268F49F00B66E3B /* voicechat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voicechat.h; sourceTree = "<group>"; };
 		503C6DAA1268FE1000B66E3B /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		503C6DAB1268FE1000B66E3B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		503C6DB31269002800B66E3B /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = /Users/joer/Source/Steam3/main/src/lib/osx32/release/libsteam_api.dylib; sourceTree = "<absolute>"; };
+		503C6DB31269002800B66E3B /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = ../redistributable_bin/osx32/libsteam_api.dylib; sourceTree = "<absolute>"; };
 		504EDCB4126900D600F96D63 /* steamworksexample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "steamworksexample-Info.plist"; path = "osx/steamworksexample-Info.plist"; sourceTree = "<group>"; };
 		504EDCC01269025A00F96D63 /* steam_appid.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = steam_appid.txt; path = osx/steam_appid.txt; sourceTree = "<group>"; };
+		50E77DD11362190C000FC072 /* cglmbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmbuffer.cpp; path = ../glmgr/cglmbuffer.cpp; sourceTree = "<group>"; };
+		50E77DD21362190C000FC072 /* cglmbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmbuffer.h; path = ../glmgr/cglmbuffer.h; sourceTree = "<group>"; };
+		50E77DD31362190C000FC072 /* cglmfbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmfbo.cpp; path = ../glmgr/cglmfbo.cpp; sourceTree = "<group>"; };
+		50E77DD41362190C000FC072 /* cglmfbo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmfbo.h; path = ../glmgr/cglmfbo.h; sourceTree = "<group>"; };
+		50E77DD51362190C000FC072 /* cglmprogram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmprogram.cpp; path = ../glmgr/cglmprogram.cpp; sourceTree = "<group>"; };
+		50E77DD61362190C000FC072 /* cglmprogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmprogram.h; path = ../glmgr/cglmprogram.h; sourceTree = "<group>"; };
+		50E77DD71362190C000FC072 /* cglmquery.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmquery.cpp; path = ../glmgr/cglmquery.cpp; sourceTree = "<group>"; };
+		50E77DD81362190C000FC072 /* cglmquery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmquery.h; path = ../glmgr/cglmquery.h; sourceTree = "<group>"; };
+		50E77DD91362190C000FC072 /* cglmtex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cglmtex.cpp; path = ../glmgr/cglmtex.cpp; sourceTree = "<group>"; };
+		50E77DDA1362190C000FC072 /* cglmtex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cglmtex.h; path = ../glmgr/cglmtex.h; sourceTree = "<group>"; };
+		50E77DDB1362190C000FC072 /* dx9asmtogl2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dx9asmtogl2.cpp; path = ../glmgr/dx9asmtogl2.cpp; sourceTree = "<group>"; };
+		50E77DDC1362190C000FC072 /* dx9asmtogl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dx9asmtogl2.h; path = ../glmgr/dx9asmtogl2.h; sourceTree = "<group>"; };
+		50E77DDD1362190C000FC072 /* dxabstract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dxabstract.cpp; path = ../glmgr/dxabstract.cpp; sourceTree = "<group>"; };
+		50E77DDE1362190C000FC072 /* dxabstract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dxabstract.h; path = ../glmgr/dxabstract.h; sourceTree = "<group>"; };
+		50E77DDF1362190C000FC072 /* glmdebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glmdebug.h; path = ../glmgr/glmdebug.h; sourceTree = "<group>"; };
+		50E77DE01362190C000FC072 /* glmdisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glmdisplay.h; path = ../glmgr/glmdisplay.h; sourceTree = "<group>"; };
+		50E77DE11362190C000FC072 /* glmgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glmgr.cpp; path = ../glmgr/glmgr.cpp; sourceTree = "<group>"; };
+		50E77DE21362190C000FC072 /* glmgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glmgr.h; path = ../glmgr/glmgr.h; sourceTree = "<group>"; };
+		50E77DE31362190C000FC072 /* glmgrbasics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glmgrbasics.cpp; path = ../glmgr/glmgrbasics.cpp; sourceTree = "<group>"; };
+		50E77DE41362190C000FC072 /* glmgrbasics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glmgrbasics.h; path = ../glmgr/glmgrbasics.h; sourceTree = "<group>"; };
+		50E77DE51362190C000FC072 /* glmgrcocoa.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = glmgrcocoa.mm; path = ../glmgr/glmgrcocoa.mm; sourceTree = "<group>"; };
+		50E77DE61362190C000FC072 /* glmgrext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glmgrext.cpp; path = ../glmgr/glmgrext.cpp; sourceTree = "<group>"; };
+		50E77DE71362190C000FC072 /* glmgrext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glmgrext.h; path = ../glmgr/glmgrext.h; sourceTree = "<group>"; };
+		50E77DE81362190C000FC072 /* imageformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imageformat.h; path = ../glmgr/imageformat.h; sourceTree = "<group>"; };
+		50E77DE91362190C000FC072 /* mathlite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mathlite.cpp; path = ../glmgr/mathlite.cpp; sourceTree = "<group>"; };
+		50E77DEA1362190C000FC072 /* mathlite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mathlite.h; path = ../glmgr/mathlite.h; sourceTree = "<group>"; };
+		50E77DF713621991000FC072 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +157,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50E77DF813621991000FC072 /* IOKit.framework in Frameworks */,
 				503C6DB41269002800B66E3B /* libsteam_api.dylib in Frameworks */,
 				503C6DAC1268FE1000B66E3B /* OpenAL.framework in Frameworks */,
 				503C6DAD1268FE1000B66E3B /* OpenGL.framework in Frameworks */,
@@ -130,8 +171,6 @@
 		503C6CA31268F34200B66E3B = {
 			isa = PBXGroup;
 			children = (
-				503C6DAA1268FE1000B66E3B /* OpenAL.framework */,
-				503C6DAB1268FE1000B66E3B /* OpenGL.framework */,
 				503C6D291268F4EE00B66E3B /* Headers */,
 				503C6CAB1268F34200B66E3B /* Source */,
 				503C6CAC1268F34200B66E3B /* Resources */,
@@ -143,6 +182,7 @@
 		503C6CAB1268F34200B66E3B /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				50E77DCF136218F5000FC072 /* glmgr */,
 				503C6CED1268F49F00B66E3B /* p2pauth.cpp */,
 				503C6CEF1268F49F00B66E3B /* PhotonBeam.cpp */,
 				503C6CF11268F49F00B66E3B /* QuitMenu.cpp */,
@@ -182,6 +222,9 @@
 		503C6CAD1268F34200B66E3B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				50E77DF713621991000FC072 /* IOKit.framework */,
+				503C6DAA1268FE1000B66E3B /* OpenAL.framework */,
+				503C6DAB1268FE1000B66E3B /* OpenGL.framework */,
 				503C6DB31269002800B66E3B /* libsteam_api.dylib */,
 				503C6CB51268F34200B66E3B /* Cocoa.framework */,
 			);
@@ -228,6 +271,39 @@
 				503C6CEA1268F49F00B66E3B /* Messages.h */,
 			);
 			name = Headers;
+			sourceTree = "<group>";
+		};
+		50E77DCF136218F5000FC072 /* glmgr */ = {
+			isa = PBXGroup;
+			children = (
+				50E77DD11362190C000FC072 /* cglmbuffer.cpp */,
+				50E77DD21362190C000FC072 /* cglmbuffer.h */,
+				50E77DD31362190C000FC072 /* cglmfbo.cpp */,
+				50E77DD41362190C000FC072 /* cglmfbo.h */,
+				50E77DD51362190C000FC072 /* cglmprogram.cpp */,
+				50E77DD61362190C000FC072 /* cglmprogram.h */,
+				50E77DD71362190C000FC072 /* cglmquery.cpp */,
+				50E77DD81362190C000FC072 /* cglmquery.h */,
+				50E77DD91362190C000FC072 /* cglmtex.cpp */,
+				50E77DDA1362190C000FC072 /* cglmtex.h */,
+				50E77DDB1362190C000FC072 /* dx9asmtogl2.cpp */,
+				50E77DDC1362190C000FC072 /* dx9asmtogl2.h */,
+				50E77DDD1362190C000FC072 /* dxabstract.cpp */,
+				50E77DDE1362190C000FC072 /* dxabstract.h */,
+				50E77DDF1362190C000FC072 /* glmdebug.h */,
+				50E77DE01362190C000FC072 /* glmdisplay.h */,
+				50E77DE11362190C000FC072 /* glmgr.cpp */,
+				50E77DE21362190C000FC072 /* glmgr.h */,
+				50E77DE31362190C000FC072 /* glmgrbasics.cpp */,
+				50E77DE41362190C000FC072 /* glmgrbasics.h */,
+				50E77DE51362190C000FC072 /* glmgrcocoa.mm */,
+				50E77DE61362190C000FC072 /* glmgrext.cpp */,
+				50E77DE71362190C000FC072 /* glmgrext.h */,
+				50E77DE81362190C000FC072 /* imageformat.h */,
+				50E77DE91362190C000FC072 /* mathlite.cpp */,
+				50E77DEA1362190C000FC072 /* mathlite.h */,
+			);
+			name = glmgr;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -311,6 +387,18 @@
 				503C6D261268F49F00B66E3B /* Sun.cpp in Sources */,
 				503C6D271268F49F00B66E3B /* VectorEntity.cpp in Sources */,
 				503C6D281268F49F00B66E3B /* voicechat.cpp in Sources */,
+				50E77DEB1362190C000FC072 /* cglmbuffer.cpp in Sources */,
+				50E77DEC1362190C000FC072 /* cglmfbo.cpp in Sources */,
+				50E77DED1362190C000FC072 /* cglmprogram.cpp in Sources */,
+				50E77DEE1362190C000FC072 /* cglmquery.cpp in Sources */,
+				50E77DEF1362190C000FC072 /* cglmtex.cpp in Sources */,
+				50E77DF01362190C000FC072 /* dx9asmtogl2.cpp in Sources */,
+				50E77DF11362190C000FC072 /* dxabstract.cpp in Sources */,
+				50E77DF21362190C000FC072 /* glmgr.cpp in Sources */,
+				50E77DF31362190C000FC072 /* glmgrbasics.cpp in Sources */,
+				50E77DF41362190C000FC072 /* glmgrcocoa.mm in Sources */,
+				50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */,
+				50E77DF61362190C000FC072 /* mathlite.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,7 +408,7 @@
 		503C6CC71268F34200B66E3B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
@@ -342,7 +430,7 @@
 		503C6CC81268F34200B66E3B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = (
 					POSIX,

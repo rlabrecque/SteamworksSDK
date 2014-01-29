@@ -122,7 +122,7 @@ const CellID_t k_uCellIDInvalid = 0xFFFFFFFF;
 typedef uint64 SteamAPICall_t;
 const SteamAPICall_t k_uAPICallInvalid = 0x0;
 
-
+typedef uint32 AccountID_t;
 
 
 #endif // STEAMTYPES_H

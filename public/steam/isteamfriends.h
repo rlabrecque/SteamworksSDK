@@ -93,13 +93,22 @@ enum EUserRestriction
 {
 	k_nUserRestrictionNone		= 0,	// no known chat/content restriction
 	k_nUserRestrictionUnknown	= 1,	// we don't know yet (user offline)
-	k_nUserRestrictionChat		= 2,	// user is not allowed to send/recv text/voice chat
+	k_nUserRestrictionAnyChat	= 2,	// user is not allowed to (or can't) send/recv any chat
+	k_nUserRestrictionVoiceChat	= 4,	// user is not allowed to (or can't) send/recv voice chat
+	k_nUserRestrictionGroupChat	= 8,	// user is not allowed to (or can't) send/recv group chat
+	k_nUserRestrictionRating	= 16,	// user is too young according to rating in current region
 };
 
 
 
 // size limit on chat room or member metadata
 const uint32 k_cubChatMetadataMax = 8192;
+
+// size limits on Rich Presence data
+enum { k_cchMaxRichPresenceKeys = 20 };
+enum { k_cchMaxRichPresenceKeyLength = 64 };
+enum { k_cchMaxRichPresenceValueLength = 256 };
+
 
 //-----------------------------------------------------------------------------
 // Purpose: interface to accessing information about individual users,
@@ -236,9 +245,39 @@ public:
 	// the user can't see custom avatars. But the user can be online and send/recv game invites.
 	// a chat restricted user can't add friends or join any groups.
 	virtual uint32 GetUserRestrictions() = 0;
+
+	// Rich Presence data is automatically shared between friends who are in the same game
+	// Each user has a set of Key/Value pairs
+	// Up to 20 different keys can be set
+	// There are two magic keys:
+	//		"status"  - a UTF-8 string that will show up in the 'view game info' dialog in the Steam friends list
+	//		"connect" - a UTF-8 string that contains the command-line for how a friend can connect to a game
+	// GetFriendRichPresence() returns an empty string "" if no value is set
+	// SetRichPresence() to a NULL or an empty string deletes the key
+	// You can iterate the current set of keys for a friend with GetFriendRichPresenceKeyCount()
+	// and GetFriendRichPresenceKeyByIndex() (typically only used for debugging)
+	virtual bool SetRichPresence( const char *pchKey, const char *pchValue ) = 0;
+	virtual void ClearRichPresence() = 0;
+	virtual const char *GetFriendRichPresence( CSteamID steamIDFriend, const char *pchKey ) = 0;
+	virtual int GetFriendRichPresenceKeyCount( CSteamID steamIDFriend ) = 0;
+	virtual const char *GetFriendRichPresenceKeyByIndex( CSteamID steamIDFriend, int iKey ) = 0;
+
+	// rich invite support
+	// if the target accepts the invite, the pchConnectString gets added to the command-line for launching the game
+	// if the game is already running, a GameRichPresenceJoinRequested_t callback is posted containing the connect string
+	// invites can only be sent to friends
+	virtual bool InviteUserToGame( CSteamID steamIDFriend, const char *pchConnectString ) = 0;
+
+	// recently-played-with friends iteration
+	// this iterates the entire list of users recently played with, across games
+	// GetFriendCoplayTime() returns as a unix time
+	virtual int GetCoplayFriendCount() = 0;
+	virtual CSteamID GetCoplayFriend( int iCoplayFriend ) = 0;
+	virtual int GetFriendCoplayTime( CSteamID steamIDFriend ) = 0;
+	virtual AppId_t GetFriendCoplayGame( CSteamID steamIDFriend ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends008"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends009"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -333,6 +372,26 @@ struct ClanOfficerListResponse_t
 	uint8 m_bSuccess;
 };
 
+//-----------------------------------------------------------------------------
+// Purpose: callback indicating updated data about friends rich presence information
+//-----------------------------------------------------------------------------
+struct FriendRichPresenceUpdate_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 36 };
+	CSteamID m_steamIDFriend;	// friend who's rich presence has changed
+	AppId_t m_nAppID;			// the appID of the game (should always be the current game)
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: called when the user tries to join a game from their friends list
+//			rich presence will have been set with the "connect" key which is set here
+//-----------------------------------------------------------------------------
+struct GameRichPresenceJoinRequested_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 37 };
+	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
+	char m_rgchConnect[k_cchMaxRichPresenceValueLength];
+};
 
 #pragma pack( pop )
 

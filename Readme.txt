@@ -1,6 +1,6 @@
 ================================================================
 
-Copyright © 1996-2010, Valve Corporation, All rights reserved.
+Copyright © 1996-2011, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -12,11 +12,65 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.13	26th April 2011
+----------------------------------------------------------------
+
+Rich Presence
+* added a new Rich Presence system to allow for sharing game specific per user data between users
+* ISteamFriends::SetRichPresense() can be used to set key/value presence data for the current user
+* ISteamFriends::GetFriendRichPresence() and related functions can be used to retrieve presence data for a particular user
+* Two special presence keys exist:
+** the "connect" key can be set to specify a custom command line used by friends when joining that user
+** the "status" key can be set to specify custom text that will show up in the 'view game info' dialog in the Steam friends list
+
+HTTP
+* added ISteamHTTP, which exposes methods for making HTTP requests
+
+Downloadable Content
+* added ISteamApps::GetDLCCount() and ISteamApps::BGetDLCDataByIndex() to allow for enumerating DLC content for the current title
+* added ISteamApps::InstallDLC() and ISteamApps::UninstallDLC() to control installing optional content
+
+P2P Networking
+* added ISteamNetworking::CloseP2PChannelWithUser(), to allow for closing a single channel to a user. When all channels are closed, the connection to that user is automatically closed.
+* added ISteamNetworking::AllowP2PPacketRelay(), which can be used to prevent allowing P2P connections from falling back to relay
+
+Voice
+* ISteamUser::GetAvailableVoice() & ISteamUser::GetVoice() now take the desired sample rate to determine the number of uncompressed bytes to return
+* added ISteamUser::GetVoiceOptimalSampleRate() to return the frequency of the voice data as it's stored internally
+
+Friends
+* added ISteamFriends methods to retrieve the list of users the player has recently played with
+
+Content Tool
+* all files are now encrypted by default
+* add command line option to app creation wizard
+* add command line edit option by right clicking on app
+* update cache size in CDDB after each build
+* look for install scripts at build time and automatically add CDDB flag
+* fix language names for chinese
+* add menu button to easily rev version
+* warn if rebuilding existing version
+* allow specifying subfolder when ftp-ing depots to valve
+* better error messaging if ftp fails
+* clean up various small display bugs
+* don't trash ValidOSList tag when updating CDDB
+
+OSX DirectX to OpenGL
+* added the graphics layer used to port Valve games to OSX which can now be used by all Steamworks developers
+* included in the Steamworks Example application. Can be enabled by building with DX9MODE=1
+
+
+----------------------------------------------------------------
 v1.12	10th November 2010
 ----------------------------------------------------------------
 
 Cloud
 * added a set of function to handle publishing User Generated Content (UGC) files to the backend, and to download others users UGC files. This enables games to have users easily publish & share content with each other.
+* Added ISteamRemoteStorage::FileForget() which tells a file to remain on disk but to be removed from the backend. This can be used to manage which files should be synchronized if you have more files to store than your quota allows.
+* Added ISteamRemoteStorage::FilePersisted() to tell if the file is set to be synchronized with the backend.
+* Added ISteamRemoteStorage::FileDelete() which tells a file to be deleted locally, from cloud, and from other clients that have the file. This can be used to properly delete a save file rather than writing a 1-byte file as a sentinel.
+* Added ISteamRemoteStorage::SetSyncPlatforms(), GetSyncPlatforms() to tell steam which platforms a file should be synchronized to. This allows OSX not to download PC-specific files, or vice-versa.
+* Added ISteamRemoteStorage::IsCloudEnabledForAccount(), IsCloudEnabledForApp(), and SetCloudEnabledForApp(). When cloud is disabled the APIs still work as normal and an alternate location on disk is not needed. It just means the files will not be synchronized with the backend.
 
 Leaderboards
 * added ISteamUserStats::DownloadLeaderboardEntriesForUsers(), which downloads scores for an arbitrary set of users
@@ -35,8 +89,9 @@ Authentication
 * added ISteamApps::BIsSubscribedFromFreeWeekend(), so games can show different offers or information for users who currently only have rights to play the game due to a free weekend promotion
 * added ISteamGameServer::GetAuthSessionTicket(), BeginAuthSession(), EndAuthSession(), and CancelAuthTicket(), matching what exists in ISteamUser. This allows game servers and clients to authenticate each other in a unified manner.
 
-Steamworks Example
-* added OpenGL and OSX support
+OSX
+* The Steamworks Spacewar example now builds/runs on OS X
+* The OSX retail install setup application is now contained in goldmaster\disk_assets\SteamRetailInstaller.dmg
 
 PS3
 * added several functions regarding PS3 support. This is still a work in progress, and no PS3 binaries are included.

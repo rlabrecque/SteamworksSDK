@@ -52,9 +52,18 @@ void CStarField::Render()
 		Init();
 	}
 	
+	static int counter;	// per starfield draw..
+	counter++;
+	
 	for( size_t i = 0; i < m_VecStars.size(); ++i )
 	{
-		m_pGameEngine->BDrawPoint( m_VecStars[i].x, m_VecStars[i].y, m_VecStars[i].color );
+		float x = m_VecStars[i].x;
+		float y = m_VecStars[i].y;
+		float scoot = (float)counter * (float)(m_VecStars[i].color & 0xFF) / (4.0f * 255.0f);
+		float newy = y - scoot;					// make things float up
+		while( newy < 0.0f ) newy += m_nHeight;	// keep it on screen
+		
+		m_pGameEngine->BDrawPoint( x, newy, m_VecStars[i].color );
 	}
 
 	m_pGameEngine->BFlushPointBuffer();

@@ -169,6 +169,8 @@ public:
 
 	void RetrieveEncryptedAppTicket();
 
+	void ExecCommandLineConnect( const char *pchServerAddress, const char *pchLobbyID );
+
 private:
 
 	// Receive a response from the server for a connection attempt
@@ -206,6 +208,9 @@ private:
 
 	// Draw text telling the user a connection attempt is in progress
 	void DrawConnectionAttemptText();
+
+	// Updates what we show to friends about what we're doing and how to connect
+	void UpdateRichPresenceConnectionInfo();
 
 	// Server we are connected to
 	CSpaceWarServer *m_pServer;
@@ -349,11 +354,14 @@ private:
 
 	// callback for when the lobby game server has started
 	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t, m_LobbyGameCreated );
+	STEAM_CALLBACK( CSpaceWarClient, OnGameJoinRequested, GameRichPresenceJoinRequested_t, m_GameJoinRequested );
 	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t, m_AvatarImageLoadedCreated );
 
 	// callbacks for Steam connection state
 	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t, m_SteamServersConnected );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersDisconnected, SteamServersDisconnected_t, m_SteamServersDisconnected );
 	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t, m_SteamServerConnectFailure );
+	STEAM_CALLBACK( CSpaceWarClient, OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
 	
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

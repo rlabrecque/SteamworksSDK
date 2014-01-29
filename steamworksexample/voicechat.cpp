@@ -66,10 +66,10 @@ void CVoiceChat::RunFrame()
 	if ( m_bIsActive )
 	{
 		// read local microphone input
-		uint32 nBytesAvalaible = 0;
-		EVoiceResult res = SteamUser()->GetAvailableVoice( &nBytesAvalaible, NULL );
+		uint32 nBytesAvailable = 0;
+		EVoiceResult res = SteamUser()->GetAvailableVoice( &nBytesAvailable, NULL, 0 );
 
-		if ( res == k_EVoiceResultOK && nBytesAvalaible > 0 )
+		if ( res == k_EVoiceResultOK && nBytesAvailable > 0 )
 		{	
 			uint32 nBytesWritten = 0;
 			MsgVoiceChatData_t msg;
@@ -77,7 +77,7 @@ void CVoiceChat::RunFrame()
 			// don't send more then 1 KB at a time
 			uint8 buffer[ 1024+sizeof(msg) ];
 			
-			res = SteamUser()->GetVoice( true, buffer+sizeof(msg), 1024, &nBytesWritten, false, NULL, 0, NULL );
+			res = SteamUser()->GetVoice( true, buffer+sizeof(msg), 1024, &nBytesWritten, false, NULL, 0, NULL, 0 );
 			
 			if ( res == k_EVoiceResultOK && nBytesWritten > 0 )
 			{
@@ -98,7 +98,7 @@ void CVoiceChat::RunFrame()
 					pVoiceData += sizeof(MsgVoiceChatData_t);
 
 					EVoiceResult res = SteamUser()->DecompressVoice( pVoiceData , nBytesWritten,
-						m_ubUncompressedVoice, sizeof( m_ubUncompressedVoice ), &numUncompressedBytes );
+						m_ubUncompressedVoice, sizeof( m_ubUncompressedVoice ), &numUncompressedBytes, VOICE_OUTPUT_SAMPLE_RATE );
 
 					if ( res == k_EVoiceResultOK && numUncompressedBytes > 0 )
 					{
@@ -140,7 +140,7 @@ bool CVoiceChat::HandleMessage( CSteamID fromSteamID, EMessage eMsg, const void 
 			pVoiceData += sizeof(MsgVoiceChatData_t);
 			
 			EVoiceResult res = SteamUser()->DecompressVoice( pVoiceData , pMsgVoiceData->GetDataLength(),
-				pbUncompressedVoice, sizeof( pbUncompressedVoice ), &numUncompressedBytes );
+				pbUncompressedVoice, sizeof( pbUncompressedVoice ), &numUncompressedBytes, VOICE_OUTPUT_SAMPLE_RATE );
 
 			if ( res == k_EVoiceResultOK && numUncompressedBytes > 0 )
 			{

@@ -33,10 +33,15 @@ void MiniDumpFunction( unsigned int nExceptionCode, EXCEPTION_POINTERS *pExcepti
 }
 #endif
 
-static int Alert( const char *lpCaption, const char *lpText )
+
+//-----------------------------------------------------------------------------
+// Purpose: Helper to display critical errors
+//-----------------------------------------------------------------------------
+int Alert( const char *lpCaption, const char *lpText )
 {
 #ifndef _WIN32
     fprintf( stderr, "Message: '%s', Detail: '%s'\n", lpCaption, lpText );
+	return 0;
 #else
     return ::MessageBox( NULL, lpText, lpCaption, MB_OK );
 #endif
@@ -61,9 +66,39 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Extracts some feature from the command line
+//-----------------------------------------------------------------------------
+void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID )
+{
+	// Look for the +connect ipaddress:port parameter in the command line,
+	// Steam will pass this when a user has used the Steam Server browser to find
+	// a server for our game and is trying to join it. 
+	const char *pchConnectParam = "+connect";
+	const char *pchConnect = strstr( pchCmdLine, pchConnectParam );
+	*ppchServerAddress = NULL;
+	if ( pchConnect && strlen( pchCmdLine ) > (pchConnect - pchCmdLine) + strlen( pchConnectParam ) + 1 )
+	{
+		// Address should be right after the +connect, +1 on the end to skip the space
+		*ppchServerAddress = pchCmdLine + ( pchConnect - pchCmdLine ) + strlen( pchConnectParam ) + 1;
+	}
+
+	// look for +connect_lobby lobbyid paramter on the command line
+	// Steam will pass this in if a user taken up an invite to a lobby
+	const char *pchConnectLobbyParam = "+connect_lobby";
+	const char *pchConnectLobby = strstr( pchCmdLine, pchConnectParam );
+	*ppchLobbyID = NULL;
+	if ( pchConnectLobby && strlen( pchCmdLine ) > (pchConnectLobby - pchCmdLine) + strlen( pchConnectLobbyParam ) + 1 )
+	{
+		// Address should be right after the +connect, +1 on the end to skip the space
+		*ppchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Main loop code shared between all platforms
 //-----------------------------------------------------------------------------
-void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const char *pchLobbyID  )
+void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const char *pchLobbyID )
 {
 	// Make sure it initialized ok
 	if ( pGameEngine->BReadyForUse() )
@@ -75,31 +110,7 @@ void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const 
 		pGameEngine->SetBackgroundColor( 0, 0, 0, 0 );
 
 		// If +connect was used to specify a server address, connect now
-		if ( pchServerAddress )
-		{
-			int32 octet0 = 0, octet1 = 0, octet2 = 0, octet3 = 0;
-			int32 uPort = 0;
-			int nConverted = sscanf( pchServerAddress, "%d.%d.%d.%d:%d", &octet0, &octet1, &octet2, &octet3, &uPort );
-			if ( nConverted == 5 )
-			{
-				char rgchIPAddress[128];
-				_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
-				uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
-				pGameClient->InitiateServerConnection( unIPAddress, uPort );
-			}
-		}
-
-		// if +connect_lobby was used to specify a lobby to join, connect now
-		if ( pchLobbyID )
-		{
-			CSteamID steamIDLobby( (uint64)atoll( pchLobbyID ) );
-			if ( steamIDLobby.IsValid() )
-			{
-				// act just like we had selected it from the menu
-				LobbyBrowserMenuItem_t menuItem = { steamIDLobby, k_EClientJoiningLobby };
-				pGameClient->OnMenuSelection( menuItem );
-			}
-		}
+		pGameClient->ExecCommandLineConnect( pchServerAddress, pchLobbyID );
 
 		// test a user specific secret before entering main loop
 		Steamworks_TestSecret();
@@ -137,6 +148,7 @@ void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const 
 // Purpose: Real main entry point for the program
 //-----------------------------------------------------------------------------
 #ifndef _PS3
+
 static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 {
 	
@@ -184,29 +196,8 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// with important UI in your game.
 	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
-	// Look for the +connect ipaddress:port parameter in the command line,
-	// Steam will pass this when a user has used the Steam Server browser to find
-	// a server for our game and is trying to join it. 
-	const char *pchConnectParam = "+connect";
-	const char *pchConnect = strstr( pchCmdLine, pchConnectParam );
-	const char *pchServerAddress = NULL;
-	if ( pchConnect && strlen( pchCmdLine ) > (pchConnect - pchCmdLine) + strlen( pchConnectParam ) + 1 )
-	{
-		// Address should be right after the +connect, +1 on the end to skip the space
-		pchServerAddress = pchCmdLine + ( pchConnect - pchCmdLine ) + strlen( pchConnectParam ) + 1;
-	}
-
-	// look for +connect_lobby lobbyid paramter on the command line
-	// Steam will pass this in if a user taken up an invite to a lobby
-	const char *pchConnectLobbyParam = "+connect_lobby";
-	const char *pchConnectLobby = strstr( pchCmdLine, pchConnectParam );
-	const char *pchLobbyID = NULL;
-	if ( pchConnectLobby && strlen( pchCmdLine ) > (pchConnectLobby - pchCmdLine) + strlen( pchConnectLobbyParam ) + 1 )
-	{
-		// Address should be right after the +connect, +1 on the end to skip the space
-		pchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
-	}
-
+	const char *pchServerAddress, *pchLobbyID;
+	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
 	// do a DRM self check
 	Steamworks_SelfCheck();
 
@@ -215,7 +206,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	IGameEngine *pGameEngine = 
 #if defined(_WIN32)
         new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
-#else if defined(OSX)
+#elif defined(OSX)
         CreateGameEngineOSX();
 #endif
     

@@ -116,11 +116,11 @@ public:
 	// Achievement / GroupAchievement metadata
 
 	// Gets the icon of the achievement, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set. 
-	// A return value of 0 may indicate we are still fetching data, and you can wait for the UserAchievementIconReady_t callback
-	// which will notify you when the bits are actually read.  If the callback still returns zero, then there is no image set
-	// and there never will be.
+	// A return value of 0 may indicate we are still fetching data, and you can wait for the UserAchievementIconFetched_t callback
+	// which will notify you when the bits are ready. If the callback still returns zero, then there is no image set for the
+	// specified achievement.
 	virtual int GetAchievementIcon( const char *pchName ) = 0;
-	// Get general attributes (display name / text, etc) for an Achievement
+	// Get general attributes (display name, desc, etc) for an Achievement
 	virtual const char *GetAchievementDisplayAttribute( const char *pchName, const char *pchKey ) = 0;
 
 	// Achievement progress - triggers an AchievementProgress callback, that is all.
@@ -211,6 +211,26 @@ public:
 	// Retrieves the number of players currently playing your game (online + offline)
 	// This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
 	virtual SteamAPICall_t GetNumberOfCurrentPlayers() = 0;
+
+#ifdef _PS3
+	// Call to kick off installation of the PS3 trophies. This call is asynchronous, and the results will be returned in a PS3TrophiesInstalled_t
+	// callback.
+	virtual bool InstallPS3Trophies() = 0;
+
+	// Returns the amount of space required at boot to install trophies. This value can be used when comparing the amount of space needed
+	// by the game to the available space value passed to the game at boot. The value is set during InstallPS3Trophies().
+	virtual uint64 GetTrophySpaceRequiredBeforeInstall() = 0;
+
+	// On PS3, user stats & achievement progress through Steam must be stored with the user's saved game data.
+	// At startup, before calling RequestCurrentStats(), you must pass the user's stats data to Steam via this method.
+	// If you do not have any user data, call this function with pvData = NULL and cubData = 0
+	virtual bool SetUserStatsData( const void *pvData, uint32 cubData ) = 0;
+
+	// Call to get the user's current stats data. You should retrieve this data after receiving successful UserStatsReceived_t & UserStatsStored_t
+	// callbacks, and store the data with the user's save game data. You can call this method with pvData = NULL and cubData = 0 to get the required
+	// buffer size.
+	virtual bool GetUserStatsData( void *pvData, uint32 cubData, uint32 *pcubWritten ) = 0;
+#endif
 };
 
 #define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION009"
@@ -345,6 +365,19 @@ struct LeaderboardUGCSet_t
 	enum { k_iCallback = k_iSteamUserStatsCallbacks + 11 };
 	EResult m_eResult;				// The result of the operation
 	SteamLeaderboard_t m_hSteamLeaderboard;	// the leaderboard handle that was
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: callback indicating that PS3 trophies have been installed
+//-----------------------------------------------------------------------------
+struct PS3TrophiesInstalled_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 12 };
+	uint64	m_nGameID;				// Game these stats are for
+	EResult m_eResult;				// The result of the operation
+	uint64 m_ulRequiredDiskSpace;	// If m_eResult is k_EResultDiskFull, will contain the amount of space needed to install trophies
+
 };
 
 #pragma pack( pop )

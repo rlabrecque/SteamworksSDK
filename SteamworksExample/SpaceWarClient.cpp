@@ -23,6 +23,11 @@
 CSpaceWarClient *g_pSpaceWarClient = NULL;
 CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 
+#if defined(WIN32)
+#define atoll _atoi64
+#endif
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -33,7 +38,10 @@ CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine ) :
 		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure ),
 		m_SteamShutdownCallback( this, &CSpaceWarClient::OnSteamShutdown ),
 		m_SteamServersConnected( this, &CSpaceWarClient::OnSteamServersConnected ),
-		m_SteamServerConnectFailure( this, &CSpaceWarClient::OnSteamServerConnectFailure )
+		m_SteamServersDisconnected( this, &CSpaceWarClient::OnSteamServersDisconnected ),
+		m_SteamServerConnectFailure( this, &CSpaceWarClient::OnSteamServerConnectFailure ),
+		m_GameJoinRequested( this, &CSpaceWarClient::OnGameJoinRequested ),
+		m_CallbackGameOverlayActivated( this, &CSpaceWarClient::OnGameOverlayActivated )
 {
 	Init( pGameEngine );
 }
@@ -231,6 +239,10 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	m_unServerIP = p2pSessionState.m_nRemoteIP;
 	m_usServerPort = p2pSessionState.m_nRemotePort;
 
+	// set how to connect to the game server, using the Rich Presence API
+	// this lets our friends connect to this game via their friends list
+	UpdateRichPresenceConnectionInfo();
+
 	MsgClientBeginAuthentication_t msg;
 #ifdef USE_GS_AUTH_API
 	char rgchToken[1024];
@@ -271,6 +283,9 @@ void CSpaceWarClient::OnReceiveServerAuthenticationResponse( bool bSuccess, uint
 
 		m_uPlayerShipIndex = uPlayerPosition;
 		m_eConnectedStatus = k_EClientConnectedAndAuthenticated;
+
+		// set information so our friends can join the lobby
+		UpdateRichPresenceConnectionInfo();
 
 		// send a ping, to measure round-trip time
 		m_ulPingSentTime = m_pGameEngine->GetGameTickCount();
@@ -461,6 +476,9 @@ void CSpaceWarClient::SetGameState( EClientGameState eState )
 
 	// Let the stats handler check the state (so it can detect wins, losses, etc...)
 	m_pStatsAndAchievements->OnGameStateChange( eState );
+
+	// update any rich presence state
+	UpdateRichPresenceConnectionInfo();
 }
 
 
@@ -710,6 +728,22 @@ void CSpaceWarClient::OnReceiveServerExiting()
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Steam is asking us to join a game, based on the user selecting
+//			'join game' on a friend in their friends list 
+//			the string comes from the "connect" field set in the friends' rich presence
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnGameJoinRequested( GameRichPresenceJoinRequested_t *pCallback )
+{
+	// parse out the connect 
+	const char *pchServerAddress, *pchLobbyID;
+	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID );
+	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID );
+
+	// exec
+	ExecCommandLineConnect( pchServerAddress, pchLobbyID );
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Finishes up entering a lobby of our own creation
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnLobbyCreated( LobbyCreated_t *pCallback, bool bIOFailure )
@@ -757,10 +791,11 @@ void CSpaceWarClient::OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure )
 	}
 
 	// success
+
 	// move forward the state
-	SetGameState( k_EClientInLobby );
 	m_steamIDLobby = pCallback->m_ulSteamIDLobby;
 	m_pLobby->SetLobbySteamID( m_steamIDLobby );
+	SetGameState( k_EClientInLobby );
 }
 
 
@@ -962,6 +997,31 @@ void CSpaceWarClient::OnSteamServersConnected( SteamServersConnected_t *callback
 	{
 		OutputDebugString( "Got SteamServersConnected_t, but not logged on?\n" );
 	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles notification that we are now connected to Steam
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnSteamServersDisconnected( SteamServersDisconnected_t *callback )
+{
+	SetGameState( k_EClientConnectingToSteam );
+	m_pConnectingMenu->OnConnectFailure();
+	OutputDebugString( "Got SteamServersDisconnected_t\n" );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles notification that the Steam overlay is shown/hidden, note, this
+// doesn't mean the overlay will or will not draw, it may still draw when not active.
+// This does mean the time when the overlay takes over input focus from the game.
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnGameOverlayActivated( GameOverlayActivated_t *callback )
+{
+	if ( callback->m_bActive )	
+		OutputDebugString( "Steam overlay now active\n" );
+	else
+		OutputDebugString( "Steam overlay now inactive\n" );
 }
 
 
@@ -1760,5 +1820,62 @@ void CSpaceWarClient::OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t 
 	else if ( pEncryptedAppTicketResponse->m_eResult == k_EResultNoConnection )
 	{
 		OutputDebugString( "Calling RequestEncryptedAppTicket while not connected to steam results in this error\n" );
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Updates what we show to friends about what we're doing and how to connect
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::UpdateRichPresenceConnectionInfo()
+{
+	// connect string that will come back to us on the command line	when a friend tries to join our game
+	char rgchConnectString[128];
+	rgchConnectString[0] = 0;
+
+	if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated && m_unServerIP && m_usServerPort )
+	{
+		// game server connection method
+		_snprintf( rgchConnectString, sizeof(rgchConnectString), "+connect %d:%d", m_unServerIP, m_usServerPort );
+	}
+	else if ( m_steamIDLobby.IsValid() )
+	{
+		// lobby connection method
+		_snprintf( rgchConnectString, sizeof(rgchConnectString), "+connect_lobby %llu", m_steamIDLobby.ConvertToUint64() );
+	}
+
+	SteamFriends()->SetRichPresence( "connect", rgchConnectString );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: applies a command-line connect
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::ExecCommandLineConnect( const char *pchServerAddress, const char *pchLobbyID )
+{
+	if ( pchServerAddress )
+	{
+		int32 octet0 = 0, octet1 = 0, octet2 = 0, octet3 = 0;
+		int32 uPort = 0;
+		int nConverted = sscanf( pchServerAddress, "%d.%d.%d.%d:%d", &octet0, &octet1, &octet2, &octet3, &uPort );
+		if ( nConverted == 5 )
+		{
+			char rgchIPAddress[128];
+			_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
+			uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
+			InitiateServerConnection( unIPAddress, uPort );
+		}
+	}
+
+	// if +connect_lobby was used to specify a lobby to join, connect now
+	if ( pchLobbyID )
+	{
+		CSteamID steamIDLobby( (uint64)atoll( pchLobbyID ) );
+		if ( steamIDLobby.IsValid() )
+		{
+			// act just like we had selected it from the menu
+			LobbyBrowserMenuItem_t menuItem = { steamIDLobby, k_EClientJoiningLobby };
+			OnMenuSelection( menuItem );
+		}
 	}
 }

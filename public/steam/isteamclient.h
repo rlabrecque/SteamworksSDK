@@ -42,6 +42,7 @@ class ISteamApps;
 class ISteamNetworking;
 class ISteamRemoteStorage;
 class ISteamGameServerStats;
+class ISteamPS3OverlayRender;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -132,6 +133,10 @@ public:
 
 	// Trigger global shutdown for the DLL
 	virtual bool BShutdownIfAllPipesClosed() = 0;
+
+#ifdef _PS3
+	virtual ISteamPS3OverlayRender *GetISteamPS3OverlayRender() = 0;
+#endif
 
 };
 
