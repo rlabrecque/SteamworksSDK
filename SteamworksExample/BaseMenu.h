@@ -13,6 +13,7 @@
 #include "GameEngine.h"
 #include "SpaceWar.h"
 #include "SpaceWarClient.h"
+#include "steam/isteamcontroller.h"
 
 #define MENU_FONT_HEIGHT 24
 #define MENU_ITEM_PADDING 12
@@ -102,8 +103,39 @@ public:
 		// menu to "go back to main menu" you don't end up immediately registering a return in the
 		// main menu afterwards.
 
+		bool bControllerDown = false;
+		bool bControllerUp = false;
+		bool bControllerActivate = false;
+		SteamControllerState_t controllerState;
+
+		std::vector< uint32 > vecControllerUp;
+		std::vector< uint32 > vecControllerDown;
+		std::vector< uint32 > vecControllerActivate;
+
+		for( uint32 i=0; i < MAX_STEAM_CONTROLLERS; ++i )
+		{
+			if( SteamController()->GetControllerState( i, &controllerState ) )
+			{
+				if ( controllerState.sLeftPadY > 10000 )
+				{
+					vecControllerUp.push_back( i );
+					bControllerUp = true;
+				}
+				else if ( controllerState.sLeftPadY < -10000 )
+				{
+					vecControllerDown.push_back( i );
+					bControllerDown = true;
+				}
+				if ( controllerState.ulButtons & STEAM_BUTTON_LEFTPAD_CLICKED_MASK )
+				{
+					vecControllerActivate.push_back( i );
+					bControllerActivate = true;
+				}
+			}
+		}
+
 		// check if the enter key is down, if it is take action
-		if ( m_pGameEngine->BIsKeyDown( VK_RETURN ) )
+		if ( m_pGameEngine->BIsKeyDown( VK_RETURN ) || bControllerActivate )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
 			if ( ulCurrentTickCount - 220 > g_ulLastReturnKeyTick )
@@ -111,17 +143,23 @@ public:
 				g_ulLastReturnKeyTick = ulCurrentTickCount;
 				if ( m_uSelectedItem < m_VecMenuItems.size() )
 				{
+					for( std::vector< uint32 >::iterator iter = vecControllerActivate.begin(); iter != vecControllerActivate.end(); ++iter )
+						SteamController()->TriggerHapticPulse( *iter, k_ESteamControllerPad_Left, 1400 );
+
 					SpaceWarClient()->OnMenuSelection( m_VecMenuItems[m_uSelectedItem].second );
 					return;
 				}
 			}
 		}
 		// Check if we need to change the selected menu item
-		else if ( m_pGameEngine->BIsKeyDown( VK_DOWN ) )
+		else if ( m_pGameEngine->BIsKeyDown( VK_DOWN ) || bControllerDown )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
 			if ( ulCurrentTickCount - 140 > g_ulLastKeyDownTick )
 			{
+				for( std::vector< uint32 >::iterator iter = vecControllerDown.begin(); iter != vecControllerDown.end(); ++iter )
+					SteamController()->TriggerHapticPulse( *iter, k_ESteamControllerPad_Left, 500 );
+
 				g_ulLastKeyDownTick = ulCurrentTickCount;
 				if ( m_uSelectedItem < m_VecMenuItems.size() - 1 )
 					m_uSelectedItem++;
@@ -129,11 +167,14 @@ public:
 					m_uSelectedItem = 0;
 			}
 		}
-		else if ( m_pGameEngine->BIsKeyDown( VK_UP ) )
+		else if ( m_pGameEngine->BIsKeyDown( VK_UP ) || bControllerUp )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
 			if ( ulCurrentTickCount - 140 > g_ulLastKeyUpTick )
 			{
+				for( std::vector< uint32 >::iterator iter = vecControllerUp.begin(); iter != vecControllerUp.end(); ++iter )
+					SteamController()->TriggerHapticPulse( *iter, k_ESteamControllerPad_Left, 500 );
+
 				g_ulLastKeyUpTick = ulCurrentTickCount;
 				if ( m_uSelectedItem > 0 )
 					m_uSelectedItem--;

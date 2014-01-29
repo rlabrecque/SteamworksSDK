@@ -13,11 +13,11 @@ Using the DRM tool
 ==================================================
 Flag values
 ==================================================
-Normal: 32
-Min compatibility mode: 36
+Default: 0
+Min compatibility mode: 4
 Max compatibility mode: 38
                  
-Try it with flag = 32, if that breaks the game, try with flag = 36, if that still breaks the game, try with flag = 38.  
+Try it with flag = 0, if that breaks the game, try with flag = 4, if that still breaks the game, try with flag = 38.  
 
 ==================================================
 Steam Guard
@@ -32,7 +32,7 @@ Steam Guard may block you from authenticating.  If so, do the following.
 ==================================================
 Example usage
 ==================================================
-drmtool.exe -remotedrm build_path\Auslandia.exe 107700 32
+drmtool.exe -remotedrm build_path\Auslandia.exe 107700 0
 
 ==================================================
 Example drmtool.cfg file

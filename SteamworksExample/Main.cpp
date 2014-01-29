@@ -6,6 +6,12 @@
 
 #include "stdafx.h"
 #include "steam/steam_api.h"
+#ifdef WIN32
+#include <direct.h>
+#else
+#define MAX_PATH PATH_MAX
+#define _getcwd getcwd
+#endif
 
 #if defined(WIN32)
     #include "gameenginewin32.h"
@@ -200,6 +206,21 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// with important UI in your game.
 	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
+	// We are going to use the controller interface, initialize it, which is a seperate step as it 
+	// create a new thread in the game proc and we don't want to force that on games that don't
+	// have native Steam controller implementations
+
+	char rgchCWD[1024];
+	_getcwd( rgchCWD, sizeof( rgchCWD ) );
+
+	char rgchFullPath[1024];
+#if defined(_WIN32)
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "controller.vdf" );
+#else
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "controller.vdf" );
+#endif
+	SteamController()->Init( rgchFullPath );
+
 	const char *pchServerAddress, *pchLobbyID;
 	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
 	// do a DRM self check
@@ -222,6 +243,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );
 
 	// Shutdown the SteamAPI
+	SteamController()->Shutdown();
 	SteamAPI_Shutdown();
 
 	// Shutdown Steam CEG

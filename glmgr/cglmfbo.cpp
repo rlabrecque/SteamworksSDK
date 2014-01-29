@@ -72,6 +72,7 @@ static GLenum EncodeAttachmentFBO( EGLMFBOAttachment index )
 			
 			default:
 				GLMStop(); // bad news
+				return 0;
 			break;
 		}
 	}

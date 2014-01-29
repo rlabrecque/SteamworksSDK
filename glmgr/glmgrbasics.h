@@ -154,7 +154,6 @@ private:
 #define V_vsnprintf(a,b,c,d) vsprintf(a,c,d)		// double check this
 #define V_snprintf snprintf
 #define V_strncpy strncpy
-#define V_strncat strncat
 #define V_strcmp strcmp
 #define V_strlen strlen
 #define V_strstr strstr

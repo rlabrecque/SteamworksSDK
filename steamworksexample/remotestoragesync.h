@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Class for tracking stats and achievements
 //
@@ -27,6 +27,8 @@
 class IRemoteStorageSync
 {
 public:
+	virtual ~IRemoteStorageSync() {}
+
 	virtual void SynchronizeToClient() = 0;
 	virtual void SynchronizeToServer() = 0;
 	virtual void Render() = 0;

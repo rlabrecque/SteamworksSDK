@@ -107,6 +107,7 @@ enum EResult
 	k_EResultDisabled = 80,						// The requested service has been configured to be unavailable
 	k_EResultInvalidCEGSubmission = 81,			// The set of files submitted to the CEG server are not valid !
 	k_EResultRestrictedDevice = 82,				// The device being used is not allowed to perform this action
+	k_EResultRegionLocked = 83,					// The action could not be complete because it is region restricted
 };
 
 // Error codes for use with the voice functions
@@ -221,15 +222,17 @@ enum EAppReleaseState
 //-----------------------------------------------------------------------------
 enum EAppOwernshipFlags
 {
-	k_EAppOwernshipFlags_None				= 0,	// unknown
-	k_EAppOwernshipFlags_OwnsLicense		= 1,	// owns license for this game
-	k_EAppOwernshipFlags_FreeLicense		= 2,	// not paid for game
-	k_EAppOwernshipFlags_RegionRestricted	= 4,	// owns app, but not allowed to play in current region
-	k_EAppOwernshipFlags_LowViolence		= 8,	// only low violence version
-	k_EAppOwernshipFlags_InvalidPlatform	= 16,	// app not supported on current platform
-	k_EAppOwernshipFlags_SharedLicense		= 32,	// license was granted by authorized local device
-	k_EAppOwernshipFlags_FreeWeekend		= 64,	// owned by a free weekend licenses
-	k_EAppOwernshipFlags_LicenseLocked		= 128,	// shared license is locked (in use) by other user
+	k_EAppOwernshipFlags_None				= 0x000,	// unknown
+	k_EAppOwernshipFlags_OwnsLicense		= 0x001,	// owns license for this game
+	k_EAppOwernshipFlags_FreeLicense		= 0x002,	// not paid for game
+	k_EAppOwernshipFlags_RegionRestricted	= 0x004,	// owns app, but not allowed to play in current region
+	k_EAppOwernshipFlags_LowViolence		= 0x008,	// only low violence version
+	k_EAppOwernshipFlags_InvalidPlatform	= 0x010,	// app not supported on current platform
+	k_EAppOwernshipFlags_SharedLicense		= 0x020,	// license was granted by authorized local device
+	k_EAppOwernshipFlags_FreeWeekend		= 0x040,	// owned by a free weekend licenses
+	k_EAppOwernshipFlags_LicenseLocked		= 0x080,	// shared license is locked (in use) by other user
+	k_EAppOwernshipFlags_LicensePending		= 0x100,	// owns app, but transaction is still pending. Can't install or play
+	k_EAppOwernshipFlags_LicenseExpired		= 0x200,	// doesn't own app anymore since license expired
 };
 
 

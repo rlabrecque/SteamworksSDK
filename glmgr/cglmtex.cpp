@@ -572,7 +572,7 @@ GLMTexLayout *CGLMTexLayoutTable::NewLayoutRef( GLMTexLayoutKey *key )
 			case GL_TEXTURE_CUBE_MAP:	targetname = "CUBE";		break;
 		}
 		
-		sprintf( scratch, "[%s %s %dx%dx%d mips=%d slices=%d flags=%02X%s]",
+		sprintf( scratch, "[%s %s %dx%dx%d mips=%d slices=%d flags=%02lX%s]",
 					targetname,
 					formatDesc->m_formatSummary,
 					layout->m_key.m_xSize, layout->m_key.m_ySize, layout->m_key.m_zSize,
@@ -698,7 +698,7 @@ CGLMTex::CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *s
 
 		if (gl_texmsaalog/* .GetInt() */)
 		{
-			printf( "\n == MSAA Tex %8x %s : MSAA RBO is intformat %s (%x)", this, m_debugLabel?m_debugLabel:"", GLMDecode( eGL_ENUM, msaaFormat ), msaaFormat );
+			printf( "\n == MSAA Tex %p %s : MSAA RBO is intformat %s (%x)", this, m_debugLabel?m_debugLabel:"", GLMDecode( eGL_ENUM, msaaFormat ), msaaFormat );
 		}
 
 		glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, 0 );
@@ -1406,7 +1406,7 @@ void CGLMTex::WriteTexels( GLMTexLockDesc *desc, bool writeWholeSlice, bool noDa
 					{
 						if (gl_texmsaalog/* .GetInt() */)
 						{
-							printf( "\n == MSAA Tex %8x %s : glTexImage2D for flat tex using intformat %s (%x)", this, m_debugLabel?m_debugLabel:"", GLMDecode( eGL_ENUM, intformat ), intformat );
+							printf( "\n == MSAA Tex %p %s : glTexImage2D for flat tex using intformat %s (%x)", this, m_debugLabel?m_debugLabel:"", GLMDecode( eGL_ENUM, intformat ), intformat );
 							printf( "\n" );			
 						}
 					}

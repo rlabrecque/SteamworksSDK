@@ -18,6 +18,9 @@ PFNglDisableIndexedEXT pfnglDisableIndexedEXT;
 PFNglGetFramebufferAttachmentParameteriv pfnglGetFramebufferAttachmentParameteriv;
 PFNglUniformBufferEXT pfnglUniformBufferEXT;
 
+// NSSymbol was deprecated in 10.5.
+#pragma clang diagnostic warning "-Wdeprecated-declarations"
+
 void * NSGLGetProcAddress (const char *name)
 {
     NSSymbol symbol;

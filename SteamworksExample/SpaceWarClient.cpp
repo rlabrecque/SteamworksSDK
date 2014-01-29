@@ -79,6 +79,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	}
 #endif
 
+	m_bLastControllerStateInMenu = false;
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
 	m_uPlayerWhoWonGame = 0;
@@ -1130,6 +1131,30 @@ void CSpaceWarClient::RunFrame()
 	{
 		m_bTransitionedGameState = false;
 		OnGameStateChanged( m_eGameState );
+	}
+
+	bool bInMenuNow = false;
+	switch( m_eGameState )
+	{
+	case k_EClientGameMenu:
+	case k_EClientGameQuitMenu:
+		bInMenuNow = true;
+		break;
+	default:
+		bInMenuNow = false;
+		break;
+	}
+
+	// Update steam controller override mode appropriately
+	if ( bInMenuNow && !m_bLastControllerStateInMenu )
+	{
+		m_bLastControllerStateInMenu = true;
+		SteamController()->SetOverrideMode( "menu" );
+	}
+	else if ( !bInMenuNow && m_bLastControllerStateInMenu )
+	{
+		m_bLastControllerStateInMenu = false;
+		SteamController()->SetOverrideMode( "" );
 	}
 
 	// Update state for everything

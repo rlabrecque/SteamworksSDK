@@ -396,7 +396,7 @@ bool	CGLMProgram::Compile( EGLMProgramLang lang )
 				
 
 				GetComboIndexNameString( tempname, sizeof(tempname) );
-				printf("\ncompile: %s on GL name %d ", tempname, glslDesc->m_object.glsl );
+				printf("\ncompile: %s on GL name %p ", tempname, glslDesc->m_object.glsl );
 			}
 
 			result = glslDesc->m_valid;
@@ -669,6 +669,8 @@ bool CGLMProgram::CheckValidity( EGLMProgramLang lang )
 		}
 		break;
 	}
+	
+	return false;
 }
 
 void	CGLMProgram::LogSlow( EGLMProgramLang lang )
@@ -1002,11 +1004,12 @@ bool	CGLMShaderPair::RefreshProgramPair		( void )
 
 	if (vpgood && fpgood)
 	{
-		SetProgramPair( vp, fp );
+		return SetProgramPair( vp, fp );
 	}
 	else
 	{
 		Debugger();
+		return false;
 	}
 }
 
@@ -1168,7 +1171,7 @@ CGLMShaderPair	*CGLMShaderPairCache::SelectShaderPair( CGLMProgram *vp, CGLMProg
 
 		if (loglevel >= 3)  // hits logged at level 3 and higher
 		{
-			printf("\nSSP: hit  - row %05d - pair $%08x (%d'th hit on row)",rowIndex, hit->m_pair, m_hits[ rowIndex ] );
+			printf("\nSSP: hit  - row %05d - pair $%p (%d'th hit on row)",rowIndex, hit->m_pair, m_hits[ rowIndex ] );
 		}
 
 		result = hit->m_pair;

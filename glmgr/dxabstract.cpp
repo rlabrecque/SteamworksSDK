@@ -968,6 +968,9 @@ UINT IDirect3D9::GetAdapterCount()
 	int dxAdapterCount = db->GetFakeAdapterCount();
 
 	return dxAdapterCount;
+#else
+	Debugger();
+	return 0;
 #endif
 }
 
@@ -1150,6 +1153,9 @@ HRESULT IDirect3D9::GetAdapterIdentifier( UINT Adapter, DWORD Flags, D3DADAPTER_
 	#endif
 	
 	return S_OK;
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 
 }
@@ -1361,6 +1367,9 @@ HRESULT IDirect3D9::CheckDeviceFormat(UINT Adapter,D3DDEVTYPE DeviceType,D3DFORM
 	}
 	
 	return result;
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 }
 
@@ -1387,7 +1396,9 @@ UINT IDirect3D9::GetAdapterModeCount(UINT Adapter,D3DFORMAT Format)
 	GLMPRINTF(( "-X-   --> result is %d", modeCount ));		
 	
 	return modeCount;
-	
+#else
+	Debugger();
+	return 0;
 #endif
 }
 
@@ -1424,7 +1435,9 @@ HRESULT IDirect3D9::EnumAdapterModes(UINT Adapter,D3DFORMAT Format,UINT Mode,D3D
 	
 	GLMPRINTF(( "-X- IDirect3D9::EnumAdapterModes returning mode size (%d,%d) and D3DFMT_X8R8G8B8",pMode->Width,pMode->Height ));
 	return S_OK;	
-
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 }
 
@@ -1475,7 +1488,9 @@ HRESULT IDirect3D9::GetAdapterDisplayMode(UINT Adapter,D3DDISPLAYMODE* pMode)
 	pMode->Format		= D3DFMT_X8R8G8B8;					//FIXME, this is a SWAG
 
 	return S_OK;
-
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 }
 
@@ -1586,6 +1601,9 @@ HRESULT IDirect3D9::CheckDeviceMultiSampleType( UINT Adapter,D3DDEVTYPE DeviceTy
 			return D3DERR_NOTAVAILABLE;
 		break;
 	}
+	return D3DERR_NOTAVAILABLE;
+#else
+	Debugger();
 	return D3DERR_NOTAVAILABLE;
 #endif
 
@@ -2172,6 +2190,9 @@ HRESULT	IDirect3DDevice9::Create( IDirect3DDevice9Params *params )
 	g_engine->RenderedSize( m_params.m_presentationParameters.BackBufferWidth, m_params.m_presentationParameters.BackBufferHeight, true );	// true = set
 	
 	return result;
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 }
 
@@ -2322,6 +2343,9 @@ HRESULT IDirect3DDevice9::Reset(D3DPRESENT_PARAMETERS* pPresentationParameters)
 	m_ctx->SetDisplayParams( &glmParams );
 	
 	return S_OK;
+#else
+	Debugger();
+	return D3DERR_INVALIDCALL;
 #endif
 }
 
@@ -3585,11 +3609,13 @@ HRESULT IDirect3DDevice9::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDec
 HRESULT IDirect3DDevice9::SetFVF(DWORD FVF)
 {
 	Debugger();
+	return D3DERR_INVALIDCALL;
 }
 
 HRESULT IDirect3DDevice9::GetFVF(DWORD* pFVF)
 {
 	Debugger();
+	return D3DERR_INVALIDCALL;
 }
 
 
@@ -3617,6 +3643,8 @@ HRESULT IDirect3DDevice9::SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffe
 		m_streams[ StreamNumber ].m_offset	= 0;
 		m_streams[ StreamNumber ].m_stride	= 0;
 	}
+	
+	return S_OK;
 }
 
 #pragma mark ----- Index Buffers - (IDirect3DDevice9)
@@ -3626,6 +3654,7 @@ HRESULT IDirect3DDevice9::SetIndices(IDirect3DIndexBuffer9* pIndexData)
 {
 	// just latch it.
 	m_indices.m_idxBuffer = pIndexData;
+	return S_OK;
 }
 
 
@@ -4716,6 +4745,8 @@ HRESULT IDirect3DDevice9::FlushStates( uint mask )
 		m_ctx->WriteClearStencil( &gl.m_ClearStencil );
 		
 	gl.m_stateDirtyMask &= (~stateHitMask);
+	
+	return S_OK;
 }
 
 
@@ -5002,12 +5033,16 @@ HRESULT IDirect3DDevice9::FlushSamplers( uint mask )
 			glsamp->m_compareMode = dxsamp->m_shadowFilter ? GL_COMPARE_R_TO_TEXTURE_ARB : GL_NONE;
 		}		
 	}
+	
+	return S_OK;
 }
 
 HRESULT IDirect3DDevice9::FlushIndexBindings( void )
 {
 	// push index buffer state
 	m_ctx->SetIndexBuffer( m_indices.m_idxBuffer->m_idxBuffer );
+	
+	return S_OK;
 }
 
 #if 0
@@ -5221,6 +5256,8 @@ HRESULT IDirect3DDevice9::FlushVertexBindings( uint baseVertexIndex )
 	memcpy( &setup.m_vtxAttribMap, m_vertexShader->m_vtxAttribMap, sizeof( m_vertexShader->m_vtxAttribMap ) );	
 	
 	m_ctx->SetVertexAttributes( &setup );
+
+	return S_OK;
 }
 
 
@@ -5228,6 +5265,7 @@ HRESULT IDirect3DDevice9::FlushVertexBindings( uint baseVertexIndex )
 HRESULT	IDirect3DDevice9::FlushGLM( void )
 {
 	Debugger();// old routine not used now
+	return D3DERR_INVALIDCALL;
 }
 
 HRESULT IDirect3DDevice9::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount)
@@ -5492,7 +5530,6 @@ void IDirect3DDevice9::SetGammaRamp(UINT iSwapChain,DWORD Flags,CONST D3DGAMMARA
 	// just slam it directly for the time being
 	// this code is OS X specific
 
-    CGTableCount sampleCount;
     CGDisplayErr cgErr;
 
 	CGGammaValue	redt[256];

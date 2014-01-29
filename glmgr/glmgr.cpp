@@ -11,6 +11,10 @@
 
 extern CGameEngineGL *g_engine;		// so glmgr (which is C++) can call up to the game engine ObjC object and ask for things..
 
+#ifdef __clang__
+#pragma clang diagnostic warning "-Wint-to-pointer-cast"
+#endif
+
 
 //===============================================================================
 
@@ -2310,6 +2314,7 @@ bool	GLMContext::SetDisplayParams( GLMDisplayParams *params )
 {	
 	m_displayParams = *params;	// latch em
 	m_displayParamsValid = true;
+	return true;
 }
 
 //extern ConVar gl_singlecontext;	// single context mode go-ahead if 10.6.3 or higher
@@ -2725,6 +2730,8 @@ int		GLMContext::BindTexToTMU( CGLMTex *tex, int tmu, bool noCheck )
 		}
 		m_samplers[tmu].m_boundTex = NULL;	
 	}
+	
+	return 0;
 }
 
 void	GLMContext::BindFBOToCtx( CGLMFBO *fbo, GLenum bindPoint )
@@ -2871,7 +2878,7 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 				if (tex->m_rboName)		// is it MSAA
 				{
 					// mark it dirty
-					tex->m_rboDirty++;
+					tex->m_rboDirty = true;
 				}
 			}
 		}

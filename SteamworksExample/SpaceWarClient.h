@@ -395,6 +395,8 @@ private:
 	// Called when SteamUser()->RequestEncryptedAppTicket() returns asynchronously
 	void OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t *pEncryptedAppTicketResponse, bool bIOFailure );
 	CCallResult< CSpaceWarClient, EncryptedAppTicketResponse_t > m_SteamCallResultEncryptedAppTicket;
+
+	bool m_bLastControllerStateInMenu;
 };
 
 // Must define this stuff before BaseMenu.h as it depends on calling back into us through these accessors
