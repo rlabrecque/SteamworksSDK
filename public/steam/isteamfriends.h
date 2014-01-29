@@ -64,16 +64,6 @@ enum EFriendFlags
 };
 
 
-//-----------------------------------------------------------------------------
-// Purpose: avatar sizes, used in ISteamFriends::GetFriendAvatar()
-//-----------------------------------------------------------------------------
-enum EAvatarSize
-{
-	k_EAvatarSize32x32 = 0,
-	k_EAvatarSize64x64 = 1,
-};
-
-
 // friend game played information
 #pragma pack( push, 8 )
 struct FriendGameInfo_t
@@ -143,8 +133,6 @@ public:
 	// 
 	virtual const char *GetFriendPersonaName( CSteamID steamIDFriend ) = 0;
 
-	// gets the avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
-	virtual int GetFriendAvatar( CSteamID steamIDFriend, int eAvatarSize ) = 0;
 	// returns true if the friend is actually in a game, and fills in pFriendGameInfo with an extra details 
 	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, FriendGameInfo_t *pFriendGameInfo ) = 0;
 	// accesses old friends names - returns an empty string when their are no more items in the history
@@ -198,9 +186,19 @@ public:
 	// activates game overlay to open the invite dialog. Invitations will be sent for the provided lobby.
 	// You can also use ActivateGameOverlay( "LobbyInvite" ) to allow the user to create invitations for their current public lobby.
 	virtual void ActivateGameOverlayInviteDialog( CSteamID steamIDLobby ) = 0;
+
+	// gets the small (32x32) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
+	virtual int GetSmallFriendAvatar( CSteamID steamIDFriend ) = 0;
+
+	// gets the medium (64x64) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
+	virtual int GetMediumFriendAvatar( CSteamID steamIDFriend ) = 0;
+
+	// gets the large (184x184) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
+	// returns -1 if this image has yet to be loaded, in this case wait for a AvatarImageLoaded_t callback and then call this again
+	virtual int GetLargeFriendAvatar( CSteamID steamIDFriend ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends006"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends007"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -267,6 +265,20 @@ struct GameLobbyJoinRequested_t
 	enum { k_iCallback = k_iSteamFriendsCallbacks + 33 };
 	CSteamID m_steamIDLobby;
 	CSteamID m_steamIDFriend;		// the friend they did the join via (will be invalid if not directly via a friend)
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: called when an avatar is loaded in from a previous GetLargeFriendAvatar() call
+//			if the image wasn't already available
+//-----------------------------------------------------------------------------
+struct AvatarImageLoaded_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 34 };
+	CSteamID m_steamID; // steamid the avatar has been loaded for
+	int m_iImage; // the image index of the now loaded image
+	int m_iWide; // width of the loaded image
+	int m_iTall; // height of the loaded image
 };
 
 #pragma pack( pop )

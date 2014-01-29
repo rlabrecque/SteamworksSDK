@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CSpaceWarEntity::CSpaceWarEntity( CGameEngine *pGameEngine, uint32 uCollisionRadius, bool bAffectedByGravity ) 
+CSpaceWarEntity::CSpaceWarEntity( IGameEngine *pGameEngine, uint32 uCollisionRadius, bool bAffectedByGravity ) 
 	: CVectorEntity( pGameEngine, uCollisionRadius )
 {
 	m_bAffectedByGravity = bAffectedByGravity;
@@ -37,7 +37,7 @@ void CSpaceWarEntity::RunFrame()
 
 		float distanceToSun = (float)sqrt( pow( xPosSun - GetXPos(), 2 ) + pow( yPosSun - GetYPos(), 2 ) );
 		float distancePower = (float)pow( distanceToSun, 2.0f ); // gravity power falls off exponentially
-		float factor = min( 5200000.0f / distancePower, 150.0f ); // arbitrary value for power of gravity
+		float factor = MIN( 5200000.0f / distancePower, 150.0f ); // arbitrary value for power of gravity
 
 		float xDirection = (GetXPos() - xPosSun)/distanceToSun;
 		float yDirection = (GetYPos() - yPosSun)/distanceToSun;

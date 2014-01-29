@@ -19,7 +19,7 @@ class CMainMenu : public CBaseMenu<EClientGameState>
 {
 public:
 	// Constructor
-	CMainMenu( CGameEngine *pGameEngine );
+	CMainMenu( IGameEngine *pGameEngine );
 };
 
 #endif // MAINMENU_H

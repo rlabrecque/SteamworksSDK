@@ -13,6 +13,12 @@
 
 #pragma once
 
+
+#define MAX(a,b)  (((a) > (b)) ? (a) : (b))
+#define MIN(a,b)  (((a) < (b)) ? (a) : (b))
+
+#ifdef WIN32
+
 // Modify the following defines if you have to target a platform prior to the ones specified below.
 // Refer to MSDN for the latest info on corresponding values for different platforms.
 #ifndef WINVER				// Allow use of features specific to Windows 2k or later.
@@ -32,8 +38,6 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
-
-
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
@@ -58,8 +62,11 @@ typedef unsigned __int32 uint32;
 typedef __int64 int64;
 typedef unsigned __int64 uint64;
 
-// steam api header file
 #include "steam/steam_api.h"
+#include "steam/isteamuserstats.h"
+#include "steam/isteamremotestorage.h"
+#include "steam/isteammatchmaking.h"
+#include "steam/steam_gameserver.h"
 
 #ifdef STEAM_CEG
 	// Steam DRM header file
@@ -71,3 +78,115 @@ typedef unsigned __int64 uint64;
 	#define Steamworks_SelfCheck() (true)
 #endif
 
+#elif _PS3
+
+#include <stdio.h>
+#include <stddef.h>
+#include <cell/error.h>
+#include <sys/process.h>
+#include <sys/paths.h>
+#include <sys/prx.h>
+#include <sys/spu_initialize.h>
+#include <sys/memory.h>
+#include <PSGL/psgl.h>
+#include <PSGL/psglu.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <cell/fios/fios_common.h>
+#include <cell/fios/fios_memory.h>
+#include <cell/fios/fios_configuration.h>
+#include <cell/fios/fios_time.h>
+#include <cell/dbgfont.h>
+#include <cell/pad/libpad.h>
+#include <sysutil/sysutil_syscache.h>
+#include <string.h>
+
+// Need to define some types on POSIX
+typedef short int16;
+typedef unsigned short uint16;
+typedef int int32;
+typedef unsigned int uint32;
+typedef long long int64;
+typedef unsigned long long uint64;
+typedef uint32 DWORD;
+typedef DWORD HWND;
+typedef short SHORT;
+typedef long LONG;
+typedef unsigned char byte;
+typedef unsigned char uint8;
+
+/* Font Weights */
+#define FW_DONTCARE         0
+#define FW_THIN             100
+#define FW_EXTRALIGHT       200
+#define FW_LIGHT            300
+#define FW_NORMAL           400
+#define FW_MEDIUM           500
+#define FW_SEMIBOLD         600
+#define FW_BOLD             700
+#define FW_EXTRABOLD        800
+#define FW_HEAVY            900
+
+/* Some VK_ defines from windows, we'll map these to PS3 controls */
+#define VK_BACK           0x08
+#define VK_TAB            0x09
+#define VK_RETURN         0x0D
+#define VK_SHIFT          0x10
+#define VK_CONTROL        0x11
+#define VK_ESCAPE         0x1B
+#define VK_SPACE          0x20
+#define VK_UP             0x26
+#define VK_DOWN           0x28
+#define VK_SELECT         0x29
+
+typedef struct tagRECT
+{
+	LONG    left;
+	LONG    top;
+	LONG    right;
+	LONG    bottom;
+} RECT;
+
+#define D3DCOLOR_ARGB(a,r,g,b) \
+	((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
+
+// Macros for converting ARGB DWORD color representation into opengl formats...
+#define COLOR_RED( color ) \
+	(GLubyte)(((color)>>16)&0xff)
+
+#define COLOR_GREEN( color ) \
+	(GLubyte)(((color)>>8)&0xff)
+
+#define COLOR_BLUE( color ) \
+	(GLubyte)((color)&0xff)
+
+#define COLOR_ALPHA( color ) \
+	(GLubyte)(((color)>>24)&0xff)
+
+#define DWARGB_TO_DWRGBA(color) \
+	((DWORD)(( (((((color)>>16)&0xff))<<24)|(((((color)>>8)&0xff))<<16)|((color&0xff)<<8)|((color)>>24)&0xff)))
+
+#define DWARGB_TO_DWABGR(color) \
+	((DWORD)(( (((((color)>>24)&0xff))<<24)|(((((color))&0xff))<<16)|(((color>>8)&0xff)<<8)|((color)>>16)&0xff)))
+
+// steam api header file
+#include "steam/steam_api.h"
+#include "steam/isteamuserstats.h"
+#include "steam/isteamremotestorage.h"
+#include "steam/isteammatchmaking.h"
+#include "steam/steam_gameserver.h"
+
+extern CellDbgFontConsoleId g_DbgFontConsoleID;
+static void OutputDebugString( const char *pchMsg )
+{
+	printf( "%s", pchMsg );
+	cellDbgFontConsolePrintf( g_DbgFontConsoleID, "%s", pchMsg );
+}
+
+// No _snprintf on PS3, use sprintf
+#define _snprintf snprintf
+
+#define ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
+
+#endif	// _PS3

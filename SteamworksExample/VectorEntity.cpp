@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CVectorEntity::CVectorEntity( CGameEngine *pGameEngine, uint32 uCollisionRadius ) 
+CVectorEntity::CVectorEntity( IGameEngine *pGameEngine, uint32 uCollisionRadius ) 
 {
 	m_uCollisionRadius = uCollisionRadius;
 	m_pGameEngine = pGameEngine;
@@ -125,7 +125,7 @@ void CVectorEntity::RunFrame()
 
 	// Update our acceleration, velocity, and finally position
 	// Note: The min here is so we don't get massive acceleration if frames for some reason don't run for a bit
-	float ulElapsedSeconds = min( (float)m_pGameEngine->GetGameTicksFrameDelta() / 1000.0f, 2 );
+	float ulElapsedSeconds = MIN( (float)m_pGameEngine->GetGameTicksFrameDelta() / 1000.0f, 2 );
 	m_flXVelocity += m_flXAccel * ulElapsedSeconds;
 	m_flYVelocity += m_flYAccel * ulElapsedSeconds;
 

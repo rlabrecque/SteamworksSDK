@@ -5,15 +5,21 @@
 //=============================================================================
 
 #include "stdafx.h"
-#include "GameEngine.h"
+
+#ifdef WIN32
+#include "gameenginewin32.h"
+#elif _PS3
+#include "gameengineps3.h"
+#endif
+
 #include "SpaceWarClient.h"
-#include "steam/steam_api.h"
 
 
 //-----------------------------------------------------------------------------
 // Purpose: Wrapper around SteamAPI_WriteMiniDump which can be used directly 
 // as a se translator
 //-----------------------------------------------------------------------------
+#ifndef _PS3
 void MiniDumpFunction( unsigned int nExceptionCode, EXCEPTION_POINTERS *pException )
 {
 	// You can build and set an arbitrary comment to embed in the minidump here,
@@ -24,6 +30,7 @@ void MiniDumpFunction( unsigned int nExceptionCode, EXCEPTION_POINTERS *pExcepti
 	// The 0 here is a build ID, we don't set it
 	SteamAPI_WriteMiniDump( nExceptionCode, pException, 0 );
 }
+#endif
 
 
 //-----------------------------------------------------------------------------
@@ -39,16 +46,93 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 	{
 		// place to set a breakpoint for catching API errors
 		int x = 3;
-		x;
+		x = x;
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Main loop code shared between all platforms
+//-----------------------------------------------------------------------------
+void RunGameLoop( IGameEngine *pGameEngine, char *pchServerAddress, char *pchLobbyID  )
+{
+	// Make sure it initialized ok
+	if ( pGameEngine->BReadyForUse() )
+	{
+		// Initialize the game
+		CSpaceWarClient *pGameClient = new CSpaceWarClient( pGameEngine, SteamUser()->GetSteamID() );
 
+		// Black background
+		pGameEngine->SetBackgroundColor( 0, 0, 0, 0 );
+
+		// If +connect was used to specify a server address, connect now
+		if ( pchServerAddress )
+		{
+			int32 octet0 = 0, octet1 = 0, octet2 = 0, octet3 = 0;
+			int32 uPort = 0;
+			int nConverted = sscanf( pchServerAddress, "%d.%d.%d.%d:%d", &octet0, &octet1, &octet2, &octet3, &uPort );
+			if ( nConverted == 5 )
+			{
+				char rgchIPAddress[128];
+				_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
+				uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
+				pGameClient->InitiateServerConnection( unIPAddress, uPort );
+			}
+		}
+
+		// if +connect_lobby was used to specify a lobby to join, connect now
+		if ( pchLobbyID )
+		{
+#ifndef _PS3
+			CSteamID steamIDLobby( (uint64)_atoi64( pchLobbyID ) );
+#else
+			CSteamID steamIDLobby( (uint64)atoll( pchLobbyID ) );
+#endif
+			if ( steamIDLobby.IsValid() )
+			{
+				// act just like we had selected it from the menu
+				LobbyBrowserMenuItem_t menuItem = { steamIDLobby, k_EClientJoiningLobby };
+				pGameClient->OnMenuSelection( menuItem );
+			}
+		}
+
+		// test a user specific secret before entering main loop
+#ifndef _PS3
+		Steamworks_TestSecret();
+#endif
+
+		pGameClient->RetrieveEncryptedAppTicket();
+
+		while( !pGameEngine->BShuttingDown() )
+		{
+			if ( pGameEngine->StartFrame() )
+			{
+				pGameEngine->UpdateGameTickCount();
+
+				// Run a game frame
+				pGameClient->RunFrame();
+				pGameEngine->EndFrame();
+
+				// Sleep to limit frame rate
+				while( pGameEngine->BSleepForFrameRateLimit( MAX_CLIENT_AND_SERVER_FPS ) )
+				{
+					// Keep running the network on the client at a faster rate than the FPS limit
+					pGameClient->ReceiveNetworkData();
+				}
+			}			
+		}
+
+		delete pGameClient;
+	}
+
+	// Cleanup the game engine
+	delete pGameEngine;
+}
 
 
 //-----------------------------------------------------------------------------
 // Purpose: Real main entry point for the program
 //-----------------------------------------------------------------------------
+#ifdef WIN32
 int APIENTRY RealMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPSTR     lpCmdLine,
@@ -128,114 +212,10 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 
 	// Construct a new instance of the game engine 
 	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
-	CGameEngine *pGameEngine = new CGameEngine( hInstance, nCmdShow, 1024, 768 );
+	CGameEngineWin32 *pGameEngine = new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
 
-	// Make sure it initialized ok
-	if ( pGameEngine->BReadyForUse() )
-	{
-		// Initialize the game
-		CSpaceWarClient *pGameClient = new CSpaceWarClient( pGameEngine, SteamUser()->GetSteamID() );
-
-		// Black background
-		pGameEngine->SetBackgroundColor( 0, 0, 0, 0 );
-
-		// Set max FPS
-		pGameEngine->SetMaxFPS( MAX_CLIENT_AND_SERVER_FPS );
-
-		// If +connect was used to specify a server address, connect now
-		if ( pchServerAddress )
-		{
-			int32 octet0 = 0, octet1 = 0, octet2 = 0, octet3 = 0;
-			int32 uPort = 0;
-			int nConverted = sscanf( pchServerAddress, "%d.%d.%d.%d:%d", &octet0, &octet1, &octet2, &octet3, &uPort );
-			if ( nConverted == 5 )
-			{
-				char rgchIPAddress[128];
-				_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
-				uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
-				pGameClient->InitiateServerConnection( unIPAddress, uPort );
-			}
-		}
-
-		// if +connect_lobby was used to specify a lobby to join, connect now
-		if ( pchLobbyID )
-		{
-			CSteamID steamIDLobby( (uint64)_atoi64( pchLobbyID ) );
-			if ( steamIDLobby.IsValid() )
-			{
-				// act just like we had selected it from the menu
-				LobbyBrowserMenuItem_t menuItem = { steamIDLobby, k_EClientJoiningLobby };
-				pGameClient->OnMenuSelection( menuItem );
-			}
-		}
-
-		// test a user specific secret before entering main loop
-		Steamworks_TestSecret();
-
-		static const int m_flMaxFPS = 120;
-
-		// restrict this main game thread to the first processor, so queryperformance counter won't jump on crappy AMD cpus
-		DWORD dwThreadAffinityMask = 0x01;
-		::SetThreadAffinityMask( ::GetCurrentThread(), dwThreadAffinityMask );
-
-		uint64 ulPerfCounterToMillisecondsDivisor;
-		LARGE_INTEGER l;
-		::QueryPerformanceFrequency( &l );
-		ulPerfCounterToMillisecondsDivisor = l.QuadPart/1000;
-
-		::QueryPerformanceCounter( &l );
-		uint64 ulFirstQueryPerformanceCounterValue = l.QuadPart;
-		uint64 ulGameTickCount = 0;
-
-		while( !pGameEngine->BShuttingDown() )
-		{
-			if ( pGameEngine->StartFrame() )
-			{
-				// update timers
-				::QueryPerformanceCounter( &l );
-
-				ulGameTickCount = (l.QuadPart - ulFirstQueryPerformanceCounterValue) / ulPerfCounterToMillisecondsDivisor;
-				pGameEngine->SetGameTickCount( ulGameTickCount );
-
-				// Run a game frame
-				pGameClient->RunFrame();
-				pGameEngine->EndFrame();
-
-				// Frame rate limiting
-				float flDesiredFrameMilliseconds = 1000.0f/m_flMaxFPS;
-				while( 1 )
-				{
-					::QueryPerformanceCounter( &l );
-
-					ulGameTickCount = (l.QuadPart - ulFirstQueryPerformanceCounterValue) / ulPerfCounterToMillisecondsDivisor;
-
-					float flMillisecondsElapsed = (float)(ulGameTickCount - pGameEngine->GetGameTickCount());
-					if ( flMillisecondsElapsed < flDesiredFrameMilliseconds )
-					{
-						// run networking each frame first
-						pGameClient->ReceiveNetworkData();
-
-						// If enough time is left sleep, otherwise just keep spinning so we don't go over the limit...
-						if ( flDesiredFrameMilliseconds - flMillisecondsElapsed > 2.0f )
-						{
-							Sleep( 2 );
-						}
-						else
-						{
-							continue;
-						}
-					}
-					else
-						break;
-				} 
-			}			
-		}
-
-		delete pGameClient;
-	}
-
-	// Cleanup the game engine
-	delete pGameEngine;
+	// This call will block and run until the game exits
+	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );
 
 	// Shutdown the SteamAPI
 	SteamAPI_Shutdown();
@@ -246,11 +226,12 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	// exit
 	return EXIT_SUCCESS;	
 }
-
+#endif
 
 //-----------------------------------------------------------------------------
-// Purpose: Main entry point for the program
+// Purpose: Main entry point for the program -- win32
 //-----------------------------------------------------------------------------
+#ifdef WIN32
 int APIENTRY WinMain(HINSTANCE hInstance,
 					 HINSTANCE hPrevInstance,
 					 LPSTR     lpCmdLine,
@@ -280,3 +261,145 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		return -1;
 	}
 }
+#endif
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Main entry point for the program -- ps3
+//-----------------------------------------------------------------------------
+#ifdef _PS3
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Loads the Steam PS3 module
+//-----------------------------------------------------------------------------
+sys_prx_id_t g_sys_prx_id_steam = -1;
+static bool LoadSteamPS3Module()
+{
+	g_sys_prx_id_steam = sys_prx_load_module( SYS_APP_HOME "/steam_api_ps3.sprx", 0, NULL );
+	if ( g_sys_prx_id_steam < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to load steam_api_ps3\n" );
+		return false;
+	}
+
+	int modres;
+	int res = sys_prx_start_module( g_sys_prx_id_steam, 0, NULL, &modres, 0, NULL);
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to start steam_api_ps3\n" );
+		return false;
+	}
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Unloads the Steam PS3 module
+//-----------------------------------------------------------------------------
+static bool UnloadSteamPS3Module()
+{
+	// check if loaded
+	if ( g_sys_prx_id_steam < CELL_OK )
+		return false;
+
+	int modres;
+	int res = sys_prx_stop_module( g_sys_prx_id_steam, 0, NULL, &modres, 0, NULL);
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to stop steam_api_ps3\n" );
+		return false;
+	}
+
+	res = sys_prx_unload_module( g_sys_prx_id_steam, 0, NULL );
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to unload steam_api_ps3\n" );
+		return false;
+	}
+
+	g_sys_prx_id_steam = -1;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Initializes Steam PS3 params for our application
+//-----------------------------------------------------------------------------
+bool SetSteamPS3Params( SteamPS3Params_t *pParams )
+{
+	// Steam needs the system cache path
+	CellSysCacheParam sysCacheParams;
+	memset( &sysCacheParams, 0, sizeof( CellSysCacheParam ) );
+	if ( cellSysCacheMount( &sysCacheParams ) < 0 )
+		return false;
+
+	// configure the Steamworks PS3 parameters. All params need to be set
+	strncpy( pParams->m_rgchInstallationPath, SYS_APP_HOME, STEAM_PS3_PATH_MAX );
+	strncpy( pParams->m_rgchSystemCache, sysCacheParams.getCachePath, STEAM_PS3_PATH_MAX );
+
+	return true;
+}
+
+// Global for PS3 params
+SteamPS3Params_t g_SteamPS3Params;
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Main entry point for the program -- ps3
+//-----------------------------------------------------------------------------
+int main( int argc, char *argv[] )
+{
+	printf( "PS3 main\n" );
+
+	// Initialize 6 SPUs but reserve 1 SPU as a raw SPU for PSGL
+	sys_spu_initialize(6, 1);	
+
+	// Load Steam
+	if ( !LoadSteamPS3Module() )
+		return EXIT_FAILURE;
+
+	// No restart app if necessary, or CEG initialization on PS3
+
+	// Initialize SteamAPI, if this fails we bail out since we depend on Steam for lots of stuff.
+	// You don't necessarily have to though if you write your code to check whether all the Steam
+	// interfaces are NULL before using them and provide alternate paths when they are unavailable.
+
+	if ( !SetSteamPS3Params( &g_SteamPS3Params ) )
+	{
+		OutputDebugString( "SetSteamPS3Params() failed\n" );
+		return EXIT_FAILURE;
+	}
+
+	if ( !SteamAPI_Init( &g_SteamPS3Params ) )
+	{
+		OutputDebugString( "SteamAPI_Init() failed\n" );
+		return EXIT_FAILURE;
+	}
+
+	// set our debug handler
+	SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
+
+	// bugbug ps3
+	SteamUser()->LogOn( "jmccaskeybeta", "test123" );
+
+	// No overlay notification position setting on PS3
+
+	// No +connect support on PS3 since Steam isn't launching us
+
+	// Construct a new instance of the game engine 
+	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
+	CGameEnginePS3 *pGameEngine = new CGameEnginePS3();
+
+	// This call will block and run until the game exits
+	RunGameLoop( pGameEngine, NULL, NULL );
+
+	// Shutdown the SteamAPI
+	SteamAPI_Shutdown();
+
+	// Unload Steam
+	UnloadSteamPS3Module();
+
+	// exit
+	return 0;	
+}
+#endif

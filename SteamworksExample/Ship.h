@@ -27,7 +27,7 @@ class CStatsAndAchievements;
 class CForwardThrusters : public CVectorEntity
 {
 public:
-	CForwardThrusters( CGameEngine *pGameEngine, CShip *pShip );
+	CForwardThrusters( IGameEngine *pGameEngine, CShip *pShip );
 
 	// Run Frame
 	void RunFrame();
@@ -40,7 +40,7 @@ private:
 class CReverseThrusters : public CVectorEntity
 {
 public:
-	CReverseThrusters( CGameEngine *pGameEngine, CShip *pShip );
+	CReverseThrusters( IGameEngine *pGameEngine, CShip *pShip );
 
 	// Run Frame
 	void RunFrame();
@@ -53,7 +53,7 @@ private:
 class CShipDebris : public CSpaceWarEntity
 {
 public:
-	CShipDebris( CGameEngine *pGameEngine, float xPos, float yPos, DWORD dwDebrisColor );
+	CShipDebris( IGameEngine *pGameEngine, float xPos, float yPos, DWORD dwDebrisColor );
 
 	// Run Frame
 	void RunFrame();
@@ -67,7 +67,7 @@ class CShip : public CSpaceWarEntity
 {
 public:
 	// Constructor
-	CShip( CGameEngine *pGameEngine, bool bIsServerInstance, float xPos, float yPos, DWORD dwShipColor );
+	CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, float yPos, DWORD dwShipColor );
 
 	// Destructor
 	~CShip();
@@ -79,10 +79,10 @@ public:
 	void Render();
 
 	// Update ship with data from server 
-	void OnReceiveServerUpdate( ServerShipUpdateData_t UpdateData );
+	void OnReceiveServerUpdate( ServerShipUpdateData_t *pUpdateData );
 
 	// Update the ship with data from a client
-	void OnReceiveClientUpdate( ClientSpaceWarUpdateData_t UpdateData );
+	void OnReceiveClientUpdate( ClientSpaceWarUpdateData_t *pUpdateData );
 
 	// Get the update data for this ship client side (copying into memory passed in)
 	bool BGetClientUpdateData( ClientSpaceWarUpdateData_t *pUpdatedata );
@@ -91,7 +91,7 @@ public:
 	void BuildServerUpdate( ServerShipUpdateData_t *pUpdateData );
 
 	// Build update data for photon beams to send to clients
-	void BuildServerPhotonBeamUpdate( ServerPhotonBeamUpdateData_t *pUpdateData );
+	void BuildServerPhotonBeamUpdate( ServerShipUpdateData_t *pUpdateData );
 
 	// Reset vertex data for our object
 	void ResetVertexData();
@@ -157,9 +157,6 @@ private:
 
 	// is the ship disabled for now?
 	bool m_bDisabled;
-
-	// Do we need to fire a photon beam next frame?
-	bool m_bFirePhotonBeamNextFrame;
 
 	// vector of beams we have fired (in order of firing time)
 	CPhotonBeam * m_rgPhotonBeams[MAX_PHOTON_BEAMS_PER_SHIP];

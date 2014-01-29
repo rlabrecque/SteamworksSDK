@@ -29,7 +29,7 @@ public:
 	typedef std::pair<std::string, T> MenuItem_t;
 
 	// Constructor
-	CBaseMenu( CGameEngine *pGameEngine )
+	CBaseMenu( IGameEngine *pGameEngine )
 	{
 		m_pGameEngine = pGameEngine;
 
@@ -44,6 +44,9 @@ public:
 		}
 
 	}
+
+	// Destructor
+	virtual ~CBaseMenu() { }
 
 	// Sets a heading for the menu
 	void SetHeading( const char *pchHeading )
@@ -103,10 +106,10 @@ public:
 		if ( m_pGameEngine->BIsKeyDown( VK_RETURN ) )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
-			if ( ulCurrentTickCount - 150 > g_ulLastReturnKeyTick )
+			if ( ulCurrentTickCount - 220 > g_ulLastReturnKeyTick )
 			{
 				g_ulLastReturnKeyTick = ulCurrentTickCount;
-				if ( m_uSelectedItem >= 0 && m_uSelectedItem < m_VecMenuItems.size() )
+				if ( m_uSelectedItem < m_VecMenuItems.size() )
 				{
 					SpaceWarClient()->OnMenuSelection( m_VecMenuItems[m_uSelectedItem].second );
 					return;
@@ -117,7 +120,7 @@ public:
 		else if ( m_pGameEngine->BIsKeyDown( VK_DOWN ) )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
-			if ( ulCurrentTickCount - 150 > g_ulLastKeyDownTick )
+			if ( ulCurrentTickCount - 140 > g_ulLastKeyDownTick )
 			{
 				g_ulLastKeyDownTick = ulCurrentTickCount;
 				if ( m_uSelectedItem < m_VecMenuItems.size() - 1 )
@@ -127,7 +130,7 @@ public:
 		else if ( m_pGameEngine->BIsKeyDown( VK_UP ) )
 		{
 			uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
-			if ( ulCurrentTickCount - 250 > g_ulLastKeyUpTick )
+			if ( ulCurrentTickCount - 140 > g_ulLastKeyUpTick )
 			{
 				g_ulLastKeyUpTick = ulCurrentTickCount;
 				if ( m_uSelectedItem > 0 )
@@ -143,7 +146,7 @@ public:
 	{
 		const int32 iMaxMenuItems = 13;
 		int32 iNumItems = (int32)m_VecMenuItems.size();
-		uint32 uBoxHeight = min( iNumItems, iMaxMenuItems ) * ( MENU_FONT_HEIGHT + MENU_ITEM_PADDING );
+		uint32 uBoxHeight = MIN( iNumItems, iMaxMenuItems ) * ( MENU_FONT_HEIGHT + MENU_ITEM_PADDING );
 		uint32 yPos = m_pGameEngine->GetViewportHeight()/2 - uBoxHeight/2;
 
 		RECT rect;
@@ -161,22 +164,22 @@ public:
 			rect.bottom = rect.top + MENU_FONT_HEIGHT + ( MENU_ITEM_PADDING * 2 );
 			rect.left = 0;
 			rect.right = m_pGameEngine->GetViewportWidth();
-			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, DT_CENTER|DT_VCENTER, m_sHeading.c_str() );
+			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, m_sHeading.c_str() );
 		}
 
 		int32 iStartItem = 0;
 		int32 iEndItem = iNumItems;
 		if ( iNumItems > iMaxMenuItems )
 		{
-			iStartItem = max( (int32)m_uSelectedItem - iMaxMenuItems/2, 0 );
-			iEndItem = min( iStartItem + iMaxMenuItems, iNumItems );
+			iStartItem = MAX( (int32)m_uSelectedItem - iMaxMenuItems/2, 0 );
+			iEndItem = MIN( iStartItem + iMaxMenuItems, iNumItems );
 		}
 
 		if ( iStartItem > 0 )
 		{
 			// Draw ... Scroll Up ... 
 			DWORD dwColor = D3DCOLOR_ARGB( 255, 255, 255, 255 );
-			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, DT_CENTER|DT_VCENTER, "... Scroll Up ..." );
+			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, "... Scroll Up ..." );
 
 			rect.top = rect.bottom;
 			rect.bottom += MENU_FONT_HEIGHT + MENU_ITEM_PADDING;
@@ -198,7 +201,7 @@ public:
 					dwColor = D3DCOLOR_ARGB( 255, 255, 255, 255 );
 					_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s", m_VecMenuItems[i].first.c_str() );
 				}
-				m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, DT_CENTER|DT_VCENTER, rgchBuffer );
+				m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 			}
 
 			rect.top = rect.bottom;
@@ -209,7 +212,7 @@ public:
 		{
 			// Draw ... Scroll Down ... 
 			DWORD dwColor = D3DCOLOR_ARGB( 255, 255, 255, 255 );
-			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, DT_CENTER|DT_VCENTER, "... Scroll Down ..." );
+			m_pGameEngine->BDrawString( g_hMenuFont, rect, dwColor, TEXTPOS_CENTER|TEXTPOS_VCENTER, "... Scroll Down ..." );
 
 			rect.top = rect.bottom;
 			rect.bottom += MENU_FONT_HEIGHT + MENU_ITEM_PADDING;
@@ -218,7 +221,7 @@ public:
 
 private:
 	// Game engine instance
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Heading
 	std::string m_sHeading;

@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CMainMenu::CMainMenu( CGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine )
+CMainMenu::CMainMenu( IGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine )
 {
 	AddMenuItem( MenuItem_t( "Start New Server", k_EClientGameStartServer ) );
 	AddMenuItem( MenuItem_t( "Find LAN Servers", k_EClientFindLANServers ) );

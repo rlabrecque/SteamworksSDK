@@ -18,14 +18,15 @@ class CNetworkTransport;
 class CP2PAuthPlayer
 {
 public:
-	CP2PAuthPlayer( CGameEngine *pGameEngine, CNetworkTransport *pNetworkTransport );
+	CP2PAuthPlayer( IGameEngine *pGameEngine, CNetworkTransport *pNetworkTransport );
 	~CP2PAuthPlayer();
 	void EndGame();
 	void InitPlayer( CSteamID steamID );
 	void StartAuthPlayer();
 	bool BIsAuthOk();
-	virtual bool HandleMessage( EMessage eMsg, void *pMessage );
-	virtual CSteamID GetSteamID();
+	bool HandleMessage( EMessage eMsg, void *pMessage );
+
+	CSteamID GetSteamID();
 
 	STEAM_CALLBACK( CP2PAuthPlayer, OnBeginAuthResponse, ValidateAuthTicketResponse_t, m_CallbackBeginAuthResponse );
 
@@ -50,7 +51,7 @@ private:
 	EAuthSessionResponse m_eAuthSessionResponse;
 
 	CNetworkTransport *m_pNetworkTransport;
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 };
 
 //-----------------------------------------------------------------------------
@@ -59,18 +60,18 @@ private:
 class CP2PAuthedGame
 {
 public:
-	CP2PAuthedGame( CGameEngine *pGameEngine );
+	CP2PAuthedGame( IGameEngine *pGameEngine );
 	void PlayerDisconnect( int iSlot );
 	void EndGame();
 	void StartAuthPlayer( int iSlot, CSteamID steamID );
 	void RegisterPlayer( int iSlot, CSteamID steamID );
-	virtual bool HandleMessage( EMessage eMsg, void *pMessage );
-	virtual CSteamID GetSteamID();
+	bool HandleMessage( EMessage eMsg, void *pMessage );
+	CSteamID GetSteamID();
 	void InternalInitPlayer( int iSlot, CSteamID steamID, bool bStartAuthProcess );
 
 	CP2PAuthPlayer *m_rgpP2PAuthPlayer[MAX_PLAYERS_PER_SERVER];
 	MsgP2PSendingTicket_t *m_rgpQueuedMessage[MAX_PLAYERS_PER_SERVER];
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 	CNetworkTransport *m_pNetworkTransport;
 };
 
@@ -82,7 +83,6 @@ class CNetworkTransport
 {
 public:
 	CNetworkTransport();
-
 	bool SendTicket( CSteamID steamIDFrom, CSteamID steamIDTo, uint32 cubTicket, uint8 *pubTicket );
 	void CloseConnection( CSteamID steamID );
 

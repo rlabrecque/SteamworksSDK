@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CPhotonBeam::CPhotonBeam( CGameEngine *pGameEngine, float xPos, float yPos, DWORD dwBeamColor, float flInitialRotation, float flInitialXVelocity, float flInitialYVelocity ) 
+CPhotonBeam::CPhotonBeam( IGameEngine *pGameEngine, float xPos, float yPos, DWORD dwBeamColor, float flInitialRotation, float flInitialXVelocity, float flInitialYVelocity ) 
 	: CSpaceWarEntity( pGameEngine, 3, true )
 {
 	// Beams only have a lifetime of 1 second
@@ -32,9 +32,9 @@ CPhotonBeam::CPhotonBeam( CGameEngine *pGameEngine, float xPos, float yPos, DWOR
 //-----------------------------------------------------------------------------
 // Purpose: Update with data from server
 //-----------------------------------------------------------------------------
-void CPhotonBeam::OnReceiveServerUpdate( ServerPhotonBeamUpdateData_t UpdateData )
+void CPhotonBeam::OnReceiveServerUpdate( ServerPhotonBeamUpdateData_t *pUpdateData )
 {
-	SetPosition( UpdateData.m_flXPosition, UpdateData.m_flYPosition );
-	SetVelocity( UpdateData.m_flXVelocity, UpdateData.m_flYVelocity );
-	SetAccumulatedRotation( UpdateData.m_flCurrentRotation );
+	SetPosition( pUpdateData->GetXPosition()*m_pGameEngine->GetViewportWidth(), pUpdateData->GetYPosition()*m_pGameEngine->GetViewportHeight() );
+	SetVelocity( pUpdateData->GetXVelocity(), pUpdateData->GetYVelocity() );
+	SetAccumulatedRotation( pUpdateData->GetRotation() );
 }

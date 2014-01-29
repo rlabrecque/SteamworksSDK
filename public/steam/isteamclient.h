@@ -24,6 +24,10 @@ typedef int32 HSteamUser;
 #endif
 extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);
 
+#if defined( __SNC__ )
+	#pragma diag_suppress=1700	   // warning 1700: class "%s" has virtual functions but non-virtual destructor
+#endif
+
 // interface predec
 class ISteamUser;
 class ISteamGameServer;

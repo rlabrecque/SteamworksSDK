@@ -10,9 +10,11 @@
 // stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
-#include <varargs.h>
 #include <stdio.h>
+#ifdef WIN32
+#include <varargs.h>
 #include <tchar.h>
+#endif
 
 // TODO: reference any additional headers you need in STDAFX.H
 // and not in this file

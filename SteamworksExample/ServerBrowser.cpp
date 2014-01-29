@@ -10,7 +10,6 @@
 #include "ServerBrowser.h"
 #include "ServerBrowserMenu.h"
 
-
 //-----------------------------------------------------------------------------
 // Purpose: Constructor -- initialize from steam gameserveritem_t
 //-----------------------------------------------------------------------------
@@ -36,7 +35,7 @@ CGameServer::CGameServer( gameserveritem_t *pGameServerItem )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CServerBrowser::CServerBrowser( CGameEngine *pGameEngine )
+CServerBrowser::CServerBrowser( IGameEngine *pGameEngine )
 {
 	m_pMenu = new CServerBrowserMenu( pGameEngine );
 	m_pGameEngine = pGameEngine;
@@ -90,7 +89,9 @@ void CServerBrowser::RefreshInternetServers()
 
 	m_pMenu->Rebuild( m_ListGameServers, m_bRequestingServers );
 
+#ifndef _PS3
 	Steamworks_TestSecret();
+#endif
 
 	// Allocate some filters, there are some common pre-defined values that can be used:
 	//
@@ -200,3 +201,4 @@ void CServerBrowser::RunFrame()
 {
 	m_pMenu->RunFrame();
 }
+

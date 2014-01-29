@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CStarField::CStarField( CGameEngine *pGameEngine )
+CStarField::CStarField( IGameEngine *pGameEngine )
 {
 	m_pGameEngine = pGameEngine;
 

@@ -77,6 +77,68 @@
 #define MAX_CLIENT_AND_SERVER_FPS 86
 
 
+template <typename T>
+inline T WordSwap( T w )
+{
+	uint16 temp;
+
+	temp  = ((*((uint16 *)&w) & 0xff00) >> 8);
+	temp |= ((*((uint16 *)&w) & 0x00ff) << 8);
+
+	return *((T*)&temp);
+}
+
+template <typename T>
+inline T DWordSwap( T dw )
+{
+	uint32 temp;
+
+	temp  =   *((uint32 *)&dw) 				>> 24;
+	temp |= ((*((uint32 *)&dw) & 0x00FF0000) >> 8);
+	temp |= ((*((uint32 *)&dw) & 0x0000FF00) << 8);
+	temp |= ((*((uint32 *)&dw) & 0x000000FF) << 24);
+
+	return *((T*)&temp);
+}
+
+template <typename T>
+inline T QWordSwap( T dw )
+{
+	uint64 temp;
+
+	temp  =   *((uint64 *)&dw) 				         >> 56;
+	temp |= ((*((uint64 *)&dw) & 0x00FF000000000000ull) >> 40);
+	temp |= ((*((uint64 *)&dw) & 0x0000FF0000000000ull) >> 24);
+	temp |= ((*((uint64 *)&dw) & 0x000000FF00000000ull) >> 8);
+	temp |= ((*((uint64 *)&dw) & 0x00000000FF000000ull) << 8);
+	temp |= ((*((uint64 *)&dw) & 0x0000000000FF0000ull) << 24);
+	temp |= ((*((uint64 *)&dw) & 0x000000000000FF00ull) << 40);
+	temp |= ((*((uint64 *)&dw) & 0x00000000000000FFull) << 56);
+
+	return *((T*)&temp);
+}
+
+#ifndef _PS3
+
+#define LittleShort( val )	( val )
+#define LittleWord( val )	( val )
+#define LittleLong( val )	( val )
+#define LittleDWord( val )	( val )
+#define LittleQWord( val )	( val )
+#define LittleFloat( val )	( val )
+
+#else
+
+#define LittleShort( val )	WordSwap( val )
+#define LittleWord( val )	WordSwap( val )
+#define LittleLong( val )	DWordSwap( val )
+#define LittleDWord( val )	DWordSwap( val )
+#define LittleQWord( val )	QWordSwap( val )
+#define LittleFloat( val )	DWordSwap( val )
+
+#endif
+
+
 // Leaderboard names
 #define LEADERBOARD_QUICKEST_WIN "Quickest Win"
 #define LEADERBOARD_FEET_TRAVELED "Feet Traveled"
@@ -129,10 +191,31 @@ enum EServerGameState
 	k_EServerExiting,
 };
 
+#pragma pack( push, 1 )
 
 // Data sent per photon beam from the server to update clients photon beam positions
 struct ServerPhotonBeamUpdateData_t
 {
+	void SetActive( bool bIsActive ) { m_bIsActive = bIsActive; }
+	bool GetActive() { return m_bIsActive; }
+
+	void SetRotation( float flRotation ) { m_flCurrentRotation = LittleFloat( flRotation ); }
+	float GetRotation() { return LittleFloat( m_flCurrentRotation ); }
+
+	void SetXVelocity( float flVelocity ) { m_flXVelocity = LittleFloat( flVelocity ); }
+	float GetXVelocity() { return LittleFloat( m_flXVelocity ); }
+
+	void SetYVelocity( float flVelocity ) { m_flYVelocity = LittleFloat( flVelocity ); }
+	float GetYVelocity() { return LittleFloat( m_flYVelocity ); }
+
+	void SetXPosition( float flPosition ) { m_flXPosition = LittleFloat( flPosition ); }
+	float GetXPosition() { return LittleFloat( m_flXPosition ); }
+
+	void SetYPosition( float flPosition ) { m_flYPosition = LittleFloat( flPosition ); }
+	float GetYPosition() { return LittleFloat( m_flYPosition ); }
+
+
+private:
 	// Does the photon beam exist right now?
 	bool m_bIsActive; 
 
@@ -152,6 +235,45 @@ struct ServerPhotonBeamUpdateData_t
 // This is the data that gets sent per ship in each update, see below for the full update data
 struct ServerShipUpdateData_t
 {
+	void SetRotation( float flRotation ) { m_flCurrentRotation = LittleFloat( flRotation ); }
+	float GetRotation() { return LittleFloat( m_flCurrentRotation ); }
+
+	void SetRotationDeltaLastFrame( float flDelta ) { m_flRotationDeltaLastFrame = LittleFloat( flDelta ); }
+	float GetRotationDeltaLastFrame() { return LittleFloat( m_flRotationDeltaLastFrame ); }
+
+	void SetXAcceleration( float flAcceleration ) { m_flXAcceleration = LittleFloat( flAcceleration ); }
+	float GetXAcceleration() { return LittleFloat( m_flXAcceleration ); }
+
+	void SetYAcceleration( float flAcceleration ) { m_flYAcceleration = LittleFloat( flAcceleration ); }
+	float GetYAcceleration() { return LittleFloat( m_flYAcceleration ); }
+
+	void SetXVelocity( float flVelocity ) { m_flXVelocity = LittleFloat( flVelocity ); }
+	float GetXVelocity() { return LittleFloat( m_flXVelocity ); }
+
+	void SetYVelocity( float flVelocity ) { m_flYVelocity = LittleFloat( flVelocity ); }
+	float GetYVelocity() { return LittleFloat( m_flYVelocity ); }
+
+	void SetXPosition( float flPosition ) { m_flXPosition = LittleFloat( flPosition ); }
+	float GetXPosition() { return LittleFloat( m_flXPosition ); }
+
+	void SetYPosition( float flPosition ) { m_flYPosition = LittleFloat( flPosition ); }
+	float GetYPosition() { return LittleFloat( m_flYPosition ); }
+
+	void SetExploding( bool bIsExploding ) { m_bExploding = bIsExploding; }
+	bool GetExploding() { return m_bExploding; }
+
+	void SetDisabled( bool bIsDisabled ) { m_bDisabled = bIsDisabled; }
+	bool GetDisabled() { return m_bDisabled; }
+
+	void SetForwardThrustersActive( bool bActive ) { m_bForwardThrustersActive = bActive; }
+	bool GetForwardThrustersActive() { return m_bForwardThrustersActive; }
+
+	void SetReverseThrustersActive( bool bActive ) { m_bReverseThrustersActive = bActive; }
+	bool GetReverseThrustersActive() { return m_bReverseThrustersActive; }
+
+	ServerPhotonBeamUpdateData_t *AccessPhotonBeamData( int iIndex ) { return &m_PhotonBeamData[iIndex]; }
+
+private:
 	// The current rotation of the ship
 	float m_flCurrentRotation;
 
@@ -188,8 +310,26 @@ struct ServerShipUpdateData_t
 // This is the data that gets sent from the server to each client for each update
 struct ServerSpaceWarUpdateData_t
 {
+	void SetServerGameState( EServerGameState eState ) { m_eCurrentGameState = LittleDWord( (uint32)eState ); }
+	EServerGameState GetServerGameState() { return (EServerGameState)LittleDWord( m_eCurrentGameState ); }
+
+	void SetPlayerWhoWon( uint32 iIndex ) { m_uPlayerWhoWonGame = LittleDWord( iIndex ); }
+	uint32 GetPlayerWhoWon() { return LittleDWord( m_uPlayerWhoWonGame ); }
+
+	void SetPlayerActive( uint32 iIndex, bool bIsActive ) { m_rgPlayersActive[iIndex] = bIsActive; }
+	bool GetPlayerActive( uint32 iIndex ) { return m_rgPlayersActive[iIndex]; }
+
+	void SetPlayerScore( uint32 iIndex, uint32 unScore ) { m_rgPlayerScores[iIndex] = LittleDWord(unScore); }
+	uint32 GetPlayerScore( uint32 iIndex ) { return LittleDWord(m_rgPlayerScores[iIndex]); }
+
+	void SetPlayerSteamID( uint32 iIndex, uint64 ulSteamID ) { m_rgPlayerSteamIDs[iIndex] = LittleQWord(ulSteamID); }
+	uint64 GetPlayerSteamID( uint32 iIndex ) { return LittleQWord(m_rgPlayerSteamIDs[iIndex]); }
+
+	ServerShipUpdateData_t *AccessShipUpdateData( uint32 iIndex ) { return &m_rgShipData[iIndex];}
+
+private:
 	// What state the game is in
-	EServerGameState m_eCurrentGameState;
+	uint32 m_eCurrentGameState;
 
 	// Who just won the game? -- only valid when m_eCurrentGameState == k_EGameWinner
 	uint32 m_uPlayerWhoWonGame;
@@ -211,6 +351,25 @@ struct ServerSpaceWarUpdateData_t
 // This is the data that gets sent from each client to the server for each update
 struct ClientSpaceWarUpdateData_t
 {
+	void SetPlayerName( const char *pchName ) { strncpy( m_rgchPlayerName, pchName, sizeof( m_rgchPlayerName ) ); }
+	const char *GetPlayerName() { return m_rgchPlayerName; }
+
+	void SetFirePressed( bool bIsPressed ) { m_bFirePressed = bIsPressed; }
+	bool GetFirePressed() { return m_bFirePressed; }
+
+	void SetTurnLeftPressed( bool bIsPressed ) { m_bTurnLeftPressed = bIsPressed; }
+	bool GetTurnLeftPressed() { return m_bTurnLeftPressed; }
+
+	void SetTurnRightPressed( bool bIsPressed ) { m_bTurnRightPressed = bIsPressed; }
+	bool GetTurnRightPressed() { return m_bTurnRightPressed; }
+
+	void SetForwardThrustersPressed( bool bIsPressed ) { m_bForwardThrustersPressed = bIsPressed; }
+	bool GetForwardThrustersPressed() { return m_bForwardThrustersPressed; }
+
+	void SetReverseThrustersPressed( bool bIsPressed ) { m_bReverseThrustersPressed = bIsPressed; }
+	bool GetReverseThrustersPressed() { return m_bReverseThrustersPressed; }
+
+private:
 	// Key's which are done
 	bool m_bFirePressed;
 	bool m_bTurnLeftPressed;
@@ -222,5 +381,7 @@ struct ClientSpaceWarUpdateData_t
 	// bugbug jmccaskey - Really lame to send this every update instead of event driven...
 	char m_rgchPlayerName[64];
 };
+
+#pragma pack( pop )
 
 #endif // SPACEWAR_H

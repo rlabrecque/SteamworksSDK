@@ -23,7 +23,7 @@ class CStarField
 {
 public:
 	// Constructor
-	CStarField( CGameEngine *pGameEngine );
+	CStarField( IGameEngine *pGameEngine );
 
 	// Render the star field
 	void Render();
@@ -31,7 +31,7 @@ public:
 private:
 
 	// Game engine instance we are running under
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Vector for starfield data
 	std::vector<StarVertex_t> m_VecStars;

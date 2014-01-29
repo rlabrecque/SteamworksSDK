@@ -10,8 +10,7 @@
 
 #include <map>
 
-// Would normally set this to 1 byte, however we use 8 byte to support older clients that didn't specify packing
-#pragma pack( push, 8 )
+#pragma pack( push, 1 )
 
 // Network message types
 enum EMessage
@@ -47,9 +46,20 @@ enum EMessage
 // and tells the client what SteamID the game server is using as well as whether the server is secure
 struct MsgServerSendInfo_t
 {
-	MsgServerSendInfo_t() : m_dwMessageType( k_EMsgServerSendInfo ) {}
-	const DWORD m_dwMessageType;
+	MsgServerSendInfo_t() : m_dwMessageType( LittleDWord( k_EMsgServerSendInfo ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
 
+	void SetSteamIDServer( uint64 SteamID ) { m_ulSteamIDServer = LittleQWord( SteamID ); }
+	uint64 GetSteamIDServer() { return LittleQWord( m_ulSteamIDServer ); }
+
+	void SetSecure( bool bSecure ) { m_bIsVACSecure = bSecure; }
+	bool GetSecure() { return m_bIsVACSecure; }
+
+	void SetServerName( const char *pchName ) { strncpy( m_rgchServerName, pchName, sizeof( m_rgchServerName ) ); }
+	const char *GetServerName() { return m_rgchServerName; }
+
+private:
+	const DWORD m_dwMessageType;
 	uint64 m_ulSteamIDServer;
 	bool m_bIsVACSecure;
 	char m_rgchServerName[128];
@@ -58,66 +68,102 @@ struct MsgServerSendInfo_t
 // Msg from the server to the client when refusing a connection
 struct MsgServerFailAuthentication_t
 {
-	MsgServerFailAuthentication_t() : m_dwMessageType( k_EMsgServerFailAuthentication ) {}
+	MsgServerFailAuthentication_t() : m_dwMessageType( LittleDWord( k_EMsgServerFailAuthentication ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+private:
 	const DWORD m_dwMessageType;
 };
 
 // Msg from the server to client when accepting a pending connection
 struct MsgServerPassAuthentication_t
 {
-	MsgServerPassAuthentication_t() : m_dwMessageType( k_EMsgServerPassAuthentication ) {}
-	const DWORD m_dwMessageType;
+	MsgServerPassAuthentication_t() : m_dwMessageType( LittleDWord( k_EMsgServerPassAuthentication ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
 
+	void SetPlayerPosition ( uint32 pos ) { m_uPlayerPosition = LittleDWord( pos ); }
+	uint32 GetPlayerPosition() { return LittleDWord( m_uPlayerPosition ); }
+
+private:
+	const DWORD m_dwMessageType;
 	uint32 m_uPlayerPosition;
 };
 
 // Msg from the server to clients when updating the world state
 struct MsgServerUpdateWorld_t
 {
-	MsgServerUpdateWorld_t() : m_dwMessageType( k_EMsgServerUpdateWorld ) {}
-	const DWORD m_dwMessageType;
+	MsgServerUpdateWorld_t() : m_dwMessageType( LittleDWord( k_EMsgServerUpdateWorld ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
 
+	ServerSpaceWarUpdateData_t *AccessUpdateData() { return &m_ServerUpdateData; }
+
+private:
+	const DWORD m_dwMessageType;
 	ServerSpaceWarUpdateData_t m_ServerUpdateData;
 };
 
 // Msg from server to clients when it is exiting
 struct MsgServerExiting_t
 {
-	MsgServerExiting_t() : m_dwMessageType( k_EMsgServerExiting ) {}
+	MsgServerExiting_t() : m_dwMessageType( LittleDWord( k_EMsgServerExiting ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+private:
 	const DWORD m_dwMessageType;
 };
 
 // Msg from server to clients when it is exiting
 struct MsgServerPingResponse_t
 {
-	MsgServerPingResponse_t() : m_dwMessageType( k_EMsgServerPingResponse ) {}
+	MsgServerPingResponse_t() : m_dwMessageType( LittleDWord( k_EMsgServerPingResponse ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+private:
 	const DWORD m_dwMessageType;
 };
 
 // Msg from client to server when trying to connect
 struct MsgClientInitiateConnection_t
 {
-	MsgClientInitiateConnection_t() : m_dwMessageType( k_EMsgClientInitiateConnection ) {}
+	MsgClientInitiateConnection_t() : m_dwMessageType( LittleDWord( k_EMsgClientInitiateConnection ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+private:
 	const DWORD m_dwMessageType;
 };
 
 // Msg from client to server when initiating authentication
 struct MsgClientBeginAuthentication_t
 {
-	MsgClientBeginAuthentication_t() : m_dwMessageType( k_EMsgClientBeginAuthentication ) {}
+	MsgClientBeginAuthentication_t() : m_dwMessageType( LittleDWord( k_EMsgClientBeginAuthentication ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+	void SetToken( const char *pchToken, uint32 unLen ) { m_uTokenLen = LittleDWord( unLen ); memcpy( m_rgchToken, pchToken, MIN( unLen, sizeof( m_rgchToken ) ) ); }
+	uint32 GetTokenLen() { return LittleDWord( m_uTokenLen ); }
+	const char *GetTokenPtr() { return m_rgchToken; }
+
+	void SetSteamID( uint64 ulSteamID ) { m_ulSteamID = LittleQWord( ulSteamID ); }
+	uint64 GetSteamID() { return LittleQWord( m_ulSteamID ); }
+
+private:
 	const DWORD m_dwMessageType;
 	
 	uint32 m_uTokenLen;
 #ifdef USE_GS_AUTH_API
 	char m_rgchToken[1024];
 #endif
-	CSteamID m_SteamID;
+	uint64 m_ulSteamID;
 };
 
 // Msg from client to server when sending state update
 struct MsgClientSendLocalUpdate_t
 {
-	MsgClientSendLocalUpdate_t() : m_dwMessageType( k_EMsgClientSendLocalUpdate ) {}
+	MsgClientSendLocalUpdate_t() : m_dwMessageType( LittleDWord( k_EMsgClientSendLocalUpdate ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+	
+	void SetShipPosition( uint32 uPos ) { m_uShipPosition = LittleDWord( uPos ); }
+	ClientSpaceWarUpdateData_t *AccessUpdateData() { return &m_ClientUpdateData; }
+
+private:
 	const DWORD m_dwMessageType;
 
 	uint32 m_uShipPosition;
@@ -127,25 +173,42 @@ struct MsgClientSendLocalUpdate_t
 // Msg from the client telling the server it is about to leave
 struct MsgClientLeavingServer_t
 {
-	MsgClientLeavingServer_t() : m_dwMessageType( k_EMsgClientLeavingServer ) {}
+	MsgClientLeavingServer_t() : m_dwMessageType( LittleDWord( k_EMsgClientLeavingServer ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+private:
 	const DWORD m_dwMessageType;
 };
 
 // server ping
 struct MsgClientPing_t
 {
-	MsgClientPing_t() : m_dwMessageType( k_EMsgClientPing ) {}
+	MsgClientPing_t() : m_dwMessageType( LittleDWord( k_EMsgClientPing ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+private:
 	const DWORD m_dwMessageType;
 };
 
 // Msg from client to server when trying to connect
 struct MsgP2PSendingTicket_t
 {
-	MsgP2PSendingTicket_t() : m_dwMessageType( k_EMsgP2PSendingTicket ) {}
+	MsgP2PSendingTicket_t() : m_dwMessageType( LittleDWord( k_EMsgP2PSendingTicket ) ) {}
+	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
+
+
+	void SetToken( const char *pchToken, uint32 unLen ) { m_uTokenLen = LittleDWord( unLen ); memcpy( m_rgchToken, pchToken, MIN( unLen, sizeof( m_rgchToken ) ) ); }
+	uint32 GetTokenLen() { return LittleDWord( m_uTokenLen ); }
+	const char *GetTokenPtr() { return m_rgchToken; }
+
+	void SetSteamID( uint64 ulSteamID ) { m_ulSteamID = LittleQWord( ulSteamID ); }
+	uint64 GetSteamID() { return LittleQWord( m_ulSteamID ); }
+
+private:
 	const DWORD m_dwMessageType;
 	uint32 m_uTokenLen;
 	char m_rgchToken[1024];
-	CSteamID m_SteamID;
+	uint64 m_ulSteamID;
 };
 
 #pragma pack( pop )

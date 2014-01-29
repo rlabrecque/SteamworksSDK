@@ -29,11 +29,25 @@ enum EServerMode
 //
 // Pass 0 for usGamePort or usSpectatorPort if you're not using that. Then, the master server updater will report 
 // what's running based on that.
+#ifndef _PS3
+
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 S_API bool SteamGameServer_InitSafe( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
 #else
 S_API bool SteamGameServer_Init( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
+#endif
 
+#else
+
+#ifdef VERSION_SAFE_STEAM_API_INTERFACES
+S_API bool SteamGameServer_InitSafe( const SteamPS3Params_t *ps3Params, uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
+#else
+S_API bool SteamGameServer_Init( const SteamPS3Params_t *ps3Params, uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
+#endif
+
+#endif
+
+#ifndef VERSION_SAFE_STEAM_API_INTERFACES
 S_API ISteamGameServer *SteamGameServer();
 S_API ISteamUtils *SteamGameServerUtils();
 S_API ISteamMasterServerUpdater *SteamMasterServerUpdater();

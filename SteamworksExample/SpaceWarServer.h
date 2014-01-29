@@ -13,10 +13,6 @@
 #include "Ship.h"
 #include "Sun.h"
 
-// Game server API code from Steam, lets us do authentication via Steam for who to allow to play,
-// also lets us get ourselves listed in the Steam master server so the server browser can find us
-#include "steam/steam_gameserver.h"
-
 // Forward declaration
 class CSpaceWarClient;
 
@@ -31,7 +27,7 @@ class CSpaceWarServer
 {
 public:
 	//Constructor
-	CSpaceWarServer( CGameEngine *pEngine );
+	CSpaceWarServer( IGameEngine *pEngine );
 
 	// Destructor
 	~CSpaceWarServer();
@@ -54,6 +50,7 @@ public:
 	// Checks various game objects for collisions and updates state appropriately if they have occurred
 	void CheckForCollisions();
 
+	// Kicks a given player off the server
 	void KickPlayerOffServer( CSteamID steamID );
 
 	// data accessors
@@ -65,6 +62,7 @@ private:
 	// Various callback functions that Steam will call to let us know about events related to our
 	// connection to the Steam servers for authentication purposes.
 	//
+
 
 	// Tells us when we have successfully connected to Steam
 	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnected, SteamServersConnected_t, m_CallbackSteamServersConnected );
@@ -101,7 +99,7 @@ private:
 	void SendUpdatedServerDetailsToSteam();
 
 	// Receive updates from client
-	void OnReceiveClientUpdateData( uint32 uShipIndex, ClientSpaceWarUpdateData_t UpdateData );
+	void OnReceiveClientUpdateData( uint32 uShipIndex, ClientSpaceWarUpdateData_t *pUpdateData );
 
 	// Send data to a client at the given ship index
 	bool BSendDataToClient( uint32 uShipIndex, char *pData, uint32 nSizeOfData );
@@ -156,7 +154,7 @@ private:
 	CSun *m_pSun;
 
 	// pointer to game engine instance we are running under
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Vector to keep track of client connections
 	ClientConnectionData_t m_rgClientData[MAX_PLAYERS_PER_SERVER];

@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright (c) 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to user account information in Steam
 //
@@ -127,9 +127,32 @@ public:
 	// After receiving a user's authentication data, and passing it to BeginAuthSession, use this function
 	// to determine if the user owns downloadable content specified by the provided AppID.
 	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
+	
+	// returns true if this users looks like they are behind a NAT device. Only valid once the user has connected to steam 
+	// (i.e a SteamServersConnected_t has been issued) and may not catch all forms of NAT.
+	virtual bool BIsBehindNAT() = 0;
+
+#ifdef _PS3
+	// Logs a user into Steam by using his login name and password
+	virtual void LogOn( const char *pchUserName, const char *pchPassword ) = 0;
+#endif
+
+	// set data to be replicated to friends so that they can join your game
+	// CSteamID steamIDGameServer - the steamID of the game server, received from the game server by the client
+	// uint32 unIPServer, uint16 usPortServer - the IP address of the game server
+	virtual void AdvertiseGame( CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer ) = 0;
+
+	// Requests a ticket encrypted with an app specific shared key
+	// pDataToInclude, cbDataToInclude will be encrypted into the ticket
+	// ( This is asynchronous, you must wait for the ticket to be completed by the server )
+	virtual SteamAPICall_t RequestEncryptedAppTicket( void *pDataToInclude, int cbDataToInclude ) = 0;
+
+	// retrieve a finished ticket
+	virtual bool GetEncryptedAppTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
+
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser013"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser014"
 
 
 // callbacks
@@ -226,6 +249,17 @@ struct MicroTxnAuthorizationResponse_t
 	uint32 m_unAppID;			// AppID for this microtransaction
 	uint64 m_ulOrderID;			// OrderID provided for the microtransaction
 	uint8 m_bAuthorized;		// if user authorized transaction
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Result from RequestEncryptedAppTicket
+//-----------------------------------------------------------------------------
+struct EncryptedAppTicketResponse_t
+{
+	enum { k_iCallback = k_iSteamUserCallbacks + 54 };
+
+	EResult m_eResult;
 };
 
 #pragma pack( pop )

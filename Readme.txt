@@ -12,6 +12,29 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.11	23rd August 2010
+----------------------------------------------------------------
+
+Networking
+* added virtual ports to the P2P networking API to help with routing messages to different systems
+* added ISteamUser::BIsBehindNAT() to detect when a user is behind a NAT
+
+Friends / Matchmaking
+* added support for retrieving large (184x184) avatars
+* added ISteamUser::AdvertiseGame() which can be used send join game info to friends without using the game server APIs
+
+64-bit support
+* 64-bit windows binaries are included in the sdk/redistributable_bin/ folder
+* VAC and CEG are not yet supported
+
+Authentication
+* added ticket based remote authentication library
+
+Other
+* added ISteamUser::CheckFileSignature which can be used in conjunction with the signing tab on the partner site to verify that an executable has not been modified
+
+
+----------------------------------------------------------------
 v1.10	20th July 2010
 ----------------------------------------------------------------
 

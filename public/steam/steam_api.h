@@ -80,10 +80,21 @@ S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
 // pvContext-- can be NULL, will be the void * context passed into m_pfnPreMinidumpCallback
 // PFNPreMinidumpCallback m_pfnPreMinidumpCallback   -- optional callback which occurs just before a .dmp file is written during a crash.  Applications can hook this to allow adding additional information into the .dmp comment stream.
 S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const *pchDate, char const *pchTime, bool bFullMemoryDumps, void *pvContext, PFNPreMinidumpCallback m_pfnPreMinidumpCallback );
-S_API void SteamAPI_SetBreakpadAppID( uint32 unAppID );
 
 // interface pointers, configured by SteamAPI_Init()
 S_API ISteamClient *SteamClient();
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+//	PlayStation 3 initialization parameters
+//
+//	The following structure must be passed to when loading steam_api_ps3.prx
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+#define STEAM_PS3_PATH_MAX 1055
+struct SteamPS3Params_t
+{
+	char m_rgchInstallationPath[ STEAM_PS3_PATH_MAX ];
+	char m_rgchSystemCache[ STEAM_PS3_PATH_MAX ];
+};
 
 
 //
@@ -99,7 +110,12 @@ S_API ISteamClient *SteamClient();
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 S_API bool SteamAPI_InitSafe();
 #else
+
+#if defined(_PS3)
+S_API bool SteamAPI_Init( SteamPS3Params_t *pParams );
+#else
 S_API bool SteamAPI_Init();
+#endif
 
 S_API ISteamUser *SteamUser();
 S_API ISteamFriends *SteamFriends();

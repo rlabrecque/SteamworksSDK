@@ -18,7 +18,7 @@ class CLobbyMenu : public CBaseMenu<LobbyMenuItem_t>
 {
 public:
 	// Constructor
-	CLobbyMenu( CGameEngine *pGameEngine ) : CBaseMenu<LobbyMenuItem_t>( pGameEngine ) {}
+	CLobbyMenu( IGameEngine *pGameEngine ) : CBaseMenu<LobbyMenuItem_t>( pGameEngine ) {}
 
 	void Rebuild( const CSteamID &steamIDLobby )
 	{
@@ -44,7 +44,8 @@ public:
 			// a PersonaStateUpdate_t callback when they do, and we'll rebuild the list then
 			if ( pchName && *pchName )
 			{
-				bool bReady = ( 1 == atoi( SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, steamIDLobbyMember, "ready" ) ) );
+				const char *pchReady = SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, steamIDLobbyMember, "ready" );
+				bool bReady = ( pchReady && atoi( pchReady ) == 1);
 				LobbyMenuItem_t menuItem = { steamIDLobbyMember, LobbyMenuItem_t::k_ELobbyMenuItemUser };
 
 				char rgchMenuText[256];
@@ -56,7 +57,8 @@ public:
 
 		// ready/not ready toggle
 		{
-			bool bReady = ( 1 == atoi( SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, SteamUser()->GetSteamID(), "ready" ) ) );
+			const char *pchReady = SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, SteamUser()->GetSteamID(), "ready" );
+			bool bReady = ( pchReady && atoi( pchReady ) == 1 );
 			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemToggleReadState };
 			if ( bReady )
 				AddMenuItem( CLobbyMenu::MenuItem_t( "Set myself as Not Ready", menuItem ) );
@@ -100,8 +102,8 @@ public:
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CLobby::CLobby( CGameEngine *pGameEngine ) : 
-		m_pGameEngine( pGameEngine ), 
+CLobby::CLobby( IGameEngine *pGameEngine ) : 
+		m_pGameEngine( pGameEngine ),
 		m_CallbackPersonaStateChange( this, &CLobby::OnPersonaStateChange ),
 		m_CallbackLobbyDataUpdate( this, &CLobby::OnLobbyDataUpdate ),
 		m_CallbackChatDataUpdate( this, &CLobby::OnLobbyChatUpdate )
@@ -204,7 +206,22 @@ class CLobbyBrowserMenu : public CBaseMenu<LobbyBrowserMenuItem_t>
 {
 public:
 	// Constructor
-	CLobbyBrowserMenu( CGameEngine *pGameEngine ) : CBaseMenu<LobbyBrowserMenuItem_t>( pGameEngine ) {}
+	CLobbyBrowserMenu( IGameEngine *pGameEngine ) : CBaseMenu<LobbyBrowserMenuItem_t>( pGameEngine ) {}
+
+	void ShowSearching()
+	{
+		PushSelectedItem();
+		ClearMenuItems();
+
+		LobbyBrowserMenuItem_t data;
+		data.m_eStateToTransitionTo = k_EClientGameMenu;
+		AddMenuItem( CLobbyBrowserMenu::MenuItem_t( "Searching...", data ) );
+
+		data.m_eStateToTransitionTo = k_EClientGameMenu;
+		AddMenuItem( CLobbyBrowserMenu::MenuItem_t( "Return to main menu", data ) );
+
+		PopSelectedItem();
+	}
 
 	void Rebuild( std::list<Lobby_t> &listLobbies )
 	{
@@ -237,16 +254,14 @@ public:
 // Purpose: Constructor
 //			just initializes base data
 //-----------------------------------------------------------------------------
-CLobbyBrowser::CLobbyBrowser( CGameEngine *pGameEngine ) :
-	m_CallbackLobbyDataUpdated( this, &CLobbyBrowser::OnLobbyDataUpdatedCallback )
+CLobbyBrowser::CLobbyBrowser( IGameEngine *pGameEngine ) 
+	: m_CallbackLobbyDataUpdated( this, &CLobbyBrowser::OnLobbyDataUpdatedCallback )
 {
 	m_pGameEngine = pGameEngine;
 	m_pMenu = new CLobbyBrowserMenu( pGameEngine );
 	m_pMenu->Rebuild( m_ListLobbies );
 	m_pMenu->SetHeading( "Lobby browser" );
 	m_bRequestingLobbies = false;
-
-	Refresh();
 }
 
 
@@ -280,6 +295,7 @@ void CLobbyBrowser::Refresh()
 		SteamAPICall_t hSteamAPICall = SteamMatchmaking()->RequestLobbyList();
 		// set the function to call when this API call has completed
 		m_SteamCallResultLobbyMatchList.Set( hSteamAPICall, this, &CLobbyBrowser::OnLobbyMatchListCallback );
+		m_pMenu->ShowSearching();
 	}
 }
 

@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CSun::CSun( CGameEngine *pGameEngine ) : CSpaceWarEntity( pGameEngine, 2*SUN_VECTOR_SCALE_FACTOR, false )
+CSun::CSun( IGameEngine *pGameEngine ) : CSpaceWarEntity( pGameEngine, 2*SUN_VECTOR_SCALE_FACTOR, false )
 {
 	float xcenter = (float)pGameEngine->GetViewportWidth()/2;
 	float ycenter = (float)pGameEngine->GetViewportHeight()/2;

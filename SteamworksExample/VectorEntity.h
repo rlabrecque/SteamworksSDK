@@ -26,7 +26,7 @@ class CVectorEntity
 {
 public:
 	// Constructor
-	CVectorEntity( CGameEngine *pGameEngine, uint32 uCollisionRadius );
+	CVectorEntity( IGameEngine *pGameEngine, uint32 uCollisionRadius );
 	
 	// Destructor
 	virtual ~CVectorEntity();
@@ -105,7 +105,7 @@ protected:
 
 protected:
 	// Game engine instance we are running under
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 private:
 	// Vector of points (always built 2 at a time so it's actually lines)

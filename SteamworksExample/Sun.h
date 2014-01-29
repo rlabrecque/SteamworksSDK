@@ -17,7 +17,7 @@ class CSun : public CSpaceWarEntity
 {
 public:
 	// Constructor
-	CSun( CGameEngine *pGameEngine );
+	CSun( IGameEngine *pGameEngine );
 
 	// Run a frame
 	void RunFrame();

@@ -10,11 +10,13 @@
 #include "stdlib.h"
 #include "SpaceWarServer.h"
 #include "StatsAndAchievements.h"
+#include <math.h>
+#include <string.h>
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for thrusters
 //-----------------------------------------------------------------------------
-CForwardThrusters::CForwardThrusters( CGameEngine *pGameEngine, CShip *pShip ) : CVectorEntity( pGameEngine, 0 )
+CForwardThrusters::CForwardThrusters( IGameEngine *pGameEngine, CShip *pShip ) : CVectorEntity( pGameEngine, 0 )
 {
 	DWORD dwColor = D3DCOLOR_ARGB( 255, 255, 255, 102 );
 
@@ -44,7 +46,7 @@ void CForwardThrusters::RunFrame()
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for reverse thrusters
 //-----------------------------------------------------------------------------
-CReverseThrusters::CReverseThrusters( CGameEngine *pGameEngine, CShip *pShip ) : CVectorEntity( pGameEngine, 0 )
+CReverseThrusters::CReverseThrusters( IGameEngine *pGameEngine, CShip *pShip ) : CVectorEntity( pGameEngine, 0 )
 {
 	DWORD dwColor = D3DCOLOR_ARGB( 255, 255, 255, 102 );
 
@@ -76,7 +78,7 @@ void CReverseThrusters::RunFrame()
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for ship debris after explosion
 //-----------------------------------------------------------------------------
-CShipDebris::CShipDebris( CGameEngine *pGameEngine, float xPos, float yPos, DWORD dwDebrisColor ) : CSpaceWarEntity( pGameEngine, 0, true )
+CShipDebris::CShipDebris( IGameEngine *pGameEngine, float xPos, float yPos, DWORD dwDebrisColor ) : CSpaceWarEntity( pGameEngine, 0, true )
 {
 	AddLine( 0.0f, 0.0f, 16.0f, 0.0f, dwDebrisColor );
 
@@ -112,7 +114,7 @@ CShipDebris::CShipDebris( CGameEngine *pGameEngine, float xPos, float yPos, DWOR
 //-----------------------------------------------------------------------------
 void CShipDebris::RunFrame()
 {
-	SetRotationDeltaNextFrame( m_flRotationPerInterval * min( m_pGameEngine->GetGameTicksFrameDelta(), 400.0f )/400.0f );
+	SetRotationDeltaNextFrame( m_flRotationPerInterval * MIN( m_pGameEngine->GetGameTicksFrameDelta(), 400.0f )/400.0f );
 	CSpaceWarEntity::RunFrame();
 }
 
@@ -124,7 +126,7 @@ void CShipDebris::RunFrame()
 //  warning C4355: 'this' : used in base member initializer list
 //  This is OK because the thruster classes won't use the ship object in their constructors (where it may still be only partly constructed)
 #pragma warning( disable : 4355 ) 
-CShip::CShip( CGameEngine *pGameEngine, bool bIsServerInstance, float xPos, float yPos, DWORD dwShipColor ) : 
+CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, float yPos, DWORD dwShipColor ) : 
 	CSpaceWarEntity( pGameEngine, 11, true ), m_ForwardThrusters( pGameEngine, this ), m_ReverseThrusters( pGameEngine, this )
 {
 	m_bDisabled = false;
@@ -140,7 +142,6 @@ CShip::CShip( CGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	m_bForwardThrustersActive = false;
 	m_bReverseThrustersActive = false;
 	m_bIsLocalPlayer = false;
-	m_bFirePhotonBeamNextFrame = false;
 	m_ulLastClientUpdateTick = 0;
 	m_bIsServerInstance = bIsServerInstance;
 
@@ -188,7 +189,7 @@ CShip::~CShip()
 //-----------------------------------------------------------------------------
 // Purpose: Update entity with updated data from the server
 //-----------------------------------------------------------------------------
-void CShip::OnReceiveServerUpdate( ServerShipUpdateData_t UpdateData )
+void CShip::OnReceiveServerUpdate( ServerShipUpdateData_t *pUpdateData )
 {
 	if ( m_bIsServerInstance )
 	{
@@ -196,33 +197,34 @@ void CShip::OnReceiveServerUpdate( ServerShipUpdateData_t UpdateData )
 		return;
 	}
 
-	SetDisabled( UpdateData.m_bDisabled );
+	SetDisabled( pUpdateData->GetDisabled() );
 
-	SetExploding( UpdateData.m_bExploding );
+	SetExploding( pUpdateData->GetExploding() );
 
-	SetPosition( UpdateData.m_flXPosition, UpdateData.m_flYPosition );
-	SetVelocity( UpdateData.m_flXVelocity, UpdateData.m_flYVelocity );
-	SetAccumulatedRotation( UpdateData.m_flCurrentRotation );
+	SetPosition( pUpdateData->GetXPosition()*m_pGameEngine->GetViewportWidth(), pUpdateData->GetYPosition()*m_pGameEngine->GetViewportHeight() );
+	SetVelocity( pUpdateData->GetXVelocity(), pUpdateData->GetYVelocity() );
+	SetAccumulatedRotation( pUpdateData->GetRotation() );
 
 
-	m_bForwardThrustersActive = UpdateData.m_bForwardThrustersActive;
-	m_bReverseThrustersActive = UpdateData.m_bReverseThrustersActive;
+	m_bForwardThrustersActive = pUpdateData->GetForwardThrustersActive();
+	m_bReverseThrustersActive = pUpdateData->GetReverseThrustersActive();
 
 	// Update the photon beams
 	for ( int i=0; i < MAX_PHOTON_BEAMS_PER_SHIP; ++i )
 	{
-		if ( UpdateData.m_PhotonBeamData[i].m_bIsActive )
+		ServerPhotonBeamUpdateData_t *pPhotonUpdate = pUpdateData->AccessPhotonBeamData( i );
+		if ( pPhotonUpdate->GetActive() )
 		{
 			if ( !m_rgPhotonBeams[i] )
 			{
 				m_rgPhotonBeams[i] = new CPhotonBeam( m_pGameEngine, 
-					UpdateData.m_PhotonBeamData[i].m_flXPosition, UpdateData.m_PhotonBeamData[i].m_flYPosition, 
-					m_dwShipColor, UpdateData.m_PhotonBeamData[i].m_flCurrentRotation, 
-					UpdateData.m_PhotonBeamData[i].m_flXVelocity, UpdateData.m_PhotonBeamData[i].m_flYVelocity );
+					pPhotonUpdate->GetXPosition(), pPhotonUpdate->GetYPosition(), 
+					m_dwShipColor, pPhotonUpdate->GetRotation(), 
+					pPhotonUpdate->GetXVelocity(), pPhotonUpdate->GetYVelocity() );
 			}
 			else
 			{
-				m_rgPhotonBeams[i]->OnReceiveServerUpdate( UpdateData.m_PhotonBeamData[i] );
+				m_rgPhotonBeams[i]->OnReceiveServerUpdate( pPhotonUpdate );
 			}
 		}
 		else
@@ -240,14 +242,14 @@ void CShip::OnReceiveServerUpdate( ServerShipUpdateData_t UpdateData )
 //-----------------------------------------------------------------------------
 // Purpose: Update entity with updated data from the client
 //-----------------------------------------------------------------------------
-void CShip::OnReceiveClientUpdate( ClientSpaceWarUpdateData_t UpdateData )
+void CShip::OnReceiveClientUpdate( ClientSpaceWarUpdateData_t *pUpdateData )
 {
 	if ( !m_bIsServerInstance )
 	{
 		OutputDebugString( "Should not be receiving client updates on non-server instances\n" );
 		return;
 	}
-	memcpy( &m_SpaceWarClientUpdateData, &UpdateData, sizeof( ClientSpaceWarUpdateData_t ) );
+	memcpy( &m_SpaceWarClientUpdateData, pUpdateData, sizeof( ClientSpaceWarUpdateData_t ) );
 }
 
 
@@ -264,7 +266,9 @@ bool CShip::BGetClientUpdateData( ClientSpaceWarUpdateData_t *pUpdateData  )
 
 	// Update playername before sending
 	if ( m_bIsLocalPlayer )
-		strncpy( m_SpaceWarClientUpdateData.m_rgchPlayerName, SteamFriends()->GetFriendPersonaName( SteamUser()->GetSteamID() ), ARRAYSIZE( m_SpaceWarClientUpdateData.m_rgchPlayerName ) );
+	{
+		m_SpaceWarClientUpdateData.SetPlayerName( SteamFriends()->GetFriendPersonaName( SteamUser()->GetSteamID() ) );
+	}
 
 	memcpy( pUpdateData, &m_SpaceWarClientUpdateData, sizeof( ClientSpaceWarUpdateData_t ) );
 	memset( &m_SpaceWarClientUpdateData, 0, sizeof( m_SpaceWarClientUpdateData ) );
@@ -277,7 +281,7 @@ bool CShip::BGetClientUpdateData( ClientSpaceWarUpdateData_t *pUpdateData  )
 //-----------------------------------------------------------------------------
 const char* CShip::GetPlayerName()
 {
-	return m_SpaceWarClientUpdateData.m_rgchPlayerName;
+	return m_SpaceWarClientUpdateData.GetPlayerName();
 }
 
 
@@ -324,29 +328,29 @@ void CShip::RunFrame()
 
 	if ( m_bIsLocalPlayer )
 	{
-		m_SpaceWarClientUpdateData.m_bTurnLeftPressed = false;
-		m_SpaceWarClientUpdateData.m_bTurnRightPressed = false;
+		m_SpaceWarClientUpdateData.SetTurnLeftPressed( false );
+		m_SpaceWarClientUpdateData.SetTurnRightPressed( false );
 
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKLeft ) )
 		{
-			m_SpaceWarClientUpdateData.m_bTurnLeftPressed = true;
+			m_SpaceWarClientUpdateData.SetTurnLeftPressed( true );
 		}
 		
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKRight ) )
 		{
-			m_SpaceWarClientUpdateData.m_bTurnRightPressed = true;
+			m_SpaceWarClientUpdateData.SetTurnRightPressed( true );
 		}
 	}
 	else if ( m_bIsServerInstance )
 	{
 		// Server side
 		float flRotationDelta = 0.0f;
-		if ( m_SpaceWarClientUpdateData.m_bTurnLeftPressed )
+		if ( m_SpaceWarClientUpdateData.GetTurnLeftPressed() )
 		{
 			flRotationDelta += (PI_VALUE/2.0f) * -1.0f * (float)m_pGameEngine->GetGameTicksFrameDelta()/400.0f;
 		}
 
-		if ( m_SpaceWarClientUpdateData.m_bTurnRightPressed )
+		if ( m_SpaceWarClientUpdateData.GetTurnRightPressed() )
 		{
 			flRotationDelta += (PI_VALUE/2.0f) * (float)m_pGameEngine->GetGameTicksFrameDelta()/400.0f;
 		}
@@ -357,17 +361,17 @@ void CShip::RunFrame()
 	if ( m_bIsLocalPlayer )
 	{
 		// client side
-		m_SpaceWarClientUpdateData.m_bReverseThrustersPressed = false;
-		m_SpaceWarClientUpdateData.m_bForwardThrustersPressed = false;
+		m_SpaceWarClientUpdateData.SetReverseThrustersPressed( false );
+		m_SpaceWarClientUpdateData.SetForwardThrustersPressed( false );
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKForwardThrusters ) || m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) )
 		{
 			if ( m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) )
 			{
-				m_SpaceWarClientUpdateData.m_bReverseThrustersPressed = true;
+				m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
 			}
 			else
 			{
-				m_SpaceWarClientUpdateData.m_bForwardThrustersPressed = true;
+				m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
 			}
 		}
 	}
@@ -378,10 +382,10 @@ void CShip::RunFrame()
 		float yThrust = 0;
 		m_bReverseThrustersActive = false;
 		m_bForwardThrustersActive = false;
-		if ( m_SpaceWarClientUpdateData.m_bReverseThrustersPressed || m_SpaceWarClientUpdateData.m_bForwardThrustersPressed )
+		if ( m_SpaceWarClientUpdateData.GetReverseThrustersPressed() || m_SpaceWarClientUpdateData.GetForwardThrustersPressed() )
 		{
 			float flSign = 1.0f;
-			if ( m_SpaceWarClientUpdateData.m_bReverseThrustersPressed )
+			if ( m_SpaceWarClientUpdateData.GetReverseThrustersPressed() )
 			{
 				m_bReverseThrustersActive = true;
 				flSign = -1.0f;
@@ -395,7 +399,7 @@ void CShip::RunFrame()
 				m_ulLastThrustStartedTickCount = ulCurrentTickCount;
 
 			// You have to hold the key for a second to reach maximum thrust
-			float factor = min( ((float)(ulCurrentTickCount - m_ulLastThrustStartedTickCount) / 500.0f) + 0.2f, 1.0f );
+			float factor = MIN( ((float)(ulCurrentTickCount - m_ulLastThrustStartedTickCount) / 500.0f) + 0.2f, 1.0f );
 
 			xThrust = flSign * (float)(MAXIMUM_SHIP_THRUST * factor * sin( GetAccumulatedRotation() ) );
 			yThrust = flSign * -1.0f * (float)(MAXIMUM_SHIP_THRUST * factor * cos( GetAccumulatedRotation() ) );
@@ -414,22 +418,18 @@ void CShip::RunFrame()
 	float sinvalue = (float)sin( GetAccumulatedRotation() );
 	float cosvalue = (float)cos( GetAccumulatedRotation() );
 
-	// See if we need to fire a photon beam
-	bool bFirePhotonBeam = m_bFirePhotonBeamNextFrame;
-	m_bFirePhotonBeamNextFrame = false;
-
 	if ( m_bIsLocalPlayer )
 	{
 		// client side
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKFire ) )
 		{
-			m_SpaceWarClientUpdateData.m_bFirePressed = true;
+			m_SpaceWarClientUpdateData.SetFirePressed( true );
 		}
 	}
 	else if ( m_bIsServerInstance )
 	{
 		// server side
-		if ( nNextAvailablePhotonBeamSlot != -1 && !m_bExploding && m_SpaceWarClientUpdateData.m_bFirePressed && ulCurrentTickCount - PHOTON_BEAM_FIRE_INTERVAL_TICKS > m_ulLastPhotonTickCount )
+		if ( nNextAvailablePhotonBeamSlot != -1 && !m_bExploding && m_SpaceWarClientUpdateData.GetFirePressed() && ulCurrentTickCount - PHOTON_BEAM_FIRE_INTERVAL_TICKS > m_ulLastPhotonTickCount )
 		{
 			m_ulLastPhotonTickCount = ulCurrentTickCount;
 
@@ -502,7 +502,9 @@ void CShip::SetExploding( bool bExploding )
 	if ( m_bExploding == bExploding )
 		return;
 
+#ifndef _PS3
 	Steamworks_TestSecret();
+#endif
 
 	// Track that we are exploding, and disable collision detection
 	m_bExploding = bExploding;
@@ -572,43 +574,43 @@ bool CShip::BCheckForPhotonsCollidingWith( CVectorEntity *pTarget )
 //-----------------------------------------------------------------------------
 void CShip::BuildServerUpdate( ServerShipUpdateData_t *pUpdateData )
 {
-	pUpdateData->m_bDisabled = BIsDisabled();
-	pUpdateData->m_bExploding = BIsExploding();
-	pUpdateData->m_flXAcceleration = GetXAccelerationLastFrame();
-	pUpdateData->m_flYAcceleration = GetYAccelerationLastFrame();
-	pUpdateData->m_flXPosition = GetXPos();
-	pUpdateData->m_flYPosition = GetYPos();
-	pUpdateData->m_flXVelocity = GetXVelocity();
-	pUpdateData->m_flYVelocity = GetYVelocity();
-	pUpdateData->m_flCurrentRotation = GetAccumulatedRotation();
-	pUpdateData->m_flRotationDeltaLastFrame = GetRotationDeltaLastFrame();
-	pUpdateData->m_bForwardThrustersActive = m_bForwardThrustersActive;
-	pUpdateData->m_bReverseThrustersActive = m_bReverseThrustersActive;
+	pUpdateData->SetDisabled( BIsDisabled() );
+	pUpdateData->SetExploding( BIsExploding() );
+	pUpdateData->SetXAcceleration( GetXAccelerationLastFrame() );
+	pUpdateData->SetYAcceleration( GetYAccelerationLastFrame() );
+	pUpdateData->SetXPosition( GetXPos()/(float)m_pGameEngine->GetViewportWidth() );
+	pUpdateData->SetYPosition( GetYPos()/(float)m_pGameEngine->GetViewportHeight() );
+	pUpdateData->SetXVelocity( GetXVelocity() );
+	pUpdateData->SetYVelocity( GetYVelocity() );
+	pUpdateData->SetRotation( GetAccumulatedRotation() );
+	pUpdateData->SetRotationDeltaLastFrame( GetRotationDeltaLastFrame() );
+	pUpdateData->SetForwardThrustersActive( m_bForwardThrustersActive );
+	pUpdateData->SetReverseThrustersActive( m_bReverseThrustersActive );
 
-	BuildServerPhotonBeamUpdate( pUpdateData->m_PhotonBeamData );
+	BuildServerPhotonBeamUpdate( pUpdateData );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Build the photon beam update data to send from the server to clients
 //-----------------------------------------------------------------------------
-void CShip::BuildServerPhotonBeamUpdate( ServerPhotonBeamUpdateData_t *pUpdateData )
+void CShip::BuildServerPhotonBeamUpdate( ServerShipUpdateData_t *pUpdateData )
 {
 	for( int i = 0; i < MAX_PHOTON_BEAMS_PER_SHIP; ++i )
 	{
+		ServerPhotonBeamUpdateData_t *pPhotonUpdate = pUpdateData->AccessPhotonBeamData( i );
 		if ( m_rgPhotonBeams[i] )
 		{
-			pUpdateData[i].m_bIsActive = true;
-			pUpdateData[i].m_flXPosition = m_rgPhotonBeams[i]->GetXPos();
-			pUpdateData[i].m_flYPosition = m_rgPhotonBeams[i]->GetYPos();
-			pUpdateData[i].m_flXVelocity = m_rgPhotonBeams[i]->GetXVelocity();
-			pUpdateData[i].m_flYVelocity = m_rgPhotonBeams[i]->GetYVelocity();
-			pUpdateData[i].m_flCurrentRotation = m_rgPhotonBeams[i]->GetAccumulatedRotation();
+			pPhotonUpdate->SetActive( true );
+			pPhotonUpdate->SetXPosition( m_rgPhotonBeams[i]->GetXPos()/(float)m_pGameEngine->GetViewportWidth() );
+			pPhotonUpdate->SetYPosition( m_rgPhotonBeams[i]->GetYPos()/(float)m_pGameEngine->GetViewportHeight() );
+			pPhotonUpdate->SetXVelocity( m_rgPhotonBeams[i]->GetXVelocity() );
+			pPhotonUpdate->SetYVelocity( m_rgPhotonBeams[i]->GetYVelocity() );
+			pPhotonUpdate->SetRotation( m_rgPhotonBeams[i]->GetAccumulatedRotation() ); 
 		}
 		else
 		{
-			pUpdateData[i].m_bIsActive = false;
+			pPhotonUpdate->SetActive( false );
 		}
-
 	}
 }
 

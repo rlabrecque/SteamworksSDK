@@ -8,7 +8,6 @@
 #include "stdafx.h"
 #include "StatsAndAchievements.h"
 #include <math.h>
-#include "steam/isteamuserstats.h"
 #include "SpaceWarClient.h"
 
 #define ACHDISP_FONT_HEIGHT 20
@@ -36,9 +35,9 @@ Achievement_t g_rgAchievements[] =
 //  warning C4355: 'this' : used in base member initializer list
 //  This is OK because it's warning on setting up the Steam callbacks, they won't use this until after construction is done
 #pragma warning( disable : 4355 ) 
-CStatsAndAchievements::CStatsAndAchievements( CGameEngine *pGameEngine )
+CStatsAndAchievements::CStatsAndAchievements( IGameEngine *pGameEngine )
 	: 
-	m_pGameEngine( pGameEngine ), 
+	m_pGameEngine( pGameEngine ),
 	m_pSteamUser( NULL ),
 	m_pSteamUserStats( NULL ),
 	m_GameID( SteamUtils()->GetAppID() ),
@@ -386,7 +385,7 @@ void CStatsAndAchievements::Render()
 
 		char rgchBuffer[256];
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Unable to retrieve data from Steam\n" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 
 		rect.left = 0;
@@ -395,7 +394,7 @@ void CStatsAndAchievements::Render()
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
 		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_TOP, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 	}
 	else
@@ -485,7 +484,7 @@ void CStatsAndAchievements::Render()
 
 		char rgchBuffer[256];
 		_snprintf( rgchBuffer, sizeof( rgchBuffer ), "Press ESC to return to the Main Menu" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_TOP, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 	}
 }
@@ -518,7 +517,7 @@ void CStatsAndAchievements::DrawAchievementInfo( RECT &rect, Achievement_t &ach 
 		ach.m_bAchieved ? "Unlocked" : "Locked",
 		ach.m_rgchDescription );
 
-	m_pGameEngine->BDrawString( m_hDisplayFont, rect2, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_LEFT|DT_VCENTER, rgchBuffer );
+	m_pGameEngine->BDrawString( m_hDisplayFont, rect2, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
 }
 
 void CStatsAndAchievements::DrawStatInfo( RECT &rect, const char *pchName, float flValue )
@@ -526,5 +525,5 @@ void CStatsAndAchievements::DrawStatInfo( RECT &rect, const char *pchName, float
 	// todo: divide up so can draw image
 	char rgchBuffer[256];
 	_snprintf( rgchBuffer, sizeof( rgchBuffer), "%s: %.1f", pchName, flValue );
-	m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_LEFT|DT_VCENTER, rgchBuffer );
+	m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
 }

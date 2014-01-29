@@ -19,7 +19,7 @@ class CQuitMenu : public CBaseMenu<EClientGameState>
 {
 public:
 	// Constructor
-	CQuitMenu( CGameEngine *pGameEngine );
+	CQuitMenu( IGameEngine *pGameEngine );
 };
 
 #endif // QUITMENU_H

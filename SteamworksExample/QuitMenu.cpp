@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CQuitMenu::CQuitMenu( CGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine )
+CQuitMenu::CQuitMenu( IGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine )
 {
 	AddMenuItem( MenuItem_t( "Resume Game", k_EClientGameActive ) );
 	AddMenuItem( MenuItem_t( "Exit To Menu", k_EClientGameMenu ) );

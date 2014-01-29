@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CRemoteStorage::CRemoteStorage( CGameEngine *pGameEngine )
+CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine )
 : m_pGameEngine( pGameEngine )
 {
 	m_rgchGreeting[0] = 0;
@@ -85,7 +85,6 @@ void CRemoteStorage::GetFileStats()
 //-----------------------------------------------------------------------------
 void CRemoteStorage::Render()
 {
-	static uint64 m_ulLastEnterKeyTick = 0;
 	uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
 
 	m_bFinished = false;
@@ -100,10 +99,6 @@ void CRemoteStorage::Render()
 
 	while ( m_pGameEngine->BGetFirstKeyDown( &dwVKDown ) )
 	{
-		// Clear this key
-		m_pGameEngine->RecordKeyUp( dwVKDown );
-
-	
 		if ( VK_ESCAPE == dwVKDown )
 		{
 			// cancel
@@ -181,7 +176,7 @@ void CRemoteStorage::Render()
 
 		char rgchBuffer[256];
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Num Files In Cloud: %d", m_nNumFilesInCloud );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -190,7 +185,7 @@ void CRemoteStorage::Render()
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Quota: %d bytes, %d bytes remaining", m_nBytesQuota, m_nAvailableBytes );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -199,7 +194,7 @@ void CRemoteStorage::Render()
 		pxVertOffset = rect.bottom + CLOUDDISP_VERT_SPACING;
 
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Current Message:" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -207,7 +202,7 @@ void CRemoteStorage::Render()
 		rect.right = rect.left + CLOUDDISP_COLUMN_WIDTH;
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, m_rgchGreeting );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, m_rgchGreeting );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -216,7 +211,7 @@ void CRemoteStorage::Render()
 		pxVertOffset = rect.bottom + CLOUDDISP_VERT_SPACING;
 
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Type in a new message below:" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -224,7 +219,7 @@ void CRemoteStorage::Render()
 		rect.right = rect.left + CLOUDDISP_COLUMN_WIDTH;
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, m_rgchGreetingNext );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, m_rgchGreetingNext );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + CLOUDDISP_TEXT_HEIGHT;
@@ -233,7 +228,7 @@ void CRemoteStorage::Render()
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
 		_snprintf( rgchBuffer, sizeof( rgchBuffer), "Hit <ENTER> to save, <ESC> to cancel" );
-		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		if ( bQuotaExceeded )
 		{
@@ -244,7 +239,7 @@ void CRemoteStorage::Render()
 			pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
 			_snprintf( rgchBuffer, sizeof( rgchBuffer), "!! QUOTA EXCEEDED !!" );
-			m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), DT_CENTER|DT_VCENTER, rgchBuffer );
+			m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 		}
 
 	}

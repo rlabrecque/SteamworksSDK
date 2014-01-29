@@ -16,7 +16,7 @@ class CSpaceWarEntity : public CVectorEntity
 {
 public:
 	// Constructor
-	CSpaceWarEntity( CGameEngine *pGameEngine, uint32 uCollisionRadius, bool bAffectedByGravity );
+	CSpaceWarEntity( IGameEngine *pGameEngine, uint32 uCollisionRadius, bool bAffectedByGravity );
 
 	// Destructor
 	virtual ~CSpaceWarEntity() { return; }

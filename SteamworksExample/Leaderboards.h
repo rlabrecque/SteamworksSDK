@@ -9,7 +9,6 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
-#include "steam/isteamuserstats.h"
 #include "StatsAndAchievements.h"
 #include "SpaceWarClient.h"
 
@@ -22,7 +21,7 @@ class CLeaderboards
 {
 public:
 	// Constructor
-	CLeaderboards( CGameEngine *pGameEngine );
+	CLeaderboards( IGameEngine *pGameEngine );
 
 	// Run a frame
 	void RunFrame();
@@ -40,7 +39,7 @@ private:
 	void FindLeaderboards();
 
 	// Engine
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
 	void OnFindLeaderboard( LeaderboardFindResult_t *pFindLearderboardResult, bool bIOFailure );
@@ -53,6 +52,7 @@ private:
 	// handles to our leaderboards
 	SteamLeaderboard_t m_hQuickestWinLeaderboard;
 	SteamLeaderboard_t m_hFeetTraveledLeaderboard;
+
 	int m_bLoading;										// true if we looking up a leaderboard handle
 
 

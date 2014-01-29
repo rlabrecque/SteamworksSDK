@@ -80,6 +80,7 @@ enum EResult
 	k_EResultDataCorruption = 53,				// Operation canceled because data is ill formed or unrecoverable
 	k_EResultDiskFull = 54,						// Operation canceled - not enough disk space.
 	k_EResultRemoteCallFailed = 55,				// an remote call or IPC call failed
+	k_EResultPasswordUnset = 56,				// Password could not be verified as it's unset server side
 };
 
 // Error codes for use with the voice functions
@@ -236,10 +237,10 @@ enum EChatRoomEnterResponse
 //-----------------------------------------------------------------------------
 enum EStatusDepotVersion
 {
-	k_EStatusDepotVersionInvalid = 0,
-	k_EStatusDepotVersionCompleteDisabled = 1,
-	k_EStatusDepotVersionCompleteEnabledBeta = 2,
-	k_EStatusDepotVersionCompleteEnabledPublic = 3,
+	k_EStatusDepotVersionInvalid = 0,			
+	k_EStatusDepotVersionDisabled = 1,			// version was disabled, no manifest & content available
+	k_EStatusDepotVersionAvailable = 2,			// manifest & content is available, but not current
+	k_EStatusDepotVersionCurrent = 3,			// current depot version. The can be multiple, one for public and one for each beta key
 };
 
 
@@ -605,10 +606,17 @@ private:
 	{
 		struct SteamIDComponent_t
 		{
+#ifdef VALVE_BIG_ENDIAN
+			EUniverse			m_EUniverse : 8;	// universe this account belongs to
+			unsigned int		m_EAccountType : 4;			// type of account - can't show as EAccountType, due to signed / unsigned difference
+			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID (used for multiseat type accounts only)
+			uint32				m_unAccountID : 32;			// unique account identifier
+#else
 			uint32				m_unAccountID : 32;			// unique account identifier
 			unsigned int		m_unAccountInstance : 20;	// dynamic instance ID (used for multiseat type accounts only)
 			unsigned int		m_EAccountType : 4;			// type of account - can't show as EAccountType, due to signed / unsigned difference
 			EUniverse			m_EUniverse : 8;	// universe this account belongs to
+#endif
 		} m_comp;
 
 		uint64 m_unAll64Bits;
@@ -787,6 +795,11 @@ public:
 		return &m_ulGameID;
 	}
 
+	void Set( uint64 ulGameID )
+	{
+		m_ulGameID = ulGameID;
+	}
+
 	bool IsMod() const
 	{
 		return ( m_gameID.m_nType == k_EGameIDTypeGameMod );
@@ -839,16 +852,16 @@ public:
 		{
 		case k_EGameIDTypeApp:
 			return m_gameID.m_nAppID != k_uAppIdInvalid;
-			break;
+
 		case k_EGameIDTypeGameMod:
 			return m_gameID.m_nAppID != k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
-			break;
+
 		case k_EGameIDTypeShortcut:
 			return (m_gameID.m_nModID & 0x80000000) != 0;
-			break;
+
 		case k_EGameIDTypeP2P:
 			return m_gameID.m_nAppID == k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
-			break;
+
 		default:
 #if defined(Assert)
 			Assert(false);
@@ -877,9 +890,15 @@ private:
 
 	struct GameID_t
 	{
+#ifdef VALVE_BIG_ENDIAN
+		unsigned int m_nModID : 32;
+		unsigned int m_nType : 8;
+		unsigned int m_nAppID : 24;
+#else
 		unsigned int m_nAppID : 24;
 		unsigned int m_nType : 8;
 		unsigned int m_nModID : 32;
+#endif
 	};
 
 	union

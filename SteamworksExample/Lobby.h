@@ -10,7 +10,6 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
-#include "steam/isteammatchmaking.h"
 #include "BaseMenu.h"
 #include <list>
 
@@ -25,7 +24,7 @@ class CLobbyMenu;
 class CLobby
 {
 public:
-	CLobby( CGameEngine *pGameEngine );
+	CLobby( IGameEngine *pGameEngine );
 	~CLobby();
 
 	// sets which lobby to display
@@ -38,7 +37,7 @@ private:
 	CSteamID m_steamIDLobby;
 
 	// Pointer to engine instance (so we can draw stuff)
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Menu object
 	CLobbyMenu *m_pMenu;
@@ -66,7 +65,7 @@ struct Lobby_t
 class CLobbyBrowser
 {
 public:
-	CLobbyBrowser( CGameEngine *pGameEngine );
+	CLobbyBrowser( IGameEngine *pGameEngine );
 	~CLobbyBrowser();
 
 	// rebuild the list
@@ -77,7 +76,7 @@ public:
 
 private:
 	// Pointer to engine instance (so we can draw stuff)
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Track whether we are in the middle of a refresh or not
 	bool m_bRequestingLobbies;

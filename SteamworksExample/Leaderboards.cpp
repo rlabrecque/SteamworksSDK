@@ -7,7 +7,6 @@
 #include "stdafx.h"
 #include "leaderboards.h"
 #include <math.h>
-#include "steam/isteamuserstats.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Menu that shows a leaderboard
@@ -30,7 +29,7 @@ public:
 	//-----------------------------------------------------------------------------
 	// Purpose: Constructor
 	//-----------------------------------------------------------------------------
-	CLeaderboardMenu( CGameEngine *pGameEngine ) : CBaseMenu<LeaderboardMenuItem_t>( pGameEngine )
+	CLeaderboardMenu( IGameEngine *pGameEngine ) : CBaseMenu<LeaderboardMenuItem_t>( pGameEngine )
 	{
 		m_hSteamLeaderboard = 0;
 		m_nLeaderboardEntries = 0;
@@ -69,9 +68,9 @@ public:
 		PushSelectedItem();
 		ClearMenuItems();
 
-		LeaderboardMenuItem_t menuItemEmpty = { 0 };
 		LeaderboardMenuItem_t menuItemBack = { true, false };
 		LeaderboardMenuItem_t menuItemNextLeaderboard = { false, true };
+		LeaderboardMenuItem_t menuItemEmpty = { 0 };
 
 		if ( m_hSteamLeaderboard )
 		{
@@ -147,7 +146,7 @@ public:
 		m_bIOFailure = bIOFailure;
 		
 		// leaderboard entries handle will be invalid once we return from this function. Copy all data now.
-		m_nLeaderboardEntries = min( pLeaderboardScoresDownloaded->m_cEntryCount, k_nMaxLeaderboardEntries );
+		m_nLeaderboardEntries = MIN( pLeaderboardScoresDownloaded->m_cEntryCount, k_nMaxLeaderboardEntries );
 		for ( int index = 0; index < m_nLeaderboardEntries; index++ )
 		{
 			SteamUserStats()->GetDownloadedLeaderboardEntry( pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, 
@@ -165,14 +164,14 @@ public:
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CLeaderboards::CLeaderboards( CGameEngine *pGameEngine ) : m_pGameEngine( pGameEngine )
+CLeaderboards::CLeaderboards( IGameEngine *pGameEngine ) : m_pGameEngine( pGameEngine )
 {
 	m_hQuickestWinLeaderboard = 0;
 	m_hFeetTraveledLeaderboard = 0;
 	m_nCurrentLeaderboard = 0;
 
-	m_pLeaderboardMenu = new CLeaderboardMenu( pGameEngine );
 	m_bLoading = false;
+	m_pLeaderboardMenu = new CLeaderboardMenu( pGameEngine );
 
 	FindLeaderboards();
 }

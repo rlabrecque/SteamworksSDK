@@ -11,12 +11,12 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
-#include "steam/isteammatchmaking.h"
 #include "BaseMenu.h"
 #include <list>
 
 class CSpaceWarClient;
 class CServerBrowserMenu;
+
 
 // Class to encapsulate game server data
 class CGameServer
@@ -53,7 +53,7 @@ private:
 class CServerBrowser : public ISteamMatchmakingServerListResponse
 {
 public:
-	CServerBrowser( CGameEngine *pGameEngine );
+	CServerBrowser( IGameEngine *pGameEngine );
 	~CServerBrowser();
 
 	// Initiate a refresh of internet servers
@@ -73,7 +73,7 @@ public:
 private:
 
 	// Pointer to engine instance (so we can draw stuff)
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Track the number of servers we know about
 	int m_nServers;

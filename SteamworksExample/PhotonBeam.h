@@ -16,13 +16,13 @@ class CPhotonBeam : public CSpaceWarEntity
 {
 public:
 	// Constructor
-	CPhotonBeam( CGameEngine *pGameEngine, float xPos, float yPos, DWORD dwBeamColor, float flInitialRotation, float flInitialXVelocity, float flInitialYVelocity );
+	CPhotonBeam( IGameEngine *pGameEngine, float xPos, float yPos, DWORD dwBeamColor, float flInitialRotation, float flInitialXVelocity, float flInitialYVelocity );
 
 	// Check if the photon beam needs to die
 	bool BIsBeamExpired() { return m_pGameEngine->GetGameTickCount() > m_ulTickCountToDieAt; }
 
 	// Update with new data from server
-	void OnReceiveServerUpdate( ServerPhotonBeamUpdateData_t UpdateData );
+	void OnReceiveServerUpdate( ServerPhotonBeamUpdateData_t *pUpdateData );
 
 private:
 	uint64 m_ulTickCountToDieAt;

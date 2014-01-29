@@ -10,7 +10,6 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
-#include "steam/isteamuserstats.h"
 
 enum EAchievements
 {
@@ -38,7 +37,7 @@ class CStatsAndAchievements
 {
 public:
 	// Constructor
-	CStatsAndAchievements( CGameEngine *pGameEngine );
+	CStatsAndAchievements( IGameEngine *pGameEngine );
 
 	// Run a frame
 	void RunFrame();
@@ -77,7 +76,7 @@ private:
 	CGameID m_GameID;
 
 	// Engine
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Steam User interface
 	ISteamUser *m_pSteamUser;

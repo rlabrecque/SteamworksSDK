@@ -10,12 +10,11 @@
 #include "BaseMenu.h"
 #include "ServerBrowser.h"
 
-
 class CServerBrowserMenu : public CBaseMenu<ServerBrowserMenuData_t>
 {
 public:
 	// Constructor
-	CServerBrowserMenu( CGameEngine *pGameEngine ) : CBaseMenu<ServerBrowserMenuData_t>( pGameEngine ) {}
+	CServerBrowserMenu( IGameEngine *pGameEngine ) : CBaseMenu<ServerBrowserMenuData_t>( pGameEngine ) {}
 
 	void Rebuild( std::list<CGameServer> &List, bool bIsRefreshing )
 	{
@@ -36,5 +35,4 @@ public:
 	}
 };
 
-
-#endif SERVERBROWSERMENU_H
+#endif // SERVERBROWSERMENU_H

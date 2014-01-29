@@ -25,7 +25,7 @@ enum EP2PSessionError
 	k_EP2PSessionErrorTimeout = 4,					// target isn't responding, perhaps not calling AcceptP2PSessionWithUser()
 													// corporate firewalls can also block this (NAT traversal is not firewall traversal)
 													// make sure that UDP ports 3478, 4379, and 4380 are open in an outbound direction
-
+	k_EP2PSessionErrorMax = 5
 };
 
 // SendP2PPacket() send types
@@ -129,16 +129,19 @@ public:
 	// the first packet send may be delayed as the NAT-traversal code runs
 	// if we can't get through to the user, an error will be posted via the callback P2PSessionConnectFail_t
 	// see EP2PSend enum above for the descriptions of the different ways of sending packets
-	virtual bool SendP2PPacket( CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType ) = 0;
+	// nVirtualPort is a routing number you can use to help route message to different systems 	- you'll have to call ReadP2PPacket() 
+	// with the same nVirtualPort number in order to retrieve the data on the other end
+	// using different virtual ports to talk to the same user will still use the same underlying p2p connection, saving on resources
+	virtual bool SendP2PPacket( CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType, int nVirtualPort = 0 ) = 0;
 
 	// returns true if any data is available for read, and the amount of data that will need to be read
-	virtual bool IsP2PPacketAvailable( uint32 *pcubMsgSize ) = 0;
+	virtual bool IsP2PPacketAvailable( uint32 *pcubMsgSize, int nVirtualPort = 0 ) = 0;
 
 	// reads in a packet that has been sent from another user via SendP2PPacket()
 	// returns the size of the message and the steamID of the user who sent it in the last two parameters
 	// if the buffer passed in is too small, the message will be truncated
 	// this call is not blocking, and will return false if no data is available
-	virtual bool ReadP2PPacket( void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote ) = 0;
+	virtual bool ReadP2PPacket( void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote, int nVirtualPort = 0 ) = 0;
 
 	// AcceptP2PSessionWithUser() should only be called in response to a P2PSessionRequest_t callback
 	// P2PSessionRequest_t will be posted if another user tries to send you a packet that you haven't talked to yet
@@ -237,7 +240,7 @@ public:
 	// max packet size, in bytes
 	virtual int GetMaxPacketSize( SNetSocket_t hSocket ) = 0;
 };
-#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking003"
+#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking004"
 
 // callbacks
 #pragma pack( push, 8 )

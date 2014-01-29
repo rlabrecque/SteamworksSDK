@@ -10,7 +10,6 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
-#include "steam/isteamremotestorage.h"
 
 class ISteamUser;
 class CSpaceWarClient;
@@ -20,7 +19,7 @@ class CRemoteStorage
 public:
 
 	// Constructor
-	CRemoteStorage( CGameEngine *pGameEngine );
+	CRemoteStorage( IGameEngine *pGameEngine );
 
 	// Display the remote storage screen
 	void Render();
@@ -34,7 +33,7 @@ private:
 	void GetFileStats();
 
 	// Engine
-	CGameEngine *m_pGameEngine;
+	IGameEngine *m_pGameEngine;
 
 	// Display font
 	HGAMEFONT m_hDisplayFont;

@@ -13,7 +13,8 @@
 //-----------------------------------------------------------------------------
 // Purpose: constructor
 //-----------------------------------------------------------------------------
-CNetworkTransport::CNetworkTransport() : 
+CNetworkTransport::CNetworkTransport() 
+: 
 	m_CallbackP2PSessionRequest( this, &CNetworkTransport::OnP2PSessionRequest ),
 	m_CallbackP2PSessionConnectFail( this, &CNetworkTransport::OnP2PSessionConnectFail )
 {
@@ -26,9 +27,8 @@ CNetworkTransport::CNetworkTransport() :
 bool CNetworkTransport::SendTicket( CSteamID steamIDFrom, CSteamID steamIDTo, uint32 cubTicket, uint8 *pubTicket )
 {
 	MsgP2PSendingTicket_t msg;
-	msg.m_uTokenLen = cubTicket;
-	memcpy( msg.m_rgchToken, pubTicket, cubTicket );
-	msg.m_SteamID = steamIDFrom;
+	msg.SetToken( (char *)pubTicket, cubTicket );
+	msg.SetSteamID( steamIDFrom.ConvertToUint64() );
 	return SendNetMessage( steamIDTo, (void*)&msg, sizeof( msg ) );
 }
 
@@ -75,7 +75,8 @@ void CNetworkTransport::OnP2PSessionConnectFail( P2PSessionConnectFail_t *pP2PSe
 //-----------------------------------------------------------------------------
 // Purpose: constructor
 //-----------------------------------------------------------------------------
-CP2PAuthPlayer::CP2PAuthPlayer( CGameEngine *pGameEngine, CNetworkTransport *pNetworkTransport ):m_CallbackBeginAuthResponse( this, &CP2PAuthPlayer::OnBeginAuthResponse )
+CP2PAuthPlayer::CP2PAuthPlayer( IGameEngine *pGameEngine, CNetworkTransport *pNetworkTransport )
+: m_CallbackBeginAuthResponse( this, &CP2PAuthPlayer::OnBeginAuthResponse )
 {
 	m_pGameEngine = pGameEngine;
 	m_pNetworkTransport = pNetworkTransport;
@@ -108,7 +109,7 @@ void CP2PAuthPlayer::OnBeginAuthResponse( ValidateAuthTicketResponse_t *pCallbac
 	{
 		char rgch[128];
 		sprintf( rgch, "P2P:: Received steam response for account=%d\n", m_steamID.GetAccountID() );
-		OutputDebugStringA( rgch );
+		OutputDebugString( rgch );
 		m_ulAnswerTime = GetGameTimeInSeconds();
 		m_bHaveAnswer = true;
 		m_eAuthSessionResponse = pCallback->m_eAuthSessionResponse;
@@ -158,7 +159,7 @@ bool CP2PAuthPlayer::BIsAuthOk()
 			{
 				char rgch[128];
 				sprintf( rgch, "P2P:: Nothing received for account=%d\n", m_steamID.GetAccountID() );
-				OutputDebugStringA( rgch );
+				OutputDebugString( rgch );
 				return false;
 			}
 		}
@@ -167,7 +168,7 @@ bool CP2PAuthPlayer::BIsAuthOk()
 		{
 			char rgch[128];
 			sprintf( rgch, "P2P:: Ticket from account=%d was bad\n", m_steamID.GetAccountID() );
-			OutputDebugStringA( rgch );
+			OutputDebugString( rgch );
 			return false;
 		}
 		// second ticket check: if the steam backend replied, was that good?
@@ -175,7 +176,7 @@ bool CP2PAuthPlayer::BIsAuthOk()
 		{
 			char rgch[128];
 			sprintf( rgch, "P2P:: Steam response for account=%d was bad\n", m_steamID.GetAccountID() );
-			OutputDebugStringA( rgch );
+			OutputDebugString( rgch );
 			return false;
 		}
 		// last: if i sent him a ticket and he has not reciprocated, time out after 30 sec
@@ -185,7 +186,7 @@ bool CP2PAuthPlayer::BIsAuthOk()
 			{
 				char rgch[128];
 				sprintf( rgch, "P2P:: No ticket received for account=%d\n", m_steamID.GetAccountID() );
-				OutputDebugStringA( rgch );
+				OutputDebugString( rgch );
 				return false;
 			}
 		}
@@ -226,22 +227,23 @@ bool CP2PAuthPlayer::HandleMessage( EMessage eMsg, void *pMessage )
 		{
 			MsgP2PSendingTicket_t *pMsg = (MsgP2PSendingTicket_t*)pMessage;
 			// is this message for me?
-			if ( pMsg->m_SteamID != m_steamID )
+			if ( pMsg->GetSteamID() != m_steamID.ConvertToUint64() )
 				return false;
-			m_cubTicketHeGaveMe = pMsg->m_uTokenLen;
-			memcpy( m_rgubTicketHeGaveMe, pMsg->m_rgchToken, m_cubTicketHeGaveMe );
+
+			m_cubTicketHeGaveMe = pMsg->GetTokenLen();
+			memcpy( m_rgubTicketHeGaveMe, pMsg->GetTokenPtr(), m_cubTicketHeGaveMe );
 			m_eBeginAuthSessionResult = SteamUser()->BeginAuthSession( m_rgubTicketHeGaveMe, m_cubTicketHeGaveMe, m_steamID );
 			m_bSubmittedHisTicket = true;
 			char rgch[128];
 			sprintf( rgch, "P2P:: ReceivedTicket from account=%d \n", m_steamID.GetAccountID() );
-			OutputDebugStringA( rgch );
+			OutputDebugString( rgch );
 			if ( !m_bSentTicket )
 				StartAuthPlayer();
 			return true;
 		}
 	default:
 		{
-			OutputDebugStringA( "P2P:: Received unknown message on our listen socket\n" );
+			OutputDebugString( "P2P:: Received unknown message on our listen socket\n" );
 			break;
 		}
 	}
@@ -261,7 +263,7 @@ CSteamID CP2PAuthPlayer::GetSteamID()
 //-----------------------------------------------------------------------------
 // Purpose: constructor
 //-----------------------------------------------------------------------------
-CP2PAuthedGame::CP2PAuthedGame( CGameEngine *pGameEngine )
+CP2PAuthedGame::CP2PAuthedGame( IGameEngine *pGameEngine )
 {
 	m_pNetworkTransport = new CNetworkTransport;
 	m_pGameEngine = pGameEngine;
@@ -316,7 +318,7 @@ void CP2PAuthedGame::InternalInitPlayer( int iSlot, CSteamID steamID, bool bStar
 {
 	char rgch[128];
 	sprintf( rgch, "P2P:: StartAuthPlayer slot=%d account=%d \n", iSlot, steamID.GetAccountID() );
-	OutputDebugStringA( rgch );
+	OutputDebugString( rgch );
 	m_rgpP2PAuthPlayer[iSlot] = new CP2PAuthPlayer( m_pGameEngine, m_pNetworkTransport );
 	m_rgpP2PAuthPlayer[iSlot]->InitPlayer( steamID );
 	if ( bStartAuthProcess )
@@ -329,7 +331,7 @@ void CP2PAuthedGame::InternalInitPlayer( int iSlot, CSteamID steamID, bool bStar
 		{
 			if ( m_rgpP2PAuthPlayer[i]->HandleMessage( k_EMsgP2PSendingTicket, m_rgpQueuedMessage[i] ) )
 			{
-				OutputDebugStringA( "P2P:: Consumed queued message \n" );
+				OutputDebugString( "P2P:: Consumed queued message \n" );
 				free( m_rgpQueuedMessage[i] );
 				m_rgpQueuedMessage[i] = NULL;
 			}
@@ -383,7 +385,7 @@ bool CP2PAuthedGame::HandleMessage( EMessage eMsg, void *pMessage )
 				}
 			}
 			// if we dont have the player in our list yet, lets queue the message and assume he will show up soon
-			OutputDebugStringA( "P2P:: HandleMessage queueing message \n" );
+			OutputDebugString( "P2P:: HandleMessage queueing message \n" );
 			for ( int i = 0; i < MAX_PLAYERS_PER_SERVER; i++ )
 			{
 				if ( m_rgpQueuedMessage[i] == NULL )
@@ -396,7 +398,7 @@ bool CP2PAuthedGame::HandleMessage( EMessage eMsg, void *pMessage )
 		}
 	default:
 		{
-			OutputDebugStringA( "Received unknown message on our listen socket\n" );
+			OutputDebugString( "Received unknown message on our listen socket\n" );
 			break;
 		}
 	}
