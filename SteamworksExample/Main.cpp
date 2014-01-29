@@ -54,15 +54,18 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
-	/*
-	if ( !SteamAPI_IsSteamRunning() )
+	
+	if ( SteamAPI_RestartAppIfNecessary( k_uAppIdInvalid ) )
 	{
-		// if Steam is not running, SteamAPI_RestartApp starts the local Steam client and also launches this game again
-		// Once you get a public Steam AppID assigned for this game, you need to replace k_uAppIdInvalid with it.
-		SteamAPI_RestartApp( k_uAppIdInvalid );
+		// if Steam is not running or the game wasn't started through Steam, SteamAPI_RestartAppIfNecessary starts the 
+		// local Steam client and also launches this game again.
+		
+		// Once you get a public Steam AppID assigned for this game, you need to replace k_uAppIdInvalid with it and
+		// removed steam_appid.txt from the game depot.
+
 		return EXIT_FAILURE;
 	}
-	*/
+	
 
 	// Init Steam CEG
 	if ( !Steamworks_InitCEGLibrary() )

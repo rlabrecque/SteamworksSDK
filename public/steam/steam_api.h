@@ -57,8 +57,7 @@ S_API void SteamAPI_Shutdown();
 S_API bool SteamAPI_IsSteamRunning();
 
 // restart your app through Steam to enable required Steamworks features
-S_API bool SteamAPI_RestartApp( uint32 unOwnAppID );
-
+S_API bool SteamAPI_RestartAppIfNecessary( uint32 unOwnAppID );
 
 // crash dump recording functions
 S_API void SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID );

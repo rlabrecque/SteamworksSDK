@@ -13,6 +13,13 @@ Revision History:
 
 
 ----------------------------------------------------------------
+v1.07	16th December 2009
+----------------------------------------------------------------
+* Replaced SteamAPI_RestartApp() with SteamAPI_RestartAppIfNecessary(). This new function detects if the process was started through Steam, and starts the current game through Steam if necessary.
+* Added ISteamUtils::BOverlayNeedsPresent() so games with event driven rendering can determine when the Steam overlay needs to draw
+
+
+----------------------------------------------------------------
 v1.06	30th September 2009
 ----------------------------------------------------------------
 
