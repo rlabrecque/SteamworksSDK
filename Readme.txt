@@ -12,6 +12,15 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.15	1st June 2011
+----------------------------------------------------------------
+
+Bug fixes
+* Fixed exposing HTTP interface
+* Fixed setting AppID for game processes started outside of Steam or which require administrative privileges
+
+
+----------------------------------------------------------------
 v1.14	16th May 2011
 ----------------------------------------------------------------
 

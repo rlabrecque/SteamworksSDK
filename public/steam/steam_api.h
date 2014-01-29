@@ -19,6 +19,7 @@
 #include "isteamapps.h"
 #include "isteamnetworking.h"
 #include "isteamremotestorage.h"
+#include "isteamhttp.h"
 
 #if defined( _PS3 )
 #include "steamps3params.h"
@@ -119,6 +120,7 @@ S_API ISteamApps *SteamApps();
 S_API ISteamNetworking *SteamNetworking();
 S_API ISteamMatchmakingServers *SteamMatchmakingServers();
 S_API ISteamRemoteStorage *SteamRemoteStorage();
+S_API ISteamHTTP *SteamHTTP();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender * SteamPS3OverlayRender();
 #endif
@@ -395,6 +397,7 @@ public:
 	ISteamMatchmakingServers*	SteamMatchmakingServers()	{ return m_pSteamMatchmakingServers; }
 	ISteamNetworking*	SteamNetworking()					{ return m_pSteamNetworking; }
 	ISteamRemoteStorage* SteamRemoteStorage()				{ return m_pSteamRemoteStorage; }
+	ISteamHTTP*			SteamHTTP()							{ return m_pSteamHTTP; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
 #endif
@@ -409,6 +412,7 @@ private:
 	ISteamMatchmakingServers	*m_pSteamMatchmakingServers;
 	ISteamNetworking	*m_pSteamNetworking;
 	ISteamRemoteStorage *m_pSteamRemoteStorage;
+	ISteamHTTP			*m_pSteamHTTP;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -475,6 +479,10 @@ inline bool CSteamAPIContext::Init()
 
 	m_pSteamRemoteStorage = SteamClient()->GetISteamRemoteStorage( hSteamUser, hSteamPipe, STEAMREMOTESTORAGE_INTERFACE_VERSION );
 	if ( !m_pSteamRemoteStorage )
+		return false;
+
+	m_pSteamHTTP = SteamClient()->GetISteamHTTP( hSteamUser, hSteamPipe, STEAMHTTP_INTERFACE_VERSION );
+	if ( !m_pSteamHTTP )
 		return false;
 
 #ifdef _PS3

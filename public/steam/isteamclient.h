@@ -43,6 +43,7 @@ class ISteamNetworking;
 class ISteamRemoteStorage;
 class ISteamGameServerStats;
 class ISteamPS3OverlayRender;
+class ISteamHTTP;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -137,6 +138,10 @@ public:
 #ifdef _PS3
 	virtual ISteamPS3OverlayRender *GetISteamPS3OverlayRender() = 0;
 #endif
+
+	// Expose HTTP interface
+	virtual ISteamHTTP *GetISteamHTTP( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
 
 };
 
