@@ -130,5 +130,7 @@ const SteamAPICall_t k_uAPICallInvalid = 0x0;
 
 typedef uint32 AccountID_t;
 
+typedef uint32 PartnerId_t;
+const PartnerId_t k_uPartnerIdInvalid = 0;
 
 #endif // STEAMTYPES_H

@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2009, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2009, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to http client 
 //
@@ -13,12 +13,12 @@
 #include "isteamclient.h"
 #include "steamhttpenums.h"
 
-// Handle to a depot build
+// Handle to a HTTP Request handle
 typedef uint32 HTTPRequestHandle;
 #define INVALID_HTTPREQUEST_HANDLE		0
 
 //-----------------------------------------------------------------------------
-// Purpose: interface to building depots
+// Purpose: interface to http client
 //-----------------------------------------------------------------------------
 class ISteamHTTP
 {
@@ -49,14 +49,14 @@ public:
 	virtual bool SetHTTPRequestGetOrPostParameter( HTTPRequestHandle hRequest, const char *pchParamName, const char *pchParamValue ) = 0;
 
 	// Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
-	// asyncronous response via callback.
+	// asynchronous response via callback.
 	//
 	// Note: If the user is in offline mode in Steam, then this will add a only-if-cached cache-control 
 	// header and only do a local cache lookup rather than sending any actual remote request.
 	virtual bool SendHTTPRequest( HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle ) = 0;
 
 	// Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
-	// asyncronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
+	// asynchronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
 	// HTTPRequestDataReceived_t callbacks while streaming.
 	virtual bool SendHTTPRequestAndStreamResponse( HTTPRequestHandle hRequest, SteamAPICall_t *pCallHandle ) = 0;
 
@@ -110,7 +110,13 @@ public:
 #define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION002"
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 struct HTTPRequestCompleted_t
 {

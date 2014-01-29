@@ -12,6 +12,33 @@ website at: http://partner.steamgames.com
 Revision History:
 
 
+
+----------------------------------------------------------------
+v1.23	19th February 2013
+----------------------------------------------------------------
+
+Cloud:
+* Added ISteamScreenshots::TagPublishedFile() which allows tagging workshop content that is visible or active when a screenshot is taken.
+* Added ISteamRemoteStorage::UGCDownloadToLocation() which allows a developer to specify a location on disk to download workshop content.
+
+Setup tool:
+* Added Arabic to the supported languages for the PC Gold Master Setup Tool
+* Fixed regression in localized EULA support in Mac OS X Gold Master Setup Tool
+
+Windows:
+* Fix SteamAPI_RestartAppIfNecessary() on 64 bit Windows
+* When launching a game's development build from outside of Steam, fixed using steam_appid.txt in the Steam Overlay and for authorizing microtransactions (broken in the SDK 1.22)
+
+Mac:
+* Fixed many Steam callbacks not working for 64 bit OS X games due to mismatched structure alignment between the SDK and the Steam client
+* Implemented SteamAPI_RestartAppIfNecessary()
+
+Linux:
+* Removed the need to redistribute libtier0_s.so and libvstdlib_s.so
+* Fixed finding and loading steamclient.so, so LD_LIBRARY_PATH does not need to be set for game to talk with Steam
+* Implemented SteamAPI_RestartAppIfNecessary()
+
+
 ----------------------------------------------------------------
 v1.22	12th December 2012
 ----------------------------------------------------------------

@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: public interface to user remote file storage in Steam
 //
@@ -13,6 +13,7 @@
 #include "isteamclient.h"
 
 const uint32 k_nScreenshotMaxTaggedUsers = 32;
+const uint32 k_nScreenshotMaxTaggedPublishedFiles = 32;
 const int k_cubUFSTagTypeMax = 255;
 const int k_cubUFSTagValueMax = 255;
 
@@ -53,12 +54,21 @@ public:
 	
 	// Tags a user as being visible in the screenshot
 	virtual bool TagUser( ScreenshotHandle hScreenshot, CSteamID steamID ) = 0;
+
+	// Tags a published file as being visible in the screenshot
+	virtual bool TagPublishedFile( ScreenshotHandle hScreenshot, PublishedFileId_t unPublishedFileID ) = 0;
 };
 
-#define STEAMSCREENSHOTS_INTERFACE_VERSION "STEAMSCREENSHOTS_INTERFACE_VERSION001"
+#define STEAMSCREENSHOTS_INTERFACE_VERSION "STEAMSCREENSHOTS_INTERFACE_VERSION002"
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 //-----------------------------------------------------------------------------
 // Purpose: Screenshot successfully written or otherwise added to the library
 // and can now be tagged

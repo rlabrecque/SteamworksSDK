@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: public interface to user remote file storage in Steam
 //
@@ -23,7 +23,13 @@ const uint32 k_unMaxCloudFileSize = 100 * 1024 * 1024;
 //-----------------------------------------------------------------------------
 // Purpose: Structure that contains an array of const char * strings and the number of those strings
 //-----------------------------------------------------------------------------
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 struct SteamParamStringArray_t
 {
 	const char ** m_ppStrings;
@@ -90,9 +96,11 @@ enum EWorkshopFileType
 	k_EWorkshopFileTypeGame = 6,
 	k_EWorkshopFileTypeSoftware = 7,
 	k_EWorkshopFileTypeConcept = 8,
+	k_EWorkshopFileTypeWebGuide = 9,
+	k_EWorkshopFileTypeIntegratedGuide = 10,
 
 	// Update k_EWorkshopFileTypeMax if you add values
-	k_EWorkshopFileTypeMax = 9
+	k_EWorkshopFileTypeMax = 11
 	
 };
 
@@ -177,7 +185,7 @@ class ISteamRemoteStorage
 		// otherwise it will wait to download the file until all downloads with a lower priority
 		// value are completed.  Downloads with equal priority will occur simultaneously.
 		virtual SteamAPICall_t UGCDownload( UGCHandle_t hContent, uint32 unPriority ) = 0;
-
+		
 		// Gets the amount of data downloaded so far for a piece of content. pnBytesExpected can be 0 if function returns false
 		// or if the transfer hasn't started yet, so be careful to check for that before dividing to get a percentage
 		virtual bool	GetUGCDownloadProgress( UGCHandle_t hContent, int32 *pnBytesDownloaded, int32 *pnBytesExpected ) = 0;
@@ -237,13 +245,21 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t	EnumeratePublishedFilesByUserAction( EWorkshopFileAction eAction, uint32 unStartIndex ) = 0;
 		// this method enumerates the public view of workshop files
 		virtual SteamAPICall_t	EnumeratePublishedWorkshopFiles( EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags ) = 0;
+
+		virtual SteamAPICall_t UGCDownloadToLocation( UGCHandle_t hContent, const char *pchLocation, uint32 unPriority ) = 0;
 };
 
 #define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION010"
 
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 //-----------------------------------------------------------------------------
 // Purpose: sent when the local file cache is fully synced with the server for an app
@@ -365,6 +381,7 @@ struct RemoteStorageSubscribePublishedFileResult_t
 {
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 13 };
 	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;
 };
 
 
@@ -381,6 +398,13 @@ struct RemoteStorageEnumerateUserSubscribedFilesResult_t
 	uint32 m_rgRTimeSubscribed[ k_unEnumeratePublishedFilesMaxResults ];
 };
 
+#if defined(VALVE_CALLBACK_PACK_SMALL)
+	VALVE_COMPILE_TIME_ASSERT( sizeof( RemoteStorageEnumerateUserSubscribedFilesResult_t ) == (1 + 1 + 1 + 50 + 100) * 4 );
+#elif defined(VALVE_CALLBACK_PACK_LARGE)
+	VALVE_COMPILE_TIME_ASSERT( sizeof( RemoteStorageEnumerateUserSubscribedFilesResult_t ) == (1 + 1 + 1 + 50 + 100) * 4 + 4 );
+#else
+#warning You must first include isteamclient.h
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: The result of a call to UnsubscribePublishedFile()
@@ -389,6 +413,7 @@ struct RemoteStorageUnsubscribePublishedFileResult_t
 {
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 15 };
 	EResult m_eResult;				// The result of the operation.
+	PublishedFileId_t m_nPublishedFileId;
 };
 
 
@@ -554,6 +579,18 @@ struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t
 	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
 	uint32 m_rgRTimeUpdated[ k_unEnumeratePublishedFilesMaxResults ];
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called periodically while a PublishWorkshopFile is in progress
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishFileProgress_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 29 };
+	double m_dPercentFile;
+	bool m_bPreview;
+};
+
 
 
 #pragma pack( pop )

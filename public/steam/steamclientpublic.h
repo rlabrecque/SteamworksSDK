@@ -102,6 +102,7 @@ enum EResult
 	k_EResultNoMatchingURL = 75,
 	k_EResultBadResponse = 76,					// parse failure, missing field, etc.
 	k_EResultRequirePasswordReEntry = 77,		// The user cannot complete the action until they re-enter their password
+	k_EResultValueOutOfRange = 78				// the value entered is outside the acceptable range
 };
 
 // Error codes for use with the voice functions
@@ -250,6 +251,7 @@ enum EAppType
 	k_EAppType_Media				= 0x010,	// media trailer
 	k_EAppType_DLC					= 0x020,	// down loadable content
 	k_EAppType_Guide				= 0x040,	// game guide, PDF etc
+	k_EAppType_Driver				= 0x080,	// hardware driver updater (ATI, Razor etc)
 	
 	k_EAppType_Shortcut				= 0x40000000,	// just a shortcut, client side only
 	k_EAppType_DepotOnly			= 0x80000000,	// placeholder since depots and apps share the same namespace
@@ -284,7 +286,7 @@ enum EChatEntryType
 	k_EChatEntryTypeChatMsg = 1,		// Normal text message from another user
 	k_EChatEntryTypeTyping = 2,			// Another user is typing (not used in multi-user chat)
 	k_EChatEntryTypeInviteGame = 3,		// Invite from other user into that users current game
-	k_EChatEntryTypeEmote = 4,			// text emote message
+	k_EChatEntryTypeEmote = 4,			// text emote message (deprecated, should be treated as ChatMsg)
 	//k_EChatEntryTypeLobbyGameStart = 5,	// lobby game is starting (dead - listen for LobbyGameCreated_t callback instead)
 	k_EChatEntryTypeLeftConversation = 6, // user has left the conversation ( closed chat window )
 	// Above are previous FriendMsgType entries, now merged into more generic chat entry types
@@ -292,6 +294,7 @@ enum EChatEntryType
 	k_EChatEntryTypeWasKicked = 8,		// user was kicked (data: 64-bit steamid of actor performing the kick)
 	k_EChatEntryTypeWasBanned = 9,		// user was banned (data: 64-bit steamid of actor performing the ban)
 	k_EChatEntryTypeDisconnected = 10,	// user disconnected
+	k_EChatEntryTypeHistoricalChat = 11,	// a chat message from user's chat history or offilne message
 
 };
 
@@ -312,9 +315,9 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseCommunityBan = 9,	// Attempt to join a chat when the user has a community lock on their account
 	k_EChatRoomEnterResponseMemberBlockedYou = 10, // Join failed - some member in the chat has blocked you from joining
 	k_EChatRoomEnterResponseYouBlockedMember = 11, // Join failed - you have blocked some member already in the chat
-	k_EChatRoomEnterResponseNoRankingDataLobby = 12,  // There is no ranking data available for the lobby 
-	k_EChatRoomEnterResponseNoRankingDataUser = 13,  // There is no ranking data available for the user
-	k_EChatRoomEnterResponseRankOutOfRange = 14, // The user is out of the allowable ranking range
+	// k_EChatRoomEnterResponseNoRankingDataLobby = 12,  // No longer used
+	// k_EChatRoomEnterResponseNoRankingDataUser = 13,  //  No longer used
+	// k_EChatRoomEnterResponseRankOutOfRange = 14, //  No longer used
 };
 
 
@@ -363,10 +366,13 @@ enum EMarketingMessageFlags
 	k_EMarketingMessageFlagsHighPriority = 1 << 0,
 	k_EMarketingMessageFlagsPlatformWindows = 1 << 1,
 	k_EMarketingMessageFlagsPlatformMac = 1 << 2,
+	k_EMarketingMessageFlagsPlatformLinux = 1 << 3,
 
 	//aggregate flags
 	k_EMarketingMessageFlagsPlatformRestrictions = 
-		k_EMarketingMessageFlagsPlatformWindows | k_EMarketingMessageFlagsPlatformMac,
+		k_EMarketingMessageFlagsPlatformWindows |
+        k_EMarketingMessageFlagsPlatformMac |
+        k_EMarketingMessageFlagsPlatformLinux,
 };
 
 
@@ -384,6 +390,8 @@ enum ENotificationPosition
 
 
 #pragma pack( push, 1 )		
+
+#define CSTEAMID_DEFINED
 
 // Steam ID structure (64 bits total)
 class CSteamID

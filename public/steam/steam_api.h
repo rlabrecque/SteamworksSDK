@@ -21,6 +21,7 @@
 #include "isteamremotestorage.h"
 #include "isteamscreenshots.h"
 #include "isteamhttp.h"
+#include "isteamunifiedmessages.h"
 
 #if defined( _PS3 )
 #include "steamps3params.h"
@@ -114,6 +115,7 @@ S_API ISteamMatchmakingServers *SteamMatchmakingServers();
 S_API ISteamRemoteStorage *SteamRemoteStorage();
 S_API ISteamScreenshots *SteamScreenshots();
 S_API ISteamHTTP *SteamHTTP();
+S_API ISteamUnifiedMessages *SteamUnifiedMessages();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender * SteamPS3OverlayRender();
 #endif
@@ -393,6 +395,7 @@ public:
 	ISteamRemoteStorage* SteamRemoteStorage()				{ return m_pSteamRemoteStorage; }
 	ISteamScreenshots*	SteamScreenshots()					{ return m_pSteamScreenshots; }
 	ISteamHTTP*			SteamHTTP()							{ return m_pSteamHTTP; }
+	ISteamUnifiedMessages*	SteamUnifiedMessages()			{ return m_pSteamUnifiedMessages; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
 #endif
@@ -409,6 +412,7 @@ private:
 	ISteamRemoteStorage *m_pSteamRemoteStorage;
 	ISteamScreenshots	*m_pSteamScreenshots;
 	ISteamHTTP			*m_pSteamHTTP;
+	ISteamUnifiedMessages*m_pSteamUnifiedMessages;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -432,6 +436,10 @@ inline void CSteamAPIContext::Clear()
 	m_pSteamRemoteStorage = NULL;
 	m_pSteamHTTP = NULL;
 	m_pSteamScreenshots = NULL;
+	m_pSteamUnifiedMessages = NULL;
+#ifdef _PS3
+	m_pSteamPS3OverlayRender = NULL;
+#endif
 }
 
 // This function must be inlined so the module using steam_api.dll gets the version names they want.
@@ -485,6 +493,10 @@ inline bool CSteamAPIContext::Init()
 
 	m_pSteamHTTP = SteamClient()->GetISteamHTTP( hSteamUser, hSteamPipe, STEAMHTTP_INTERFACE_VERSION );
 	if ( !m_pSteamHTTP )
+		return false;
+
+	m_pSteamUnifiedMessages = SteamClient()->GetISteamUnifiedMessages( hSteamUser, hSteamPipe, STEAMUNIFIEDMESSAGES_INTERFACE_VERSION );
+	if ( !m_pSteamUnifiedMessages )
 		return false;
 
 #ifdef _PS3

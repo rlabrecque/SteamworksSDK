@@ -80,7 +80,13 @@ enum EFriendFlags
 
 
 // friend game played information
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 struct FriendGameInfo_t
 {
 	CGameID m_gameID;
@@ -90,7 +96,6 @@ struct FriendGameInfo_t
 	CSteamID m_steamIDLobby;
 };
 #pragma pack( pop )
-
 
 // maximum number of characters in a user's name. Two flavors; one for UTF-8 and one for UTF-16.
 // The UTF-8 version has to be very generous to accomodate characters that get large when encoded
@@ -354,7 +359,13 @@ public:
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends013"
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a friends' status changes
@@ -385,6 +396,7 @@ enum EPersonaChange
 	k_EPersonaChangeNameFirstSet = 0x0400,
 	k_EPersonaChangeFacebookInfo = 0x0800,
 	k_EPersonaChangeNickname =	0x1000,
+	k_EPersonaChangeSteamLevel = 0x2000,
 };
 
 

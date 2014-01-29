@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to app data in Steam
 //
@@ -59,6 +59,10 @@ public:
 
 	virtual bool GetCurrentBetaName( char *pchName, int cchNameBufferSize ) = 0; // returns current beta branch name, 'public' is the default branch
 	virtual bool MarkContentCorrupt( bool bMissingFilesOnly ) = 0; // signal Steam that game files seems corrupt or missing
+	virtual uint32 GetInstalledDepots( DepotId_t *pvecDepots, uint32 cMaxDepots ) = 0; // return installed depots in mount order
+
+	// returns current app install folder for AppID, returns folder name length
+	virtual uint32 GetAppInstallDir( AppId_t appID, char *pchFolder, uint32 cchFolderBufferSize ) = 0;
 
 #ifdef _PS3
 	// Result returned in a RegisterActivationCodeResponse_t callresult
@@ -69,8 +73,13 @@ public:
 #define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION005"
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
-
+#else
+#error isteamclient.h must be included
+#endif 
 //-----------------------------------------------------------------------------
 // Purpose: posted after the user gains ownership of DLC & that DLC is installed
 //-----------------------------------------------------------------------------
@@ -84,13 +93,13 @@ struct DlcInstalled_t
 //-----------------------------------------------------------------------------
 // Purpose: possible results when registering an activation code
 //-----------------------------------------------------------------------------
-enum ERegisterActivactionCodeResult
+enum ERegisterActivationCodeResult
 {
-	k_ERegisterActivactionCodeResultOK = 0,
-	k_ERegisterActivactionCodeResultFail = 1,
-	k_ERegisterActivactionCodeResultAlreadyRegistered = 2,
-	k_ERegisterActivactionCodeResultTimeout = 3,
-	k_ERegisterActivactionCodeAlreadyOwned = 4
+	k_ERegisterActivationCodeResultOK = 0,
+	k_ERegisterActivationCodeResultFail = 1,
+	k_ERegisterActivationCodeResultAlreadyRegistered = 2,
+	k_ERegisterActivationCodeResultTimeout = 3,
+	k_ERegisterActivationCodeAlreadyOwned = 4,
 };
 
 
@@ -100,7 +109,7 @@ enum ERegisterActivactionCodeResult
 struct RegisterActivationCodeResponse_t
 {
 	enum { k_iCallback = k_iSteamAppsCallbacks + 8 };
-	ERegisterActivactionCodeResult m_eResult;
+	ERegisterActivationCodeResult m_eResult;
 	uint32 m_unPackageRegistered;						// package that was registered. Only set on success
 };
 
@@ -114,7 +123,5 @@ struct AppProofOfPurchaseKeyResponse_t
 	uint32	m_nAppID;
 	char	m_rgchKey[ k_cubAppProofOfPurchaseKeyMax ];
 };
-
 #pragma pack( pop )
-
 #endif // ISTEAMAPPS_H

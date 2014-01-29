@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to steam managing network connections between game clients & servers
 //
@@ -58,7 +58,13 @@ enum EP2PSend
 
 // connection state to a specified user, returned by GetP2PSessionState()
 // this is under-the-hood info about what's going on with a SendP2PPacket(), shouldn't be needed except for debuggin
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 struct P2PSessionState_t
 {
 	uint8 m_bConnectionActive;		// true if we've got an active open connection
@@ -256,7 +262,13 @@ public:
 #define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking005"
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 // callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
 // in response, a call to AcceptP2PPacketsFromUser() needs to be made, if you want to talk with them

@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to steam managing game server/client match making
 //
@@ -543,7 +543,13 @@ enum EChatMemberStateChange
 
 //-----------------------------------------------------------------------------
 // Callbacks for ISteamMatchmaking (which go through the regular Steam callback registration system)
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 //-----------------------------------------------------------------------------
 // Purpose: a server was added/removed from the favorites list, you should refresh now
@@ -720,7 +726,6 @@ struct PSNGameBootInviteResult_t
 	CSteamID m_steamIDLobby;		// Should be valid if m_bGameBootInviteExists == true
 };
 #pragma pack( pop )
-
 
 
 #endif // ISTEAMMATCHMAKING

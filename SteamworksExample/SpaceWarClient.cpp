@@ -1075,6 +1075,7 @@ void CSpaceWarClient::OnGameWebCallback( GameWebCallback_t *callback )
 	m_bSentWebOpen = false;
 	char rgchString[256];
 	_snprintf( rgchString, sizeof(rgchString), "User submitted following url: %s\n", callback->m_szURL );
+	rgchString[ sizeof(rgchString) - 1 ] = 0;
 	OutputDebugString( rgchString );
 }
 
@@ -1375,6 +1376,7 @@ void CSpaceWarClient::RunFrame()
 		if ( !m_bSentWebOpen )
 		{
 			m_bSentWebOpen = true;
+#ifndef _PS3
 			char szCurDir[MAX_PATH];
 			_getcwd( szCurDir, sizeof(szCurDir) );
 			char szURL[MAX_PATH];
@@ -1382,6 +1384,7 @@ void CSpaceWarClient::RunFrame()
 			// load the test html page, it just has a steam://gamewebcallback link in it
 			SteamFriends()->ActivateGameOverlayToWebPage( szURL );
 			SetGameState( k_EClientGameMenu );
+#endif
 		}
 
 		break;

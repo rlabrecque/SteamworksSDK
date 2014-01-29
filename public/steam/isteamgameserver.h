@@ -271,7 +271,13 @@ const uint32 k_unServerFlagPrivate		= 0x20;		// server shouldn't list on master 
 
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
 
 
 // client has been approved to connect to this game server
