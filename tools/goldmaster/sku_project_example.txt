@@ -1,0 +1,6 @@
+"sku"
+{
+	"subscriptionID"        "710"
+	"appID"                 "200"
+	"disk_size_mb"          "4700"
+}
