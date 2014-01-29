@@ -82,12 +82,6 @@ void CStatsAndAchievements::RunFrame()
 			return;
 		}
 
-		// If yes, are we connected to the back end? if no, wait
-		if ( !m_pSteamUser->BLoggedOn() )
-		{
-			return;
-		}
-
 		// If yes, request our stats
 		bool bSuccess = m_pSteamUserStats->RequestCurrentStats( );
 		

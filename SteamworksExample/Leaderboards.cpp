@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2009, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2009, Valve LLC, All rights reserved. ============
 //
 // Purpose: Class for tracking leaderboards
 //
@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 #include "leaderboards.h"
+#include "BaseMenu.h"
 #include <math.h>
 
 //-----------------------------------------------------------------------------

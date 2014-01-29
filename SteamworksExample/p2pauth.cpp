@@ -63,7 +63,7 @@ void CNetworkTransport::OnP2PSessionRequest( P2PSessionRequest_t *pP2PSessionReq
 
 
 //-----------------------------------------------------------------------------
-// Purpose: another user has sent us a packet - do we accept?
+// Purpose: we send a packet to another user but it failed
 //-----------------------------------------------------------------------------
 void CNetworkTransport::OnP2PSessionConnectFail( P2PSessionConnectFail_t *pP2PSessionConnectFail )
 {
@@ -380,7 +380,7 @@ bool CP2PAuthedGame::HandleMessage( EMessage eMsg, void *pMessage )
 				{
 					if ( m_rgpP2PAuthPlayer[i]->HandleMessage( eMsg, pMessage ) )
 					{
-						return true;
+						return true; // message handled
 					}
 				}
 			}
@@ -391,18 +391,18 @@ bool CP2PAuthedGame::HandleMessage( EMessage eMsg, void *pMessage )
 				if ( m_rgpQueuedMessage[i] == NULL )
 				{
 					 m_rgpQueuedMessage[i] = pMsg;
-					 return false;
+					 return true; // message handled
 				}
 			}
 			break;
 		}
 	default:
-		{
-			OutputDebugString( "Received unknown message on our listen socket\n" );
-			break;
-		}
+		// this is not a P2P auth message
+		break;
 	}
-	return true;
+
+	// message didn't got handled here
+	return false;
 }
 
 

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Main class for the game engine
 //
@@ -21,6 +21,9 @@ typedef int HGAMEVERTBUF;
 typedef int HGAMETEXTURE;
 
 
+// Typedef for voice channels
+typedef int HGAMEVOICECHANNEL;
+
 // BDrawText position flags
 #define TEXTPOS_TOP                      0x00000000
 #define TEXTPOS_LEFT                     0x00000000
@@ -29,6 +32,11 @@ typedef int HGAMETEXTURE;
 #define TEXTPOS_VCENTER                  0x00000004
 #define TEXTPOS_BOTTOM                   0x00000008
 
+
+#define VOICE_OUTPUT_SAMPLE_RATE			11000	// real sample rate is 11025 but for XAudio2 it must be a multiple of XAUDIO2_QUANTUM_DENOMINATOR
+#define VOICE_OUTPUT_SAMPLE_RATE_IDEAL		11025
+#define BYTES_PER_SAMPLE					2
+
 //
 // Interface that needs to be implemented for game engines on all platforms
 //
@@ -36,7 +44,7 @@ class IGameEngine
 {
 public:
 
-	// Just here to stop warnings on non-virtual destructor in PS3 build
+	// Just here to stop warnings on non-virtual destructor in gcc builds
 	virtual ~IGameEngine() {};
 
 	// Check if the game engine is initialized ok and ready for use
@@ -121,6 +129,10 @@ public:
 	// Check if the game engine hwnd currently has focus (and a working d3d device)
 	virtual bool BGameEngineHasFocus() = 0;
 
+	// Voice chat functions
+	virtual HGAMEVOICECHANNEL HCreateVoiceChannel() = 0;
+	virtual void DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel ) = 0;
+	virtual bool AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoiceData, uint32 uLength ) = 0;
 };
 
 #endif // GAMEENGINE_H

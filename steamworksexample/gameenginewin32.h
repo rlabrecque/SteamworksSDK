@@ -67,6 +67,8 @@ struct TexturedQuadVertex_t
 	float u, v; // texture coordinates
 };
 
+class CVoiceContext;
+
 // WndProc declaration
 LRESULT CALLBACK GameWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
@@ -165,6 +167,10 @@ public:
 	// Check if the game engine hwnd currently has focus (and a working d3d device)
 	bool BGameEngineHasFocus() { return ::GetForegroundWindow() == m_hWnd && !m_bDeviceLost; }
 
+	// voice chat sound engine
+	virtual HGAMEVOICECHANNEL HCreateVoiceChannel();
+	virtual void DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel );
+	virtual bool AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoiceData, uint32 uLength );
 
 	// Track the state of keyboard input (these are public, but not part of the public interface)
 	void RecordKeyDown( DWORD dwVK );
@@ -336,6 +342,12 @@ private:
 	// Presentation parameters, saved in case of lost device needing reset
 	D3DPRESENT_PARAMETERS m_d3dpp;
 
+	IXAudio2* m_pXAudio2;
+	IXAudio2MasteringVoice* m_pMasteringVoice;
+
+	// Map of font handles to font objects
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
+	uint32 m_unVoiceChannelCount;
 };
 
 #endif // GAMEENGINEWIN32_H

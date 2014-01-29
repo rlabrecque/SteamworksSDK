@@ -7,7 +7,8 @@
 
 #include "stdafx.h"
 #include "RemoteStorage.h"
-#include "BaseMenu.h"
+#include "RemoteStorageSync.h"
+#include <assert.h>
 
 #define CLOUDDISP_FONT_HEIGHT 20
 #define CLOUDDISP_COLUMN_WIDTH 600
@@ -30,11 +31,135 @@
 //
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+// Purpose: CRemoteStorage implementation
+//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine )
-: m_pGameEngine( pGameEngine )
+CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine ) : m_pGameEngine( pGameEngine ), m_pRemoteStorageSync(NULL)
+{
+	m_pRemoteStorageScreen = new CRemoteStorageScreen( pGameEngine );
+
+#ifdef _PS3
+	m_pRemoteStorageSync = new CRemoteStorageSync( pGameEngine );
+#endif
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CRemoteStorage::~CRemoteStorage()
+{
+	if ( m_pRemoteStorageSync )
+	{
+		assert( m_pRemoteStorageSync->BFinished() );
+		delete m_pRemoteStorageSync;
+	}
+
+	delete m_pRemoteStorageScreen;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when the user selects view remote storage files
+//-----------------------------------------------------------------------------
+void CRemoteStorage::Show()
+{
+	m_eState = k_ERemoteStorageStateIdle;
+	CheckState();
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Check's if we have finished our current step and should advance to the next
+//
+// NOTE:	These steps are not necessary for platforms where the Steam client is running. On those platforms,
+//			the Steam client will take care of synchronization and m_pRemoteStorageSync will be NULL
+//-----------------------------------------------------------------------------
+void CRemoteStorage::CheckState()
+{
+	switch( m_eState )
+	{
+	default:
+	case k_ERemoteStorageStateIdle:
+		if ( m_pRemoteStorageSync )
+			m_pRemoteStorageSync->SynchronizeToClient();
+
+		// advance to next state
+		m_eState = k_ERemoteStorageStateSyncToClient;
+
+		// fall through
+
+	case k_ERemoteStorageStateSyncToClient:
+		if ( m_pRemoteStorageSync && !m_pRemoteStorageSync->BFinished() )
+			break;
+
+		// advance to next state
+		m_eState = k_ERemoteStorageStateDisplayMessage;
+		m_pRemoteStorageScreen->Show();
+		break;
+
+	case k_ERemoteStorageStateDisplayMessage:
+		if ( !m_pRemoteStorageScreen->BFinished() )
+			break;
+
+		// advance to next state
+		m_eState = k_ERemoteStorageStateSyncToServer;
+		if ( m_pRemoteStorageSync )
+			m_pRemoteStorageSync->SynchronizeToServer();
+
+		// fall through
+
+	case k_ERemoteStorageStateSyncToServer:
+		if ( m_pRemoteStorageSync && !m_pRemoteStorageSync->BFinished() )
+			break;
+
+		// complete. Return to the main menu
+		m_eState = k_ERemoteStorageStateIdle;
+		SpaceWarClient()->SetGameState( k_EClientGameMenu );
+
+		break;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called once per frame
+//-----------------------------------------------------------------------------
+void CRemoteStorage::Render()
+{
+	if ( m_pRemoteStorageSync && (m_eState == k_ERemoteStorageStateSyncToClient || m_eState == k_ERemoteStorageStateSyncToServer) )
+		m_pRemoteStorageSync->Render();
+
+	if ( m_eState == k_ERemoteStorageStateDisplayMessage )
+		m_pRemoteStorageScreen->Render();
+
+	CheckState();
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: A sync menu item has been selected
+//-----------------------------------------------------------------------------
+void CRemoteStorage::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
+{
+	if ( m_pRemoteStorageSync )
+		m_pRemoteStorageSync->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: CRemoteStorageScreen implementation
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CRemoteStorageScreen::CRemoteStorageScreen( IGameEngine *pGameEngine ) : m_pGameEngine( pGameEngine )
 {
 	m_rgchGreeting[0] = 0;
 	strncpy( m_rgchGreeting, "<none>", sizeof( m_rgchGreeting ) );
@@ -46,24 +171,30 @@ CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine )
 	if ( !m_hDisplayFont )
 		OutputDebugString( "RemoteStorage font was not created properly, text won't draw\n" );
 
-	GetFileStats();
+	GetFileStats();	
+}
 
-	if ( m_pSteamRemoteStorage->FileExists( MESSAGE_FILE_NAME ) )
+
+//-----------------------------------------------------------------------------
+// Purpose: Load the user's saved message
+//-----------------------------------------------------------------------------
+void CRemoteStorageScreen::LoadMessage()
+{
+	if ( !m_pSteamRemoteStorage->FileExists( MESSAGE_FILE_NAME ) )
+		return;
+
+	int32 cubFile = m_pSteamRemoteStorage->GetFileSize( MESSAGE_FILE_NAME );
+	if ( cubFile >= sizeof( m_rgchGreeting ) )
 	{
-		int32 cubFile = m_pSteamRemoteStorage->GetFileSize( MESSAGE_FILE_NAME );
-
-		if ( cubFile >= sizeof( m_rgchGreeting ) )
-		{
-			// ?? too big, nuke it
-			char c = 0;
-			OutputDebugString( "RemoteStorage: File was larger than expected. . .\n" );
-			m_pSteamRemoteStorage->FileWrite( MESSAGE_FILE_NAME, &c, 1 );
-		}
-		else
-		{
-			int32 cubRead = m_pSteamRemoteStorage->FileRead( MESSAGE_FILE_NAME, m_rgchGreeting, sizeof( m_rgchGreeting ) - 1 );
-			m_rgchGreeting[cubRead] = 0; // null-terminate
-		}
+		// ?? too big, nuke it
+		char c = 0;
+		OutputDebugString( "RemoteStorage: File was larger than expected. . .\n" );
+		m_pSteamRemoteStorage->FileWrite( MESSAGE_FILE_NAME, &c, 1 );
+	}
+	else
+	{
+		int32 cubRead = m_pSteamRemoteStorage->FileRead( MESSAGE_FILE_NAME, m_rgchGreeting, sizeof( m_rgchGreeting ) - 1 );
+		m_rgchGreeting[cubRead] = 0; // null-terminate
 	}
 }
 
@@ -71,7 +202,7 @@ CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine )
 //-----------------------------------------------------------------------------
 // Purpose: Update stats on our files in the Cloud
 //-----------------------------------------------------------------------------
-void CRemoteStorage::GetFileStats()
+void CRemoteStorageScreen::GetFileStats()
 {
 	m_nBytesQuota = 0;
 	m_nAvailableBytes = 0;
@@ -81,9 +212,19 @@ void CRemoteStorage::GetFileStats()
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Called when the user selects view remote storage files
+//-----------------------------------------------------------------------------
+void CRemoteStorageScreen::Show()
+{
+	GetFileStats();
+	LoadMessage();
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Render the Remote Storage page
 //-----------------------------------------------------------------------------
-void CRemoteStorage::Render()
+void CRemoteStorageScreen::Render()
 {
 	uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
 
@@ -241,8 +382,5 @@ void CRemoteStorage::Render()
 			_snprintf( rgchBuffer, sizeof( rgchBuffer), "!! QUOTA EXCEEDED !!" );
 			m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 		}
-
 	}
 }
-
-

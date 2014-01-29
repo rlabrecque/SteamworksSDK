@@ -12,6 +12,37 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.12	10th November 2010
+----------------------------------------------------------------
+
+Cloud
+* added a set of function to handle publishing User Generated Content (UGC) files to the backend, and to download others users UGC files. This enables games to have users easily publish & share content with each other.
+
+Leaderboards
+* added ISteamUserStats::DownloadLeaderboardEntriesForUsers(), which downloads scores for an arbitrary set of users
+* added ISteamUserStats::AttachLeaderboardUGC(), to attach a clouded file to a leaderboard entry
+
+Friends
+* added ISteamFriends::RequestUserInformation(), to asynchronously request a users persona name & avatar by steamID
+* added ISteamFriends::RequestClanOfficerList(), to asynchronously download the set of officers for a clan. GetClanOwner(), GetClanOfficerCount(), and GetClanOfficerByIndex() can then be used to access the data.
+
+Matchmaking
+* added k_ELobbyTypePrivate option to creating lobbies - this means that the lobby won't show up to friends or be returned in searches
+* added LobbyDataUpdate_t::m_bSuccess, to easily check if a RequestLobbyData() call failed to find the specified lobby
+
+Authentication
+* added ISteamApps::GetEarliestPurchaseUnixTime(), for games that want to reward users who have played for a long time
+* added ISteamApps::BIsSubscribedFromFreeWeekend(), so games can show different offers or information for users who currently only have rights to play the game due to a free weekend promotion
+* added ISteamGameServer::GetAuthSessionTicket(), BeginAuthSession(), EndAuthSession(), and CancelAuthTicket(), matching what exists in ISteamUser. This allows game servers and clients to authenticate each other in a unified manner.
+
+Steamworks Example
+* added OpenGL and OSX support
+
+PS3
+* added several functions regarding PS3 support. This is still a work in progress, and no PS3 binaries are included.
+
+
+----------------------------------------------------------------
 v1.11	23rd August 2010
 ----------------------------------------------------------------
 

@@ -1,5 +1,10 @@
 "InstallScript"
 {
+
+	// Install scripts on the Gold Master are only necessary for Games for Windows titles.
+	// Otherwise this file doesn't need to be shipped on the GM and the Steam client
+	// will run the install script shipped with your depots at a later point
+	
 	"Run Process"
 	{
 		"VCRedist"

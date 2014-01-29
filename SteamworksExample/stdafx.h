@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -55,6 +55,9 @@
 #include "d3d9.h"
 #include "d3dx9.h"
 
+// XAudio2 header files
+#include <xaudio2.h>
+
 typedef __int16 int16;
 typedef unsigned __int16 uint16;
 typedef __int32 int32;
@@ -68,39 +71,24 @@ typedef unsigned __int64 uint64;
 #include "steam/isteammatchmaking.h"
 #include "steam/steam_gameserver.h"
 
-#ifdef STEAM_CEG
-	// Steam DRM header file
-	#include "cegclient.h"
-#else
-	#define Steamworks_InitCEGLibrary() (true)
-	#define Steamworks_TermCEGLibrary() (true)
-	#define Steamworks_TestSecret() (true)
-	#define Steamworks_SelfCheck() (true)
-#endif
-
-#elif _PS3
+#elif defined(POSIX)
 
 #include <stdio.h>
 #include <stddef.h>
-#include <cell/error.h>
-#include <sys/process.h>
-#include <sys/paths.h>
-#include <sys/prx.h>
-#include <sys/spu_initialize.h>
-#include <sys/memory.h>
-#include <PSGL/psgl.h>
-#include <PSGL/psglu.h>
-#include <sys/types.h>
+#include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <cell/fios/fios_common.h>
-#include <cell/fios/fios_memory.h>
-#include <cell/fios/fios_configuration.h>
-#include <cell/fios/fios_time.h>
-#include <cell/dbgfont.h>
-#include <cell/pad/libpad.h>
-#include <sysutil/sysutil_syscache.h>
-#include <string.h>
+
+	#if defined(_PS3)
+
+	#include "stdafx_ps3.h"
+
+	#elif defined(OSX)
+	
+	#include <OpenGL/OpenGL.h>
+
+	#endif
 
 // Need to define some types on POSIX
 typedef short int16;
@@ -111,6 +99,7 @@ typedef long long int64;
 typedef unsigned long long uint64;
 typedef uint32 DWORD;
 typedef DWORD HWND;
+typedef DWORD HINSTANCE;
 typedef short SHORT;
 typedef long LONG;
 typedef unsigned char byte;
@@ -128,7 +117,7 @@ typedef unsigned char uint8;
 #define FW_EXTRABOLD        800
 #define FW_HEAVY            900
 
-/* Some VK_ defines from windows, we'll map these to PS3 controls */
+/* Some VK_ defines from windows, we'll map these for posix */
 #define VK_BACK           0x08
 #define VK_TAB            0x09
 #define VK_RETURN         0x0D
@@ -136,7 +125,9 @@ typedef unsigned char uint8;
 #define VK_CONTROL        0x11
 #define VK_ESCAPE         0x1B
 #define VK_SPACE          0x20
+#define VK_LEFT           0x25
 #define VK_UP             0x26
+#define VK_RIGHT          0x27
 #define VK_DOWN           0x28
 #define VK_SELECT         0x29
 
@@ -177,16 +168,24 @@ typedef struct tagRECT
 #include "steam/isteammatchmaking.h"
 #include "steam/steam_gameserver.h"
 
-extern CellDbgFontConsoleId g_DbgFontConsoleID;
-static void OutputDebugString( const char *pchMsg )
-{
-	printf( "%s", pchMsg );
-	cellDbgFontConsolePrintf( g_DbgFontConsoleID, "%s", pchMsg );
-}
+extern void OutputDebugString( const char *pchMsg );
 
-// No _snprintf on PS3, use sprintf
+// No _snprintf on POSIX, use snprintf
+#ifndef _snprintf
 #define _snprintf snprintf
+#endif
 
 #define ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
 
-#endif	// _PS3
+#endif	// POSIX
+
+#ifdef STEAM_CEG
+// Steam DRM header file
+#include "cegclient.h"
+#else
+#define Steamworks_InitCEGLibrary() (true)
+#define Steamworks_TermCEGLibrary() (true)
+#define Steamworks_TestSecret() (true)
+#define Steamworks_SelfCheck() (true)
+#endif
+

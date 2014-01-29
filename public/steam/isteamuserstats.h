@@ -11,6 +11,7 @@
 #endif
 
 #include "isteamclient.h"
+#include "isteamremotestorage.h"
 
 // size limit on stat or achievement name (UTF-8 encoded)
 enum { k_cchStatNameMax = 128 };
@@ -33,6 +34,7 @@ enum ELeaderboardDataRequest
 	k_ELeaderboardDataRequestGlobal = 0,
 	k_ELeaderboardDataRequestGlobalAroundUser = 1,
 	k_ELeaderboardDataRequestFriends = 2,
+	k_ELeaderboardDataRequestUsers = 3
 };
 
 // the sort order of a leaderboard
@@ -68,6 +70,7 @@ struct LeaderboardEntry_t
 	int32 m_nGlobalRank;	// [1..N], where N is the number of users with an entry in the leaderboard
 	int32 m_nScore;			// score as set in the leaderboard
 	int32 m_cDetails;		// number of int32 details available for this entry
+	UGCHandle_t m_hUGC;		// handle for UGC attached to the entry
 };
 
 #pragma pack( pop )
@@ -173,6 +176,10 @@ public:
 	//   e.g. DownloadLeaderboardEntries( hLeaderboard, k_ELeaderboardDataRequestGlobalAroundUser, -3, 3 ) will return 7 rows, 3 before the user, 3 after
 	// k_ELeaderboardDataRequestFriends requests all the rows for friends of the current user 
 	virtual SteamAPICall_t DownloadLeaderboardEntries( SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd ) = 0;
+	// as above, but downloads leaderboard entries for an arbitrary set of users - ELeaderboardDataRequest is k_ELeaderboardDataRequestUsers
+	// if a user doesn't have a leaderboard entry, they won't be included in the result
+	// a max of 100 users can be downloaded at a time, with only one outstanding call at a time
+	virtual SteamAPICall_t DownloadLeaderboardEntriesForUsers( SteamLeaderboard_t hSteamLeaderboard, CSteamID *prgUsers, int cUsers ) = 0;
 
 	// Returns data about a single leaderboard entry
 	// use a for loop from 0 to LeaderboardScoresDownloaded_t::m_cEntryCount to get all the downloaded entries
@@ -196,13 +203,17 @@ public:
 	// pScoreDetails points to an array of int32's, cScoreDetailsCount is the number of int32's in the list
 	virtual SteamAPICall_t UploadLeaderboardScore( SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32 *pScoreDetails, int cScoreDetailsCount ) = 0;
 
+	// Attaches a piece of user generated content the user's entry on a leaderboard.
+	// hContent is a handle to a piece of user generated content that was shared using ISteamUserRemoteStorage::FileShare().
+	// This call is asynchronous, with the result returned in LeaderboardUGCSet_t.
+	virtual SteamAPICall_t AttachLeaderboardUGC( SteamLeaderboard_t hSteamLeaderboard, UGCHandle_t hUGC ) = 0;
+
 	// Retrieves the number of players currently playing your game (online + offline)
 	// This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
 	virtual SteamAPICall_t GetNumberOfCurrentPlayers() = 0;
-
 };
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION007"
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION009"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -296,6 +307,7 @@ struct NumberOfCurrentPlayers_t
 };
 
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Callback indicating that a user's stats have been unloaded.
 //  Call RequestUserStats again to access stats for this user
@@ -324,6 +336,16 @@ struct UserAchievementIconFetched_t
 //
 // IMPORTANT! k_iSteamUserStatsCallbacks + 10 is used, see iclientuserstats.h
 //
+
+//-----------------------------------------------------------------------------
+// Purpose: call result indicating UGC has been uploaded, returned as a result of SetLeaderboardUGC()
+//-----------------------------------------------------------------------------
+struct LeaderboardUGCSet_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 11 };
+	EResult m_eResult;				// The result of the operation
+	SteamLeaderboard_t m_hSteamLeaderboard;	// the leaderboard handle that was
+};
 
 #pragma pack( pop )
 

@@ -81,6 +81,10 @@ enum EResult
 	k_EResultDiskFull = 54,						// Operation canceled - not enough disk space.
 	k_EResultRemoteCallFailed = 55,				// an remote call or IPC call failed
 	k_EResultPasswordUnset = 56,				// Password could not be verified as it's unset server side
+	k_EResultPSNAccountUnlinked = 57,			// Attempt to logon from a PS3 failed because the PSN online id is not linked to a Steam account
+	k_EResultPSNTicketInvalid = 58,				// PSN ticket was invalid
+	k_EResultPSNAccountAlreadyLinked = 59,		// PSN account is already linked to some other account, must explicitly request to replace/delete the link first
+	k_EResultRemoteFileConflict = 60,			// The sync cannot resume due to a conflict between the local and remote files
 };
 
 // Error codes for use with the voice functions
@@ -92,6 +96,8 @@ enum EVoiceResult
 	k_EVoiceResultNoData = 3,
 	k_EVoiceResultBufferTooSmall = 4,
 	k_EVoiceResultDataCorrupted = 5,
+	k_EVoiceResultRestricted = 6,
+
 };
 
 // Result codes to GSHandleClientDeny/Kick
@@ -198,6 +204,9 @@ enum ESteamUserStatType
 	k_ESteamUserStatTypeAVGRATE = 3,
 	k_ESteamUserStatTypeACHIEVEMENTS = 4,
 	k_ESteamUserStatTypeGROUPACHIEVEMENTS = 5,
+
+	// max, for sanity checks
+	k_ESteamUserStatTypeMAX
 };
 
 
@@ -229,6 +238,8 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseError = 5,			// Unexpected Error
 	k_EChatRoomEnterResponseBanned = 6,			// You are banned from this chat room and may not join
 	k_EChatRoomEnterResponseLimited = 7,		// Joining this chat is not allowed because you are a limited user (no value on account)
+	k_EChatRoomEnterResponseClanDisabled = 8,	// Attempt to join a clan chat when the clan is locked or disabled
+	k_EChatRoomEnterResponseCommunityBan = 9,	// Attempt to join a chat when the user has a community lock on their account
 };
 
 
@@ -645,21 +656,20 @@ inline bool CSteamID::IsValid() const
 	return true;
 }
 
-
 // generic invalid CSteamID
-const CSteamID k_steamIDNil;
+#define k_steamIDNil CSteamID()
 
 // This steamID comes from a user game connection to an out of date GS that hasnt implemented the protocol
 // to provide its steamID
-const CSteamID k_steamIDOutofDateGS( 0, 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
+#define k_steamIDOutofDateGS CSteamID( 0, 0, k_EUniverseInvalid, k_EAccountTypeInvalid )
 // This steamID comes from a user game connection to an sv_lan GS
-const CSteamID k_steamIDLanModeGS( 0, 0, k_EUniversePublic, k_EAccountTypeInvalid );
+#define k_steamIDLanModeGS CSteamID( 0, 0, k_EUniversePublic, k_EAccountTypeInvalid )
 // This steamID can come from a user game connection to a GS that has just booted but hasnt yet even initialized
 // its steam3 component and started logging on.
-const CSteamID k_steamIDNotInitYetGS( 1, 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
+#define k_steamIDNotInitYetGS CSteamID( 1, 0, k_EUniverseInvalid, k_EAccountTypeInvalid )
 // This steamID can come from a user game connection to a GS that isn't using the steam authentication system but still
 // wants to support the "Join Game" option in the friends list
-const CSteamID k_steamIDNonSteamGS( 2, 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
+#define k_steamIDNonSteamGS CSteamID( 2, 0, k_EUniverseInvalid, k_EAccountTypeInvalid )
 
 
 #ifdef STEAM

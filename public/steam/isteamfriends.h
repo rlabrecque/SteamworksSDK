@@ -86,6 +86,18 @@ enum
 	k_cwchPersonaNameMax = 32,
 };
 
+//-----------------------------------------------------------------------------
+// Purpose: user restriction flags
+//-----------------------------------------------------------------------------
+enum EUserRestriction
+{
+	k_nUserRestrictionNone		= 0,	// no known chat/content restriction
+	k_nUserRestrictionUnknown	= 1,	// we don't know yet (user offline)
+	k_nUserRestrictionChat		= 2,	// user is not allowed to send/recv text/voice chat
+};
+
+
+
 // size limit on chat room or member metadata
 const uint32 k_cubChatMetadataMax = 8192;
 
@@ -196,9 +208,37 @@ public:
 	// gets the large (184x184) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
 	// returns -1 if this image has yet to be loaded, in this case wait for a AvatarImageLoaded_t callback and then call this again
 	virtual int GetLargeFriendAvatar( CSteamID steamIDFriend ) = 0;
+
+	// requests information about a user - persona name & avatar
+	// if bRequireNameOnly is set, then the avatar of a user isn't downloaded 
+	// - it's a lot slower to download avatars and churns the local cache, so if you don't need avatars, don't request them
+	// if returns true, it means that data is being requested, and a PersonaStateChanged_t callback will be posted when it's retrieved
+	// if returns false, it means that we already have all the details about that user, and functions can be called immediately
+	virtual bool RequestUserInformation( CSteamID steamIDUser, bool bRequireNameOnly ) = 0;
+
+	// requests information about a clan officer list
+	// when complete, data is returned in ClanOfficerListResponse_t call result
+	// this makes available the calls below
+	// you can only ask about clans that a user is a member of
+	// note that this won't download avatars automatically; if you get an officer,
+	// and no avatar image is available, call RequestUserInformation( steamID, false ) to download the avatar
+	virtual SteamAPICall_t RequestClanOfficerList( CSteamID steamIDClan ) = 0;
+
+	// iteration of clan officers - can only be done when a RequestClanOfficerList() call has completed
+	
+	// returns the steamID of the clan owner
+	virtual CSteamID GetClanOwner( CSteamID steamIDClan ) = 0;
+	// returns the number of officers in a clan (including the owner)
+	virtual int GetClanOfficerCount( CSteamID steamIDClan ) = 0;
+	// returns the steamID of a clan officer, by index, of range [0,GetClanOfficerCount)
+	virtual CSteamID GetClanOfficerByIndex( CSteamID steamIDClan, int iOfficer ) = 0;
+	// if current user is chat restricted, he can't send or receive any text/voice chat messages.
+	// the user can't see custom avatars. But the user can be online and send/recv game invites.
+	// a chat restricted user can't add friends or join any groups.
+	virtual uint32 GetUserRestrictions() = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends007"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends008"
 
 // callbacks
 #pragma pack( push, 8 )
@@ -280,6 +320,19 @@ struct AvatarImageLoaded_t
 	int m_iWide; // width of the loaded image
 	int m_iTall; // height of the loaded image
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: marks the return of a request officer list call
+//-----------------------------------------------------------------------------
+struct ClanOfficerListResponse_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 35 };
+	CSteamID m_steamIDClan;
+	int m_cOfficers;
+	uint8 m_bSuccess;
+};
+
 
 #pragma pack( pop )
 

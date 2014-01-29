@@ -89,9 +89,7 @@ void CServerBrowser::RefreshInternetServers()
 
 	m_pMenu->Rebuild( m_ListGameServers, m_bRequestingServers );
 
-#ifndef _PS3
 	Steamworks_TestSecret();
-#endif
 
 	// Allocate some filters, there are some common pre-defined values that can be used:
 	//

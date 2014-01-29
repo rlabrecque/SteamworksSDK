@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Class for rendering the starfield
 //
@@ -29,6 +29,12 @@ public:
 	void Render();
 
 private:
+	
+	void Init();
+	
+private:
+	int m_nWidth;
+	int m_nHeight;
 
 	// Game engine instance we are running under
 	IGameEngine *m_pGameEngine;

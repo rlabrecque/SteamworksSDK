@@ -502,9 +502,7 @@ void CShip::SetExploding( bool bExploding )
 	if ( m_bExploding == bExploding )
 		return;
 
-#ifndef _PS3
 	Steamworks_TestSecret();
-#endif
 
 	// Track that we are exploding, and disable collision detection
 	m_bExploding = bExploding;

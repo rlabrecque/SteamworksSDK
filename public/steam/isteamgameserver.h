@@ -113,6 +113,24 @@ public:
 	// After receiving a user's authentication data, and passing it to SendUserConnectAndAuthenticate, use this function
 	// to determine if the user owns downloadable content specified by the provided AppID.
 	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
+
+	// New auth system APIs - do not mix with the old auth system APIs.
+	// ----------------------------------------------------------------
+
+	// Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
+	// pcbTicket retrieves the length of the actual ticket.
+	virtual HAuthTicket GetAuthSessionTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
+
+	// Authenticate ticket ( from GetAuthSessionTicket ) from entity steamID to be sure it is valid and isnt reused
+	// Registers for callbacks if the entity goes offline or cancels the ticket ( see ValidateAuthTicketResponse_t callback and EAuthSessionResponse )
+	virtual EBeginAuthSessionResult BeginAuthSession( const void *pAuthTicket, int cbAuthTicket, CSteamID steamID ) = 0;
+
+	// Stop tracking started by BeginAuthSession - called when no longer playing game with this entity
+	virtual void EndAuthSession( CSteamID steamID ) = 0;
+
+	// Cancel auth ticket from GetAuthSessionTicket, called when no longer playing game with the entity you gave the ticket to
+	virtual void CancelAuthTicket( HAuthTicket hAuthTicket ) = 0;
+
 };
 
 #define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer010"

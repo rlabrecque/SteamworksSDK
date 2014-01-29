@@ -132,11 +132,6 @@ public:
 	// (i.e a SteamServersConnected_t has been issued) and may not catch all forms of NAT.
 	virtual bool BIsBehindNAT() = 0;
 
-#ifdef _PS3
-	// Logs a user into Steam by using his login name and password
-	virtual void LogOn( const char *pchUserName, const char *pchPassword ) = 0;
-#endif
-
 	// set data to be replicated to friends so that they can join your game
 	// CSteamID steamIDGameServer - the steamID of the game server, received from the game server by the client
 	// uint32 unIPServer, uint16 usPortServer - the IP address of the game server
@@ -149,6 +144,39 @@ public:
 
 	// retrieve a finished ticket
 	virtual bool GetEncryptedAppTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
+
+#ifdef _PS3
+	// Initiates PS3 Logon request using just PSN ticket.  
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
+	//
+	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
+	// may return with EResult k_EResultPSNAccountUnlinked if the PSN account is unknown to Steam.  You should
+	// then call LogOnAndLinkSteamAccountToPSN() after prompting the user for credentials to establish a link. 
+	// Future calls to LogOn() after the one time link call should succeed as long as the user is connected to PSN.
+	virtual void LogOn( bool bInteractive ) = 0;
+
+	// Initiates a request to logon with a specific steam username/password and create a PSN account link at 
+	// the same time.  Should call this only if LogOn() has failed and indicated the PSN account is unlinked.
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.  pchUserName 
+	// should be the users Steam username, and pchPassword should be the users Steam password.
+	// 
+	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
+	// may return with EResult k_EResultPSNAccountAlreadyLinked if already linked to another account. 
+	virtual void LogOnAndLinkSteamAccountToPSN( bool bInteractive, const char *pchUserName, const char *pchPassword ) = 0;
+
+	// Final logon option for PS3, this logs into an existing account if already linked, but if not already linked
+	// creates a new account using the info in the PSN ticket to generate a unique account name.  The new account is
+	// then linked to the PSN ticket.  This is the faster option for new users who don't have an existing Steam account
+	// to get into multiplayer.
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
+	virtual void LogOnAndCreateNewSteamAccountIfNeeded( bool bInteractive ) = 0;
+#endif
 
 };
 

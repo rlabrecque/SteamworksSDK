@@ -120,18 +120,18 @@ inline T QWordSwap( T dw )
 
 #ifndef _PS3
 
-#define LittleShort( val )	( val )
+#define LittleInt16( val )	( val )
 #define LittleWord( val )	( val )
-#define LittleLong( val )	( val )
+#define LittleInt32( val )	( val )
 #define LittleDWord( val )	( val )
 #define LittleQWord( val )	( val )
 #define LittleFloat( val )	( val )
 
 #else
 
-#define LittleShort( val )	WordSwap( val )
+#define LittleInt16( val )	WordSwap( val )
 #define LittleWord( val )	WordSwap( val )
-#define LittleLong( val )	DWordSwap( val )
+#define LittleInt32( val )	DWordSwap( val )
 #define LittleDWord( val )	DWordSwap( val )
 #define LittleQWord( val )	QWordSwap( val )
 #define LittleFloat( val )	DWordSwap( val )
@@ -178,6 +178,10 @@ enum EClientGameState
 	k_EClientRemoteStorage,
 	k_EClientLeaderboards,
 	k_EClientMinidump,
+	k_EClientConnectingToSteam,
+	k_EClientLinkSteamAccount,
+	k_EClientAutoCreateAccount,
+	k_EClientRetrySteamConnection,
 };
 
 

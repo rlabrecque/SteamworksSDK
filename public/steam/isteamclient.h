@@ -130,9 +130,12 @@ public:
 	// callbacks will occur directly after the API function is called that generated the warning or message
 	virtual void SetWarningMessageHook( SteamAPIWarningMessageHook_t pFunction ) = 0;
 
+	// Trigger global shutdown for the DLL
+	virtual bool BShutdownIfAllPipesClosed() = 0;
+
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient009"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient010"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must

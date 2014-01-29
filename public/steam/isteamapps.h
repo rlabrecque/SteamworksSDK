@@ -28,9 +28,17 @@ public:
 
 	// Takes AppID of DLC and checks if the user owns the DLC & if the DLC is installed
 	virtual bool BIsDlcInstalled( AppId_t appID ) = 0;
+
+	// returns the Unix time of the purchase of the app
+	virtual uint32 GetEarliestPurchaseUnixTime( AppId_t nAppID ) = 0;
+
+	// Checks if the user is subscribed to the current app through a free weekend
+	// This function will return false for users who have a retail or other type of license
+	// Before using, please ask your Valve technical contact how to package and secure your free weekened
+	virtual bool BIsSubscribedFromFreeWeekend() = 0;
 };
 
-#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION003"
+#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION004"
 
 // callbacks
 #pragma pack( push, 8 )

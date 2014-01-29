@@ -80,6 +80,7 @@ S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
 // pvContext-- can be NULL, will be the void * context passed into m_pfnPreMinidumpCallback
 // PFNPreMinidumpCallback m_pfnPreMinidumpCallback   -- optional callback which occurs just before a .dmp file is written during a crash.  Applications can hook this to allow adding additional information into the .dmp comment stream.
 S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const *pchDate, char const *pchTime, bool bFullMemoryDumps, void *pvContext, PFNPreMinidumpCallback m_pfnPreMinidumpCallback );
+S_API void SteamAPI_SetBreakpadAppID( uint32 unAppID );
 
 // interface pointers, configured by SteamAPI_Init()
 S_API ISteamClient *SteamClient();
@@ -90,10 +91,35 @@ S_API ISteamClient *SteamClient();
 //	The following structure must be passed to when loading steam_api_ps3.prx
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 #define STEAM_PS3_PATH_MAX 1055
+#define STEAM_PS3_SERVICE_ID_MAX 32
 struct SteamPS3Params_t
 {
+	void *pReserved;
+	AppId_t m_nAppId;
+
 	char m_rgchInstallationPath[ STEAM_PS3_PATH_MAX ];
-	char m_rgchSystemCache[ STEAM_PS3_PATH_MAX ];
+	char m_rgchSystemCache[ STEAM_PS3_PATH_MAX ];	// temp working cache, not persistent 
+	char m_rgchGameData[ STEAM_PS3_PATH_MAX ];		// persistent game data path for storing user data
+	char m_rgchNpServiceID[ STEAM_PS3_SERVICE_ID_MAX ];
+
+	// Should be SYS_TTYP3 through SYS_TTYP10, if it's 0 then Steam won't spawn a 
+	// thread to read console input at all.  Using this let's you use Steam console commands
+	// like: profile_on, profile_off, profile_dump, mem_stats, mem_validate.
+	unsigned int m_cSteamInputTTY;
+
+	struct Ps3netInit_t
+	{
+		bool m_bNeedInit;
+		bool m_bNeedInitEx;
+		void *m_pMemory;
+		int m_nMemorySize;
+		int m_flags;
+	} m_sysNetInitInfo;
+
+	struct Ps3jpgInit_t
+	{
+		bool m_bNeedInit;
+	} m_sysJpgInitInfo;
 };
 
 

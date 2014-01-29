@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\redistributable_bin\steam_api.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win32\sdkencryptedappticket.dll $(OutDir)"
+				CommandLine="copy ..\redistributable_bin\steam_api.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win32\sdkencryptedappticket.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\redistributable_bin\win64\steam_api64.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)"
+				CommandLine="copy ..\redistributable_bin\win64\steam_api64.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -263,7 +263,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\redistributable_bin\steam_api.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win32\sdkencryptedappticket.dll $(OutDir)"
+				CommandLine="copy ..\redistributable_bin\steam_api.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win32\sdkencryptedappticket.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -346,7 +346,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\redistributable_bin\win64\steam_api64.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)"
+				CommandLine="copy ..\redistributable_bin\win64\steam_api64.dll $(OutDir)&#x0D;&#x0A;copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -383,6 +383,10 @@
 				>
 				<File
 					RelativePath=".\BaseMenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\connectingmenu.cpp"
 					>
 				</File>
 				<File
@@ -445,6 +449,10 @@
 					RelativePath=".\Sun.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\voicechat.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -477,6 +485,10 @@
 				>
 				<File
 					RelativePath=".\BaseMenu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\connectingmenu.h"
 					>
 				</File>
 				<File
@@ -549,6 +561,10 @@
 				</File>
 				<File
 					RelativePath=".\Sun.h"
+					>
+				</File>
+				<File
+					RelativePath=".\voicechat.h"
 					>
 				</File>
 			</Filter>

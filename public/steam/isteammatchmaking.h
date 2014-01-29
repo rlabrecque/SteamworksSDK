@@ -19,6 +19,7 @@
 // lobby type description
 enum ELobbyType
 {
+	k_ELobbyTypePrivate = 0,		// only way to join the lobby is to invite to someone else
 	k_ELobbyTypeFriendsOnly = 1,	// shows for friends or invitees, but not in lobby list
 	k_ELobbyTypePublic = 2,			// visible for friends and in lobby list
 	k_ELobbyTypeInvisible = 3,		// returned by search, but not visible to other friends 
@@ -204,7 +205,8 @@ public:
 	// this will send down all the metadata associated with a lobby
 	// this is an asynchronous call
 	// returns false if the local user is not connected to the Steam servers
-	// restart are returned by a LobbyDataUpdate_t callback
+	// results will be returned by a LobbyDataUpdate_t callback
+	// if the specified lobby doesn't exist, LobbyDataUpdate_t::m_bSuccess will be set to false
 	virtual bool RequestLobbyData( CSteamID steamIDLobby ) = 0;
 	
 	// sets the game server associated with the lobby
@@ -530,6 +532,8 @@ struct LobbyDataUpdate_t
 
 	uint64 m_ulSteamIDLobby;		// steamID of the Lobby
 	uint64 m_ulSteamIDMember;		// steamID of the member whose data changed, or the room itself
+	uint8 m_bSuccess;				// true if we lobby data was successfully changed; 
+									// will only be false if RequestLobbyData() was called on a lobby that no longer exists
 };
 
 

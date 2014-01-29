@@ -32,9 +32,15 @@ enum EMessage
 	k_EMsgClientLeavingServer = k_EMsgClientBegin+4,
 	k_EMsgClientPing = k_EMsgClientBegin+5,
 
-	// P2P messages
-	k_EMsgP2PBegin = 500,
+	// P2P authentication messages
+	k_EMsgP2PBegin = 600, 
 	k_EMsgP2PSendingTicket = k_EMsgP2PBegin+1,
+
+	// voice chat messages
+	k_EMsgVoiceChatBegin = 700, 
+	k_EMsgVoiceChatPing = k_EMsgVoiceChatBegin+1,	// just a keep alive message
+	k_EMsgVoiceChatData = k_EMsgVoiceChatBegin+2,	// voice data from another player
+
 
 
 	// force 32-bit size enum so the wire protocol doesn't get outgrown later
@@ -209,6 +215,30 @@ private:
 	uint32 m_uTokenLen;
 	char m_rgchToken[1024];
 	uint64 m_ulSteamID;
+};
+
+// voice chat ping
+struct MsgVoiceChatPing_t
+{
+	 MsgVoiceChatPing_t() : m_dwMessageType( LittleDWord( k_EMsgVoiceChatPing ) ) {}
+	DWORD GetMessageType() const { return LittleDWord( m_dwMessageType ); }
+
+private:
+	const DWORD m_dwMessageType;
+};
+
+// voice chat data
+struct MsgVoiceChatData_t
+{
+	MsgVoiceChatData_t() : m_dwMessageType( LittleDWord( k_EMsgVoiceChatData ) ) {}
+	DWORD GetMessageType() const { return LittleDWord( m_dwMessageType ); }
+	
+	void SetDataLength( uint32 unLength ) { m_uDataLength = LittleDWord( unLength ); }
+	uint32 GetDataLength() const { return LittleDWord( m_uDataLength ); }
+
+private:
+	const DWORD m_dwMessageType;
+	uint32 m_uDataLength;
 };
 
 #pragma pack( pop )

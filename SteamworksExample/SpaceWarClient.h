@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Main class for the space war game client
 //
@@ -18,14 +18,8 @@
 #include "StatsAndAchievements.h"
 #include "RemoteStorage.h"
 
-// Must define this stuff before BaseMenu.h as it depends on calling back into us through these accessors
-class CSpaceWarClient;
-extern CSpaceWarClient *g_pSpaceWarClient;
-CSpaceWarClient *SpaceWarClient();
-
-#include "BaseMenu.h"
-
 // Forward class declaration
+class CConnectingMenu;
 class CMainMenu; 
 class CQuitMenu;
 class CSpaceWarServer;
@@ -35,6 +29,7 @@ class CLobby;
 class CLeaderboards;
 class CP2PAuthPlayer;
 class CP2PAuthedGame;
+class CVoiceChat;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -89,12 +84,11 @@ struct LeaderboardMenuItem_t
 };
 
 
-
 class CSpaceWarClient 
 {
 public:
 	//Constructor
-	CSpaceWarClient( IGameEngine *pEngine, CSteamID steamIDUser );
+	CSpaceWarClient( IGameEngine *pEngine );
 
 	// Shared init for all constructors
 	void Init( IGameEngine *pGameEngine );
@@ -146,6 +140,7 @@ public:
 
 	void OnMenuSelection( LobbyMenuItem_t selection );
 	void OnMenuSelection( LeaderboardMenuItem_t selection );
+	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
 
 	// Set game state
 	void SetGameState( EClientGameState eState );
@@ -322,6 +317,9 @@ private:
 	// Main menu instance
 	CMainMenu *m_pMainMenu;
 
+	// Connecting menu instance
+	CConnectingMenu *m_pConnectingMenu;
+
 	// Pause menu instance
 	CQuitMenu *m_pQuitMenu;
 
@@ -352,14 +350,22 @@ private:
 	// callback for when the lobby game server has started
 	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t, m_LobbyGameCreated );
 	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t, m_AvatarImageLoadedCreated );
+
+	// callbacks for Steam connection state
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t, m_SteamServersConnected );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t, m_SteamServerConnectFailure );
 	
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;
 
 	// local lobby display
 	CLobby *m_pLobby;
+	
 	// p2p game auth manager
 	CP2PAuthedGame *m_pP2PAuthedGame;
+	
+	// p2p voice chat 
+	CVoiceChat *m_pVoiceChat;
 
 	// connection handler
 	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
@@ -374,5 +380,9 @@ private:
 	void OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t *pEncryptedAppTicketResponse, bool bIOFailure );
 	CCallResult< CSpaceWarClient, EncryptedAppTicketResponse_t > m_SteamCallResultEncryptedAppTicket;
 };
+
+// Must define this stuff before BaseMenu.h as it depends on calling back into us through these accessors
+extern CSpaceWarClient *g_pSpaceWarClient;
+CSpaceWarClient *SpaceWarClient();
 
 #endif // SPACEWARCLIENT_H

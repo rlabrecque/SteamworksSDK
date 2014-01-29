@@ -9,6 +9,10 @@
 #include "GameEngineWin32.h"
 #include <map>
 
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE( x ) if ( 0 != ( x ) ) { ( x )->Release(); x = 0; }
+#endif
+
 // Allocate static member
 std::map<HWND, CGameEngineWin32* > CGameEngineWin32::m_MapEngineInstances;
 
@@ -71,6 +75,46 @@ LRESULT CALLBACK GameWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+class CVoiceContext : public IXAudio2VoiceCallback
+{
+public:
+	CVoiceContext() : m_hBufferEndEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
+	{
+		m_pSourceVoice = NULL;
+	}
+	virtual ~CVoiceContext()
+	{
+		CloseHandle( m_hBufferEndEvent );
+	}
+
+	STDMETHOD_( void, OnVoiceProcessingPassStart )( UINT32 )
+	{
+	}
+	STDMETHOD_( void, OnVoiceProcessingPassEnd )()
+	{
+	}
+	STDMETHOD_( void, OnStreamEnd )()
+	{
+	}
+	STDMETHOD_( void, OnBufferStart )( void* )
+	{
+	}
+	STDMETHOD_( void, OnBufferEnd )( void* pContext )
+	{
+		free( pContext ); // free the sound buffer
+		SetEvent( m_hBufferEndEvent );
+	}
+	STDMETHOD_( void, OnLoopEnd )( void* )
+	{
+	}
+	STDMETHOD_( void, OnVoiceError )( void*, HRESULT )
+	{
+	}
+
+	HANDLE m_hBufferEndEvent;
+	IXAudio2SourceVoice* m_pSourceVoice;
+};
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for game engine instance
@@ -83,6 +127,9 @@ CGameEngineWin32::CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32
 	m_hWnd = NULL;
 	m_pD3D9Interface = NULL;
 	m_pD3D9Device = NULL;
+	m_pXAudio2 = NULL;
+	m_pMasteringVoice = NULL;
+	m_unVoiceChannelCount = 0; // 0 == invalid handle
 	m_nWindowWidth = nWindowWidth;
 	m_nWindowHeight = nWindowHeight;
 	m_nNextFontHandle = 1;
@@ -107,12 +154,14 @@ CGameEngineWin32::CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32
 	m_ulGameTickCount = 0;
 	m_dwBackgroundColor = D3DCOLOR_ARGB(0, 255, 255, 255 );
 
+	// for XAudio2
+	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+	
 	// restrict this main game thread to the first processor, so query performance counter won't jump on crappy AMD cpus
 	DWORD dwThreadAffinityMask = 0x01;
 	::SetThreadAffinityMask( ::GetCurrentThread(), dwThreadAffinityMask );
 
 	// Setup timing data
-	
 	LARGE_INTEGER l;
 	::QueryPerformanceFrequency( &l );
 	m_ulPerfCounterToMillisecondsDivisor = l.QuadPart/1000;
@@ -139,8 +188,21 @@ CGameEngineWin32::CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32
 	m_nViewportWidth = r.right-r.left;
 	m_nViewportHeight = r.bottom-r.top;
 
-	m_bEngineReadyForUse = true;
+	// initialzie XAudio2 interface
+	if( FAILED( XAudio2Create( &m_pXAudio2, 0 ) ) )
+	{
+		::MessageBoxA( NULL, "Failed to init XAudio2 engine", "SteamworksExample - Fatal error", MB_OK | MB_ICONERROR );
+		return;
+	}
 
+	// Create a mastering voice
+	if( FAILED( m_pXAudio2->CreateMasteringVoice( &m_pMasteringVoice, XAUDIO2_DEFAULT_CHANNELS, VOICE_OUTPUT_SAMPLE_RATE ) ) )
+	{
+		::MessageBoxA( NULL, "Failed to create mastering voice", "SteamworksExample - Fatal error", MB_OK | MB_ICONERROR );
+		return;
+	}
+
+	m_bEngineReadyForUse = true;
 }
 
 
@@ -157,8 +219,7 @@ void CGameEngineWin32::Shutdown()
 		std::map<HGAMEFONT, ID3DXFont *>::iterator iter;
 		for( iter = m_MapFontInstances.begin(); iter != m_MapFontInstances.end(); ++iter )
 		{
-			iter->second->Release();
-			iter->second = NULL;
+			SAFE_RELEASE( iter->second );
 		}
 		m_MapFontInstances.clear();
 	}
@@ -170,8 +231,7 @@ void CGameEngineWin32::Shutdown()
 		{
 			if ( iter->second.m_bIsLocked )
 				iter->second.m_pBuffer->Unlock();
-			iter->second.m_pBuffer->Release();
-			iter->second.m_pBuffer = NULL;
+			SAFE_RELEASE( iter->second.m_pBuffer );
 		}
 		m_MapVertexBuffers.clear();
 	}
@@ -188,26 +248,24 @@ void CGameEngineWin32::Shutdown()
 			}
 			if ( iter->second.m_pTexture )
 			{
-				iter->second.m_pTexture->Release();
-				iter->second.m_pTexture = NULL;
+				SAFE_RELEASE( iter->second.m_pTexture );
 			}
 		}
 		m_MapTextures.clear();
 	}
 
+	// All XAudio2 interfaces are released when the engine is destroyed, but being tidy
+	if ( m_pMasteringVoice )
+	{
+		m_pMasteringVoice->DestroyVoice();
+		m_pMasteringVoice = NULL;
+	}
+
 	// Cleanup D3D
-	if ( m_pD3D9Device )
-	{
-		m_pD3D9Device->Release();
-		m_pD3D9Device = NULL;
-	}
-
-	if ( m_pD3D9Interface )
-	{
-		m_pD3D9Interface->Release();
-		m_pD3D9Interface = NULL;
-	}
-
+	SAFE_RELEASE( m_pD3D9Device );
+	SAFE_RELEASE( m_pD3D9Interface );
+	SAFE_RELEASE( m_pXAudio2 );
+	
 	// Destroy our window
 	if ( m_hWnd )
 	{
@@ -239,6 +297,8 @@ void CGameEngineWin32::Shutdown()
 		}
 		m_hInstance = NULL;
 	}
+
+	CoUninitialize();
 }
 
 
@@ -1643,3 +1703,104 @@ void CGameEngineWin32::RemoveInstanceFromHWNDMap( HWND hWnd )
 		m_MapEngineInstances.erase( iter );
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+HGAMEVOICECHANNEL CGameEngineWin32::HCreateVoiceChannel()
+{
+	if ( !m_pXAudio2 )
+		return 0;
+
+	m_unVoiceChannelCount++;
+	CVoiceContext* pVoiceContext = new CVoiceContext;
+
+	// The format we sample voice in.
+	WAVEFORMATEX voicesampleformat =
+	{
+		WAVE_FORMAT_PCM,		// wFormatTag
+		1,						// nChannels
+		VOICE_OUTPUT_SAMPLE_RATE,// nSamplesPerSec
+		VOICE_OUTPUT_SAMPLE_RATE*BYTES_PER_SAMPLE, // nAvgBytesPerSec
+		2,						// nBlockAlign
+		8*BYTES_PER_SAMPLE,		// wBitsPerSample
+		sizeof(WAVEFORMATEX)	// cbSize
+	};
+
+	if( FAILED( m_pXAudio2->CreateSourceVoice( &pVoiceContext->m_pSourceVoice, &voicesampleformat , 0, 1.0f, pVoiceContext ) ) )
+	{
+		delete pVoiceContext;
+		return 0; // failed
+	}
+
+	pVoiceContext->m_pSourceVoice->Start( 0, 0 );
+
+	m_MapVoiceChannel[m_unVoiceChannelCount] = pVoiceContext;
+
+	return m_unVoiceChannelCount;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CGameEngineWin32::DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel )
+{
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* >::iterator iter;
+	iter = m_MapVoiceChannel.find( hChannel );
+	if ( iter != m_MapVoiceChannel.end() )
+	{
+		CVoiceContext* pVoiceContext = iter->second;
+		XAUDIO2_VOICE_STATE state;
+
+		for(;;)
+		{
+			pVoiceContext->m_pSourceVoice->GetState( &state );
+			if( !state.BuffersQueued )
+				break;
+
+			WaitForSingleObject( pVoiceContext->m_hBufferEndEvent, INFINITE );
+		}
+
+		pVoiceContext->m_pSourceVoice->Stop( 0 );
+		pVoiceContext->m_pSourceVoice->DestroyVoice();
+
+		delete pVoiceContext;
+
+		m_MapVoiceChannel.erase( iter );
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CGameEngineWin32::AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoiceData, uint32 uLength )
+{
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* >::iterator iter;
+	iter = m_MapVoiceChannel.find( hChannel );
+	if ( iter == m_MapVoiceChannel.end() )
+		return false; // channel not found
+	
+	CVoiceContext* pVoiceContext = iter->second;
+
+	//
+	// At this point we have a buffer full of audio and enough room to submit it, so
+	// let's submit it and get another read request going.
+	
+	uint8 *pBuffer = (uint8 *) malloc( uLength );
+	memcpy( pBuffer, pVoiceData, uLength );
+
+	XAUDIO2_BUFFER buf = {0};
+	buf.AudioBytes = uLength;
+	buf.pAudioData = pBuffer;
+	buf.pContext = pBuffer; // the buffer is freed again in CVoiceContext::OnBufferEnd
+
+	if ( FAILED( pVoiceContext->m_pSourceVoice->SubmitSourceBuffer( &buf ) ) )
+	{
+		free ( pBuffer );
+		return false;
+	}
+
+	return true;
+}
