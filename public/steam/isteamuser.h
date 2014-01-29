@@ -25,7 +25,6 @@ struct CallbackMsg_t
 // reference to a steam call, to filter results by
 typedef int32 HSteamCall;
 
-
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing and manipulating a steam account
 //			associated with one client instance
@@ -92,9 +91,23 @@ public:
 	// number of bytes written to pDestBuffer. The output format of the data is 16-bit signed at 
 	// 11025 samples per second.
 	virtual EVoiceResult DecompressVoice( void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
+
+	// Retrieve ticket to be sent to the entity who wishes to authenticate you. 
+	// pcbTicket retrieves the length of the actual ticket.
+	virtual HAuthTicket GetAuthSessionTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
+
+	// Authenticate ticket from entity steamID to be sure it is valid and isnt reused
+	// Registers for callbacks if the entity goes offline or cancels the ticket ( see ValidateAuthTicketResponse_t callback and EAuthSessionResponse )
+	virtual EBeginAuthSessionResult BeginAuthSession( const void *pAuthTicket, int cbAuthTicket, CSteamID steamID ) = 0;
+
+	// Stop tracking started by BeginAuthSession - called when no longer playing game with this entity
+	virtual void EndAuthSession( CSteamID steamID ) = 0;
+
+	// Cancel auth ticket from GetAuthSessionTicket, called when no longer playing game with the entity you gave the ticket to
+	virtual void CancelAuthTicket( HAuthTicket hAuthTicket ) = 0;
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser011"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser012"
 
 
 // callbacks
@@ -168,5 +181,19 @@ struct IPCFailure_t
 	};
 	uint8 m_eFailureType;
 };
+
+
+//-----------------------------------------------------------------------------
+// callback for BeginAuthSession
+//-----------------------------------------------------------------------------
+struct ValidateAuthTicketResponse_t
+{
+	enum { k_iCallback = k_iSteamUserCallbacks + 43 };
+	CSteamID m_SteamID;
+	EAuthSessionResponse m_eAuthSessionResponse;
+};
+
+
+
 
 #endif // ISTEAMUSER_H

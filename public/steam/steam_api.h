@@ -181,15 +181,15 @@ public:
 private:
 	virtual void Run( void *pvParam )
 	{
-		(m_pObj->*m_Func)( (P *)pvParam, false );
 		m_hAPICall = 0;
+		(m_pObj->*m_Func)( (P *)pvParam, false );		
 	}
 	void Run( void *pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall )
 	{
 		if ( hSteamAPICall == m_hAPICall )
 		{
-			(m_pObj->*m_Func)( (P *)pvParam, bIOFailure );
 			m_hAPICall = 0;
+			(m_pObj->*m_Func)( (P *)pvParam, bIOFailure );			
 		}
 	}
 	int GetCallbackSizeBytes()
@@ -301,6 +301,13 @@ S_API const char *SteamAPI_GetSteamInstallPath();
 
 // returns the pipe we are communicating to Steam with
 S_API HSteamPipe SteamAPI_GetHSteamPipe();
+
+// sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
+S_API void SteamAPI_SetTryCatchCallbacks( bool bTryCatchCallbacks );
+
+// backwards compat export, passes through to SteamAPI_ variants
+S_API HSteamPipe GetHSteamPipe();
+S_API HSteamUser GetHSteamUser();
 
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//

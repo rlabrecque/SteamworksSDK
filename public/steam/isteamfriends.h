@@ -175,6 +175,9 @@ public:
 	// activates game overlay web browser directly to the specified URL
 	// full address with protocol type is required, e.g. http://www.steamgames.com/
 	virtual void ActivateGameOverlayToWebPage( const char *pchURL ) = 0;
+
+	// activates game overlay to store page for app
+	virtual void ActivateGameOverlayToStore( AppId_t nAppID ) = 0;
 };
 
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends005"

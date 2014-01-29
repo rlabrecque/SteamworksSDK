@@ -77,6 +77,11 @@
 #define MAX_CLIENT_AND_SERVER_FPS 86
 
 
+// Leaderboard names
+#define LEADERBOARD_QUICKEST_WIN "Quickest Win"
+#define LEADERBOARD_FEET_TRAVELED "Feet Traveled"
+
+
 // Player colors
 DWORD const g_rgPlayerColors[ MAX_PLAYERS_PER_SERVER ] = 
 { 
@@ -109,6 +114,7 @@ enum EClientGameState
 	k_EClientJoiningLobby,
 	k_EClientFindLANServers,
 	k_EClientRemoteStorage,
+	k_EClientLeaderboards,
 };
 
 

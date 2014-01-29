@@ -27,6 +27,7 @@ class CSpaceWarServer;
 class CServerBrowser;
 class CLobbyBrowser;
 class CLobby;
+class CLeaderboards;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -64,6 +65,13 @@ struct LobbyMenuItem_t
 	bool m_bStartGame;
 	bool m_bToggleReadyState;
 	bool m_bLeaveLobby;
+};
+
+// a leaderboard item
+struct LeaderboardMenuItem_t
+{
+	bool m_bBack;
+	bool m_bNextLeaderboard;
 };
 
 
@@ -120,6 +128,7 @@ public:
 	}
 
 	void OnMenuSelection( LobbyMenuItem_t selection );
+	void OnMenuSelection( LeaderboardMenuItem_t selection );
 
 	// Set game state
 	void SetGameState( EClientGameState eState );
@@ -256,6 +265,8 @@ private:
 
 	CStatsAndAchievements *m_pStatsAndAchievements;
 
+	CLeaderboards *m_pLeaderboards;
+
 	CServerBrowser *m_pServerBrowser;
 
 	CRemoteStorage *m_pRemoteStorage;
@@ -284,6 +295,9 @@ private:
 
 	// ipc failure handler
 	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t, m_IPCFailureCallback );
+
+	// Steam wants to shut down, Game for Windows applications should shutdown too
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamShutdown, SteamShutdown_t, m_SteamShutdownCallback );
 };
 
 extern CSpaceWarClient *g_pSpaceWarClient;

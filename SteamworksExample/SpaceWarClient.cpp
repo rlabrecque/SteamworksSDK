@@ -13,6 +13,7 @@
 #include "stdlib.h"
 #include "time.h"
 #include "ServerBrowser.h"
+#include "Leaderboards.h"
 #include "Lobby.h"
 
 CSpaceWarClient *g_pSpaceWarClient = NULL;
@@ -24,7 +25,9 @@ CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser ) :
 		m_SocketStatusCallback( this, &CSpaceWarClient::OnSocketStatusCallback ),
 		m_LobbyGameCreated( this, &CSpaceWarClient::OnLobbyGameCreated ),
-		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure )
+		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure ),
+		m_SteamShutdownCallback( this, &CSpaceWarClient::OnSteamShutdown )
+
 {
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
@@ -78,6 +81,7 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
+	m_pLeaderboards = new CLeaderboards( pGameEngine );
 
 	// Remote Storage page
 	m_pRemoteStorage = new CRemoteStorage( pGameEngine );
@@ -669,6 +673,15 @@ void CSpaceWarClient::OnMenuSelection( LobbyMenuItem_t selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing a leaderboard
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( LeaderboardMenuItem_t selection )
+{
+	m_pLeaderboards->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: does work on transitioning from one game state to another
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
@@ -711,6 +724,16 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 			m_pServer = NULL;
 		}
 	}
+	else if ( m_eGameState == k_EClientGameWinner || m_eGameState == k_EClientGameDraw )
+	{
+		// game over.. update the leaderboard
+		m_pLeaderboards->UpdateLeaderboards( m_pStatsAndAchievements );
+	}
+	else if ( m_eGameState == k_EClientLeaderboards )
+	{
+		// we've switched to the leaderboard menu
+		m_pLeaderboards->Show();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -725,6 +748,22 @@ void CSpaceWarClient::OnIPCFailure( IPCFailure_t *failure )
 	{
 		OutputDebugString( "Steam IPC Failure, shutting down\n" );
 		::MessageBoxA( NULL, "Connection to Steam Lost, Exiting", "Steam Connection Error", MB_OK );
+		m_pGameEngine->Shutdown();
+		bExiting = true;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles notification of a Steam shutdown request since a Windows
+// user in a second concurrent session requests to play this game. Shutdown
+// this process immediately if possible.
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnSteamShutdown( SteamShutdown_t *callback )
+{
+	static bool bExiting = false;
+	if ( !bExiting )
+	{
+		OutputDebugString( "Steam shutdown request, shutting down\n" );
 		m_pGameEngine->Shutdown();
 		bExiting = true;
 	}
@@ -881,6 +920,14 @@ void CSpaceWarClient::RunFrame()
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );
 		break;
+	case k_EClientLeaderboards:
+		m_pStarField->Render();
+		m_pLeaderboards->RunFrame();		
+
+		if ( bEscapePressed )
+			SetGameState( k_EClientGameMenu );
+		break;
+
 	case k_EClientRemoteStorage:
 		m_pStarField->Render();
 		m_pRemoteStorage->Render();

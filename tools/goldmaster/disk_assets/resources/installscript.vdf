@@ -1,0 +1,12 @@
+"InstallScript"
+{
+	"Run Process"
+	{
+		"VCRedist"
+		{
+			"process 1"		"%INSTALLDIR%\\redist\\vcredist_x86.exe"
+			"command 1"		"/q:a"
+			"NoCleanUp"		"1"
+		}
+	}
+}

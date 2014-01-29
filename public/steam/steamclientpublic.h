@@ -68,6 +68,7 @@ enum EResult
 	k_EResultIgnored = 41,						// target is ignoring sender
 	k_EResultNoMatch = 42,						// nothing matching the request found
 	k_EResultAccountDisabled = 43,
+	k_EResultServiceReadOnly = 44,				// this service is not accepting content changes right now
 };
 
 // Error codes for use with the voice functions
@@ -101,6 +102,36 @@ typedef enum
 	k_EDenySteamValidationStalled = 14,
 	k_EDenySteamOwnerLeftGuestUser = 15,
 } EDenyReason;
+
+// return type of GetAuthSessionTicket
+typedef uint32 HAuthTicket;
+const HAuthTicket k_HAuthTicketInvalid = 0;
+
+// results from BeginAuthSession
+typedef enum
+{
+	k_EBeginAuthSessionResultOK = 0,						// Ticket is valid for this game and this steamID.
+	k_EBeginAuthSessionResultInvalidTicket = 1,				// Ticket is not valid.
+	k_EBeginAuthSessionResultDuplicateRequest = 2,			// A ticket has already been submitted for this steamID
+	k_EBeginAuthSessionResultInvalidVersion = 3,			// Ticket is from an incompatible interface version
+	k_EBeginAuthSessionResultGameMismatch = 4,				// Ticket is not for this game
+	k_EBeginAuthSessionResultExpiredTicket = 5,				// Ticket has expired
+} EBeginAuthSessionResult;
+
+// Callback values for callback ValidateAuthTicketResponse_t which is a response to BeginAuthSession
+typedef enum
+{
+	k_EAuthSessionResponseOK = 0,							// Steam has verified the user is online, the ticket is valid and ticket has not been reused.
+	k_EAuthSessionResponseUserNotConnectedToSteam = 1,		// The user in question is not connected to steam
+	k_EAuthSessionResponseNoLicenseOrExpired = 2,			// The license has expired.
+	k_EAuthSessionResponseVACBanned = 3,					// The user is VAC banned for this game.
+	k_EAuthSessionResponseLoggedInElseWhere = 4,			// The user account has logged in elsewhere and the session containing the game instance has been disconnected.
+	k_EAuthSessionResponseVACCheckTimedOut = 5,				// VAC has been unable to perform anti-cheat checks on this user
+	k_EAuthSessionResponseAuthTicketCanceled = 6,			// The ticket has been canceled by the issuer
+	k_EAuthSessionResponseAuthTicketInvalidAlreadyUsed = 7,	// This ticket has already been used, it is not valid.
+	k_EAuthSessionResponseAuthTicketInvalid = 8,			// This ticket is not from a user instance currently connected to steam.
+} EAuthSessionResponse;
+
 
 // Steam universes.  Each universe is a self-contained Steam instance.
 enum EUniverse
@@ -491,7 +522,7 @@ public:
 	EAccountType GetEAccountType() const		{ return ( EAccountType ) m_steamid.m_comp.m_EAccountType; }
 	EUniverse GetEUniverse() const				{ return m_steamid.m_comp.m_EUniverse; }
 	void SetEUniverse( EUniverse eUniverse )	{ m_steamid.m_comp.m_EUniverse = eUniverse; }
-	bool IsValid() const						{ return ( m_steamid.m_comp.m_EAccountType != k_EAccountTypeInvalid && m_steamid.m_comp.m_EUniverse != k_EUniverseInvalid ); }
+	bool IsValid() const;
 
 	// this set of functions is hidden, will be moved out of class
 	explicit CSteamID( const char *pchSteamID, EUniverse eDefaultUniverse = k_EUniverseInvalid );
@@ -531,6 +562,29 @@ private:
 		uint64 m_unAll64Bits;
 	} m_steamid;
 };
+
+inline bool CSteamID::IsValid() const
+{
+	if ( m_steamid.m_comp.m_EAccountType <= k_EAccountTypeInvalid || m_steamid.m_comp.m_EAccountType >= k_EAccountTypeMax )
+		return false;
+	
+	if ( m_steamid.m_comp.m_EUniverse <= k_EUniverseInvalid || m_steamid.m_comp.m_EUniverse >= k_EUniverseMax )
+		return false;
+
+	if ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeIndividual )
+	{
+		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance != 1 )
+			return false;
+	}
+
+	if ( m_steamid.m_comp.m_EAccountType == k_EAccountTypeClan )
+	{
+		if ( m_steamid.m_comp.m_unAccountID == 0 || m_steamid.m_comp.m_unAccountInstance != 0 )
+			return false;
+	}
+	return true;
+}
+
 
 // generic invalid CSteamID
 const CSteamID k_steamIDNil;
@@ -738,7 +792,7 @@ public:
 			return m_gameID.m_nAppID != k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
 			break;
 		case k_EGameIDTypeShortcut:
-			return m_gameID.m_nAppID == k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
+			return (m_gameID.m_nModID & 0x80000000) != 0;
 			break;
 		case k_EGameIDTypeP2P:
 			return m_gameID.m_nAppID == k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;

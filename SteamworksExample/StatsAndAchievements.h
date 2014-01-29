@@ -52,6 +52,10 @@ public:
 	// Accumulators
 	void AddDistanceTraveled( float flDistance );
 
+	// accessors
+	float GetGameFeetTraveled() { return m_flGameFeetTraveled; }
+	double GetGameDurationSeconds() { return m_flGameDurationSeconds; }
+
 	STEAM_CALLBACK( CStatsAndAchievements, OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
 	STEAM_CALLBACK( CStatsAndAchievements, OnUserStatsStored, UserStatsStored_t, m_CallbackUserStatsStored );
 	STEAM_CALLBACK( CStatsAndAchievements, OnAchievementStored, UserAchievementStored_t, m_CallbackAchievementStored );

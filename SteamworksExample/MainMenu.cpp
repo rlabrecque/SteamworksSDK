@@ -22,6 +22,7 @@ CMainMenu::CMainMenu( CGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( 
 	AddMenuItem( MenuItem_t( "Find Lobby", k_EClientFindLobby ) );
 	AddMenuItem( MenuItem_t( "Instructions", k_EClientGameInstructions ) );
 	AddMenuItem( MenuItem_t( "Stats and Achievements", k_EClientStatsAchievements ) );
+	AddMenuItem( MenuItem_t( "Leaderboards", k_EClientLeaderboards ) );
 	AddMenuItem( MenuItem_t( "Remote Storage", k_EClientRemoteStorage ) );
 	AddMenuItem( MenuItem_t( "Exit Game", k_EClientGameExiting ) );
 }

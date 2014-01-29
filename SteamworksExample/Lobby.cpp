@@ -56,8 +56,12 @@ public:
 				AddMenuItem( CLobbyMenu::MenuItem_t( "Set myself as Ready", menuItem ) );
 		}
 
-		// bugbug taylor make it so we can find out who the lobby owner is
-		bool bLobbyOwner = true;
+		// see if the local user is the owner of this lobby
+		bool bLobbyOwner = false;
+		if ( SteamUser()->GetSteamID() == SteamMatchmaking()->GetLobbyOwner( steamIDLobby ) )
+		{
+			bLobbyOwner = true;
+		}
 
 		// start game
 		if ( bLobbyOwner )

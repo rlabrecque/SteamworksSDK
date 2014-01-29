@@ -101,6 +101,7 @@ public:
 	// behind NAT and you want to advertise its IP in a lobby for other clients to directly
 	// connect to
 	virtual uint32 GetPublicIP() = 0;
+
 };
 
 #define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer008"

@@ -25,6 +25,11 @@ enum ESteamAPICallFailure
 	k_ESteamAPICallFailureMismatchedCallback = 3,// GetAPICallResult() was called with the wrong callback type for this API call
 };
 
+// function prototype for warning message hook
+#if defined( POSIX ) && !defined( _CYGWIN )
+#define __cdecl
+#endif
+extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);
 
 //-----------------------------------------------------------------------------
 // Purpose: interface to user independent utility functions
@@ -72,9 +77,29 @@ public:
 	virtual bool IsAPICallCompleted( SteamAPICall_t hSteamAPICall, bool *pbFailed ) = 0;
 	virtual ESteamAPICallFailure GetAPICallFailureReason( SteamAPICall_t hSteamAPICall ) = 0;
 	virtual bool GetAPICallResult( SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed ) = 0;
+
+	// this needs to be called every frame to process matchmaking results
+	// redundant if you're already calling SteamAPI_RunCallbacks()
+	virtual void RunFrame() = 0;
+
+	// returns the number of IPC calls made since the last time this function was called
+	// Used for perf debugging so you can understand how many IPC calls your game makes per frame
+	// Every IPC call is at minimum a thread context switch if not a process one so you want to rate
+	// control how often you do them.
+	virtual uint32 GetIPCCallCount() = 0;
+
+	// API warning handling
+	// 'int' is the severity; 0 for msg, 1 for warning
+	// 'const char *' is the text of the message
+	// callbacks will occur directly after the API function is called that generated the warning or message
+	virtual void SetWarningMessageHook( SteamAPIWarningMessageHook_t pFunction ) = 0;
+
+	// Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
+	// start & hook the game process, so this function will initially return false while the overlay is loading.
+	virtual bool IsOverlayEnabled() = 0;
 };
 
-#define STEAMUTILS_INTERFACE_VERSION "SteamUtils002"
+#define STEAMUTILS_INTERFACE_VERSION "SteamUtils004"
 
 
 // callbacks
@@ -109,6 +134,13 @@ struct SteamAPICallCompleted_t
 };
 
 
+//-----------------------------------------------------------------------------
+// called when Steam wants to shutdown
+//-----------------------------------------------------------------------------
+struct SteamShutdown_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 4 };
+};
 
 
 #endif // ISTEAMUTILS_H

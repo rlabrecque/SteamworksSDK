@@ -14,6 +14,42 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.04	9th Mar 2009
+----------------------------------------------------------------
+
+Added Peer To Peer Multi-Player Authentication/Authorization:
+* Allows each peer to verify the unique identity of the peers ( by steam account id ) in their game and determine if that user is allowed access to the game.
+* Added to the ISteamUser interface: GetAuthSessionTicket(), BeginAuthSession(), EndAuthSession() and CancelAuthTicket()
+* Additional information can be found in the API Overview on the Steamworks site
+
+Added support for purchasing downloadable content in game:
+* Added ISteamApps::BIsDlcInstalled() and the DlcInstalled_t callback, which enable a game to check if downloadable content is owned and installed
+* Added ISteamFriends::ActivateGameOverlayToStore(), which opens the Steam game overlay to the store page for an appID (can be a game or DLC)
+
+Gold Master Creation:
+* It is no longer optional to encrypt depots on a GM
+* The GM configuration file now supports an included_depots key, which along with the excluded_depots key, allows you to specify exactly which depots are placed on a GM
+* Simplified the configuration process for the setup application
+* The documentation for creating a Gold Master has been rewritten and extended. See the Steamworks site for more information.
+
+Added Leaderboards:
+* 10k+ leaderboards can now be created programmatically per game, and queried globally or compared to friends
+* Added to ISteamUserStats interface
+* See SteamworksExample for a usage example
+
+Other:
+* Added SteamShutdown_t callback, which will alert the game when Steam wants to shut down
+* Added ISteamUtils::IsOverlayEnabled(), which can be used to detect if the user has disabled the overlay in the Steam settings
+* Added ISteamUserStats::ResetAllStats(), which can be used to reset all stats (and optionally achievements) for a user
+* Moved SetWarningMessageHook() from ISteamClient to ISteamUtils
+* Added SteamAPI_SetTryCatchCallbacks,  sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
+* In CCallResult callback, CCallResult::IsActive() will return false and can now reset the CCallResult
+* Added support for zero-size depots
+* Properly strip illegal characters from depot names
+
+
+
+----------------------------------------------------------------
 v1.03	16th Jan 2009
 ----------------------------------------------------------------
 

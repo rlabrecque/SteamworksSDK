@@ -215,6 +215,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Leaderboards.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Lobby.cpp"
 					>
 				</File>
@@ -294,6 +298,10 @@
 				>
 				<File
 					RelativePath=".\BaseMenu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Leaderboards.h"
 					>
 				</File>
 				<File
