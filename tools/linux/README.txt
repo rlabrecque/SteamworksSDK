@@ -40,7 +40,7 @@ For example to run a shell targeting 32-bit architecture:
 
 For example to run a shell targeting 64-bit architecture:
 	shell-amd64.sh
-
+	
 
 Testing
 -------
@@ -59,6 +59,13 @@ e.g.
 You can debug your programs in the runtime environment with run.sh as well:
 	run.sh gdb MyGame
 	(gdb) r -windowed
+
+
+Steam Depots
+------------
+
+When you are ready to build and upload your Steam depots, you will need to use 
+Steamcmd.exe on a Windows machine.
 
 
 More Info

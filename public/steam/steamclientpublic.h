@@ -102,7 +102,11 @@ enum EResult
 	k_EResultNoMatchingURL = 75,
 	k_EResultBadResponse = 76,					// parse failure, missing field, etc.
 	k_EResultRequirePasswordReEntry = 77,		// The user cannot complete the action until they re-enter their password
-	k_EResultValueOutOfRange = 78				// the value entered is outside the acceptable range
+	k_EResultValueOutOfRange = 78,				// the value entered is outside the acceptable range
+	k_EResultUnexpectedError = 79,				// something happened that we didn't expect to ever happen
+	k_EResultDisabled = 80,						// The requested service has been configured to be unavailable
+	k_EResultInvalidCEGSubmission = 81,			// The set of files submitted to the CEG server are not valid !
+	k_EResultRestrictedDevice = 82,				// The device being used is not allowed to perform this action
 };
 
 // Error codes for use with the voice functions

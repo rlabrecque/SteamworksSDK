@@ -7,9 +7,53 @@
 #include "glmgrbasics.h"
 #include "dxabstract.h"
 
+#if __MAC_OS_X_VERSION_MAX_ALLOWED <= __MAC_10_6
 #include <OpenGL/CGLProfiler.h>
 #include <OpenGL/CGLProfilerFunctionEnum.h>
+#else
+#define kCGLCPComment ((CGLContextParameter)1232)
+/* param is a pointer to a NULL-terminated C-style string. */
+/* Inserts a context-specific comment into the function trace stream. */
+/* Availability: set only, get is ignored. */
 
+#define kCGLCPDumpState ((CGLContextParameter)1233)
+/* param ignored.  Dumps all the gl state. */
+/* Availability: set only, get is ignored. */
+
+#define kCGLCPEnableForceFlush ((CGLContextParameter)1234)
+/* param is GL_TRUE to enable "force flush" mode or GL_FALSE to disable. */
+/* Availability: set and get. */
+
+#define kCGLGOComment ((CGLGlobalOption)1506)
+/* param is a pointer to a NULL-terminated C-style string. */
+/* Inserts a comment in the trace steam that applies to all contexts. */
+/* Availability: set only, get is ignored. */
+
+#define kCGLGOEnableFunctionTrace ((CGLGlobalOption)1507)
+/* param is GL_TRUE or GL_FALSE */
+/* Turns GL function call tracing on and off */
+/* Availability: set and get */
+
+#define kCGLGOResetFunctionTrace ((CGLGlobalOption)1509)
+/* param is ignored */
+/* Erases current function trace and starts a new one */
+/* Availability: set only, get is ignored. */
+
+#define kCGLGOEnableBreakpoint ((CGLGlobalOption)1514)
+/* param is an array of 3 GLints:
+ param[0] is function ID (see CGLProfilerFunctionEnum.h)
+ param[1] is the logical OR of kCGLProfBreakBefore or kCGLProfBreakAfter, indicating how
+ you want the breakpoint to stop: before entering OpenGL, on return from OpenGL, or both.
+ param[2] is a boolean which turns the breakpoint on or off.
+ */
+/* Availability: set and get. */
+
+#define kCGLProfBreakBefore  0x0001
+#define kCGLProfBreakAfter   0x0002
+
+#define kCGLFEglColor4sv 98
+
+#endif
 
 //===============================================================================
 #define TOLOWERC( x )  (( ( x >= 'A' ) && ( x <= 'Z' ) )?( x + 32 ) : x )
@@ -2704,10 +2748,10 @@ bool	GLMDetectOGLP( void )
 	result = error == 0;
 	if (result)
 	{
-		// enable a breakpoint on color4sv
+        // enable a breakpoint on color4sv
 		GLint oglp_bkpt[3] = { kCGLFEglColor4sv, kCGLProfBreakBefore, 1 };
 		
-		CGLSetGlobalOption( kCGLGOEnableBreakpoint, oglp_bkpt );			
+		CGLSetGlobalOption( kCGLGOEnableBreakpoint, oglp_bkpt );
 	}
 	
 	return result;

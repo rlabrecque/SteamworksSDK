@@ -12,6 +12,20 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.26 6th November 2013
+----------------------------------------------------------------
+* Includes libsteam_api.so for 64-bit Linux.
+* Callbacks ValidateAuthTicketResponse_t and GSClientApprove_t now contain the SteamID of the owner of current game. If the game is borrowed, this is different than the player's SteamID.
+* Added ISteamFriends::GetPlayerNickname, which returns the nickname the current user has set for the specified player.
+* Fix p2p networking apis on Linux so they work with dedicated servers
+* Fix command line argument handling bug in SteamAPI_RestartAppIfNecessary on Linux and OSX.
+* Added ISteamApps::GetLaunchQueryParam, which will get the value associated with the given key if a game is launched via a url with query paramaters, such as steam://run/<appid>//?param1=value1;param2=value2;param3=value3.  If the game is already running when such a url is executed, instead it will receive a NewLaunchQueryParameters_t callback.
+* Added EUGCReadAction parameter to ISteamRemoteStorage:UGCRead that allows the game to keep the file open if it needs to seek around the file for arbitrary data, rather than always closing the file when the last byte is read.
+* Added new ISteamUGC interface that is used for querying for lists of UGC details (e.g. Workshop items, screenshots, videos, artwork, guides, etc.). The ISteamUGC interface should be used instead of ISteamRemoteStorage, which contains similar, but less flexible and powerful functionality.
+* Removed tools for deprecated content system
+
+
+----------------------------------------------------------------
 v1.25 1st October 2013
 ----------------------------------------------------------------
 * Fixed a crash in the 1.24 SDK update when attempting to call ISteamRemoteStorage::GetPublishedFileDetails by adding a missing parameter unMaxSecondsOld, which allows a game to request potentially-cached details (passing a value of 0 retains the previous behavior).

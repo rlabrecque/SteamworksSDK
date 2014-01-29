@@ -295,6 +295,7 @@ struct ValidateAuthTicketResponse_t
 	enum { k_iCallback = k_iSteamUserCallbacks + 43 };
 	CSteamID m_SteamID;
 	EAuthSessionResponse m_eAuthSessionResponse;
+	CSteamID m_OwnerSteamID; // different from m_SteamID if borrowed
 };
 
 

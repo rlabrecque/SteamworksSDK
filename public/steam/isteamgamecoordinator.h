@@ -48,6 +48,15 @@ public:
 };
 #define STEAMGAMECOORDINATOR_INTERFACE_VERSION "SteamGameCoordinator001"
 
+// callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
+#pragma pack( push, 8 )
+#else
+#error isteamclient.h must be included
+#endif 
+
 // callback notification - A new message is available for reading from the message queue
 struct GCMessageAvailable_t
 {
@@ -60,5 +69,7 @@ struct GCMessageFailed_t
 {
 	enum { k_iCallback = k_iSteamGameCoordinatorCallbacks + 2 };
 };
+
+#pragma pack( pop )
 
 #endif // ISTEAMGAMECOORDINATOR

@@ -121,7 +121,7 @@ public:
 	/// it allows users to filter in the matchmaking/server-browser interfaces based on the value
 	///
 	/// @see k_cbMaxGameServerTags
-	virtual void SetGameTags( const char *pchGameTags ) = 0; 
+	virtual void SetGameTags( const char *pchGameTags ) = 0;
 
 	/// Sets a string defining the "gamedata" for this server, this is optional, but if it is set
 	/// it allows users to filter in the matchmaking/server-browser interfaces based on the value
@@ -129,7 +129,7 @@ public:
 	/// acknowledged)
 	///
 	/// @see k_cbMaxGameServerGameData
-	virtual void SetGameData( const char *pchGameData) = 0; 
+	virtual void SetGameData( const char *pchGameData ) = 0;
 
 	/// Region identifier.  This is an optional field, the default value is empty, meaning the "world" region
 	virtual void SetRegion( const char *pszRegion ) = 0;
@@ -284,7 +284,8 @@ const uint32 k_unServerFlagPrivate		= 0x20;		// server shouldn't list on master 
 struct GSClientApprove_t
 {
 	enum { k_iCallback = k_iSteamGameServerCallbacks + 1 };
-	CSteamID m_SteamID;
+	CSteamID m_SteamID;			// SteamID of approved player
+	CSteamID m_OwnerSteamID;	// SteamID of original owner for game license
 };
 
 

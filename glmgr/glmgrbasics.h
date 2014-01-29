@@ -21,7 +21,7 @@
 #include <OpenGL/CGLTypes.h>
 #include <OpenGL/CGLRenderers.h>
 #include <OpenGL/CGLCurrent.h>
-#include <OpenGL/CGLProfiler.h>
+//#include <OpenGL/CGLProfiler.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ApplicationServices/ApplicationServices.h>

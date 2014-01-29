@@ -87,6 +87,8 @@ class ISteamGameServerStats;
 class ISteamPS3OverlayRender;
 class ISteamHTTP;
 class ISteamUnifiedMessages;
+class ISteamController;
+class ISteamUGC;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -189,6 +191,11 @@ public:
 	// Exposes the ISteamUnifiedMessages interface
 	virtual ISteamUnifiedMessages *GetISteamUnifiedMessages( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 
+	// Exposes the ISteamController interface
+	virtual ISteamController *GetISteamController( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
+	// Exposes the ISteamUGC interface
+	virtual ISteamUGC *GetISteamUGC( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 };
 
 #define STEAMCLIENT_INTERFACE_VERSION		"SteamClient012"
@@ -229,6 +236,10 @@ enum { k_iClientParentalSettingsCallbacks = 2900 };
 enum { k_iClientDeviceAuthCallbacks = 3000 };
 enum { k_iClientNetworkDeviceManagerCallbacks = 3100 };
 enum { k_iClientMusicCallbacks = 3200 };
+enum { k_iClientRemoteClientManagerCallbacks = 3300 };
+enum { k_iClientUGCCallbacks = 3400 };
+enum { k_iSteamStreamClientCallbacks = 3500 };
+enum { k_IClientProductBuilderCallbacks = 3600 };
 
 
 //-----------------------------------------------------------------------------
