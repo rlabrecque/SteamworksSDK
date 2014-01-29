@@ -111,7 +111,7 @@ private:
 	bool BSendDataToClientOnSocket( SNetSocket_t hSocket, char *pData, uint32 nSizeOfData );
 
 	// Connect a client, will send a success/failure response to the client
-	void OnClientBeginAuthentication( SNetSocket_t hSocketClient, CSteamID steamIDUser, void *pToken, uint32 uTokenLen );
+	void OnClientBeginAuthentication( SNetSocket_t hSocketClient, void *pToken, uint32 uTokenLen );
 
 	// Handles authentication completing for a client
 	void OnAuthCompleted( bool bAuthSuccess, uint32 iPendingAuthIndex );

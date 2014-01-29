@@ -33,7 +33,7 @@ CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 	// Initialize the SteamGameServer interface, we tell it some info about us, and we request support
 	// for both Authentication (making sure users own games) and secure mode, VAC running in our game
 	// and kicking users who are VAC banned
-	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eServerModeAuthenticationAndSecure, SteamUtils()->GetAppID(), pchGameDir, SPACEWAR_SERVER_VERSION ) )
+	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eServerModeAuthenticationAndSecure, pchGameDir, SPACEWAR_SERVER_VERSION ) )
 	{
 		OutputDebugString( "SteamGameServer_Init call failed\n" );
 	}
@@ -222,7 +222,7 @@ bool CSpaceWarServer::BSendDataToClientOnSocket( SNetSocket_t hSocket, char *pDa
 //-----------------------------------------------------------------------------
 // Purpose: Handle a new client connecting
 //-----------------------------------------------------------------------------
-void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, CSteamID steamIDUser, void *pToken, uint32 uTokenLen )
+void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, void *pToken, uint32 uTokenLen )
 {
 	// First, check this isn't a duplicate and we already have a user logged on from the same ip/port combo
 	for( uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i ) 
@@ -258,8 +258,6 @@ void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, C
 		if ( !m_rgPendingClientData[i].m_bActive )
 		{
 			m_rgPendingClientData[i].m_hSocket = hSocketClient;
-			m_rgPendingClientData[i].m_bActive = true;
-			m_rgPendingClientData[i].m_SteamIDUser = steamIDUser;
 			m_rgPendingClientData[i].m_ulTickCountLastData = m_pGameEngine->GetGameTickCount();
 
 			// pull the IP address of the user from the socket
@@ -267,7 +265,12 @@ void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, C
 			SteamGameServerNetworking()->GetSocketInfo( hSocketClient, NULL, NULL, &unIPClient, NULL );
 
 			// authenticate the user with the Steam back-end servers
-			SteamGameServer()->SendUserConnectAndAuthenticate( steamIDUser, unIPClient, pToken, uTokenLen ); 
+			m_rgPendingClientData[i].m_bActive = SteamGameServer()->SendUserConnectAndAuthenticate( unIPClient, pToken, uTokenLen, &m_rgPendingClientData[i].m_SteamIDUser ); 
+			if ( !m_rgPendingClientData[i].m_bActive )
+			{
+				MsgServerFailAuthentication_t msg;
+				BSendDataToClientOnSocket( hSocketClient, (char*)&msg, sizeof( msg ) );
+			}
 			break;
 		}
 	}
@@ -531,7 +534,7 @@ void CSpaceWarServer::ReceiveNetworkData()
 					continue;
 				}
 				MsgClientBeginAuthentication_t *pMsg = (MsgClientBeginAuthentication_t*)pchRecvBuf;
-				OnClientBeginAuthentication( hSocketClient, CSteamID( pMsg->m_ulSteamID ), &pMsg->m_rgchToken, pMsg->m_uTokenLen );
+				OnClientBeginAuthentication( hSocketClient, &pMsg->m_rgchToken, pMsg->m_uTokenLen );
 			}
 			break;
 		case k_EMsgClientSendLocalUpdate:
@@ -903,7 +906,7 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 		4,							// Maximum number of players
 		0,							// Number of AI/Bot players
 		m_sServerName.c_str(),		// Server name
-		"",							// Specatotor server name, unused for us
+		"",							// Spectator server name, unused for us
 		"MilkyWay"					// Map name
 		);
 

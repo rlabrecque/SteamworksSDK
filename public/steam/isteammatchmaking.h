@@ -113,6 +113,8 @@ public:
 	// Broadcasts a chat message to the all the users in the lobby
 	// users in the lobby (including the local user) will receive a LobbyChatMsg_t callback
 	// returns true if the message is successfully sent
+	// pvMsgBody can be binary or text data, up to 4k
+	// if pvMsgBody is text, cubMsgBody should be strlen( text ) + 1, to include the null terminator
 	virtual bool SendLobbyChatMsg( CSteamID steamIDLobby, const void *pvMsgBody, int cubMsgBody ) = 0;
 	// Get a chat message as specified in a LobbyChatMsg_t callback
 	// iChatID is the LobbyChatMsg_t::m_iChatID value in the callback
@@ -266,6 +268,18 @@ public:
 	virtual void RequestHistoryServerList( AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse ) = 0;
 	virtual void RequestSpectatorServerList( AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse ) = 0;
 
+	/* the filters that are available in the ppchFilters params are:
+
+		"map"		- map the server is running, as set in the dedicated server api
+		"dedicated" - reports bDedicated from the API
+		"secure"	- VAC-enabled
+		"full"		- not full
+		"empty"		- not empty
+		"noplayers" - is empty
+		"proxy"		- a relay server
+
+	*/
+
 	// Get details on a given server in the list, you can get the valid range of index
 	// values by calling GetServerCount().  You will also receive index values in 
 	// ISteamMatchmakingServerListResponse::ServerResponded() callbacks
@@ -310,16 +324,34 @@ public:
 };
 #define STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION "SteamMatchMakingServers001"
 
-//-----------------------------------------------------------------------------
-// Callbacks for ISteamMatchmaking which go through the regular Steam callback registration system
-//-----------------------------------------------------------------------------
-
 // game server flags
 const uint32 k_unFavoriteFlagNone			= 0x00;
 const uint32 k_unFavoriteFlagFavorite		= 0x01; // this game favorite entry is for the favorites list
 const uint32 k_unFavoriteFlagHistory		= 0x02; // this game favorite entry is for the history list
 
-// callbacks
+
+//-----------------------------------------------------------------------------
+// Purpose: Used in ChatInfo messages - fields specific to a chat member - must fit in a uint32
+//-----------------------------------------------------------------------------
+enum EChatMemberStateChange
+{
+	// Specific to joining / leaving the chatroom
+	k_EChatMemberStateChangeEntered			= 0x01,		// This user has joined or is joining the chat room
+	k_EChatMemberStateChangeLeft			= 0x02,		// This user has left or is leaving the chat room
+	k_EChatMemberStateChangeDisconnected	= 0x04,		// User disconnected without leaving the chat first
+	k_EChatMemberStateChangeKicked			= 0x08,		// User kicked
+	k_EChatMemberStateChangeBanned			= 0x10,		// User kicked and banned
+
+	k_EChatMemberInfoVoiceSpeaking			= 0x20,		// User started talking (using speaker slot)
+	k_EChatMemberInfoVoiceDoneSpeaking		= 0x40,		// User relinquished speaker slot
+};
+
+// returns true of the flags indicate that a user has been removed from the chat
+#define BChatMemberStateChangeRemoved( rgfChatMemberStateChangeFlags ) ( rgfChatMemberStateChangeFlags & ( k_EChatMemberStateChangeDisconnected | k_EChatMemberStateChangeLeft | k_EChatMemberStateChangeKicked | k_EChatMemberStateChangeBanned ) )
+
+
+//-----------------------------------------------------------------------------
+// Callbacks for ISteamMatchmaking (which go through the regular Steam callback registration system)
 
 
 //-----------------------------------------------------------------------------

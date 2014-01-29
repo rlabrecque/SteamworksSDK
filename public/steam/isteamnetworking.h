@@ -79,8 +79,7 @@ public:
 
 	// sending data
 	// must be a handle to a connected socket
-	// data size cannot be more than 8k, although in UDP mode (default),
-	// it's recommended packets be no larger than 1300 bytes
+	// data is all sent via UDP, and thus send sizes are limited to 1200 bytes; after this, many routers will start dropping packets
 	// use the reliable flag with caution; although the resend rate is pretty aggressive,
 	// it can still cause stalls in receiving data (like TCP)
 	virtual bool SendDataOnSocket( SNetSocket_t hSocket, void *pubData, uint32 cubData, bool bReliable ) = 0;

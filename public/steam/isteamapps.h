@@ -10,31 +10,23 @@
 #pragma once
 #endif
 
-#include "steam/isteamapps.h"
-
 //-----------------------------------------------------------------------------
 // Purpose: interface to app data
 //-----------------------------------------------------------------------------
 class ISteamApps
 {
 public:
-	// returns 0 if the key does not exist
-	// this may be true on first call, since the app data may not be cached locally yet
-	// If you expect it to exists wait for the AppDataChanged_t after the first failure and ask again
-	virtual int GetAppData( AppId_t nAppID, const char *pchKey, char *pchValue, int cchValueMax ) = 0;
+	virtual bool BIsSubscribed() = 0;
+	virtual bool BIsLowViolence() = 0;
+	virtual bool BIsCybercafe() = 0;
+	virtual bool BIsVACBanned() = 0;
+	virtual const char *GetCurrentGameLanguage() = 0;
+	virtual const char *GetAvailableGameLanguages() = 0;
+
+	// only use this member if you need to check ownership of another game related to yours, a demo for example
+	virtual bool BIsSubscribedApp( AppId_t appID ) = 0;
 };
 
-#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION001"
-
-//-----------------------------------------------------------------------------
-// Purpose: called when new information about an app has arrived
-//-----------------------------------------------------------------------------
-struct AppDataChanged_t
-{
-	enum { k_iCallback = k_iSteamAppsCallbacks + 1 };
-	uint32	m_nAppID;		// appid that changed
-	bool	m_bBySteamUI;	// change came from SteamUI
-	bool	m_bCDDBUpdate;	// the cddb entry for this app changed
-};
+#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION002"
 
 #endif // ISTEAMAPPS_H

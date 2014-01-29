@@ -319,6 +319,17 @@ void CStatsAndAchievements::OnUserStatsStored( UserStatsStored_t *pCallback )
 		{
 			OutputDebugString( "StoreStats - success\n" );
 		}
+		else if ( k_EResultInvalidParam == pCallback->m_eResult )
+		{
+			// One or more stats we set broke a constraint. They've been reverted,
+			// and we should re-iterate the values now to keep in sync.
+			OutputDebugString( "StoreStats - some failed to validate\n" );
+			// Fake up a callback here so that we re-load the values.
+			UserStatsReceived_t callback;
+			callback.m_eResult = k_EResultOK;
+			callback.m_nGameID = m_GameID.ToUint64();
+			OnUserStatsReceived( &callback );
+		}
 		else
 		{
 			char buffer[128];

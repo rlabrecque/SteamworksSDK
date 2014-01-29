@@ -90,8 +90,6 @@ struct MsgClientBeginAuthentication_t
 {
 	MsgClientBeginAuthentication_t() : m_dwMessageType( k_EMsgClientBeginAuthentication ) {}
 	const DWORD m_dwMessageType;
-
-	uint64 m_ulSteamID;
 	
 	uint32 m_uTokenLen;
 	char m_rgchToken[1024];

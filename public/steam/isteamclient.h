@@ -19,6 +19,9 @@ typedef int32 HSteamPipe;
 // handle to single instance of a steam user
 typedef int32 HSteamUser;
 // function prototype
+#ifdef _LINUX
+#define __cdecl
+#endif
 extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);
 
 // interface predec
@@ -137,6 +140,7 @@ enum { k_iClientUserCallbacks = 900 };
 enum { k_iSteamAppsCallbacks = 1000 };
 enum { k_iSteamUserStatsCallbacks = 1100 };
 enum { k_iSteamNetworkingCallbacks = 1200 };
+enum { k_iClientRemoteStorageCallbacks = 1300 };
 
 
 #endif // ISTEAMCLIENT_H

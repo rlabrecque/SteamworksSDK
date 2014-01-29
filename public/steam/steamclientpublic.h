@@ -66,6 +66,7 @@ enum EResult
 	k_EResultShoppingCartNotFound = 39,			// failed to find the shopping cart requested
 	k_EResultBlocked = 40,						// a user didn't allow it
 	k_EResultIgnored = 41,						// target is ignoring sender
+	k_EResultNoMatch = 42,						// nothing matching the request found
 };
 
 // Result codes to GSHandleClientDeny/Kick
@@ -534,9 +535,12 @@ CSteamID ClanIDFromChatID( CSteamID &steamIDChat );
 class CGameID
 {
 public:
+
 	CGameID()
 	{
-		m_ulGameID = 0;
+		m_gameID.m_nType = k_EGameIDTypeApp;
+		m_gameID.m_nAppID = k_uAppIdInvalid;
+		m_gameID.m_nModID = 0;
 	}
 
 	explicit CGameID( uint64 ulGameID )
@@ -566,8 +570,8 @@ public:
 
 	// Hidden functions used only by Steam
 	explicit CGameID( const char *pchGameID );
-	char * Render() const;				// renders this Game ID to string
-	static char * Render( uint64 ulGameID );	// static method to render a uint64 representation of a Game ID to a string
+	char *Render() const;						// render this Game ID to string
+	static char *Render( uint64 ulGameID );		// static method to render a uint64 representation of a Game ID to a string
 
 	// must include checksum_crc.h first to get this functionality
 #if defined( CHECKSUM_CRC_H )
@@ -593,7 +597,7 @@ public:
 	CGameID( const char *pchExePath, const char *pchAppName )
 	{
 		m_ulGameID = 0;
-		m_gameID.m_nAppID = 0;
+		m_gameID.m_nAppID = k_uAppIdInvalid;
 		m_gameID.m_nType = k_EGameIDTypeShortcut;
 
 		CRC32_t crc32;
@@ -607,19 +611,31 @@ public:
 		// replacement for appID's
 		m_gameID.m_nModID = crc32 | (0x80000000);
 	}
-#endif
 
-	void SetAsShortcut()
-	{
-		m_gameID.m_nAppID = 0;
-		m_gameID.m_nType = k_EGameIDTypeShortcut;
-	}
+#if defined( VSTFILEID_H )
 
-	void SetAsP2PFile()
+	CGameID( VstFileID vstFileID )
 	{
-		m_gameID.m_nAppID = 0;
+		m_ulGameID = 0;
+		m_gameID.m_nAppID = k_uAppIdInvalid;
 		m_gameID.m_nType = k_EGameIDTypeP2P;
+
+		CRC32_t crc32;
+		CRC32_Init( &crc32 );
+		const char *pchFileId = vstFileID.Render();
+		CRC32_ProcessBuffer( &crc32, pchFileId, Q_strlen( pchFileId ) );
+		CRC32_Final( &crc32 );
+
+		// set the high-bit on the mod-id 
+		// reduces crc32 to 31bits, but lets us use the modID as a guaranteed unique
+		// replacement for appID's
+		m_gameID.m_nModID = crc32 | (0x80000000);		
 	}
+
+#endif /* VSTFILEID_H */
+
+#endif /* CHECKSUM_CRC_H */
+
 
 	uint64 ToUint64() const
 	{
@@ -651,8 +667,6 @@ public:
 		return ( m_gameID.m_nType == k_EGameIDTypeApp );
 	}
 		
-
-
 	uint32 ModID() const
 	{
 		return m_gameID.m_nModID;
@@ -680,7 +694,28 @@ public:
 
 	bool IsValid() const
 	{
-		return ( m_ulGameID != 0 );
+		// each type has it's own invalid fixed point:
+		switch( m_gameID.m_nType )
+		{
+		case k_EGameIDTypeApp:
+			return m_gameID.m_nAppID != k_uAppIdInvalid;
+			break;
+		case k_EGameIDTypeGameMod:
+			return m_gameID.m_nAppID != k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
+			break;
+		case k_EGameIDTypeShortcut:
+			return m_gameID.m_nAppID == k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
+			break;
+		case k_EGameIDTypeP2P:
+			return m_gameID.m_nAppID == k_uAppIdInvalid && m_gameID.m_nModID & 0x80000000;
+			break;
+		default:
+#if defined(Assert)
+			Assert(false);
+#endif
+			return false;
+		}
+
 	}
 
 	void Reset() 
@@ -691,6 +726,7 @@ public:
 
 
 private:
+
 	enum EGameIDType
 	{
 		k_EGameIDTypeApp		= 0,

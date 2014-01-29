@@ -33,10 +33,10 @@ public:
 	// and identity.  The AuthBlob here should be acquired on the game client using SteamUser()->InitiateGameConnection()
 	// and must then be sent up to the game server for authentication.
 	//
-	// Return Value: true/false depending on whether the call succeeds.  If the call succeeds then you
-	// should expect a GSClientApprove_t or GSClientDeny_t callback which will tell you whether authentication
-	// for the user has succeeded or failed.
-	virtual void SendUserConnectAndAuthenticate( CSteamID steamIDUser, uint32 unIPClient, void *pvAuthBlob, uint32 cubAuthBlobSize ) = 0;
+	// Return Value: returns true if the users ticket passes basic checks. pSteamIDUser will contain the Steam ID of this user. pSteamIDUser must NOT be NULL
+	// If the call succeeds then you should expect a GSClientApprove_t or GSClientDeny_t callback which will tell you whether authentication
+	// for the user has succeeded or failed (the steamid in the callback will match the one returned by this call)
+	virtual bool SendUserConnectAndAuthenticate( uint32 unIPClient, const void *pvAuthBlob, uint32 cubAuthBlobSize, CSteamID *pSteamIDUser ) = 0;
 
 	// Creates a fake user (ie, a bot) which will be listed as playing on the server, but skips validation.  
 	// 
@@ -72,7 +72,7 @@ public:
 	//			
 	// bugbug jmccaskey - figure out how to remove this from the API and only expose via SteamGameServer_Init... or make this actually used,
 	// and stop calling it in SteamGameServer_Init()?
-	virtual bool BSetServerType( int32 nGameAppId, uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, 
+	virtual bool BSetServerType( uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, 
 								uint16 unSpectatorPort, uint16 usQueryPort, const char *pchGameDir, const char *pchVersion, bool bLANMode ) = 0;
 
 	// Updates server status values which shows up in the server browser and matchmaking APIs
@@ -91,7 +91,7 @@ public:
 	virtual bool BGetUserAchievementStatus( CSteamID steamID, const char *pchAchievementName ) = 0;
 };
 
-#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer004"
+#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer005"
 
 // game server flags
 const uint32 k_unServerFlagNone			= 0x00;
@@ -104,7 +104,6 @@ const uint32 k_unServerFlagPrivate		= 0x20;		// server shouldn't list on master 
 													// won't enforce authentication of users that connect to the server.
 													// Useful when you run a server where the clients may not
 													// be connected to the internet but you want them to play (i.e LANs)
-
 
 
 // callbacks
@@ -156,5 +155,7 @@ struct GSPolicyResponse_t
 	enum { k_iCallback = k_iSteamUserCallbacks + 15 };
 	uint8 m_bSecure;
 };
+
+
 
 #endif // ISTEAMGAMESERVER_H

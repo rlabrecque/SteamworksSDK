@@ -65,7 +65,7 @@ enum k_EFriendFlags
 enum { k_cchPersonaNameMax = 128 };
 
 // size limit on chat room or member metadata
-const uint32 k_cubChatMetadataMax = 4096;
+const uint32 k_cubChatMetadataMax = 8192;
 
 //-----------------------------------------------------------------------------
 // Purpose: interface to accessing information about individual users,

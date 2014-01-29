@@ -75,11 +75,13 @@ const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 // this is baked into client messages and interfaces as an int, 
 // make sure we never break this.
 typedef uint32 AppId_t;
-const AppId_t k_uAppIdInvalid = 0xFFFFFFFF;
+const AppId_t k_uAppIdInvalid = 0x0;
 
 // RTime32
 // We use this 32 bit time representing real world time.
 // It offers 1 second resolution beginning on January 1, 1970 (Unix time)
 typedef uint32 RTime32;
+
+typedef uint32 CellID_t;
 
 #endif // STEAMTYPES_H

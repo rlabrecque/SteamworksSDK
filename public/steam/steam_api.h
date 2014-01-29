@@ -136,30 +136,39 @@ public:
 	// If you can't support constructing a callback with the correct parameters
 	// then uncomment the empty constructor below and manually call
 	// ::Register() for your object
-	//CCallback() {}
+	// Or, just call the regular constructor with (NULL, NULL)
+	// CCallback() {}
 	
 	// constructor for initializing this object in owner's constructor
 	CCallback( T *pObj, func_t func ) : m_pObj( pObj ), m_Func( func )
 	{
-		if ( bGameServer )
-		{
-			m_nCallbackFlags |= k_ECallbackFlagsGameServer;
-		}
-
-		Register( pObj, func );
+		if ( pObj && func )
+			Register( pObj, func );
 	}
 
 	~CCallback()
 	{
-		SteamAPI_UnregisterCallback( this );
+		Unregister();
 	}
 
 	// manual registration of the callback
 	void Register( T *pObj, func_t func )
 	{
+		if ( m_nCallbackFlags & k_ECallbackFlagsRegistered )
+			Unregister();
+
+		if ( bGameServer )
+		{
+			m_nCallbackFlags |= k_ECallbackFlagsGameServer;
+		}
 		m_pObj = pObj;
 		m_Func = func;
 		SteamAPI_RegisterCallback( this, P::k_iCallback );
+	}
+
+	void Unregister()
+	{
+		SteamAPI_UnregisterCallback( this );
 	}
 
 private:
@@ -201,6 +210,8 @@ S_API HSteamUser Steam_GetHSteamUserCurrent();
 // returns the filename path of the current running Steam process, used if you need to load an explicit steam dll by name
 S_API const char *SteamAPI_GetSteamInstallPath();
 
+// returns the pipe we are communicating to Steam with
+S_API HSteamPipe SteamAPI_GetHSteamPipe();
 
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -211,8 +222,7 @@ S_API const char *SteamAPI_GetSteamInstallPath();
 // for whatever Steam API version it has.
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-S_API HSteamPipe GetHSteamPipe();
-S_API HSteamUser GetHSteamUser();
+S_API HSteamUser SteamAPI_GetHSteamUser();
 
 class CSteamAPIContext
 {
@@ -265,8 +275,8 @@ inline bool CSteamAPIContext::Init()
 	if ( !SteamClient() )
 		return false;
 
-	HSteamUser hSteamUser = GetHSteamUser();
-	HSteamPipe hSteamPipe = GetHSteamPipe();
+	HSteamUser hSteamUser = SteamAPI_GetHSteamUser();
+	HSteamPipe hSteamPipe = SteamAPI_GetHSteamPipe();
 
 	m_pSteamUser = SteamClient()->GetISteamUser( hSteamUser, hSteamPipe, STEAMUSER_INTERFACE_VERSION );
 	if ( !m_pSteamUser )
@@ -276,7 +286,7 @@ inline bool CSteamAPIContext::Init()
 	if ( !m_pSteamFriends )
 		return false;
 
-	m_pSteamUtils = SteamClient()->GetISteamUtils( hSteamUser, STEAMUTILS_INTERFACE_VERSION );
+	m_pSteamUtils = SteamClient()->GetISteamUtils( hSteamPipe, STEAMUTILS_INTERFACE_VERSION );
 	if ( !m_pSteamUtils )
 		return false;
 

@@ -61,7 +61,7 @@ public:
 	//
 	// return value - returns the number of bytes written to pBlob. If the return is 0, then the buffer passed in was too small, and the call has failed
 	// The contents of pBlob should then be sent to the game server, for it to use to complete the authentication process.
-	virtual int InitiateGameConnection( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, CGameID gameID, uint32 unIPServer, uint16 usPortServer, bool bSecure ) = 0;
+	virtual int InitiateGameConnection( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure ) = 0;
 
 	// notify of disconnect
 	// needs to occur when the game client leaves the specified game server, needs to match with the InitiateGameConnection() call
@@ -71,13 +71,9 @@ public:
 
 	// used by only a few games to track usage events
 	virtual void TrackAppUsageEvent( CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo = "" ) = 0;
-
-	// legacy authentication support - need to be called if the game server rejects the user with a 'bad ticket' error
-	// this is only needed under very specific circumstances
-	virtual void RefreshSteam2Login() = 0;
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser009"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser010"
 
 
 // callbacks

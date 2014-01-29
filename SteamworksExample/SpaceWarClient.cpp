@@ -157,8 +157,7 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	m_pQuitMenu->SetHeading( pchServerName );
 
 	MsgClientBeginAuthentication_t msg;
-	msg.m_ulSteamID = SteamUser()->GetSteamID().ConvertToUint64();
-	msg.m_uTokenLen = SteamUser()->InitiateGameConnection( (void*)&msg.m_rgchToken, ARRAYSIZE( msg.m_rgchToken ), steamIDGameServer, CGameID( SteamUtils()->GetAppID() ), m_unServerIP, m_usServerPort, bVACSecure );
+	msg.m_uTokenLen = SteamUser()->InitiateGameConnection( (void*)&msg.m_rgchToken, ARRAYSIZE( msg.m_rgchToken ), steamIDGameServer, m_unServerIP, m_usServerPort, bVACSecure );
 
 	if ( msg.m_uTokenLen < 1 )
 		OutputDebugString( "Warning: Looks like InitiateGameConnection didn't give us a good token\n" );
