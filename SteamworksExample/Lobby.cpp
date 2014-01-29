@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 #include "Lobby.h"
+#include "SpaceWarClient.h"
+#include "p2pauth.h"
 
 
 //-----------------------------------------------------------------------------
@@ -167,6 +169,18 @@ void CLobby::OnLobbyChatUpdate( LobbyChatUpdate_t *pCallback )
 
 	// rebuild the menu
 	m_pMenu->Rebuild( m_steamIDLobby );
+
+
+	int cLobbyMembers = SteamMatchmaking()->GetNumLobbyMembers( m_steamIDLobby );
+	for ( int i = 0; i < cLobbyMembers; i++ )
+	{
+		CSteamID steamIDLobbyMember = SteamMatchmaking()->GetLobbyMemberByIndex( m_steamIDLobby, i ) ;
+
+		// ignore yourself.
+		if ( SteamUser()->GetSteamID() == steamIDLobbyMember )
+			continue;
+
+	}
 }
 
 

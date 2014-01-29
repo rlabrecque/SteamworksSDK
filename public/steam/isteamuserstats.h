@@ -52,6 +52,13 @@ enum ELeaderboardDisplayType
 	k_ELeaderboardDisplayTypeTimeMilliSeconds = 3,	// the score represents a time, in milliseconds
 };
 
+enum ELeaderboardUploadScoreMethod
+{
+	k_ELeaderboardUploadScoreMethodNone = 0,
+	k_ELeaderboardUploadScoreMethodKeepBest = 1,	// Leaderboard will keep user's best score
+	k_ELeaderboardUploadScoreMethodForceUpdate = 2,	// Leaderboard will always replace score with specified
+};
+
 // a single entry in a leaderboard, as returned by GetDownloadedLeaderboardEntry()
 struct LeaderboardEntry_t
 {
@@ -166,13 +173,16 @@ public:
 
 	// Uploads a user score to the Steam back-end.
 	// This call is asynchronous, with the result returned in LeaderboardScoreUploaded_t
-	// If the score passed in is no better than the existing score this user has in the leaderboard, then the leaderboard will not be updated.
 	// Details are extra game-defined information regarding how the user got that score
 	// pScoreDetails points to an array of int32's, cScoreDetailsCount is the number of int32's in the list
-	virtual SteamAPICall_t UploadLeaderboardScore( SteamLeaderboard_t hSteamLeaderboard, int32 nScore, int32 *pScoreDetails, int cScoreDetailsCount ) = 0;
+	virtual SteamAPICall_t UploadLeaderboardScore( SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32 *pScoreDetails, int cScoreDetailsCount ) = 0;
+
+	// Retrieves the number of players currently playing your game (online + offline)
+	// This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
+	virtual SteamAPICall_t GetNumberOfCurrentPlayers() = 0;
 };
 
-#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION005"
+#define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION006"
 
 
 //-----------------------------------------------------------------------------
@@ -254,6 +264,13 @@ struct LeaderboardScoreUploaded_t
 	uint8 m_bScoreChanged;		// true if the score in the leaderboard change, false if the existing score was better
 	int m_nGlobalRankNew;		// the new global rank of the user in this leaderboard
 	int m_nGlobalRankPrevious;	// the previous global rank of the user in this leaderboard; 0 if the user had no existing entry in the leaderboard
+};
+
+struct NumberOfCurrentPlayers_t
+{
+	enum { k_iCallback = k_iSteamUserStatsCallbacks + 7 };
+	uint8 m_bSuccess;			// 1 if the call was successful
+	int32 m_cPlayers;			// Number of players currently playing
 };
 
 

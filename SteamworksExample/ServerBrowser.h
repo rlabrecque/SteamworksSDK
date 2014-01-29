@@ -31,6 +31,7 @@ public:
 	uint32 GetIP() { return m_unIPAddress; }
 
 	int32 GetPort() { return m_nConnectionPort; }
+	CSteamID GetSteamID()	{ return m_steamID; }
 
 private:
 	uint32 m_unIPAddress;			// IP address for the server
@@ -46,7 +47,7 @@ private:
 	int	m_nServerVersion;			// server version as reported to Steam
 	char m_szServerName[64];		// Game server name
 	char m_szServerString[128];		// String to show in server browser
-
+	CSteamID m_steamID;
 };
 
 class CServerBrowser : public ISteamMatchmakingServerListResponse

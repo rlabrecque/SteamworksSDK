@@ -1,5 +1,3 @@
-This is the Steamworks SDK v1.03
-
 ================================================================
 
 Copyright © 1996-2009, Valve Corporation, All rights reserved.
@@ -12,6 +10,40 @@ website at: http://partner.steamgames.com
 
 
 Revision History:
+
+----------------------------------------------------------------
+v1.05	11th June 2009
+----------------------------------------------------------------
+
+Matchmaking
+* Added the SteamID of the gameserver to the gameserveritem_t structure (returned only by newer game servers)
+* Added ISteamUserStats::GetNumberOfCurrentPlayers(), asyncronously returns the number users currently running this game
+* Added k_ELobbyComparisonNotEqual comparision functions for filters
+* Added option to use comparison functions for string filters
+* Added ISteamMatchmaking::AddRequestLobbyListFilterSlotsAvailable( int nSlotsAvailable ) filter function, so you can find a lobby for a group of users to join
+* Extended ISteamMatchmaking::CreateLobby() to take the max number of users in the lobby
+* Added ISteamMatchmaking::GetLobbyDataCount(), ISteamMatchmaking::GetLobbyDataByIndex() so you can iterate all the data set on a lobby
+* Added ISteamMatchmaking::DeleteLobbyData() so you can clear a key from a lobby
+* Added ISteamMatchmaking::SetLobbyOwner() so that ownership of a lobby can be transferred
+* Added ISteamMatchmaking::SetLobbyJoinable()
+* Added ISteamGameServer::SetGameData(), so game server can set more information that can be filtered for in the server pinging API
+
+Networking
+* Added a set of connectionless networking functions for easy use for making peer-to-peer (NAT traversal) connections. Includes supports for windowed reliable sendsand fragementation/re-assembly of large packets. See ISteamNetworking.h for more details.
+
+Leaderboards
+* Added enum ELeaderboardUploadScoreMethod and changed ISteamUserStats::UploadLeaderboardScore() to take this - lets you force a score to be changed even if it's worse than the prior score
+
+Callbacks
+* Added CCallbackManual<> class to steam_api.h, a version of CCallback<> that doesn't register itself automatically in it's the constructor
+
+Downloadable Content
+* Added ISteamUser::UserHasLicenseForApp() and ISteamGameServer::UserHasLicenseForApp() to enable checking if a user owns DLC in multiplayer. See the DLC documentation for more info.
+
+Game Overlay
+* ISteamFriends::ActivateGameOverlay() now accepts "Stats" and "Achievements"
+
+
 
 ----------------------------------------------------------------
 v1.04	9th Mar 2009

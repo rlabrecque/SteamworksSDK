@@ -502,6 +502,8 @@ void CShip::SetExploding( bool bExploding )
 	if ( m_bExploding == bExploding )
 		return;
 
+	Steamworks_TestSecret();
+
 	// Track that we are exploding, and disable collision detection
 	m_bExploding = bExploding;
 	SetCollisionDetectionDisabled( m_bExploding );

@@ -28,6 +28,8 @@ class CServerBrowser;
 class CLobbyBrowser;
 class CLobby;
 class CLeaderboards;
+class CP2PAuthPlayer;
+class CP2PAuthedGame;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -47,8 +49,7 @@ enum EClientConnectionState
 struct ServerBrowserMenuData_t
 {
 	EClientGameState m_eStateToTransitionTo;
-	uint32 m_unIPAddress;
-	int32 m_nConnectionPort;
+	CSteamID m_steamIDGameServer;
 };
 
 // a lobby as shown in the find lobbies menu
@@ -92,11 +93,11 @@ public:
 	void ReceiveNetworkData();
 
 	// Connect to a server at a given IP address or game server steamID
-	void InitiateServerConnection( uint32 unServerAddress, const int32 nPort );
 	void InitiateServerConnection( CSteamID steamIDGameServer );
+	void InitiateServerConnection( uint32 unServerAddress, const int32 nPort );
 
 	// Send data to a client at the given ship index
-	bool BSendServerData( char *pData, uint32 nSizeOfData, bool bSendReliably );
+	bool BSendServerData( const void *pData, uint32 nSizeOfData );
 
 	// Menu callback handler (handles a bunch of menus that just change state with no extra data)
 	void OnMenuSelection( EClientGameState eState ) { SetGameState( eState ); }
@@ -106,7 +107,7 @@ public:
 	{ 
 		if ( selection.m_eStateToTransitionTo == k_EClientGameConnecting )
 		{
-			InitiateServerConnection( selection.m_unIPAddress, selection.m_nConnectionPort );
+			InitiateServerConnection( selection.m_steamIDGameServer );
 		}
 		else
 		{
@@ -122,6 +123,8 @@ public:
 			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->JoinLobby( selection.m_steamIDLobby );
 			// set the function to call when this API completes
 			m_SteamCallResultLobbyEntered.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyEntered );
+			m_SteamCallResultLobbyDataChange.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyDataChange );
+			m_SteamCallResultLobbyChatUpdate.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyChatUpdate );
 		}
 
 		SetGameState( selection.m_eStateToTransitionTo );
@@ -232,15 +235,61 @@ private:
 	// Time we last got data from the server
 	uint64 m_ulLastNetworkDataReceivedTime;
 
+	// Time when we sent our ping
+	uint64 m_ulPingSentTime;
+
 	// Text to display if we are in an error state
 	char m_rgchErrorText[256];
 
-	// Socket to use when communicating with servers
-	SNetSocket_t m_hSocketClient;
-
 	// Server address data
+	CSteamID m_steamIDGameServer;
 	uint32 m_unServerIP;
 	uint16 m_usServerPort;
+
+	// simple class to marshal callbacks from pinging a game server
+	class CGameServerPing : public ISteamMatchmakingPingResponse
+	{
+	public:
+		CGameServerPing()
+		{
+			m_hGameServerQuery = HSERVERQUERY_INVALID;
+			m_pSpaceWarsClient = NULL;
+		}
+
+		void RetrieveSteamIDFromGameServer( CSpaceWarClient *pSpaceWarClient, uint32 unIP, uint16 unPort )
+		{
+			m_pSpaceWarsClient = pSpaceWarClient;
+			m_hGameServerQuery = SteamMatchmakingServers()->PingServer( unIP, unPort, this );
+		}
+
+		void CancelPing()
+		{
+			m_hGameServerQuery = HSERVERQUERY_INVALID;
+		}
+
+		// Server has responded successfully and has updated data
+		virtual void ServerResponded( gameserveritem_t &server )
+		{
+			if ( m_hGameServerQuery != HSERVERQUERY_INVALID && server.m_steamID.IsValid() )
+			{
+				m_pSpaceWarsClient->InitiateServerConnection( server.m_steamID );
+			}
+
+			m_hGameServerQuery = HSERVERQUERY_INVALID;
+		}
+
+		// Server failed to respond to the ping request
+		virtual void ServerFailedToRespond()
+		{
+			m_hGameServerQuery = HSERVERQUERY_INVALID;
+		}
+
+	private:
+		HServerQuery m_hGameServerQuery;	// we're ping a game server, so we can convert IP:Port to a steamID
+		CSpaceWarClient *m_pSpaceWarsClient;
+	};
+	CGameServerPing m_GameServerPing;
+	
 
 	// Track whether we are connected to a server (and what specific state that connection is in)
 	EClientConnectionState m_eConnectedStatus;
@@ -281,6 +330,11 @@ private:
 	void OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure );
 	CCallResult<CSpaceWarClient, LobbyEnter_t> m_SteamCallResultLobbyEntered;
 
+	void OnLobbyDataChange( LobbyDataUpdate_t *pCallback, bool bIOFailure );
+	CCallResult<CSpaceWarClient, LobbyDataUpdate_t> m_SteamCallResultLobbyDataChange;
+	void OnLobbyChatUpdate( LobbyChatUpdate_t *pCallback, bool bIOFailure );
+	CCallResult<CSpaceWarClient, LobbyChatUpdate_t> m_SteamCallResultLobbyChatUpdate;
+
 	// callback for when the lobby game server has started
 	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t, m_LobbyGameCreated );
 	
@@ -289,9 +343,11 @@ private:
 
 	// local lobby display
 	CLobby *m_pLobby;
+	// p2p game auth manager
+	CP2PAuthedGame *m_pP2PAuthedGame;
 
 	// connection handler
-	STEAM_CALLBACK( CSpaceWarClient, OnSocketStatusCallback, SocketStatusCallback_t, m_SocketStatusCallback );
+	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
 
 	// ipc failure handler
 	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t, m_IPCFailureCallback );

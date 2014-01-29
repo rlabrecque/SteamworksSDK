@@ -23,8 +23,6 @@ class CSpaceWarClient;
 struct ClientConnectionData_t
 {
 	bool m_bActive;					// Is this slot in use? Or is it available for new connections?
-
-	SNetSocket_t m_hSocket;			// Socket to send data on to get to this client
 	CSteamID m_SteamIDUser;			// What is the steamid of the player?
 	uint64 m_ulTickCountLastData;	// What was the last time we got data from the player?
 };
@@ -44,6 +42,9 @@ public:
 	// Set game state
 	void SetGameState( EServerGameState eState );
 
+	// Checks for any incoming network data, then dispatches it
+	void ReceiveNetworkData();
+
 	// Reset player scores (occurs when starting a new game)
 	void ResetScores();
 
@@ -53,10 +54,10 @@ public:
 	// Checks various game objects for collisions and updates state appropriately if they have occurred
 	void CheckForCollisions();
 
+	void KickPlayerOffServer( CSteamID steamID );
+
 	// data accessors
 	bool IsConnectedToSteam()		{ return m_bConnectedToSteam; }
-	uint32 GetIP();
-	uint16 GetPort();
 	CSteamID GetSteamID();
 
 private:
@@ -90,7 +91,8 @@ private:
 	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnGSClientKick, GSClientKick_t, m_CallbackGSClientKick );
 
 	// client connection state
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSocketStatusCallback, SocketStatusCallback_t, m_CallbackSocketStatus );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionRequest, P2PSessionRequest_t, m_CallbackP2PSessionRequest );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
 
 	// Function to tell Steam about our servers details
 	void SendUpdatedServerDetailsToSteam();
@@ -98,20 +100,14 @@ private:
 	// Receive updates from client
 	void OnReceiveClientUpdateData( uint32 uShipIndex, ClientSpaceWarUpdateData_t UpdateData );
 
-	// Checks for any incoming network data, then dispatches it
-	void ReceiveNetworkData();
-
 	// Send data to a client at the given ship index
 	bool BSendDataToClient( uint32 uShipIndex, char *pData, uint32 nSizeOfData );
 
 	// Send data to a client at the given pending index
 	bool BSendDataToPendingClient( uint32 uShipIndex, char *pData, uint32 nSizeOfData );
 
-	// Send data to a client at a given address
-	bool BSendDataToClientOnSocket( SNetSocket_t hSocket, char *pData, uint32 nSizeOfData );
-
 	// Connect a client, will send a success/failure response to the client
-	void OnClientBeginAuthentication( SNetSocket_t hSocketClient, void *pToken, uint32 uTokenLen );
+	void OnClientBeginAuthentication( CSteamID steamIDClient, void *pToken, uint32 uTokenLen );
 
 	// Handles authentication completing for a client
 	void OnAuthCompleted( bool bAuthSuccess, uint32 iPendingAuthIndex );
@@ -155,9 +151,6 @@ private:
 
 	// Sun instance
 	CSun *m_pSun;
-
-	// Server socket (which has been bound to our known port)
-	SNetSocket_t m_hSocketServer;
 
 	// pointer to game engine instance we are running under
 	CGameEngine *m_pGameEngine;

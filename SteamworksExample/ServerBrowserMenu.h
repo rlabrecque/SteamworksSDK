@@ -27,8 +27,7 @@ public:
 		for( iter = List.begin(); iter != List.end(); ++iter )
 		{
 			data.m_eStateToTransitionTo = k_EClientGameConnecting;
-			data.m_unIPAddress = iter->GetIP();
-			data.m_nConnectionPort = iter->GetPort();
+			data.m_steamIDGameServer = iter->GetSteamID();
 			AddMenuItem( MenuItem_t( iter->GetDisplayString(), data ) );
 		}
 

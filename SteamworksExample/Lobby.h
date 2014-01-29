@@ -18,6 +18,7 @@ class CSpaceWarClient;
 class CLobbyBrowserMenu;
 class CLobbyMenu;
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Displays the other users in a lobby and allows the game to be started
 //-----------------------------------------------------------------------------

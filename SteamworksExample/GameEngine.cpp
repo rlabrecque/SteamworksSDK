@@ -101,26 +101,9 @@ CGameEngine::CGameEngine( HINSTANCE hInstance, int nShowCommand, int32 nWindowWi
 	m_dwQuadBufferBatchPos = 0;
 	m_hTextureWhite = NULL;
 	m_bDeviceLost = false;
-	m_bFirstFrame = true; 
-	m_flMaxFPS = 120.0f;
 	m_hLastTexture = NULL;
 	m_ulPreviousGameTickCount = 0;
 	m_ulGameTickCount = 0;
-
-	// restrict this main game thread to the first processor, so queryperformance counter won't jump on crappy AMD cpus
-	DWORD dwThreadAffinityMask = 0x01;
-	::SetThreadAffinityMask( ::GetCurrentThread(), dwThreadAffinityMask );
-
-	LARGE_INTEGER l;
-	if ( QueryPerformanceFrequency( &l ) )
-	{
-		m_ulPerfCounterToMillisecondsDivisor = l.QuadPart/1000;
-	}
-	else
-	{
-		m_ulPerfCounterToMillisecondsDivisor = 0;
-	}
-
 	m_dwBackgroundColor = D3DCOLOR_ARGB(0, 255, 255, 255 );
 
 	if ( !BCreateGameWindow( nShowCommand ) || !m_hWnd )
@@ -518,32 +501,6 @@ void CGameEngine::SetBackgroundColor( short a, short r, short g, short b )
 //-----------------------------------------------------------------------------
 bool CGameEngine::StartFrame()
 {
-	// Track current game time 
-	// bugbug jmccaskey - use a more reliable timer that won't wrap and has better precision!
-	if ( m_bFirstFrame )
-	{
-		LARGE_INTEGER l;
-		if ( !QueryPerformanceCounter( &l ) )
-			OutputDebugString( "QueryPerformanceCounter failed\n" );
-
-		m_ulLastQueryPerformanceCounterValue = l.QuadPart;
-		
-		m_ulPreviousGameTickCount = 0;
-		m_ulGameTickCount = 0;
-		m_bFirstFrame = false;
-	}
-	else 
-	{
-		m_ulPreviousGameTickCount = m_ulGameTickCount;
-		
-		LARGE_INTEGER l;
-		if ( !QueryPerformanceCounter( &l ) )
-			OutputDebugString( "QueryPerformanceCounter failed\n" );
-
-		m_ulGameTickCount += (l.QuadPart - m_ulLastQueryPerformanceCounterValue)/m_ulPerfCounterToMillisecondsDivisor;
-		m_ulLastQueryPerformanceCounterValue = l.QuadPart;
-	}
-
 	// Before doing anything else pump messages
 	MessagePump();
 
@@ -664,30 +621,6 @@ void CGameEngine::EndFrame()
 		OutputDebugString( "Present() call failed\n" );
 		return;
 	}
-
-	// Frame rate limiting
-	float flDesiredFrameMilliseconds = 1000.0f/m_flMaxFPS;
-	while( 1 )
-	{
-		uint64 ulCurrentTickCount = m_ulGameTickCount;
-		LARGE_INTEGER l;
-		if ( !QueryPerformanceCounter( &l ) )
-			OutputDebugString( "QueryPerformanceCounter failed\n" );
-
-		ulCurrentTickCount += (l.QuadPart-m_ulLastQueryPerformanceCounterValue)/m_ulPerfCounterToMillisecondsDivisor;
-		
-		float flMillisecondsElapsed = (float)(ulCurrentTickCount - m_ulGameTickCount);
-		if ( flMillisecondsElapsed < flDesiredFrameMilliseconds )
-		{
-			// If enough time is left sleep, otherwise just keep spinning so we don't go over the limit...
-			if ( flDesiredFrameMilliseconds - flMillisecondsElapsed > 2.0f )
-				Sleep( 2 );
-			else
-				continue;
-		}
-		else
-			break;
-	} 
 }
 
 //-----------------------------------------------------------------------------

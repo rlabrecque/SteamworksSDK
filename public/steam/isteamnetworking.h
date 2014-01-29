@@ -13,12 +13,67 @@
 #include "steamtypes.h"
 #include "steamclientpublic.h"
 
+
+// list of possible errors returned by SendP2PPacket() API
+// these will be posted in the P2PSessionConnectFail_t callback
+enum EP2PSessionError
+{
+	k_EP2PSessionErrorNone = 0,
+	k_EP2PSessionErrorNotRunningApp = 1,			// target is not running the same game
+	k_EP2PSessionErrorNoRightsToApp = 2,			// local user doesn't own the app that is running
+	k_EP2PSessionErrorDestinationNotLoggedIn = 3,	// target user isn't connected to Steam
+	k_EP2PSessionErrorTimeout = 4,					// target isn't responding, perhaps not calling AcceptP2PSessionWithUser()
+
+};
+
+// SendP2PPacket() send types
+// Typically k_EP2PSendUnreliable is what you want for UDP-like packets, k_EP2PSendReliable for TCP-like packets
+enum EP2PSend
+{
+	// Basic UDP send. Packets can't be bigger than 1200 bytes (your typical MTU size). Can be lost, or arrive out of order (rare).
+	// The sending API does have some knowledge of the underlying connection, so if there is no NAT-traversal accomplished or
+	// there is a recognized adjustment happening on the connection, the packet will be batched until the connection is open again.
+	k_EP2PSendUnreliable = 0,
+
+	// As above, but if the underlying p2p connection isn't yet established the packet will just be thrown away. Using this on the first
+	// packet sent to a remote host almost guarantees the packet will be dropped.
+	// This is only really useful for kinds of data that should never buffer up, i.e. voice payload packets
+	k_EP2PSendUnreliableNoDelay = 1,
+
+	// Reliable message send. Can send up to 1MB of data in a single message. 
+	// Does fragmentation/re-assembly of messages under the hood, as well as a sliding window for efficient sends of large chunks of data. 
+	k_EP2PSendReliable = 2,
+
+	// As above, but applies the Nagle algorithm to the send - sends will accumulate 
+	// until the current MTU size (typically ~1200 bytes, but can change) or ~200ms has passed (Nagle algorithm). 
+	// Useful if you want to send a set of smaller messages but have the coalesced into a single packet
+	// Since the reliable stream is all ordered, you can do several small message sends with k_EP2PSendReliableWithBuffering and then
+	// do a normal k_EP2PSendReliable to force all the buffered data to be sent.
+	k_EP2PSendReliableWithBuffering = 3,
+
+};
+
+
+// connection state to a specified user, returned by GetP2PSessionState()
+// this is under-the-hood info about what's going on with a SendP2PPacket(), shouldn't be needed except for debuggin
+struct P2PSessionState_t
+{
+	uint8 m_bConnectionActive;		// true if we've got an active open connection
+	uint8 m_bConnecting;			// true if we're currently trying to establish a connection
+	uint8 m_eP2PSessionError;		// last error recorded (see enum above)
+	uint8 m_bUsingRelay;			// true if it's going through a relay server (TURN)
+	int32 m_nBytesQueuedForSend;
+	int32 m_nPacketsQueuedForSend;
+	uint32 m_nRemoteIP;				// potential IP:Port of remote host. Could be TURN server. 
+	uint16 m_nRemotePort;			// Only exists for compatibility with older authentication api's
+};
+
+
 // handle to a socket
-typedef uint32 SNetSocket_t;
-typedef uint32 SNetListenSocket_t;
+typedef uint32 SNetSocket_t;		// CreateP2PConnectionSocket()
+typedef uint32 SNetListenSocket_t;	// CreateListenSocket()
 
-
-// connection progress indicators
+// connection progress indicators, used by CreateP2PConnectionSocket()
 enum ESNetSocketState
 {
 	k_ESNetSocketStateInvalid = 0,						
@@ -61,6 +116,54 @@ enum ESNetSocketConnectionType
 class ISteamNetworking
 {
 public:
+	////////////////////////////////////////////////////////////////////////////////////////////
+	// Session-less connection functions
+	//    automatically establishes NAT-traversing or Relay server connections
+
+	// Sends a P2P packet to the specified user
+	// UDP-like, unreliable and a max packet size of 1200 bytes
+	// the first packet send may be delayed as the NAT-traversal code runs
+	// if we can't get through to the user, an error will be posted via the callback P2PSessionConnectFail_t
+	// see EP2PSend enum above for the descriptions of the different ways of sending packets
+	virtual bool SendP2PPacket( CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType ) = 0;
+
+	// returns true if any data is available for read, and the amount of data that will need to be read
+	virtual bool IsP2PPacketAvailable( uint32 *pcubMsgSize ) = 0;
+
+	// reads in a packet that has been sent from another user via SendP2PPacket()
+	// returns the size of the message and the steamID of the user who sent it in the last two parameters
+	// if the buffer passed in is too small, the message will be truncated
+	// this call is not blocking, and will return false if no data is available
+	virtual bool ReadP2PPacket( void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote ) = 0;
+
+	// AcceptP2PSessionWithUser() should only be called in response to a P2PSessionRequest_t callback
+	// P2PSessionRequest_t will be posted if another user tries to send you a packet that you haven't talked to yet
+	// if you don't want to talk to the user, just ignore the request
+	// if the user continues to send you packets, another P2PSessionRequest_t will be posted periodically
+	// this may be called multiple times for a single user
+	// (if you've called SendP2PPacket() on the other user, this implicitly accepts the session request)
+	virtual bool AcceptP2PSessionWithUser( CSteamID steamIDRemote ) = 0;
+
+	// call CloseP2PSessionWithUser() when you're done talking to a user, will free up resources under-the-hood
+	// if the remote user tries to send data to you again, another P2PSessionRequest_t callback will be posted
+	virtual bool CloseP2PSessionWithUser( CSteamID steamIDRemote ) = 0;
+
+	// fills out P2PSessionState_t structure with details about the underlying connection to the user
+	// should only needed for debugging purposes
+	// returns false if no connection exists to the specified user
+	virtual bool GetP2PSessionState( CSteamID steamIDRemote, P2PSessionState_t *pConnectionState ) = 0;
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////
+	// LISTEN / CONNECT style interface functions
+	//
+	// This is an older set of functions designed around the Berkeley TCP sockets model
+	// it's preferential that you use the above P2P functions, they're more robust
+	// and these older functions will be removed eventually
+	//
+	////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	// creates a socket and listens others to connect
 	// will trigger a SocketStatusCallback_t callback on another client connecting
 	// nVirtualP2PPort is the unique ID that the client will connect to, in case you have multiple ports
@@ -130,10 +233,31 @@ public:
 	// max packet size, in bytes
 	virtual int GetMaxPacketSize( SNetSocket_t hSocket ) = 0;
 };
-#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking002"
+#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking003"
+
+
+// callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
+// in response, a call to AcceptP2PPacketsFromUser() needs to be made, if you want to talk with them
+struct P2PSessionRequest_t
+{ 
+	enum { k_iCallback = k_iSteamNetworkingCallbacks + 2 };
+	CSteamID m_steamIDRemote;			// user who wants to talk to us
+};
+
+
+// callback notification - packets can't get through to the specified user via the SendP2PPacket() API
+// all packets queued packets unsent at this point will be dropped
+// further attempts to send will retry making the connection (but will be dropped if we fail again)
+struct P2PSessionConnectFail_t
+{ 
+	enum { k_iCallback = k_iSteamNetworkingCallbacks + 3 };
+	CSteamID m_steamIDRemote;			// user we were sending packets to
+	uint8 m_eP2PSessionError;			// EP2PSessionError indicating why we're having trouble
+};
 
 
 // callback notification - status of a socket has changed
+// used as part of the CreateListenSocket() / CreateP2PConnectionSocket() 
 struct SocketStatusCallback_t
 { 
 	enum { k_iCallback = k_iSteamNetworkingCallbacks + 1 };

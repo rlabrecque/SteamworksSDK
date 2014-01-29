@@ -15,6 +15,7 @@
 #include "ServerBrowser.h"
 #include "Leaderboards.h"
 #include "Lobby.h"
+#include "p2pauth.h"
 
 CSpaceWarClient *g_pSpaceWarClient = NULL;
 CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
@@ -23,7 +24,7 @@ CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
 CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser ) :
-		m_SocketStatusCallback( this, &CSpaceWarClient::OnSocketStatusCallback ),
+		m_CallbackP2PSessionConnectFail( this, &CSpaceWarClient::OnP2PSessionConnectFail ),
 		m_LobbyGameCreated( this, &CSpaceWarClient::OnLobbyGameCreated ),
 		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure ),
 		m_SteamShutdownCallback( this, &CSpaceWarClient::OnSteamShutdown )
@@ -39,11 +40,11 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 	m_uPlayerShipIndex = 0;
 	m_SteamIDLocalUser = steamIDUser;
 	m_eConnectedStatus = k_EClientNotConnected;
-	m_hSocketClient = NULL;
 	m_bTransitionedGameState = false;
 	m_rgchErrorText[0] = 0;
 	m_unServerIP = 0;
 	m_usServerPort = 0;
+	m_ulPingSentTime = 0;
 
 	for( uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i )
 	{
@@ -74,10 +75,14 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 	// Initialize sun
 	m_pSun = new CSun( pGameEngine );
 
+	// initialize P2P auth engine
+	m_pP2PAuthedGame = new CP2PAuthedGame( m_pGameEngine );
+
 	// Create matchmaking menus
 	m_pServerBrowser = new CServerBrowser( m_pGameEngine );
 	m_pLobbyBrowser = new CLobbyBrowser( m_pGameEngine );
 	m_pLobby = new CLobby( m_pGameEngine );
+
 
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
@@ -94,6 +99,13 @@ CSpaceWarClient::CSpaceWarClient( CGameEngine *pGameEngine, CSteamID steamIDUser
 CSpaceWarClient::~CSpaceWarClient()
 {
 	DisconnectFromServer();
+
+	if ( m_pP2PAuthedGame )
+	{
+		m_pP2PAuthedGame->EndGame();
+		delete m_pP2PAuthedGame;
+		m_pP2PAuthedGame = NULL;
+	}
 
 	if ( m_pServer )
 	{
@@ -127,13 +139,6 @@ CSpaceWarClient::~CSpaceWarClient()
 			m_rgpShips[i] = NULL;
 		}
 	}
-
-	// Close down our socket if it appears to be valid
-	if ( m_hSocketClient )
-	{
-		SteamNetworking()->DestroySocket( m_hSocketClient, true );
-		m_hSocketClient = NULL;
-	}
 }
 
 
@@ -147,8 +152,19 @@ void CSpaceWarClient::DisconnectFromServer()
 		SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
 
 		MsgClientLeavingServer_t msg;
-		BSendServerData( (char*)&msg, sizeof(msg), true );
+		BSendServerData( &msg, sizeof(msg) );
 		m_eConnectedStatus = k_EClientNotConnected;
+	}
+	if ( m_pP2PAuthedGame )
+	{
+		m_pP2PAuthedGame->EndGame();
+	}
+
+	// forget the game server ID
+	if ( m_steamIDGameServer.IsValid() )
+	{
+		SteamNetworking()->CloseP2PSessionWithUser( m_steamIDGameServer );
+		m_steamIDGameServer = CSteamID();
 	}
 }
 
@@ -160,6 +176,13 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 {
 	m_eConnectedStatus = k_EClientConnectedPendingAuthentication;
 	m_pQuitMenu->SetHeading( pchServerName );
+	m_steamIDGameServer = steamIDGameServer;
+
+	// look up the servers IP and Port from the connection
+	P2PSessionState_t p2pSessionState;
+	SteamNetworking()->GetP2PSessionState( steamIDGameServer, &p2pSessionState );
+	m_unServerIP = p2pSessionState.m_nRemoteIP;
+	m_usServerPort = p2pSessionState.m_nRemotePort;
 
 	MsgClientBeginAuthentication_t msg;
 #ifdef USE_GS_AUTH_API
@@ -171,10 +194,12 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	msg.m_SteamID = SteamUser()->GetSteamID();
 #endif
 
+	Steamworks_TestSecret();
+
 	if ( msg.m_uTokenLen < 1 )
 		OutputDebugString( "Warning: Looks like InitiateGameConnection didn't give us a good token\n" );
 
-	BSendServerData( (char*)&msg, sizeof(msg), true );
+	BSendServerData( &msg, sizeof(msg) );
 }
 
 
@@ -197,6 +222,11 @@ void CSpaceWarClient::OnReceiveServerAuthenticationResponse( bool bSuccess, uint
 
 		m_uPlayerShipIndex = uPlayerPosition;
 		m_eConnectedStatus = k_EClientConnectedAndAuthenticated;
+
+		// send a ping, to measure round-trip time
+		m_ulPingSentTime = m_pGameEngine->GetGameTickCount();
+		MsgClientPing_t msg;
+		BSendServerData( &msg, sizeof( msg ) );
 	}
 }
 
@@ -263,6 +293,56 @@ void CSpaceWarClient::OnReceiveServerUpdate( ServerSpaceWarUpdateData_t UpdateDa
 
 	// Update who won last
 	m_uPlayerWhoWonGame = UpdateData.m_uPlayerWhoWonGame;
+
+	if ( m_pP2PAuthedGame )
+	{
+		// has the player list changed?
+		if ( m_pServer )
+		{
+			// if i am the server owner i need to auth everyone who wants to play
+			// assume i am in slot 0, so start at slot 1
+			for( uint32 i=1; i < MAX_PLAYERS_PER_SERVER; ++i )
+			{
+				CSteamID steamIDNew( UpdateData.m_rgPlayerSteamIDs[i] );
+				if ( steamIDNew == SteamUser()->GetSteamID() )
+				{
+					OutputDebugStringA( "Server player slot 0 is not server owner.\n" );
+				}
+				else if ( steamIDNew != m_rgSteamIDPlayers[i] )
+				{
+					if ( m_rgSteamIDPlayers[i].IsValid() )
+					{
+						m_pP2PAuthedGame->PlayerDisconnect( i );
+					}
+					if ( steamIDNew.IsValid() )
+					{
+						m_pP2PAuthedGame->RegisterPlayer( i, steamIDNew );
+					}
+				}
+			}
+		}
+		else
+		{
+			// i am just a client, i need to auth the game owner ( slot 0 )
+			CSteamID steamIDNew( UpdateData.m_rgPlayerSteamIDs[0] );
+			if ( steamIDNew == SteamUser()->GetSteamID() )
+			{
+				OutputDebugStringA( "Server player slot 0 is not server owner.\n" );
+			}
+			else if ( steamIDNew != m_rgSteamIDPlayers[0] )
+			{
+				if ( m_rgSteamIDPlayers[0].IsValid() )
+				{
+					OutputDebugStringA( "Server player slot 0 has disconnected - but thats the server owner.\n" );
+					m_pP2PAuthedGame->PlayerDisconnect( 0 );
+				}
+				if ( steamIDNew.IsValid() )
+				{
+					m_pP2PAuthedGame->StartAuthPlayer( 0, steamIDNew );
+				}
+			}
+		}
+	}
 
 	// Update the ships
 	for( uint32 i=0; i < MAX_PLAYERS_PER_SERVER; ++i )
@@ -336,9 +416,9 @@ void CSpaceWarClient::SetConnectionFailureText( const char *pchErrorText )
 //-----------------------------------------------------------------------------
 // Purpose: Send data to the current server
 //-----------------------------------------------------------------------------
-bool CSpaceWarClient::BSendServerData( char *pData, uint32 nSizeOfData, bool bSendReliably )
+bool CSpaceWarClient::BSendServerData( const void *pData, uint32 nSizeOfData )
 {
-	if ( !SteamNetworking()->SendDataOnSocket( m_hSocketClient, pData, nSizeOfData, bSendReliably ) )
+	if ( !SteamNetworking()->SendP2PPacket( m_steamIDGameServer, pData, nSizeOfData, k_EP2PSendUnreliable ) )
 	{
 		OutputDebugString( "Failed sending data to server\n" );
 		return false;
@@ -364,14 +444,10 @@ void CSpaceWarClient::InitiateServerConnection( uint32 unServerAddress, const in
 	// and so we will retry at appropriate intervals if packets drop
 	m_ulLastNetworkDataReceivedTime = m_ulLastConnectionAttemptRetryTime = m_pGameEngine->GetGameTickCount();
 
-	// Create UDP socket for the client to talk to the server over
-	m_hSocketClient = SteamNetworking()->CreateConnectionSocket( unServerAddress, nPort, 10 );
-	if ( !m_hSocketClient )
-	{
-		OutputDebugString( "Failed creating socket for CSpaceWarClient -- won't be able to talk to server\n" );
-	}
-
-	// wait for the callback before initiating connection
+	// ping the server to find out what it's steamID is
+	m_unServerIP = unServerAddress;
+	m_usServerPort = (uint16)nPort;
+	m_GameServerPing.RetrieveSteamIDFromGameServer( this, m_unServerIP, m_usServerPort );
 }
 
 
@@ -387,52 +463,28 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 
 	SetGameState( k_EClientGameConnecting );
 
+	m_steamIDGameServer = steamIDGameServer;
+
 	// Update when we last retried the connection, as well as the last packet received time so we won't timeout too soon,
 	// and so we will retry at appropriate intervals if packets drop
 	m_ulLastNetworkDataReceivedTime = m_ulLastConnectionAttemptRetryTime = m_pGameEngine->GetGameTickCount();
 
-	// Create UDP socket for the client to talk to the server over
-	m_hSocketClient = SteamNetworking()->CreateP2PConnectionSocket( steamIDGameServer, 0, 10, true );
-	if ( !m_hSocketClient )
-	{
-		OutputDebugString( "Failed creating socket for CSpaceWarClient -- won't be able to talk to server\n" );
-	}
-
-	// wait for the callback before initiating connection
+	// send the packet to the server
+	MsgClientInitiateConnection_t msg;
+	BSendServerData( &msg, sizeof( msg ) );
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: steam callback, trigger when our connection state changes
 //-----------------------------------------------------------------------------
-void CSpaceWarClient::OnSocketStatusCallback( SocketStatusCallback_t *pCallback )
+void CSpaceWarClient::OnP2PSessionConnectFail( P2PSessionConnectFail_t *pCallback )
 {
-	// make sure the callback is for our socket
-	if ( pCallback->m_hSocket != m_hSocketClient )
-		return;
-
-	// Update out network data received time even though we haven't really received anything yet,
-	// this will help us make sure we don't time out prematurely during the handshake
-	m_ulLastNetworkDataReceivedTime = m_pGameEngine->GetGameTickCount();
-
-	// if we've finished connecting to the server, send the connect message
-	if ( pCallback->m_eSNetSocketState == k_ESNetSocketStateConnected )
+	if ( pCallback->m_steamIDRemote == m_steamIDGameServer )
 	{
-		MsgClientInitiateConnection_t msg;
-		BSendServerData( (char*)&msg, sizeof( msg ), true );
-	}
-
-	// handling being disconnect from the server signal via network breakage, or the remote end dying
-	if ( pCallback->m_eSNetSocketState == k_ESNetSocketStateRemoteEndDisconnected 
-		|| pCallback->m_eSNetSocketState == k_ESNetSocketStateConnectionBroken )
-	{
+		// failed, error out
+		OutputDebugString( "Failed to make P2P connection, quiting server" );
 		OnReceiveServerExiting();
-		m_hSocketClient = NULL;
-	}
-
-	if ( pCallback->m_eSNetSocketState >= k_ESNetSocketStateDisconnecting )
-	{
-		m_hSocketClient = NULL;
 	}
 }
 
@@ -442,9 +494,6 @@ void CSpaceWarClient::OnSocketStatusCallback( SocketStatusCallback_t *pCallback 
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::ReceiveNetworkData()
 {
-	if ( !m_hSocketClient )
-		return;
-
 	char rgchRecvBuf[MAX_SPACEWAR_PACKET_SIZE];
 	char *pchRecvBuf = rgchRecvBuf;
 	uint32 cubMsgSize;
@@ -458,89 +507,114 @@ void CSpaceWarClient::ReceiveNetworkData()
 		}
 
 		// see if there is any data waiting on the socket
-		if ( !SteamNetworking()->RetrieveDataFromSocket( m_hSocketClient, rgchRecvBuf, sizeof( rgchRecvBuf ), &cubMsgSize ) )
+		if ( !SteamNetworking()->IsP2PPacketAvailable( &cubMsgSize ) )
 			break;
 
-		// not enough space in buffer, so message won't have been popped off of list
+		// not enough space in default buffer
 		// alloc custom size and try again
 		if ( cubMsgSize > sizeof(rgchRecvBuf) )
 		{
 			pchRecvBuf = (char *)malloc( cubMsgSize );
-			SteamNetworking()->RetrieveDataFromSocket( m_hSocketClient, pchRecvBuf, cubMsgSize, &cubMsgSize );
 		}
+		CSteamID steamIDRemote;
+		if ( !SteamNetworking()->ReadP2PPacket( pchRecvBuf, cubMsgSize, &cubMsgSize, &steamIDRemote ) )
+			break;
 
-		m_ulLastNetworkDataReceivedTime = m_pGameEngine->GetGameTickCount();
-
-		// make sure we're connected
-		if ( m_eConnectedStatus == k_EClientNotConnected && m_eGameState != k_EClientGameConnecting )
-			continue;
-
-		if ( cubMsgSize < sizeof( EMessage ) )
+		// see if it's from the game server
+		if ( steamIDRemote == m_steamIDGameServer )
 		{
-			OutputDebugString( "Got garbage on client socket, too short\n" );
-		}
+			m_ulLastNetworkDataReceivedTime = m_pGameEngine->GetGameTickCount();
 
-		EMessage *pEMsg = (EMessage*)pchRecvBuf;
-		switch ( *pEMsg )
+			// make sure we're connected
+			if ( m_eConnectedStatus == k_EClientNotConnected && m_eGameState != k_EClientGameConnecting )
+				continue;
+
+			if ( cubMsgSize < sizeof( EMessage ) )
+			{
+				OutputDebugString( "Got garbage on client socket, too short\n" );
+			}
+
+			EMessage *pEMsg = (EMessage*)pchRecvBuf;
+			switch ( *pEMsg )
+			{
+			case k_EMsgServerSendInfo:
+				{
+					if ( cubMsgSize != sizeof( MsgServerSendInfo_t ) )
+					{
+						OutputDebugString ("Bad server info msg\n" );
+						continue;
+					}
+					MsgServerSendInfo_t *pMsg = (MsgServerSendInfo_t*)pchRecvBuf;
+
+					// pull the IP address of the user from the socket
+					OnReceiveServerInfo( CSteamID( pMsg->m_ulSteamIDServer ), pMsg->m_bIsVACSecure, pMsg->m_rgchServerName );
+				}
+				break;
+			case k_EMsgServerPassAuthentication:
+				{
+					if ( cubMsgSize != sizeof( MsgServerPassAuthentication_t ) )
+					{
+						OutputDebugString( "Bad accept connection msg\n" );
+						continue;
+					}
+					MsgServerPassAuthentication_t *pMsg = (MsgServerPassAuthentication_t*)pchRecvBuf;
+
+					// Our game client doesn't really care about whether the server is secure, or what its 
+					// steamID is, but if it did we would pass them in here as they are part of the accept message
+					OnReceiveServerAuthenticationResponse( true, pMsg->m_uPlayerPosition );
+				}
+				break;
+			case k_EMsgServerFailAuthentication:
+				{
+					OnReceiveServerAuthenticationResponse( false, 0 );
+				}
+				break;
+			case k_EMsgServerUpdateWorld:
+				{
+					if ( cubMsgSize != sizeof( MsgServerUpdateWorld_t ) )
+					{
+						OutputDebugString( "Bad server world update msg\n" );
+						continue;
+					}
+
+					MsgServerUpdateWorld_t *pMsg = (MsgServerUpdateWorld_t*)pchRecvBuf;
+					OnReceiveServerUpdate( pMsg->m_ServerUpdateData );
+				}
+				break;
+			case k_EMsgServerExiting:
+				{
+					if ( cubMsgSize != sizeof( MsgServerExiting_t ) )
+					{
+						OutputDebugString( "Bad server exiting msg\n" );
+					}
+					OnReceiveServerExiting();
+				}
+				break;
+			case k_EMsgServerPingResponse:
+				{
+					uint64 ulTimePassedMS = m_pGameEngine->GetGameTickCount() - m_ulPingSentTime;
+					char rgchT[256];
+					_snprintf( rgchT, sizeof(rgchT), "Round-trip ping time to server %d ms\n", (int)ulTimePassedMS );
+					OutputDebugString( rgchT );
+					m_ulPingSentTime = 0;
+				}
+				break;
+			default:
+				OutputDebugString( "Unhandled message from server\n" );
+				break;
+			}
+		}
+		else
 		{
-		case k_EMsgServerSendInfo:
-			{
-				if ( cubMsgSize != sizeof( MsgServerSendInfo_t ) )
-				{
-					OutputDebugString ("Bad server info msg\n" );
-					continue;
-				}
-				MsgServerSendInfo_t *pMsg = (MsgServerSendInfo_t*)pchRecvBuf;
-
-				// pull the IP address of the user from the socket
-				SteamNetworking()->GetSocketInfo( m_hSocketClient, NULL, NULL, &m_unServerIP, &m_usServerPort );
-				OnReceiveServerInfo( CSteamID( pMsg->m_ulSteamIDServer ), pMsg->m_bIsVACSecure, pMsg->m_rgchServerName );
-			}
-			break;
-		case k_EMsgServerPassAuthentication:
-			{
-				if ( cubMsgSize != sizeof( MsgServerPassAuthentication_t ) )
-				{
-					OutputDebugString( "Bad accept connection msg\n" );
-					continue;
-				}
-				MsgServerPassAuthentication_t *pMsg = (MsgServerPassAuthentication_t*)pchRecvBuf;
-
-				// Our game client doesn't really care about whether the server is secure, or what its 
-				// steamID is, but if it did we would pass them in here as they are part of the accept message
-				OnReceiveServerAuthenticationResponse( true, pMsg->m_uPlayerPosition );
-			}
-			break;
-		case k_EMsgServerFailAuthentication:
-			{
-				OnReceiveServerAuthenticationResponse( false, 0 );
-			}
-			break;
-		case k_EMsgServerUpdateWorld:
-			{
-				if ( cubMsgSize != sizeof( MsgServerUpdateWorld_t ) )
-				{
-					OutputDebugString( "Bad server world update msg\n" );
-					continue;
-				}
-
-				MsgServerUpdateWorld_t *pMsg = (MsgServerUpdateWorld_t*)pchRecvBuf;
-				OnReceiveServerUpdate( pMsg->m_ServerUpdateData );
-			}
-			break;
-		case k_EMsgServerExiting:
-			{
-				if ( cubMsgSize != sizeof( MsgServerExiting_t ) )
-				{
-					OutputDebugString( "Bad server exiting msg\n" );
-				}
-				OnReceiveServerExiting();
-			}
-			break;
-		default:
-			OutputDebugString( "Unhandled message from server\n" );
-			break;
+			EMessage *pEMsg = (EMessage*)pchRecvBuf;
+			m_pP2PAuthedGame->HandleMessage( *pEMsg, pchRecvBuf );
 		}
+	}
+
+	// if we're running a server, do that as well
+	if ( m_pServer )
+	{
+		m_pServer->ReceiveNetworkData();
 	}
 }
 
@@ -550,6 +624,8 @@ void CSpaceWarClient::ReceiveNetworkData()
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnReceiveServerExiting()
 {
+	if ( m_pP2PAuthedGame )
+		m_pP2PAuthedGame->EndGame();
 	if ( m_eGameState != k_EClientGameActive )
 		return;
 
@@ -611,6 +687,18 @@ void CSpaceWarClient::OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure )
 
 }
 
+void CSpaceWarClient::OnLobbyDataChange( LobbyDataUpdate_t *pCallback, bool bIOFailure )
+{
+	OutputDebugStringA( "OnLobbyDataChange ");
+	CSteamID steamIDLobbyMember( pCallback->m_ulSteamIDMember );
+}
+
+void CSpaceWarClient::OnLobbyChatUpdate( LobbyChatUpdate_t *pCallback, bool bIOFailure )
+{
+	CSteamID steamIDLobbyMember( pCallback->m_ulSteamIDUserChanged );
+	CSteamID steamIDLobbyMember2( pCallback->m_ulSteamIDMakingChange );
+	OutputDebugStringA( "OnLobbyChatUpdate ");
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Joins a game from a lobby
@@ -624,11 +712,6 @@ void CSpaceWarClient::OnLobbyGameCreated( LobbyGameCreated_t *pCallback )
 	if ( CSteamID( pCallback->m_ulSteamIDGameServer ).IsValid() )
 	{
 		InitiateServerConnection( CSteamID( pCallback->m_ulSteamIDGameServer ) );
-	}
-	else
-	{
-		// fall back to using the IP address directly
-		InitiateServerConnection( pCallback->m_unIP, pCallback->m_usPort );
 	}
 }
 
@@ -701,7 +784,7 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		if ( !m_SteamCallResultLobbyCreated.IsActive() )
 		{
 			// ask steam to create a lobby
-			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->CreateLobby( k_ELobbyTypePublic /* public lobby, anyone can find it */ );
+			SteamAPICall_t hSteamAPICall = SteamMatchmaking()->CreateLobby( k_ELobbyTypePublic /* public lobby, anyone can find it */, 4 );
 			// set the function to call when this completes
 			m_SteamCallResultLobbyCreated.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyCreated );
 		}
@@ -838,11 +921,9 @@ void CSpaceWarClient::RunFrame()
 		if ( m_pServer && m_pServer->IsConnectedToSteam() )
 		{
 			// server is up; tell everyone else to connect
-			SteamMatchmaking()->SetLobbyGameServer( m_steamIDLobby, m_pServer->GetIP(), m_pServer->GetPort(), m_pServer->GetSteamID() );
-
+			SteamMatchmaking()->SetLobbyGameServer( m_steamIDLobby, 0, 0, m_pServer->GetSteamID() );
 			// start connecting ourself via localhost (this will automatically leave the lobby)
-			uint32 unIPAddress = ( 1 ) + ( 0 << 8 ) + ( 0 << 16 ) + ( 127 << 24 );
-			InitiateServerConnection( unIPAddress, m_pServer->GetPort() );
+			InitiateServerConnection( m_pServer->GetSteamID() );
 		}
 		break;
 
@@ -884,9 +965,12 @@ void CSpaceWarClient::RunFrame()
 		// Check if we've waited too long and should time out the connection
 		if ( m_pGameEngine->GetGameTickCount() - m_ulStateTransitionTime > MILLISECONDS_CONNECTION_TIMEOUT )
 		{
+			if ( m_pP2PAuthedGame )
+				m_pP2PAuthedGame->EndGame();
 			if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated )
 				SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
-
+			
+			m_GameServerPing.CancelPing();
 			SetConnectionFailureText( "Timed out connecting to game server" );
 			SetGameState( k_EClientGameConnectionFailure );
 		}
@@ -941,14 +1025,13 @@ void CSpaceWarClient::RunFrame()
 		if ( !m_pServer )
 		{
 			m_pServer = new CSpaceWarServer( m_pGameEngine );
-			uint32 unIPAddress = ( 1 ) + ( 0 << 8 ) + ( 0 << 16 ) + ( 127 << 24 );
-			InitiateServerConnection( unIPAddress, SPACEWAR_SERVER_PORT );
-		}
-		else
-		{
-			OutputDebugString( "Server already started locally when in k_EClientGameStartServer state!\n" );
 		}
 
+		if ( m_pServer && m_pServer->IsConnectedToSteam() )
+		{
+			// server is ready, connect to it
+			InitiateServerConnection( m_pServer->GetSteamID() );
+		}
 		break;
 	case k_EClientGameDraw:
 	case k_EClientGameWinner:
@@ -1004,7 +1087,37 @@ void CSpaceWarClient::RunFrame()
 
 		// If this fails, it probably just means its not time to send an update yet
 		if ( m_rgpShips[ m_uPlayerShipIndex ]->BGetClientUpdateData( &msg.m_ClientUpdateData ) )
-			BSendServerData( (char*)&msg, sizeof( msg ), false );
+			BSendServerData( &msg, sizeof( msg ) );
+	}
+
+	if ( m_pP2PAuthedGame )
+	{
+		if ( m_pServer )
+		{
+			// Now if we are the owner of the game, lets make sure all of our players are legit.
+			// if they are not, we tell the server to kick them off
+			// Start at 1 to skip myself
+			for ( int i = 1; i < MAX_PLAYERS_PER_SERVER; i++ )
+			{
+				if ( m_pP2PAuthedGame->m_rgpP2PAuthPlayer[i] && !m_pP2PAuthedGame->m_rgpP2PAuthPlayer[i]->BIsAuthOk() )
+				{
+					m_pServer->KickPlayerOffServer( m_pP2PAuthedGame->m_rgpP2PAuthPlayer[i]->m_steamID );
+				}
+			}
+		}
+		else
+		{
+			// If we are not the owner of the game, lets make sure the game owner is legit
+			// if he is not, we leave the game
+			if ( m_pP2PAuthedGame->m_rgpP2PAuthPlayer[0] )
+			{
+				if ( !m_pP2PAuthedGame->m_rgpP2PAuthPlayer[0]->BIsAuthOk() )
+				{
+					// leave the game
+					SetGameState( k_EClientGameMenu );
+				}
+			}
+		}
 	}
 
 	// If we've started a local server run it

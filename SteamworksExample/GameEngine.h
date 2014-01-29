@@ -166,6 +166,8 @@ public:
 	//			way to handle that.  
 	uint64 GetGameTicksFrameDelta() { return m_ulGameTickCount - m_ulPreviousGameTickCount; }
 
+	void SetGameTickCount( uint64 ulGameTickCount ) { m_ulPreviousGameTickCount = m_ulGameTickCount; m_ulGameTickCount = ulGameTickCount; }
+
 	// Get the game engines hwnd
 	HWND GetGameHWND() { return m_hWnd; }
 
@@ -301,15 +303,6 @@ private:
 
 	// Game time at the start of the previous frame
 	uint64 m_ulPreviousGameTickCount;
-
-	// Track whether this is the first frame
-	bool m_bFirstFrame;
-
-	// Value to divide from QueryPerformanceCounter results to get milliseconds
-	uint64 m_ulPerfCounterToMillisecondsDivisor;
-
-	// Last value from QueryPerformanceCounter
-	uint64 m_ulLastQueryPerformanceCounterValue;
 
 	// Maximum FPS to run the engine at
 	float m_flMaxFPS;

@@ -102,9 +102,18 @@ public:
 	// connect to
 	virtual uint32 GetPublicIP() = 0;
 
+	// Sets a string defining the "gamedata" for this server, this is optional, but if it is set
+	// it allows users to filter in the matchmaking/server-browser interfaces based on the value
+	// don't set this unless it actually changes, its only uploaded to the master once (when
+	// acknowledged)
+	virtual void SetGameData( const char *pchGameData) = 0; 
+
+	// After receiving a user's authentication data, and passing it to SendUserConnectAndAuthenticate, use this function
+	// to determine if the user owns downloadable content specified by the provided AppID.
+	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
 };
 
-#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer008"
+#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer009"
 
 // game server flags
 const uint32 k_unServerFlagNone			= 0x00;

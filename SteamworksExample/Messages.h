@@ -20,6 +20,7 @@ enum EMessage
 	k_EMsgServerPassAuthentication = k_EMsgServerBegin+3,
 	k_EMsgServerUpdateWorld = k_EMsgServerBegin+4,
 	k_EMsgServerExiting = k_EMsgServerBegin+5,
+	k_EMsgServerPingResponse = k_EMsgServerBegin+6,
 
 	// Client messages
 	k_EMsgClientBegin = 500,
@@ -27,6 +28,11 @@ enum EMessage
 	k_EMsgClientBeginAuthentication = k_EMsgClientBegin+2,
 	k_EMsgClientSendLocalUpdate = k_EMsgClientBegin+3,
 	k_EMsgClientLeavingServer = k_EMsgClientBegin+4,
+	k_EMsgClientPing = k_EMsgClientBegin+5,
+
+	// P2P messages
+	k_EMsgP2PBegin = 500,
+	k_EMsgP2PSendingTicket = k_EMsgP2PBegin+1,
 
 
 	// force 32-bit size enum so the wire protocol doesn't get outgrown later
@@ -78,6 +84,13 @@ struct MsgServerExiting_t
 	const DWORD m_dwMessageType;
 };
 
+// Msg from server to clients when it is exiting
+struct MsgServerPingResponse_t
+{
+	MsgServerPingResponse_t() : m_dwMessageType( k_EMsgServerPingResponse ) {}
+	const DWORD m_dwMessageType;
+};
+
 // Msg from client to server when trying to connect
 struct MsgClientInitiateConnection_t
 {
@@ -94,9 +107,8 @@ struct MsgClientBeginAuthentication_t
 	uint32 m_uTokenLen;
 #ifdef USE_GS_AUTH_API
 	char m_rgchToken[1024];
-#else
-	CSteamID m_SteamID;
 #endif
+	CSteamID m_SteamID;
 };
 
 // Msg from client to server when sending state update
@@ -109,7 +121,6 @@ struct MsgClientSendLocalUpdate_t
 	ClientSpaceWarUpdateData_t m_ClientUpdateData;
 };
 
-
 // Msg from the client telling the server it is about to leave
 struct MsgClientLeavingServer_t
 {
@@ -117,5 +128,21 @@ struct MsgClientLeavingServer_t
 	const DWORD m_dwMessageType;
 };
 
+// server ping
+struct MsgClientPing_t
+{
+	MsgClientPing_t() : m_dwMessageType( k_EMsgClientPing ) {}
+	const DWORD m_dwMessageType;
+};
+
+// Msg from client to server when trying to connect
+struct MsgP2PSendingTicket_t
+{
+	MsgP2PSendingTicket_t() : m_dwMessageType( k_EMsgP2PSendingTicket ) {}
+	const DWORD m_dwMessageType;
+	uint32 m_uTokenLen;
+	char m_rgchToken[1024];
+	CSteamID m_SteamID;
+};
 
 #endif // MESSAGES_H

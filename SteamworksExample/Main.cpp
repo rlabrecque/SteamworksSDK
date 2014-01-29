@@ -54,6 +54,14 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
+	// Init Steam CEG
+	if ( !Steamworks_InitCEGLibrary() )
+	{
+		OutputDebugString( "Steamworks_InitCEGLibrary() failed\n" );
+		::MessageBox( NULL, "Steam must be running to play this game (InitDrmLibrary() failed).\n", "Fatal Error", MB_OK );
+		return -1;
+	}
+
 	// Initialize SteamAPI, if this fails we bail out since we depend on Steam for lots of stuff.
 	// You don't necessarily have to though if you write your code to check whether all the Steam
 	// interfaces are NULL before using them and provide alternate paths when they are unavailable.
@@ -76,8 +84,7 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	// Generally you should use the default and not call this as users will be most comfortable with 
 	// the default position.  The API is provided in case the bottom right creates a serious conflict 
 	// with important UI in your game.
-// disabled temporarily until calling issue is resolved
-//	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
+	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find
@@ -103,6 +110,8 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 		pchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
 	}
 
+	// do a DRM self check
+	Steamworks_SelfCheck();
 
 	// Construct a new instance of the game engine 
 	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
@@ -147,14 +156,65 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 			}
 		}
 
+		// test a user specific secret before entering main loop
+		Steamworks_TestSecret();
+
+		static const int m_flMaxFPS = 120;
+
+		// restrict this main game thread to the first processor, so queryperformance counter won't jump on crappy AMD cpus
+		DWORD dwThreadAffinityMask = 0x01;
+		::SetThreadAffinityMask( ::GetCurrentThread(), dwThreadAffinityMask );
+
+		uint64 ulPerfCounterToMillisecondsDivisor;
+		LARGE_INTEGER l;
+		::QueryPerformanceFrequency( &l );
+		ulPerfCounterToMillisecondsDivisor = l.QuadPart/1000;
+
+		::QueryPerformanceCounter( &l );
+		uint64 ulFirstQueryPerformanceCounterValue = l.QuadPart;
+		uint64 ulGameTickCount = 0;
+
 		while( !pGameEngine->BShuttingDown() )
 		{
 			if ( pGameEngine->StartFrame() )
 			{
+				// update timers
+				::QueryPerformanceCounter( &l );
+
+				ulGameTickCount = (l.QuadPart - ulFirstQueryPerformanceCounterValue) / ulPerfCounterToMillisecondsDivisor;
+				pGameEngine->SetGameTickCount( ulGameTickCount );
+
 				// Run a game frame
 				pGameClient->RunFrame();
-
 				pGameEngine->EndFrame();
+
+				// Frame rate limiting
+				float flDesiredFrameMilliseconds = 1000.0f/m_flMaxFPS;
+				while( 1 )
+				{
+					::QueryPerformanceCounter( &l );
+
+					ulGameTickCount = (l.QuadPart - ulFirstQueryPerformanceCounterValue) / ulPerfCounterToMillisecondsDivisor;
+
+					float flMillisecondsElapsed = (float)(ulGameTickCount - pGameEngine->GetGameTickCount());
+					if ( flMillisecondsElapsed < flDesiredFrameMilliseconds )
+					{
+						// run networking each frame first
+						pGameClient->ReceiveNetworkData();
+
+						// If enough time is left sleep, otherwise just keep spinning so we don't go over the limit...
+						if ( flDesiredFrameMilliseconds - flMillisecondsElapsed > 2.0f )
+						{
+							Sleep( 2 );
+						}
+						else
+						{
+							continue;
+						}
+					}
+					else
+						break;
+				} 
 			}			
 		}
 
@@ -166,6 +226,9 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 
 	// Shutdown the SteamAPI
 	SteamAPI_Shutdown();
+
+	// Shutdown Steam CEG
+	Steamworks_TermCEGLibrary();
 
 	// exit
 	return 0;	

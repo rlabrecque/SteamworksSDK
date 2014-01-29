@@ -105,6 +105,10 @@ public:
 
 	// Cancel auth ticket from GetAuthSessionTicket, called when no longer playing game with the entity you gave the ticket to
 	virtual void CancelAuthTicket( HAuthTicket hAuthTicket ) = 0;
+
+	// After receiving a user's authentication data, and passing it to BeginAuthSession, use this function
+	// to determine if the user owns downloadable content specified by the provided AppID.
+	virtual EUserHasLicenseForAppResult UserHasLicenseForApp( CSteamID steamID, AppId_t appID ) = 0;
 };
 
 #define STEAMUSER_INTERFACE_VERSION "SteamUser012"

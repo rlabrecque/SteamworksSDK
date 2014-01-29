@@ -16,15 +16,17 @@
 #include "isteamclient.h"
 #include "isteamfriends.h"
 
-//-----------------------------------------------------------------------------
-// Purpose: Functions for match making services for clients to get to favorites
-//-----------------------------------------------------------------------------
+// lobby type description
 enum ELobbyType
 {
 	k_ELobbyTypeFriendsOnly = 1,	// shows for friends or invitees, but not in lobby list
 	k_ELobbyTypePublic = 2,			// visible for friends and in lobby list
+	k_ELobbyTypeInvisible = 3,		// returned by search, but not visible to other friends 
+									//    useful if you want a user in two lobbies, for example matching groups together
+									//	  a user can be in only one regular lobby, and up to two invisible lobbies
 };
 
+// lobby search filter tools
 enum ELobbyComparison
 {
 	k_ELobbyComparisonEqualToOrLessThan = -2,
@@ -32,7 +34,9 @@ enum ELobbyComparison
 	k_ELobbyComparisonEqual = 0,
 	k_ELobbyComparisonGreaterThan = 1,
 	k_ELobbyComparisonEqualToOrGreaterThan = 2,
+	k_ELobbyComparisonNotEqual = 3,
 };
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for match making services for clients to get to favorites
@@ -91,11 +95,13 @@ public:
 	// filters for lobbies
 	// this needs to be called before RequestLobbyList() to take effect
 	// these are cleared on each call to RequestLobbyList()
-	virtual void AddRequestLobbyListFilter( const char *pchKeyToMatch, const char *pchValueToMatch ) = 0;
+	virtual void AddRequestLobbyListStringFilter( const char *pchKeyToMatch, const char *pchValueToMatch, ELobbyComparison eComparisonType ) = 0;
 	// numerical comparison
-	virtual void AddRequestLobbyListNumericalFilter( const char *pchKeyToMatch, int nValueToMatch, int nComparisonType ) = 0;
+	virtual void AddRequestLobbyListNumericalFilter( const char *pchKeyToMatch, int nValueToMatch, ELobbyComparison eComparisonType ) = 0;
 	// returns results closest to the specified value. Multiple near filters can be added, with early filters taking precedence
 	virtual void AddRequestLobbyListNearValueFilter( const char *pchKeyToMatch, int nValueToBeCloseTo ) = 0;
+	// returns only lobbies with the specified number of slots available
+	virtual void AddRequestLobbyListFilterSlotsAvailable( int nSlotsAvailable ) = 0;
 
 	// returns the CSteamID of a lobby, as retrieved by a RequestLobbyList call
 	// should only be called after a LobbyMatchList_t callback is received
@@ -109,7 +115,7 @@ public:
 	// this is an asynchronous request
 	// results will be returned by LobbyCreated_t callback and call result; lobby is joined & ready to use at this pointer
 	// a LobbyEnter_t callback will also be received (since the local user is joining their own lobby)
-	virtual SteamAPICall_t CreateLobby( ELobbyType eLobbyType ) = 0;
+	virtual SteamAPICall_t CreateLobby( ELobbyType eLobbyType, int cMaxMembers ) = 0;
 
 	// Joins an existing lobby
 	// this is an asynchronous request
@@ -125,6 +131,8 @@ public:
 	// the target user will receive a LobbyInvite_t callback
 	// will return true if the invite is successfully sent, whether or not the target responds
 	// returns false if the local user is not connected to the Steam servers
+	// if the other user clicks the join link, a GameLobbyJoinRequested_t will be posted if the user is in-game,
+	// or if the game isn't running yet the game will be launched with the parameter +connect_lobby <64-bit lobby id>
 	virtual bool InviteUserToLobby( CSteamID steamIDLobby, CSteamID steamIDInvitee ) = 0;
 
 	// Lobby iteration, for viewing details of users in a lobby
@@ -149,7 +157,16 @@ public:
 	// other users in the lobby will receive notification of the lobby data change via a LobbyDataUpdate_t callback
 	virtual bool SetLobbyData( CSteamID steamIDLobby, const char *pchKey, const char *pchValue ) = 0;
 
-	// As above, but gets per-user data for someone in this lobby
+	// returns the number of metadata keys set on the specified lobby
+	virtual int GetLobbyDataCount( CSteamID steamIDLobby ) = 0;
+
+	// returns a lobby metadata key/values pair by index, of range [0, GetLobbyDataCount())
+	virtual bool GetLobbyDataByIndex( CSteamID steamIDLobby, int iLobbyData, char *pchKey, int cchKeyBufferSize, char *pchValue, int cchValueBufferSize ) = 0;
+
+	// removes a metadata key from the lobby
+	virtual bool DeleteLobbyData( CSteamID steamIDLobby, const char *pchKey ) = 0;
+
+	// Gets per-user metadata for someone in this lobby
 	virtual const char *GetLobbyMemberData( CSteamID steamIDLobby, CSteamID steamIDUser, const char *pchKey ) = 0;
 	// Sets per-user metadata (for the local user implicitly)
 	virtual void SetLobbyMemberData( CSteamID steamIDLobby, const char *pchKey, const char *pchValue ) = 0;
@@ -188,16 +205,25 @@ public:
 	virtual int GetLobbyMemberLimit( CSteamID steamIDLobby ) = 0;
 
 	// updates which type of lobby it is
-	// only lobbies that are k_ELobbyTypePublic will be returned by RequestLobbyList() calls
+	// only lobbies that are k_ELobbyTypePublic or k_ELobbyTypeInvisible, and are set to joinable, will be returned by RequestLobbyList() calls
 	virtual bool SetLobbyType( CSteamID steamIDLobby, ELobbyType eLobbyType ) = 0;
+
+	// sets whether or not a lobby is joinable - defaults to true for a new lobby
+	// if set to false, no user can join, even if they are a friend or have been invited
+	virtual bool SetLobbyJoinable( CSteamID steamIDLobby, bool bLobbyJoinable ) = 0;
 
 	// returns the current lobby owner
 	// you must be a member of the lobby to access this
 	// there always one lobby owner - if the current owner leaves, another user will become the owner
 	// it is possible (bur rare) to join a lobby just as the owner is leaving, thus entering a lobby with self as the owner
 	virtual CSteamID GetLobbyOwner( CSteamID steamIDLobby ) = 0;
+
+	// changes who the lobby owner is
+	// you must be the lobby owner for this to succeed, and steamIDNewOwner must be in the lobby
+	// after completion, the local user will no longer be the owner
+	virtual bool SetLobbyOwner( CSteamID steamIDLobby, CSteamID steamIDNewOwner ) = 0;
 };
-#define STEAMMATCHMAKING_INTERFACE_VERSION "SteamMatchMaking006"
+#define STEAMMATCHMAKING_INTERFACE_VERSION "SteamMatchMaking007"
 
 
 //-----------------------------------------------------------------------------
@@ -432,7 +458,9 @@ struct FavoritesListChanged_t
 // Purpose: Someone has invited you to join a Lobby
 //			normally you don't need to do anything with this, since
 //			the Steam UI will also display a '<user> has invited you to the lobby, join?' dialog
-//			if the user outside a game chooses to join, your game will be launched with the parameter "+connect_lobby <64-bit lobby id>"
+//
+//			if the user outside a game chooses to join, your game will be launched with the parameter "+connect_lobby <64-bit lobby id>",
+//			or with the callback GameLobbyJoinRequested_t if they're already in-game
 //-----------------------------------------------------------------------------
 struct LobbyInvite_t
 {
@@ -529,29 +557,6 @@ struct LobbyMatchList_t
 {
 	enum { k_iCallback = k_iSteamMatchmakingCallbacks + 10 };
 	uint32 m_nLobbiesMatching;		// Number of lobbies that matched search criteria and we have SteamIDs for
-};
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Called when the lobby is being forcefully closed
-//			lobby details functions will no longer be updated
-//-----------------------------------------------------------------------------
-struct LobbyClosing_t
-{
-	enum { k_iCallback = k_iSteamMatchmakingCallbacks + 11 };
-	uint64 m_ulSteamIDLobby;			// Lobby
-};
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Called when the local user has been kicked from the lobby
-//			lobby details functions will no longer be updated
-//-----------------------------------------------------------------------------
-struct LobbyKicked_t
-{
-	enum { k_iCallback = k_iSteamMatchmakingCallbacks + 12 };
-	uint64 m_ulSteamIDLobby;			// Lobby
-	uint64 m_ulSteamIDAdmin;			// User who kicked you
 };
 
 

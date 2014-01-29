@@ -44,7 +44,7 @@
 #include <tchar.h>
 
 // Winsock
-#include <winsock.h>
+#include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib" )
 
 // d3d header files
@@ -60,3 +60,14 @@ typedef unsigned __int64 uint64;
 
 // steam api header file
 #include "steam/steam_api.h"
+
+#ifdef STEAM_CEG
+	// Steam DRM header file
+	#include "cegclient.h"
+#else
+	#define Steamworks_InitCEGLibrary() (true)
+	#define Steamworks_TermCEGLibrary() (true)
+	#define Steamworks_TestSecret() (true)
+	#define Steamworks_SelfCheck() (true)
+#endif
+

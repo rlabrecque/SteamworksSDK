@@ -74,6 +74,14 @@ const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 typedef uint32 AppId_t;
 const AppId_t k_uAppIdInvalid = 0x0;
 
+
+// this is baked into client messages and interfaces as an int, 
+// make sure we never break this.  AppIds and DepotIDs also presently
+// share the same namespace, but since we'd like to change that in the future
+// I've defined it seperately here.
+typedef uint32 DepotId_t;
+const DepotId_t k_uDepotIdInvalid = 0x0;
+
 // RTime32
 // We use this 32 bit time representing real world time.
 // It offers 1 second resolution beginning on January 1, 1970 (Unix time)

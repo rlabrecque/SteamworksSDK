@@ -13,6 +13,7 @@
 #include "isteamclient.h"
 #include "steamclientpublic.h"
 
+
 //-----------------------------------------------------------------------------
 // Purpose: set of relationships to other users
 //-----------------------------------------------------------------------------
@@ -163,7 +164,7 @@ public:
 	virtual void SetInGameVoiceSpeaking( CSteamID steamIDUser, bool bSpeaking ) = 0;
 
 	// activates the game overlay, with an optional dialog to open 
-	// valid options are "Friends", "Community", "Players", "Settings", "LobbyInvite", "OfficialGameGroup"
+	// valid options are "Friends", "Community", "Players", "Settings", "LobbyInvite", "OfficialGameGroup", "Stats", "Achievements"
 	virtual void ActivateGameOverlay( const char *pchDialog ) = 0;
 
 	// activates game overlay to a specific place

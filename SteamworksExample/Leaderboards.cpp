@@ -291,7 +291,7 @@ void CLeaderboards::UpdateLeaderboards( CStatsAndAchievements *pStats )
 	// if the user won, update the leaderboard with the time it took. If the user's previous time was faster, this time will be thrown out.
 	if ( m_hQuickestWinLeaderboard && SpaceWarClient()->BLocalPlayerWonLastGame() )
 	{
-		SteamAPICall_t hSteamAPICall = SteamUserStats()->UploadLeaderboardScore( m_hQuickestWinLeaderboard, (int)pStats->GetGameDurationSeconds(), NULL, 0 );
+		SteamAPICall_t hSteamAPICall = SteamUserStats()->UploadLeaderboardScore( m_hQuickestWinLeaderboard, k_ELeaderboardUploadScoreMethodKeepBest, (int)pStats->GetGameDurationSeconds(), NULL, 0 );
 		m_SteamCallResultUploadScore.Set( hSteamAPICall, this, &CLeaderboards::OnUploadScore );
 	}
 
@@ -299,7 +299,7 @@ void CLeaderboards::UpdateLeaderboards( CStatsAndAchievements *pStats )
 	// this value will be thrown out
 	if ( m_hFeetTraveledLeaderboard )
 	{
-		SteamUserStats()->UploadLeaderboardScore( m_hFeetTraveledLeaderboard, (int)pStats->GetGameFeetTraveled(), NULL, 0 );
+		SteamUserStats()->UploadLeaderboardScore( m_hFeetTraveledLeaderboard, k_ELeaderboardUploadScoreMethodKeepBest, (int)pStats->GetGameFeetTraveled(), NULL, 0 );
 	}
 }
 

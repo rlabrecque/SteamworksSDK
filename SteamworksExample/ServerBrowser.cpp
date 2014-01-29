@@ -29,6 +29,7 @@ CGameServer::CGameServer( gameserveritem_t *pGameServerItem )
 	m_nServerVersion = pGameServerItem->m_nServerVersion;
 	strncpy( m_szServerName, pGameServerItem->GetName(), ARRAYSIZE( m_szServerName ) );
 	_snprintf( m_szServerString, ARRAYSIZE( m_szServerString ), "%s (%i/%i) at %s ping(%d)", pGameServerItem->GetName(), pGameServerItem->m_nPlayers, pGameServerItem->m_nMaxPlayers, pGameServerItem->m_NetAdr.GetConnectionAddressString(), pGameServerItem->m_nPing );
+	m_steamID = pGameServerItem->m_steamID;
 }
 
 
@@ -77,6 +78,8 @@ void CServerBrowser::RefreshInternetServers()
 	m_pMenu->SetHeading( "Internet Server browser" );
 
 	m_pMenu->Rebuild( m_ListGameServers, m_bRequestingServers );
+
+	Steamworks_TestSecret();
 
 	// Allocate some filters, there are some common pre-defined values that can be used:
 	//

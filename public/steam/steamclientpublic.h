@@ -69,6 +69,11 @@ enum EResult
 	k_EResultNoMatch = 42,						// nothing matching the request found
 	k_EResultAccountDisabled = 43,
 	k_EResultServiceReadOnly = 44,				// this service is not accepting content changes right now
+	k_EResultAccountNotFeatured = 45,			// account doesn't have value, so this feature isn't available
+	k_EResultAdministratorOK = 46,				// allowed to take this action, but only because requester is admin
+	k_EResultContentVersion = 47,				// A Version mismatch in content transmitted within the Steam protocol.
+	k_EResultTryAnotherCM = 48,					// The current CM can't service the user making a request, user should try another.
+
 };
 
 // Error codes for use with the voice functions
@@ -132,6 +137,14 @@ typedef enum
 	k_EAuthSessionResponseAuthTicketInvalid = 8,			// This ticket is not from a user instance currently connected to steam.
 } EAuthSessionResponse;
 
+// results from UserHasLicenseForApp
+typedef enum
+{
+	k_EUserHasLicenseResultHasLicense = 0,					// User has a license for specified app
+	k_EUserHasLicenseResultDoesNotHaveLicense = 1,			// User does not have a license for the specified app
+	k_EUserHasLicenseResultNoAuth = 2,						// User has not been authenticated
+} EUserHasLicenseForAppResult;
+
 
 // Steam universes.  Each universe is a self-contained Steam instance.
 enum EUniverse
@@ -186,11 +199,13 @@ enum ESteamUserStatType
 //-----------------------------------------------------------------------------
 enum EChatEntryType
 {
+	k_EChatEntryTypeInvalid = 0, 
 	k_EChatEntryTypeChatMsg = 1,		// Normal text message from another user
 	k_EChatEntryTypeTyping = 2,			// Another user is typing (not used in multi-user chat)
 	k_EChatEntryTypeInviteGame = 3,		// Invite from other user into that users current game
 	k_EChatEntryTypeEmote = 4,			// text emote message
 	k_EChatEntryTypeLobbyGameStart = 5,	// lobby game is starting
+	k_EChatEntryTypeLeftConversation = 6, // user has left the conversation ( closed chat window )
 	// Above are previous FriendMsgType entries, now merged into more generic chat entry types
 };
 
@@ -206,6 +221,18 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseFull = 4,			// Chat room has reached its maximum size
 	k_EChatRoomEnterResponseError = 5,			// Unexpected Error
 	k_EChatRoomEnterResponseBanned = 6,			// You are banned from this chat room and may not join
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Status of a given depot version, these are stored in the DB, don't renumber
+//-----------------------------------------------------------------------------
+enum EStatusDepotVersion
+{
+	k_EStatusDepotVersionInvalid = 0,
+	k_EStatusDepotVersionCompleteDisabled = 1,
+	k_EStatusDepotVersionCompleteEnabledBeta = 2,
+	k_EStatusDepotVersionCompleteEnabledPublic = 3,
 };
 
 

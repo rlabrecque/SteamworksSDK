@@ -270,9 +270,19 @@ private:
 	func_t m_Func;
 };
 
+// Allows you to defer registration of the callback
+template< class T, class P, bool bGameServer >
+class CCallbackManual : public CCallback< T, P, bGameServer >
+{
+public:
+	CCallbackManual() : CCallback< T, P, bGameServer >( NULL, NULL ) {}
+};
 
 // utility macro for declaring the function and callback object together
 #define STEAM_CALLBACK( thisclass, func, param, var ) CCallback< thisclass, param, false > var; void func( param *pParam )
+
+// same as above, but lets you defer the callback binding by calling Register later
+#define STEAM_CALLBACK_MANUAL( thisclass, func, param, var ) CCallbackManual< thisclass, param, false > var; void func( param *pParam )
 
 
 #ifdef _WIN32
