@@ -119,6 +119,7 @@ S_API ISteamScreenshots *S_CALLTYPE SteamScreenshots();
 S_API ISteamHTTP *S_CALLTYPE SteamHTTP();
 S_API ISteamUnifiedMessages *S_CALLTYPE SteamUnifiedMessages();
 S_API ISteamController *S_CALLTYPE SteamController();
+S_API ISteamUGC *S_CALLTYPE SteamUGC();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender *S_CALLTYPE SteamPS3OverlayRender();
 #endif

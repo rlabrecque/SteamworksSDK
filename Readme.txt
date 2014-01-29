@@ -12,6 +12,12 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.26a 14th November 2013
+----------------------------------------------------------------
+
+* Fix missing accessor function in steam_api.h for SteamUGC()
+
+----------------------------------------------------------------
 v1.26 6th November 2013
 ----------------------------------------------------------------
 * Includes libsteam_api.so for 64-bit Linux.
