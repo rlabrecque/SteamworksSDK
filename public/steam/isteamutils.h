@@ -25,6 +25,23 @@ enum ESteamAPICallFailure
 	k_ESteamAPICallFailureMismatchedCallback = 3,// GetAPICallResult() was called with the wrong callback type for this API call
 };
 
+
+// Input modes for the Big Picture gamepad text entry
+enum EGamepadTextInputMode
+{
+	k_EGamepadTextInputModeNormal = 0,
+	k_EGamepadTextInputModePassword = 1
+};
+
+
+// Controls number of allowed lines for the Big Picture gamepad text entry
+enum EGamepadTextInputLineMode
+{
+	k_EGamepadTextInputLineModeSingleLine = 0,
+	k_EGamepadTextInputLineModeMultipleLines = 1
+};
+
+
 // function prototype for warning message hook
 #if defined( POSIX )
 #define __cdecl
@@ -131,6 +148,12 @@ public:
 	virtual void SetPSNGameBootInviteStrings( const char *pchSubject, const char *pchBody ) = 0;
 #endif
 
+	// Activates the Big Picture text input dialog which only supports gamepad input
+	virtual bool ShowGamepadTextInput( EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, const char *pchDescription, uint32 unCharMax ) = 0;
+
+	// Returns previously entered text & length
+	virtual uint32 GetEnteredGamepadTextLength() = 0;
+	virtual bool GetEnteredGamepadTextInput( char *pchText, uint32 cchText ) = 0;	
 };
 
 #define STEAMUTILS_INTERFACE_VERSION "SteamUtils005"
@@ -251,6 +274,20 @@ struct PS3PSNStatusChange_t
 };
 
 #endif
+
+// k_iSteamUtilsCallbacks + 13 is taken
+
+
+//-----------------------------------------------------------------------------
+// Big Picture gamepad text input has been closed
+//-----------------------------------------------------------------------------
+struct GamepadTextInputDismissed_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 14 };
+	bool m_bSubmitted;										// true if user entered & accepted text (Call ISteamUtils::GetEnteredGamepadTextInput() for text), false if canceled input
+	uint32 m_unSubmittedText;
+};
+
 
 #pragma pack( pop )
 

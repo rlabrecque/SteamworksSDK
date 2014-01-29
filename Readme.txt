@@ -1,6 +1,6 @@
 ================================================================
 
-Copyright © 1996-2011, Valve Corporation, All rights reserved.
+Copyright © 1996-2012, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -10,6 +10,17 @@ website at: http://partner.steamgames.com
 
 
 Revision History:
+
+
+----------------------------------------------------------------
+v1.21	25th October 2012
+----------------------------------------------------------------
+
+Big Picture
+* Added ISteamUtils::ShowGamepadTextInput() to enable usage of the Big Picture gamepad text input control in-game. UI is rendered by the Steam Overlay.
+* Added ISteamUtils::GetEnteredGamepadTextLength() and ISteamUtils::GetEnteredGamepadTextInput() to retrieve entered gamepad text.
+* Added GamepadTextInputDismissed_t callback to detect when the user has entered gamepad data.
+
 
 ----------------------------------------------------------------
 v1.20	30th August 2012
