@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: Main interface for loading and accessing Steamworks API's from the 
 //			Steam client.
@@ -19,7 +19,7 @@ typedef int32 HSteamPipe;
 // handle to single instance of a steam user
 typedef int32 HSteamUser;
 // function prototype
-#ifdef _LINUX
+#if defined( POSIX ) && !defined( _CYGWIN )
 #define __cdecl
 #endif
 extern "C" typedef void (__cdecl *SteamAPIWarningMessageHook_t)(int, const char *);
@@ -141,6 +141,9 @@ enum { k_iSteamAppsCallbacks = 1000 };
 enum { k_iSteamUserStatsCallbacks = 1100 };
 enum { k_iSteamNetworkingCallbacks = 1200 };
 enum { k_iClientRemoteStorageCallbacks = 1300 };
+enum { k_iSteamUserItemsCallbacks = 1400 };
+enum { k_iSteamGameServerItemsCallbacks = 1500 };
+enum { k_iClientUtilsCallbacks = 1600 };
 
 
 #endif // ISTEAMCLIENT_H

@@ -69,9 +69,21 @@ enum EResult
 	k_EResultNoMatch = 42,						// nothing matching the request found
 };
 
+// Error codes for use with the voice functions
+enum EVoiceResult
+{
+	k_EVoiceResultOK = 0,
+	k_EVoiceResultNotInitialized = 1,
+	k_EVoiceResultNotRecording = 2,
+	k_EVoiceResultNoData = 3,
+	k_EVoiceResultBufferTooSmall = 4,
+	k_EVoiceResultDataCorrupted = 5,
+};
+
 // Result codes to GSHandleClientDeny/Kick
 typedef enum
 {
+	k_EDenyInvalid = 0,
 	k_EDenyInvalidVersion = 1,
 	k_EDenyGeneric = 2,
 	k_EDenyNotLoggedOn = 3,
@@ -86,6 +98,7 @@ typedef enum
 	k_EDenySteamConnectionError = 12,
 	k_EDenySteamResponseTimedOut = 13,
 	k_EDenySteamValidationStalled = 14,
+	k_EDenySteamOwnerLeftGuestUser = 15,
 } EDenyReason;
 
 // Steam universes.  Each universe is a self-contained Steam instance.
@@ -97,7 +110,6 @@ enum EUniverse
 	k_EUniverseInternal = 3,
 	k_EUniverseDev = 4,
 	k_EUniverseRC = 5,
-
 	k_EUniverseMax
 };
 
@@ -167,6 +179,83 @@ enum EChatRoomEnterResponse
 
 typedef void (*PFNLegacyKeyRegistration)( const char *pchCDKey, const char *pchInstallPath );
 typedef bool (*PFNLegacyKeyInstalled)();
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Persistent item constants
+//-----------------------------------------------------------------------------
+typedef int32 HNewItemRequest;			// Handle to an item generation request
+const int k_cchCreateItemLen	= 64;	// Maximum string length in item create APIs
+const uint64 INVALID_ITEM_ID	= (uint64)-1;
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Persistent item quality (rarity)
+//-----------------------------------------------------------------------------
+enum EItemQuality
+{
+	// If k_EItemQuality_Any is used in an item request a random quality will be chosen
+	k_EItemQuality_Any			= -1,		
+	k_EItemQuality_Normal		= 0,	
+	k_EItemQuality_Common		= 1,	
+	k_EItemQuality_Rare			= 2,	
+	k_EItemQuality_Unique		= 3,	
+
+	//Must be last
+	k_EItemQuality_Count		= 4,
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Result codes for SendNewItemReqeust
+//-----------------------------------------------------------------------------
+enum EItemRequestResult
+{
+	k_EItemRequestResultOK = 0,			// Request succeeded
+	k_EItemRequestResultDenied = 1,		// Request denied
+	k_EItemRequestResultServerError = 2, // Request failed due to a temporary server error
+	k_EItemRequestResultTimeout = 3,		// Request timed out
+	k_EItemRequestResultInvalid = 4,		// Request was corrupt
+	k_EItemRequestResultNoMatch = 5,		// No item definition matched the request
+	k_EItemRequestResultUnknownError = 6,	// Request failed with an unknown error
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Valid operators for BAddNewItemCriteria
+//-----------------------------------------------------------------------------
+enum EItemCriteriaOperator
+{
+	k_EOperator_String_EQ = 0,				// Field is string equal to value
+	k_EOperator_Not = 1,					// Logical not
+	k_EOperator_String_Not_EQ = 1,			// Field is not string equal to value
+	k_EOperator_Float_EQ = 2,				// Field as a float is equal to value
+	k_EOperator_Float_Not_EQ = 3,			// Field as a float is not equal to value
+	k_EOperator_Float_LT = 4,				// Field as a float is less than value
+	k_EOperator_Float_Not_LT = 5,			// Field as a float is not less than value
+	k_EOperator_Float_LTE = 6,				// Field as a float is less than or equal value
+	k_EOperator_Float_Not_LTE = 7,			// Field as a float is not less than or equal value
+	k_EOperator_Float_GT = 8,				// Field as a float is greater than value
+	k_EOperator_Float_Not_GT = 9,			// Field as a float is not greater than value
+	k_EOperator_Float_GTE = 10,				// Field as a float is greater than or equal value
+	k_EOperator_Float_Not_GTE = 11,			// Field as a float is not greater than or equal value
+	k_EOperator_Subkey_Contains = 12,		// Field contains value as a subkey
+	k_EOperator_Subkey_Not_Contains = 13,	// Field does not contain value as a subkey
+
+	// Must be last
+	k_EItemCriteriaOperator_Count = 14,
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Possible positions to tell the overlay to show notifications in
+//-----------------------------------------------------------------------------
+enum ENotificationPosition
+{
+	k_EPositionTopLeft = 0,
+	k_EPositionTopRight = 1,
+	k_EPositionBottomLeft = 2,
+	k_EPositionBottomRight = 3,
+};
 
 
 #pragma pack( push, 1 )		
@@ -512,6 +601,9 @@ const CSteamID k_steamIDLanModeGS( 0, 0, k_EUniversePublic, k_EAccountTypeInvali
 // This steamID can come from a user game connection to a GS that has just booted but hasnt yet even initialized
 // its steam3 component and started logging on.
 const CSteamID k_steamIDNotInitYetGS( 1, 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
+// This steamID can come from a user game connection to a GS that isn't using the steam authentication system but still
+// wants to support the "Join Game" option in the friends list
+const CSteamID k_steamIDNonSteamGS( 2, 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
 
 
 #ifdef STEAM

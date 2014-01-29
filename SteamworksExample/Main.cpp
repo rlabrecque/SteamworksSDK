@@ -71,11 +71,17 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 	// set our debug handler
 	SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
 
+	// Tell Steam where it's overlay should show notification dialogs, this can be top right, top left,
+	// bottom right, bottom left. The default position is the bottom left if you don't call this.  
+	// Generally you should use the default and not call this as users will be most comfortable with 
+	// the default position.  The API is provided in case the bottom right creates a serious conflict 
+	// with important UI in your game.
+	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find
 	// a server for our game and is trying to join it. 
-	const char* pchConnectParam = "+connect";
+	const char *pchConnectParam = "+connect";
 	char *pchCmdLine = ::GetCommandLine();
 	char *pchConnect = strstr( pchCmdLine, pchConnectParam );
 	char *pchServerAddress = NULL;
@@ -85,6 +91,16 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 		pchServerAddress = pchCmdLine + ( pchConnect - pchCmdLine ) + strlen( pchConnectParam ) + 1;
 	}
 
+	// look for +connect_lobby lobbyid paramter on the command line
+	// Steam will pass this in if a user taken up an invite to a lobby
+	const char *pchConnectLobbyParam = "+connect_lobby";
+	char *pchConnectLobby = strstr( pchCmdLine, pchConnectParam );
+	char *pchLobbyID = NULL;
+	if ( pchConnectLobby && strlen( pchCmdLine ) > (pchConnectLobby - pchCmdLine) + strlen( pchConnectLobbyParam ) + 1 )
+	{
+		// Address should be right after the +connect, +1 on the end to skip the space
+		pchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
+	}
 
 
 	// Construct a new instance of the game engine 
@@ -106,7 +122,6 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 		// If +connect was used to specify a server address, connect now
 		if ( pchServerAddress )
 		{
-
 			int32 octet0 = 0, octet1 = 0, octet2 = 0, octet3 = 0;
 			int32 uPort = 0;
 			int nConverted = sscanf( pchServerAddress, "%d.%d.%d.%d:%d", &octet0, &octet1, &octet2, &octet3, &uPort );
@@ -116,6 +131,18 @@ int APIENTRY RealMain(HINSTANCE hInstance,
 				_snprintf( rgchIPAddress, ARRAYSIZE( rgchIPAddress ), "%d.%d.%d.%d", octet0, octet1, octet2, octet3 );
 				uint32 unIPAddress = ( octet3 ) + ( octet2 << 8 ) + ( octet1 << 16 ) + ( octet0 << 24 );
 				pGameClient->InitiateServerConnection( unIPAddress, uPort );
+			}
+		}
+
+		// if +connect_lobby was used to specify a lobby to join, connect now
+		if ( pchLobbyID )
+		{
+			CSteamID steamIDLobby( (uint64)_atoi64( pchLobbyID ) );
+			if ( steamIDLobby.IsValid() )
+			{
+				// act just like we had selected it from the menu
+				LobbyBrowserMenuItem_t menuItem = { steamIDLobby, k_EClientJoiningLobby };
+				pGameClient->OnMenuSelection( menuItem );
 			}
 		}
 

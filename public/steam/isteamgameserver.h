@@ -138,6 +138,7 @@ struct GSClientKick_t
 // NOTE: callback values 4 and 5 are skipped because they are used for old deprecated callbacks, 
 // do not reuse them here.
 
+
 // client achievement info
 struct GSClientAchievementStatus_t
 {
@@ -146,7 +147,6 @@ struct GSClientAchievementStatus_t
 	char m_pchAchievement[128];
 	bool m_bUnlocked;
 };
-
 
 // received when the game server requests to be displayed as secure (VAC protected)
 // m_bSecure is true if the game server should display itself as secure to users, false otherwise

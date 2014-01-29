@@ -8,6 +8,26 @@
 #ifndef SPACEWAR_H
 #define SPACEWAR_H
 
+// The Steamworks API's are modular, you can use some subsystems without using others
+// When USE_GS_AUTH_API is defined you get the following Steam features:
+// - Strong user authentication and authorization
+// - Game server matchmaking
+// - VAC cheat protection
+// - Access to achievement/community API's
+// - P2P networking capability
+
+// Remove this define to disable using the native Steam authentication and matchmaking system
+// You can use this as a sample of how to integrate your game without replacing an existing matchmaking system
+// When you un-define USE_GS_AUTH_API you get:
+// - Access to achievement/community API's
+// - P2P networking capability
+// You CANNOT use:
+// - VAC cheat protection
+// - Game server matchmaking
+// as these function depend on using Steam authentication
+#define USE_GS_AUTH_API 
+
+
 // Current game server version
 #define SPACEWAR_SERVER_VERSION "1.0.0.0"
 

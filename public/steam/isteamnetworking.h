@@ -65,8 +65,8 @@ public:
 
 	// creates a socket and begin connection to a remote destination
 	// can connect via a known steamID (client or game server), or directly to an IP
-	// on success will trigger a SocketConnectCallback_t callback
-	// on failure or timeout will trigger a SocketConnectionFailureCallback_t callback
+	// on success will trigger a SocketStatusCallback_t callback
+	// on failure or timeout will trigger a SocketStatusCallback_t callback with a failure code in m_eSNetSocketState
 	virtual SNetSocket_t CreateP2PConnectionSocket( CSteamID steamIDTarget, int nVirtualPort, int nTimeoutSec ) = 0;
 	virtual SNetSocket_t CreateConnectionSocket( uint32 nIP, uint16 nPort, int nTimeoutSec ) = 0;
 

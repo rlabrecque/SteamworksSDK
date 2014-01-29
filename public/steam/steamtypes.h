@@ -58,10 +58,7 @@ typedef unsigned int uintp;
 
 #endif // else _WIN32
 
-const int k_cubDigestSize = 20;							// CryptoPP::SHA::DIGESTSIZE
 const int k_cubSaltSize   = 8;
-
-typedef	uint8 SHADigest_t[ k_cubDigestSize ];
 typedef	uint8 Salt_t[ k_cubSaltSize ];
 
 typedef uint64 GID_t;		// globally unique identifier

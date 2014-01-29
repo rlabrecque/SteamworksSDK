@@ -121,6 +121,7 @@ void CLobby::RunFrame()
 
 //-----------------------------------------------------------------------------
 // Purpose: Handles a user in the lobby changing their name or details
+//			( note: joining and leaving is handled below by CLobby::OnLobbyChatUpdate() )
 //-----------------------------------------------------------------------------
 void CLobby::OnPersonaStateChange( PersonaStateChange_t *pCallback )
 {

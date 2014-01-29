@@ -157,7 +157,14 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	m_pQuitMenu->SetHeading( pchServerName );
 
 	MsgClientBeginAuthentication_t msg;
+#ifdef USE_GS_AUTH_API
 	msg.m_uTokenLen = SteamUser()->InitiateGameConnection( (void*)&msg.m_rgchToken, ARRAYSIZE( msg.m_rgchToken ), steamIDGameServer, m_unServerIP, m_usServerPort, bVACSecure );
+#else
+	// When you aren't using Steam auth you still call InitiateGameConnection() so you can communicate presence data to the friends
+	// system. Make sure to pass k_steamIDNonSteamGS so Steam won't try to authenticate your user.
+	msg.m_uTokenLen = SteamUser()->InitiateGameConnection( NULL, 0, k_steamIDNonSteamGS, m_unServerIP, m_usServerPort, false );
+	msg.m_SteamID = SteamUser()->GetSteamID();
+#endif
 
 	if ( msg.m_uTokenLen < 1 )
 		OutputDebugString( "Warning: Looks like InitiateGameConnection didn't give us a good token\n" );
@@ -975,8 +982,8 @@ void CSpaceWarClient::DrawHUDText()
 	const int32 width = m_pGameEngine->GetViewportWidth();
 	const int32 height = m_pGameEngine->GetViewportHeight();
 
-	const int32 nAvatarWidth = 40; // scaled up from 32 which steam gives us
-	const int32 nAvatarHeight = 40;
+	const int32 nAvatarWidth = 64;
+	const int32 nAvatarHeight = 64;
 
 	const int32 nSpaceBetweenAvatarAndScore = 6;
 
@@ -1007,7 +1014,7 @@ void CSpaceWarClient::DrawHUDText()
 		// We also want to use the Steam Avatar image inside the HUD if it is available.
 		// We look it up via GetFriendAvatar, which returns an image index we use
 		// to look up the actual RGBA data below.
-		int iImage = SteamFriends()->GetFriendAvatar( m_rgSteamIDPlayers[i] );
+		int iImage = SteamFriends()->GetFriendAvatar( m_rgSteamIDPlayers[i], k_EAvatarSize64x64 );
 		HGAMETEXTURE hTexture = GetSteamImageAsTexture( iImage );
 
 		RECT rect;

@@ -92,7 +92,11 @@ struct MsgClientBeginAuthentication_t
 	const DWORD m_dwMessageType;
 	
 	uint32 m_uTokenLen;
+#ifdef USE_GS_AUTH_API
 	char m_rgchToken[1024];
+#else
+	CSteamID m_SteamID;
+#endif
 };
 
 // Msg from client to server when sending state update

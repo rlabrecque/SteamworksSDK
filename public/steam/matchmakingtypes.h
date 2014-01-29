@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -10,6 +10,10 @@
 
 #ifdef _WIN32
 #pragma once
+#endif
+
+#ifdef POSIX
+#define _snprintf snprintf
 #endif
 
 #include <stdio.h>

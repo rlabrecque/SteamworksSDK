@@ -53,6 +53,15 @@ public:
 	// a LobbyMatchList_t callback will be posted immediately with no servers
 	virtual void RequestLobbyList() = 0;
 
+	// filters for lobbies
+	// this needs to be called before RequestLobbyList() to take effect
+	// these are cleared on each call to RequestLobbyList()
+	virtual void AddRequestLobbyListFilter( const char *pchKeyToMatch, const char *pchValueToMatch ) = 0;
+	// numerical comparison - 0 is equal, -1 is the lobby value is less than nValueToMatch, 1 is the lobby value is greater than nValueToMatch
+	virtual void AddRequestLobbyListNumericalFilter( const char *pchKeyToMatch, int nValueToMatch, int nComparisonType /* 0 is equal, -1 is less than, 1 is greater than */ ) = 0;
+	// sets RequestLobbyList() to only returns lobbies which aren't yet full - needs SetLobbyMemberLimit() called on the lobby to set an initial limit
+	virtual void AddRequestLobbyListSlotsAvailableFilter() = 0;
+
 	// returns the CSteamID of a lobby, as retrieved by a RequestLobbyList call
 	// should only be called after a LobbyMatchList_t callback is received
 	// iLobby is of the range [0, LobbyMatchList_t::m_nLobbiesMatching)
@@ -71,6 +80,7 @@ public:
 	// Joins an existing lobby
 	// this is an asynchronous request
 	// results will be returned by LobbyEnter_t callback when the lobby has been joined
+	// users already in the lobby will receive LobbyChatUpdate_t callback after this user has successfully joined
 	virtual void JoinLobby( CSteamID steamIDLobby ) = 0;
 
 	// Leave a lobby; this will take effect immediately on the client side
@@ -133,9 +143,21 @@ public:
 	// usually at this point, the users will leave the lobby and join the specified game server
 	// either the IP/Port or the steamID of the game server has to be valid, depending on how you want the clients to be able to connect
 	virtual void SetLobbyGameServer( CSteamID steamIDLobby, uint32 unGameServerIP, uint16 unGameServerPort, CSteamID steamIDGameServer ) = 0;
+	// returns the details of a game server set in a lobby - returns false if there is no game server set, or that lobby doesn't exist
+	virtual bool GetLobbyGameServer( CSteamID steamIDLobby, uint32 *punGameServerIP, uint16 *punGameServerPort, CSteamID *psteamIDGameServer ) = 0;
 
+	// set the limit on the # of users who can join the lobby
+	virtual bool SetLobbyMemberLimit( CSteamID steamIDLobby, int cMaxMembers ) = 0;
+	// returns the current limit on the # of users who can join the lobby; returns 0 if no limit is defined
+	virtual int GetLobbyMemberLimit( CSteamID steamIDLobby ) = 0;
+
+	// asks the Steam servers for a list of lobbies that friends are in
+	// returns results by posting one RequestFriendsLobbiesResponse_t callback per friend/lobby pair
+	// if no friends are in lobbies, RequestFriendsLobbiesResponse_t will be posted but with 0 results
+	// filters don't apply to lobbies (currently)
+	virtual bool RequestFriendsLobbies() = 0;
 };
-#define STEAMMATCHMAKING_INTERFACE_VERSION "SteamMatchMaking002"
+#define STEAMMATCHMAKING_INTERFACE_VERSION "SteamMatchMaking004"
 
 
 //-----------------------------------------------------------------------------
@@ -371,6 +393,9 @@ struct FavoritesListChanged_t
 
 //-----------------------------------------------------------------------------
 // Purpose: Someone has invited you to join a Lobby
+//			normally you don't need to do anything with this, since
+//			the Steam UI will also display a '<user> has invited you to the lobby, join?' dialog
+//			if the user outside a game chooses to join, your game will be launched with the parameter "+connect_lobby <64-bit lobby id>"
 //-----------------------------------------------------------------------------
 struct LobbyInvite_t
 {
@@ -505,5 +530,24 @@ struct LobbyCreated_t
 	EResult m_eResult;				// Result
 	uint64 m_ulSteamIDLobby;		// chat room, zero if failed
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Response to a RequestFriendsLobbies() call
+//			One of these callbacks will be received per friend who is in a lobby
+//			if no friends are in a lobby, then one of these will be called with 0 values
+//-----------------------------------------------------------------------------
+struct RequestFriendsLobbiesResponse_t
+{
+	enum { k_iCallback = k_iSteamMatchmakingCallbacks + 14 };
+	
+	uint64 m_ulSteamIDFriend;	// friend who is in a lobby; 0 if no friends in lobbies are found
+	uint64 m_ulSteamIDLobby;	// lobby that the friend is in; 0 if no friends in lobbies are found
+
+	int m_cResultIndex;			// result #, [1, m_cResultsTotal] if any are found; 0 if no friends in lobbies are found
+	int m_cResultsTotal;		// total number of results; 0 if no friends in lobbies are found
+};
+
+
 
 #endif // ISTEAMMATCHMAKING

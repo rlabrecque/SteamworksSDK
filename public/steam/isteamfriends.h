@@ -11,6 +11,7 @@
 #endif
 
 #include "isteamclient.h"
+#include "steamclientpublic.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: set of relationships to other users
@@ -44,7 +45,7 @@ enum EPersonaState
 //-----------------------------------------------------------------------------
 // Purpose: flags for enumerating friends list, or quickly checking a the relationship between users
 //-----------------------------------------------------------------------------
-enum k_EFriendFlags
+enum EFriendFlags
 {
 	k_EFriendFlagNone			= 0x00,
 	k_EFriendFlagBlocked		= 0x01,
@@ -60,6 +61,17 @@ enum k_EFriendFlags
 	k_EFriendFlagIgnoredFriend	= 0x400,
 	k_EFriendFlagAll			= 0xFFFF,
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: avatar sizes, used in ISteamFriends::GetFriendAvatar()
+//-----------------------------------------------------------------------------
+enum EAvatarSize
+{
+	k_EAvatarSize32x32 = 0,
+	k_EAvatarSize64x64 = 1,
+};
+
 
 // maximum number of characters in a users name
 enum { k_cchPersonaNameMax = 128 };
@@ -112,7 +124,7 @@ public:
 	virtual const char *GetFriendPersonaName( CSteamID steamIDFriend ) = 0;
 
 	// gets the avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
-	virtual int GetFriendAvatar( CSteamID steamIDFriend ) = 0;
+	virtual int GetFriendAvatar( CSteamID steamIDFriend, int eAvatarSize ) = 0;
 	// returns true if the friend is actually in a game
 	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, uint64 *pulGameID, uint32 *punGameIP, uint16 *pusGamePort, uint16 *pusQueryPort ) = 0;
 	// accesses old friends names - returns an empty string when their are no more items in the history
@@ -143,7 +155,7 @@ public:
 	virtual void ActivateGameOverlay( const char *pchDialog ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends003"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends004"
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a friends' status changes

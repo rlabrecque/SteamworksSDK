@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: 
 //
@@ -28,7 +28,7 @@
 	#else
 	#define S_API extern "C" __declspec( dllimport ) 
 	#endif // STEAM_API_EXPORTS
-#elif defined( _LINUX )
+#elif defined( GNUC )
 	#if defined( STEAM_API_EXPORTS )
 	#define S_API extern "C" __attribute__ ((visibility("default"))) 
 	#else

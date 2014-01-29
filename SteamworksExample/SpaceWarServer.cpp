@@ -30,14 +30,21 @@ CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 	uint16 usSpectatorPort = 0; // We don't support specators in our game
 	uint16 usMasterServerUpdaterPort = SPACEWAR_MASTER_SERVER_UPDATER_PORT;
 
+#ifdef USE_GS_AUTH_API
+	EServerMode eMode = eServerModeAuthenticationAndSecure;
+#else
+	// Don't let Steam do authentication
+	EServerMode eMode = eServerModeNoAuthentication;
+#endif
 	// Initialize the SteamGameServer interface, we tell it some info about us, and we request support
 	// for both Authentication (making sure users own games) and secure mode, VAC running in our game
 	// and kicking users who are VAC banned
-	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eServerModeAuthenticationAndSecure, pchGameDir, SPACEWAR_SERVER_VERSION ) )
+	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usSpectatorPort, usMasterServerUpdaterPort, eMode, pchGameDir, SPACEWAR_SERVER_VERSION ) )
 	{
 		OutputDebugString( "SteamGameServer_Init call failed\n" );
 	}
 
+#ifdef USE_GS_AUTH_API
 	// We want to actively update the master server with our presence so players can
 	// find us via the steam matchmaking/server browser interfaces
 	if ( SteamMasterServerUpdater() )
@@ -58,6 +65,7 @@ CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 	{
 		OutputDebugString( "SteamMasterServerUpdater() interface is invalid\n" );
 	}
+#endif
 
 	m_uPlayerCount = 0;
 	m_pGameEngine = pGameEngine;
@@ -107,8 +115,10 @@ CSpaceWarServer::CSpaceWarServer( CGameEngine *pGameEngine ) :
 //-----------------------------------------------------------------------------
 CSpaceWarServer::~CSpaceWarServer()
 {
+#ifdef USE_GS_AUTH_API
 	// Notify Steam master server we are going offline
 	SteamMasterServerUpdater()->SetActive( false );
+#endif
 
 	delete m_pSun;
 
@@ -125,8 +135,10 @@ CSpaceWarServer::~CSpaceWarServer()
 		}
 	}
 
+#ifdef USE_GS_AUTH_API
 	// Disconnect from the steam servers
 	SteamGameServer()->LogOff();
+#endif
 
 	// Close down our socket if it appears to be valid
 	if ( m_hSocketServer )
@@ -264,6 +276,7 @@ void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, v
 			uint32 unIPClient = 0;
 			SteamGameServerNetworking()->GetSocketInfo( hSocketClient, NULL, NULL, &unIPClient, NULL );
 
+#ifdef USE_GS_AUTH_API
 			// authenticate the user with the Steam back-end servers
 			m_rgPendingClientData[i].m_bActive = SteamGameServer()->SendUserConnectAndAuthenticate( unIPClient, pToken, uTokenLen, &m_rgPendingClientData[i].m_SteamIDUser ); 
 			if ( !m_rgPendingClientData[i].m_bActive )
@@ -272,6 +285,15 @@ void CSpaceWarServer::OnClientBeginAuthentication( SNetSocket_t hSocketClient, v
 				BSendDataToClientOnSocket( hSocketClient, (char*)&msg, sizeof( msg ) );
 			}
 			break;
+#else
+			m_rgPendingClientData[i].m_bActive = true;
+			// we need to tell the server our Steam id in the non-auth case, so we stashed it in the login message, pull it back out
+			m_rgPendingClientData[i].m_SteamIDUser = *(CSteamID *)pToken;
+			// You would typically do your own authentication method here and later call OnAuthCompleted
+			// In this sample we just automatically auth anyone who connects
+			OnAuthCompleted( true, i );
+			break;
+#endif
 		}
 	}
 }
@@ -289,9 +311,10 @@ void CSpaceWarServer::OnAuthCompleted( bool bAuthSuccessful, uint32 iPendingAuth
 
 	if ( !bAuthSuccessful )
 	{
+#ifdef USE_GS_AUTH_API
 		// Tell the GS the user is leaving the server
 		SteamGameServer()->SendUserDisconnect( m_rgPendingClientData[iPendingAuthIndex].m_SteamIDUser );
-
+#endif
 		// Send a deny for the client, and zero out the pending data
 		MsgServerFailAuthentication_t msg;
 		BSendDataToClientOnSocket( m_rgPendingClientData[iPendingAuthIndex].m_hSocket, (char*)&msg, sizeof( msg ) );
@@ -436,9 +459,10 @@ void CSpaceWarServer::RemovePlayerFromServer( uint32 uShipPosition )
 	m_rgpShips[uShipPosition] = NULL;
 	m_rguPlayerScores[uShipPosition] = 0;
 
+#ifdef USE_GS_AUTH_API
 	// Tell the GS the user is leaving the server
 	SteamGameServer()->SendUserDisconnect( m_rgClientData[uShipPosition].m_SteamIDUser );
-
+#endif
 	memset( &m_rgClientData[uShipPosition], 0, sizeof( ClientConnectionData_t ) );
 }
 
@@ -521,7 +545,10 @@ void CSpaceWarServer::ReceiveNetworkData()
 				// the authentication phase of the connection which comes next
 				MsgServerSendInfo_t msg;
 				msg.m_ulSteamIDServer = SteamGameServer()->GetSteamID().ConvertToUint64();
+#ifdef USE_GS_AUTH_API
+				// You can only make use of VAC when using the Steam authentication system
 				msg.m_bIsVACSecure = SteamGameServer()->BSecure();
+#endif
 				_snprintf( msg.m_rgchServerName, sizeof( msg.m_rgchServerName ), "%s", m_sServerName.c_str() );
 				BSendDataToClientOnSocket( hSocketClient, (char*)&msg, sizeof( MsgServerSendInfo_t ) );
 			}
@@ -534,7 +561,11 @@ void CSpaceWarServer::ReceiveNetworkData()
 					continue;
 				}
 				MsgClientBeginAuthentication_t *pMsg = (MsgClientBeginAuthentication_t*)pchRecvBuf;
+#ifdef USE_GS_AUTH_API
 				OnClientBeginAuthentication( hSocketClient, &pMsg->m_rgchToken, pMsg->m_uTokenLen );
+#else
+				OnClientBeginAuthentication( hSocketClient, &pMsg->m_SteamID, 0 );
+#endif
 			}
 			break;
 		case k_EMsgClientSendLocalUpdate:
@@ -581,9 +612,10 @@ void CSpaceWarServer::ReceiveNetworkData()
 				// Also check for pending connections that may match
 				if ( m_rgPendingClientData[i].m_hSocket == hSocketClient )
 				{
+#ifdef USE_GS_AUTH_API
 					// Tell the GS the user is leaving the server
 					SteamGameServer()->SendUserDisconnect( m_rgPendingClientData[i].m_SteamIDUser );
-
+#endif
 					// Clear our data on the user
 					memset( &m_rgPendingClientData[i], 0 , sizeof( ClientConnectionData_t ) );
 					break;
@@ -847,6 +879,7 @@ void CSpaceWarServer::OnSteamServersConnected( SteamServersConnected_t *pLogonSu
 //-----------------------------------------------------------------------------
 void CSpaceWarServer::OnPolicyResponse( GSPolicyResponse_t *pPolicyResponse )
 {
+#ifdef USE_GS_AUTH_API
 	// Check if we were able to go VAC secure or not
 	if ( SteamGameServer()->BSecure() )
 	{
@@ -856,6 +889,7 @@ void CSpaceWarServer::OnPolicyResponse( GSPolicyResponse_t *pPolicyResponse )
 	{
 		OutputDebugString( "SpaceWarServer is not VAC Secure!\n" );
 	}
+#endif
 }
 
 
@@ -876,6 +910,7 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 {
 	char *pchGameDir = "spacewar";
 
+#ifdef USE_GS_AUTH_API
 	// Tell the Steam Master Server about our game
 	SteamMasterServerUpdater()->SetBasicServerData( 
 		7,		// Protocol version to talk to the master server with, use the magic number 7
@@ -886,6 +921,7 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 		false,	// Does our server require a password?
 		"Steamworks Example" // Description of our game
 	);
+#endif
 
 	// Tell the Steam authentication servers about our game
 	char rgchServerName[128];
@@ -901,6 +937,7 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 	}
 	m_sServerName = rgchServerName;
 
+#ifdef USE_GS_AUTH_API
 	SteamGameServer()->UpdateServerStatus(  
 		m_uPlayerCount,				// Current player count
 		4,							// Maximum number of players
@@ -918,6 +955,7 @@ void CSpaceWarServer::SendUpdatedServerDetailsToSteam()
 			SteamGameServer()->BUpdateUserData( m_rgClientData[i].m_SteamIDUser, m_rgpShips[i]->GetPlayerName(), m_rguPlayerScores[i] );
 		}
 	}
+#endif
 
 	// game type is a special string you can use for your game to differentiate different game play types occurring on the same maps
 	// When users search for this parameter they do a sub-string search of this string 
@@ -1032,5 +1070,10 @@ uint16 CSpaceWarServer::GetPort()
 //-----------------------------------------------------------------------------
 CSteamID CSpaceWarServer::GetSteamID()
 {
+#ifdef USE_GS_AUTH_API
 	return SteamGameServer()->GetSteamID();
+#else
+	// this is a placeholder steam id to use when not making use of Steam auth or matchmaking
+	return k_steamIDNonSteamGS;
+#endif
 }
