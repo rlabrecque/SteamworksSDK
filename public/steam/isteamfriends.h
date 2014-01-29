@@ -158,6 +158,7 @@ public:
 	virtual int GetClanCount() = 0;
 	virtual CSteamID GetClanByIndex( int iClan ) = 0;
 	virtual const char *GetClanName( CSteamID steamIDClan ) = 0;
+	virtual const char *GetClanTag( CSteamID steamIDClan ) = 0;
 
 	// iterators for getting users in a chat room, lobby, game server or clan
 	// note that large clans that cannot be iterated by the local user
@@ -179,6 +180,8 @@ public:
 	// valid options are
 	//		"steamid" - opens the overlay web browser to the specified user or groups profile
 	//		"chat" - opens a chat window to the specified user, or joins the group chat 
+	//		"stats" - opens the overlay web browser to the specified user's stats
+	//		"achievements" - opens the overlay web browser to the specified user's achievements
 	virtual void ActivateGameOverlayToUser( const char *pchDialog, CSteamID steamID ) = 0;
 
 	// activates game overlay web browser directly to the specified URL
@@ -191,9 +194,13 @@ public:
 	// Mark a target user as 'played with'. This is a client-side only feature that requires that the calling user is 
 	// in game 
 	virtual void SetPlayedWith( CSteamID steamIDUserPlayedWith ) = 0;
+
+	// activates game overlay to open the invite dialog. Invitations will be sent for the provided lobby.
+	// You can also use ActivateGameOverlay( "LobbyInvite" ) to allow the user to create invitations for their current public lobby.
+	virtual void ActivateGameOverlayInviteDialog( CSteamID steamIDLobby ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends005"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends006"
 
 // callbacks
 #pragma pack( push, 8 )

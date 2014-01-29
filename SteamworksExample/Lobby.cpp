@@ -45,7 +45,7 @@ public:
 			if ( pchName && *pchName )
 			{
 				bool bReady = ( 1 == atoi( SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, steamIDLobbyMember, "ready" ) ) );
-				LobbyMenuItem_t menuItem = { steamIDLobbyMember };
+				LobbyMenuItem_t menuItem = { steamIDLobbyMember, LobbyMenuItem_t::k_ELobbyMenuItemUser };
 
 				char rgchMenuText[256];
 				_snprintf( rgchMenuText, sizeof( rgchMenuText ), "%s %s", pchName, bReady ? "(READY)" : "" );
@@ -57,7 +57,7 @@ public:
 		// ready/not ready toggle
 		{
 			bool bReady = ( 1 == atoi( SteamMatchmaking()->GetLobbyMemberData( steamIDLobby, SteamUser()->GetSteamID(), "ready" ) ) );
-			LobbyMenuItem_t menuItem = { CSteamID(), false, true };
+			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemToggleReadState };
 			if ( bReady )
 				AddMenuItem( CLobbyMenu::MenuItem_t( "Set myself as Not Ready", menuItem ) );
 			else
@@ -74,13 +74,20 @@ public:
 		// start game
 		if ( bLobbyOwner )
 		{
-			LobbyMenuItem_t menuItem = { CSteamID(), true, false };
+			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemStartGame };
 			AddMenuItem( CLobbyMenu::MenuItem_t( "Start game", menuItem ) );
 		}
 
+		// invite friend
+		{
+			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemInviteToLobby, steamIDLobby };
+			AddMenuItem( CLobbyMenu::MenuItem_t( "Invite Friend", menuItem ) );
+		}
+		
+
 		// exit lobby
 		{
-			LobbyMenuItem_t menuItem = { CSteamID(), false, false, true };
+			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemLeaveLobby };
 			AddMenuItem( CLobbyMenu::MenuItem_t( "Return to main menu", menuItem ) );
 		}
 

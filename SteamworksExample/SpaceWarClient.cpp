@@ -721,7 +721,7 @@ void CSpaceWarClient::OnLobbyGameCreated( LobbyGameCreated_t *pCallback )
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnMenuSelection( LobbyMenuItem_t selection )
 {
-	if ( selection.m_bLeaveLobby )
+	if ( selection.m_eCommand == LobbyMenuItem_t::k_ELobbyMenuItemLeaveLobby )
 	{
 		// leave the lobby
 		SteamMatchmaking()->LeaveLobby( m_steamIDLobby );
@@ -730,7 +730,7 @@ void CSpaceWarClient::OnMenuSelection( LobbyMenuItem_t selection )
 		// return to main menu
 		SetGameState( k_EClientGameMenu );
 	}
-	else if ( selection.m_bToggleReadyState )
+	else if ( selection.m_eCommand == LobbyMenuItem_t::k_ELobbyMenuItemToggleReadState )
 	{
 		// update our state
 		bool bOldState = ( 1 == atoi( SteamMatchmaking()->GetLobbyMemberData( m_steamIDLobby, SteamUser()->GetSteamID(), "ready" ) ) );
@@ -738,7 +738,7 @@ void CSpaceWarClient::OnMenuSelection( LobbyMenuItem_t selection )
 		// publish to everyone
 		SteamMatchmaking()->SetLobbyMemberData( m_steamIDLobby, "ready", bNewState ? "1" : "0" );
 	}
-	else if ( selection.m_bStartGame )
+	else if ( selection.m_eCommand == LobbyMenuItem_t::k_ELobbyMenuItemStartGame )
 	{
 		// make sure we're not already starting a server
 		if ( m_pServer )
@@ -751,6 +751,10 @@ void CSpaceWarClient::OnMenuSelection( LobbyMenuItem_t selection )
 		// we'll have to wait until the game server connects to the Steam server back-end 
 		// before telling all the lobby members to join (so that the NAT traversal code has a path to contact the game server)
 		OutputDebugString( "Game server being created; game will start soon.\n" );
+	}
+	else if ( selection.m_eCommand == LobbyMenuItem_t::k_ELobbyMenuItemInviteToLobby )
+	{
+		SteamFriends()->ActivateGameOverlayInviteDialog( selection.m_steamIDLobby );
 	}
 }
 

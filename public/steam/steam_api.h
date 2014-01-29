@@ -76,7 +76,11 @@ S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
 // this should be called before the game initialized the steam APIs
 // pchDate should be of the format "Mmm dd yyyy" (such as from the __DATE__ macro )
 // pchTime should be of the format "hh:mm:ss" (such as from the __TIME__ macro )
-S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const *pchDate, char const *pchTime );
+// bFullMemoryDumps (Win32 only) -- writes out a uuid-full.dmp in the client/dumps folder
+// pvContext-- can be NULL, will be the void * context passed into m_pfnPreMinidumpCallback
+// PFNPreMinidumpCallback m_pfnPreMinidumpCallback   -- optional callback which occurs just before a .dmp file is written during a crash.  Applications can hook this to allow adding additional information into the .dmp comment stream.
+S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const *pchDate, char const *pchTime, bool bFullMemoryDumps, void *pvContext, PFNPreMinidumpCallback m_pfnPreMinidumpCallback );
+S_API void SteamAPI_SetBreakpadAppID( uint32 unAppID );
 
 // interface pointers, configured by SteamAPI_Init()
 S_API ISteamClient *SteamClient();

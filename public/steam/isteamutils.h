@@ -108,6 +108,9 @@ public:
 	// in that case, and then you can check for this periodically (roughly 33hz is desirable) and make sure you
 	// refresh the screen with Present or SwapBuffers to allow the overlay to do it's work.
 	virtual bool BOverlayNeedsPresent() = 0;
+
+	// Asynchronous call to check if file is signed, result is returned in CheckFileSignature_t
+	virtual SteamAPICall_t CheckFileSignature( const char *szFileName ) = 0;
 };
 
 #define STEAMUTILS_INTERFACE_VERSION "SteamUtils005"
@@ -151,6 +154,27 @@ struct SteamAPICallCompleted_t
 struct SteamShutdown_t
 {
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 4 };
+};
+
+//-----------------------------------------------------------------------------
+// results for CheckFileSignature
+//-----------------------------------------------------------------------------
+enum ECheckFileSignature
+{
+	k_ECheckFileSignatureInvalidSignature = 0,
+	k_ECheckFileSignatureValidSignature = 1,
+	k_ECheckFileSignatureFileNotFound = 2,
+	k_ECheckFileSignatureNoSignaturesFoundForThisApp = 3,
+	k_ECheckFileSignatureNoSignaturesFoundForThisFile = 4,
+};
+
+//-----------------------------------------------------------------------------
+// callback for CheckFileSignature
+//-----------------------------------------------------------------------------
+struct CheckFileSignature_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 5 };
+	ECheckFileSignature m_eCheckFileSignature;
 };
 
 #pragma pack( pop )

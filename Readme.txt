@@ -12,6 +12,23 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.10	20th July 2010
+----------------------------------------------------------------
+
+Friends / Matchmaking
+* added function ISteamFriends::GetClanTag(), which returns the abbreviation set for a group
+* added "stats" and "achievements" options to ISteamFriends::ActivateGameOverlayToUser()
+* added function ISteamFriends::ActivateGameOverlayInviteDialog() to open the invite dialog for a specific lobby
+* renamed ISteamMatchmaking::SetGameType() to the more correct SetGameTags()
+
+Authentication
+* added ISteamUtils::CheckFileSignature(), which can be used to verify that a binary has a valid signature
+
+Other
+* added #pragma pack() in several places around structures in headers
+
+
+----------------------------------------------------------------
 v1.09	12th May 2010
 ----------------------------------------------------------------
 

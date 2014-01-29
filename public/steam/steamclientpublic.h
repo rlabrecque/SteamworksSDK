@@ -227,6 +227,7 @@ enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseFull = 4,			// Chat room has reached its maximum size
 	k_EChatRoomEnterResponseError = 5,			// Unexpected Error
 	k_EChatRoomEnterResponseBanned = 6,			// You are banned from this chat room and may not join
+	k_EChatRoomEnterResponseLimited = 7,		// Joining this chat is not allowed because you are a limited user (no value on account)
 };
 
 
@@ -899,5 +900,18 @@ const int k_cchGameExtraInfoMax = 64;
 
 #define QUERY_PORT_NOT_INITIALIZED		0xFFFF	// We haven't asked the GS for this query port's actual value yet.
 #define QUERY_PORT_ERROR				0xFFFE	// We were unable to get the query port for this server.
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Passed as argument to SteamAPI_UseBreakpadCrashHandler to enable optional callback
+//  just before minidump file is captured after a crash has occurred.  (Allows app to append additional comment data to the dump, etc.)
+//-----------------------------------------------------------------------------
+typedef void (*PFNPreMinidumpCallback)(void *context);
+
+//-----------------------------------------------------------------------------
+// Purpose: Used by ICrashHandler interfaces to reference particular installed crash handlers
+//-----------------------------------------------------------------------------
+typedef void *BREAKPAD_HANDLE;
+#define BREAKPAD_INVALID_HANDLE (BREAKPAD_HANDLE)0 
 
 #endif // STEAMCLIENTPUBLIC_H

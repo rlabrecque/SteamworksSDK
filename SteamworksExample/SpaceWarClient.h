@@ -62,10 +62,18 @@ struct LobbyBrowserMenuItem_t
 // a user as shown in the lobby screen
 struct LobbyMenuItem_t
 {
+	enum ELobbyMenuItemCommand
+	{
+		k_ELobbyMenuItemUser,
+		k_ELobbyMenuItemStartGame,
+		k_ELobbyMenuItemToggleReadState,
+		k_ELobbyMenuItemLeaveLobby,
+		k_ELobbyMenuItemInviteToLobby
+	};
+
 	CSteamID m_steamIDUser;		// the user who this is in the lobby
-	bool m_bStartGame;
-	bool m_bToggleReadyState;
-	bool m_bLeaveLobby;
+	ELobbyMenuItemCommand m_eCommand;
+	CSteamID m_steamIDLobby;	// set if k_ELobbyMenuItemInviteToLobby	
 };
 
 // a leaderboard item
