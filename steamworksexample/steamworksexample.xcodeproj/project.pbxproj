@@ -50,6 +50,8 @@
 		50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE61362190C000FC072 /* glmgrext.cpp */; };
 		50E77DF61362190C000FC072 /* mathlite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE91362190C000FC072 /* mathlite.cpp */; };
 		50E77DF813621991000FC072 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50E77DF713621991000FC072 /* IOKit.framework */; };
+		F803305119087F9200344590 /* musicplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F803305019087F9200344590 /* musicplayer.cpp */; };
+		F80330831908872600344590 /* controller.vdf in Resources */ = {isa = PBXBuildFile; fileRef = F80330821908872600344590 /* controller.vdf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -153,6 +155,9 @@
 		50E77DE91362190C000FC072 /* mathlite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mathlite.cpp; path = ../glmgr/mathlite.cpp; sourceTree = "<group>"; };
 		50E77DEA1362190C000FC072 /* mathlite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mathlite.h; path = ../glmgr/mathlite.h; sourceTree = "<group>"; };
 		50E77DF713621991000FC072 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		F803304F19087DA600344590 /* musicplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = musicplayer.h; sourceTree = "<group>"; };
+		F803305019087F9200344590 /* musicplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = musicplayer.cpp; sourceTree = "<group>"; };
+		F80330821908872600344590 /* controller.vdf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = controller.vdf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,6 +215,7 @@
 				503C6CE51268F49F00B66E3B /* Lobby.cpp */,
 				503C6CE71268F49F00B66E3B /* Main.cpp */,
 				503C6CE81268F49F00B66E3B /* MainMenu.cpp */,
+				F803305019087F9200344590 /* musicplayer.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -219,6 +225,7 @@
 			children = (
 				504EDCC01269025A00F96D63 /* steam_appid.txt */,
 				504EDCB4126900D600F96D63 /* steamworksexample-Info.plist */,
+				F80330821908872600344590 /* controller.vdf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -274,6 +281,7 @@
 				503C6CE61268F49F00B66E3B /* Lobby.h */,
 				503C6CE91268F49F00B66E3B /* MainMenu.h */,
 				503C6CEA1268F49F00B66E3B /* Messages.h */,
+				F803304F19087DA600344590 /* musicplayer.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -337,6 +345,8 @@
 /* Begin PBXProject section */
 		503C6CA51268F34200B66E3B /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = 503C6CA81268F34200B66E3B /* Build configuration list for PBXProject "steamworksexample" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -359,6 +369,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F80330831908872600344590 /* controller.vdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +382,7 @@
 			files = (
 				503C6D0F1268F49F00B66E3B /* BaseMenu.cpp in Sources */,
 				503C6D101268F49F00B66E3B /* connectingmenu.cpp in Sources */,
+				F803305119087F9200344590 /* musicplayer.cpp in Sources */,
 				503C6D121268F49F00B66E3B /* gameengineosx.mm in Sources */,
 				503C6D131268F49F00B66E3B /* glstringosx.mm in Sources */,
 				503C6D141268F49F00B66E3B /* Leaderboards.cpp in Sources */,
@@ -428,7 +440,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				USER_HEADER_SEARCH_PATHS = ../public;
 			};
 			name = Debug;
@@ -448,7 +460,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				USER_HEADER_SEARCH_PATHS = ../public;
 			};
 			name = Release;

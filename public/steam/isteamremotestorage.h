@@ -41,6 +41,7 @@ struct SteamParamStringArray_t
 typedef uint64 UGCHandle_t;
 typedef uint64 PublishedFileUpdateHandle_t;
 typedef uint64 PublishedFileId_t;
+const PublishedFileId_t k_PublishedFileIdInvalid = 0;
 const UGCHandle_t k_UGCHandleInvalid = 0xffffffffffffffffull;
 const PublishedFileUpdateHandle_t k_PublishedFileUpdateHandleInvalid = 0xffffffffffffffffull;
 
@@ -366,6 +367,7 @@ struct RemoteStorageFileShareResult_t
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 7 };
 	EResult m_eResult;			// The result of the operation
 	UGCHandle_t m_hFile;		// The handle that can be shared with users and features
+	char m_rgchFilename[k_cchFilenameMax]; // The name of the file that was shared
 };
 
 

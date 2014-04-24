@@ -1044,11 +1044,14 @@ bool CGameEngineGL::BUberRenderPrimitive(	IDirect3DVertexShader9 *vsh,
 {
 	if ( !m_pD3D9Device )
 		return false;
-		
-	BSetShaders				( vsh, psh );
-	BSetVertexDeclaration	( decl );
-	BSetStreamSource		( streamNumber, hVertBuf, 0 /*uOffset*/, uStride );		// streams are based at start of buffer
-	BRenderPrimitive		( primType, uStartVertex, uCount );						// uStartVertex advances the fetch offset from the base
+	
+	bool bRes = false;
+	bRes |= BSetShaders				( vsh, psh );
+	bRes |= BSetVertexDeclaration	( decl );
+	bRes |= BSetStreamSource		( streamNumber, hVertBuf, 0 /*uOffset*/, uStride );		// streams are based at start of buffer
+	bRes |= BRenderPrimitive		( primType, uStartVertex, uCount );						// uStartVertex advances the fetch offset from the base
+
+	return bRes;
 }
 
 

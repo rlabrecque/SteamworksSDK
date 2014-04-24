@@ -12,6 +12,34 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.29 24th April 2014
+----------------------------------------------------------------
+
+General:
+* Adjust game server login to use a token instead of username/password. Tokens are randomly generated at account creation time and can be reset.
+* Added existing text param to ISteamUtils::ShowGamepadTextInput() so games can prepopulate control before displaying to user.
+* Updated retail disc installer to use a single multi-language steamsetup.exe replacing all Steam install MSI packages.
+* Removed redistributable Steam libraries for dedicated servers. Standalone dedicated server should use shared "Steamworks SDK Redist" depots.
+* steamcmd is now included for Linux and OSX.
+
+Music:
+* Introducing API to control the Steam Music Player from external software. As an example this gives games the opportunity to pause the music or lower the volume, when an important cut scene is shown, and start playing afterwards.
+* Added menu and code to the Steamworks Example to demonstrate this API.
+* This feature is currently limited to users in the Steam Music Player Beta. It will have no effect on other users.
+
+UGC:
+* ISteamUGC - Add m_bCachedData to SteamUGCQueryCompleted_t and SteamUGCRequestUGCDetailsResult_t which can be used to determine if the data was retrieved from the cache.
+* ISteamUGC - Allow clients to get cached responses for ISteamUGC queries. This is so client code doesn't have to build their own caching layer on top of ISteamUGC.
+* ISteamRemoteStorage - add the name of the shared file to RemoteStorageFileShareResult_t so it can be matched up to the request if a game has multiple outstanding FileShare requests going on at the same time
+
+Steam VR:
+* Renamed GetEyeMatrix to GetHeadFromEyePose and made it return an HmdMatrix34t. This doesn't actually change the values it was returning, it just updates the name to match the values that were already being returned. Changed the driver interface too.
+* Renamed GetWorldFromHeadPose to GetTrackerFromHeadPose to avoid confusion about the game's world space vs. the tracker's coordinate system.
+* Also renamed GetLastWorldFromHeadPose to GetLastTrackerFromHeadPose.
+* Added GetTrackerZeroPose method to get the tracker zero pose.
+* Added VR support to the Linux/SDL version of the Steamworks Example.
+
+----------------------------------------------------------------
 v1.28 28th January 2014
 ----------------------------------------------------------------
 

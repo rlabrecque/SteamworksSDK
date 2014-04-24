@@ -2386,7 +2386,7 @@ GLMContext::GLMContext( GLMDisplayParams *params )
 	if (success)
 	{
 		//write a cookie into the CGL context leading back to the GLM context object
-		GLint	glm_context_link = (GLint) this;
+		GLint	glm_context_link = (GLint)((uintptr_t)this);
 		CGLSetParameter( m_ctx, kCGLCPClientStorage, &glm_context_link );
 		
 		// save off the pixel format attributes we used		

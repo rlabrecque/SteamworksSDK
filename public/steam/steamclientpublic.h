@@ -221,19 +221,21 @@ enum EAppReleaseState
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-enum EAppOwernshipFlags
+enum EAppOwnershipFlags
 {
-	k_EAppOwernshipFlags_None				= 0x000,	// unknown
-	k_EAppOwernshipFlags_OwnsLicense		= 0x001,	// owns license for this game
-	k_EAppOwernshipFlags_FreeLicense		= 0x002,	// not paid for game
-	k_EAppOwernshipFlags_RegionRestricted	= 0x004,	// owns app, but not allowed to play in current region
-	k_EAppOwernshipFlags_LowViolence		= 0x008,	// only low violence version
-	k_EAppOwernshipFlags_InvalidPlatform	= 0x010,	// app not supported on current platform
-	k_EAppOwernshipFlags_SharedLicense		= 0x020,	// license was granted by authorized local device
-	k_EAppOwernshipFlags_FreeWeekend		= 0x040,	// owned by a free weekend licenses
-	k_EAppOwernshipFlags_LicenseLocked		= 0x080,	// shared license is locked (in use) by other user
-	k_EAppOwernshipFlags_LicensePending		= 0x100,	// owns app, but transaction is still pending. Can't install or play
-	k_EAppOwernshipFlags_LicenseExpired		= 0x200,	// doesn't own app anymore since license expired
+	k_EAppOwnershipFlags_None				= 0x000,	// unknown
+	k_EAppOwnershipFlags_OwnsLicense		= 0x001,	// owns license for this game
+	k_EAppOwnershipFlags_FreeLicense		= 0x002,	// not paid for game
+	k_EAppOwnershipFlags_RegionRestricted	= 0x004,	// owns app, but not allowed to play in current region
+	k_EAppOwnershipFlags_LowViolence		= 0x008,	// only low violence version
+	k_EAppOwnershipFlags_InvalidPlatform	= 0x010,	// app not supported on current platform
+	k_EAppOwnershipFlags_SharedLicense		= 0x020,	// license was granted by authorized local device
+	k_EAppOwnershipFlags_FreeWeekend		= 0x040,	// owned by a free weekend licenses
+	k_EAppOwnershipFlags_LicenseLocked		= 0x080,	// shared license is locked (in use) by other user
+	k_EAppOwnershipFlags_LicensePending		= 0x100,	// owns app, but transaction is still pending. Can't install or play
+	k_EAppOwnershipFlags_LicenseExpired		= 0x200,	// doesn't own app anymore since license expired
+	k_EAppOwnershipFlags_LicensePermanent	= 0x400,	// permanent license, not borrowed, or guest or freeweekend etc
+	k_EAppOwnershipFlags_LicenseRecurring	= 0x800,	// Recurring license, user is charged periodically
 };
 
 
@@ -468,7 +470,7 @@ public:
 		m_steamid.m_comp.m_EUniverse = eUniverse;
 		m_steamid.m_comp.m_EAccountType = eAccountType;
 
-		if ( eAccountType == k_EAccountTypeClan )
+		if ( eAccountType == k_EAccountTypeClan || eAccountType == k_EAccountTypeGameServer )
 		{
 			m_steamid.m_comp.m_unAccountInstance = 0;
 		}

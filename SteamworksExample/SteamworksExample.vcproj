@@ -406,6 +406,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\musicplayer.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\p2pauth.cpp"
 					>
 				</File>
@@ -513,6 +517,10 @@
 				</File>
 				<File
 					RelativePath=".\Messages.h"
+					>
+				</File>
+				<File
+					RelativePath=".\musicplayer.h"
 					>
 				</File>
 				<File

@@ -22,7 +22,7 @@
 #error isteamclient.h must be included
 #endif 
 
-#define MAX_STEAM_CONTROLLERS 8
+#define MAX_STEAM_CONTROLLERS 16
 
 #pragma pack( pop )
 

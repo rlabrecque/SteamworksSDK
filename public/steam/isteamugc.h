@@ -23,8 +23,12 @@
 
 
 typedef uint64 UGCQueryHandle_t;
+typedef uint64 UGCUpdateHandle_t;
+
 
 const UGCQueryHandle_t k_UGCQueryHandleInvalid = 0xffffffffffffffffull;
+const UGCUpdateHandle_t k_UGCUpdateHandleInvalid = 0xffffffffffffffffull;
+
 
 // Matching UGC types for queries
 enum EUGCMatchingUGCType
@@ -129,10 +133,10 @@ class ISteamUGC
 {
 public:
 
-	// Query UGC associated with a user. Creator app id or consumer app id must be valid and be set to the current running app.
+	// Query UGC associated with a user. Creator app id or consumer app id must be valid and be set to the current running app. unPage should start at 1.
 	virtual UGCQueryHandle_t CreateQueryUserUGCRequest( AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage ) = 0;
 
-	// Query for all matching UGC. Creator app id or consumer app id must be valid and be set to the current running app.
+	// Query for all matching UGC. Creator app id or consumer app id must be valid and be set to the current running app. unPage should start at 1.
 	virtual UGCQueryHandle_t CreateQueryAllUGCRequest( EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage ) = 0;
 
 	// Send the query to Steam
@@ -149,6 +153,7 @@ public:
 	virtual bool AddExcludedTag( UGCQueryHandle_t handle, const char *pTagName ) = 0;
 	virtual bool SetReturnLongDescription( UGCQueryHandle_t handle, bool bReturnLongDescription ) = 0;
 	virtual bool SetReturnTotalOnly( UGCQueryHandle_t handle, bool bReturnTotalOnly ) = 0;
+	virtual bool SetAllowCachedResponse( UGCQueryHandle_t handle, uint32 unMaxAgeSeconds ) = 0;
 
 	// Options only for querying user UGC
 	virtual bool SetCloudFileNameFilter( UGCQueryHandle_t handle, const char *pMatchCloudFileName ) = 0;
@@ -159,11 +164,11 @@ public:
 	virtual bool SetRankedByTrendDays( UGCQueryHandle_t handle, uint32 unDays ) = 0;
 
 	// Request full details for one piece of UGC
-	virtual SteamAPICall_t RequestUGCDetails( PublishedFileId_t nPublishedFileID ) = 0;
-
+	virtual SteamAPICall_t RequestUGCDetails( PublishedFileId_t nPublishedFileID, uint32 unMaxAgeSeconds ) = 0;
+	
 };
 
-#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION001"
+#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION002"
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for querying UGC
@@ -175,6 +180,7 @@ struct SteamUGCQueryCompleted_t
 	EResult m_eResult;
 	uint32 m_unNumResultsReturned;
 	uint32 m_unTotalMatchingResults;
+	bool m_bCachedData;	// indicates whether this data was retrieved from the local on-disk cache
 };
 
 
@@ -185,7 +191,14 @@ struct SteamUGCRequestUGCDetailsResult_t
 {
 	enum { k_iCallback = k_iClientUGCCallbacks + 2 };
 	SteamUGCDetails_t m_details;
+	bool m_bCachedData; // indicates whether this data was retrieved from the local on-disk cache
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: k_iClientUGCCallbacks + 3 to k_iClientUGCCallbacks + 6 in use
+//-----------------------------------------------------------------------------
+
 
 #pragma pack( pop )
 

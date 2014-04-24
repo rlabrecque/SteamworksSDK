@@ -21,7 +21,7 @@
 	extern IGameEngine *CreateGameEngineOSX();
 #elif defined(SDL)
 	#include "GameEngine.h"
-	extern IGameEngine *CreateGameEngineSDL();
+	extern IGameEngine *CreateGameEngineSDL( bool bUseVR );
 #endif
 
 #include "SpaceWarClient.h"
@@ -212,6 +212,16 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// with important UI in your game.
 	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
 
+	// Ensure that the user has logged into Steam. This will always return true if the game is launched
+	// from Steam, but if Steam is at the login prompt when you run your game from the debugger, it
+	// will return false.
+	if ( !SteamUser()->BLoggedOn() )
+	{
+		OutputDebugString( "Steam user is not logged in\n" );
+		Alert( "Fatal Error", "Steam user must be logged in to play this game (SteamUser()->BLoggedOn() returned false).\n" );
+		return EXIT_FAILURE;
+	}
+
 	// We are going to use the controller interface, initialize it, which is a seperate step as it 
 	// create a new thread in the game proc and we don't want to force that on games that don't
 	// have native Steam controller implementations
@@ -222,12 +232,21 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	char rgchFullPath[1024];
 #if defined(_WIN32)
 	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "controller.vdf" );
+#elif defined(OSX)
+    // hack for now, because we do not have utility functions available for finding the resource path
+    // alternatively we could disable the SteamController init on OS X
+    _snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/steamworksexample.app/Contents/Resources/%s", rgchCWD, "controller.vdf" );
 #else
 	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "controller.vdf" );
 #endif
-	SteamController()->Init( rgchFullPath );
+	if( !SteamController()->Init( rgchFullPath ) )
+	{
+		OutputDebugString( "SteamController()->Init() failed\n" );
+		Alert( "Fatal Error", "Steam Controller Init failed. Is controller.vdf in the current working directory?\n" );
+		return EXIT_FAILURE;
+	}
 
-	bool bUseVR = false;
+	bool bUseVR = SteamUtils()->IsSteamRunningInVR();
 	const char *pchServerAddress, *pchLobbyID;
 	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID, &bUseVR );
 
@@ -244,7 +263,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #elif defined(OSX)
         CreateGameEngineOSX();
 #elif defined(SDL)
-	CreateGameEngineSDL();
+	CreateGameEngineSDL( bUseVR );
 #else
 #error	Need CreateGameEngine()
 #endif

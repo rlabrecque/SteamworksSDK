@@ -77,13 +77,13 @@ public:
 	// ------------------------------------
 
 	/** Size and position that the window needs to be on the VR display. */
-	virtual bool GetWindowBounds( int32_t *pnX, int32_t *pnY, uint32_t *pnWidth, uint32_t *pnHeight ) = 0;
+	virtual void GetWindowBounds( int32_t *pnX, int32_t *pnY, uint32_t *pnWidth, uint32_t *pnHeight ) = 0;
 
 	/** Suggested size for the intermediate render target that the distortion pulls from. */
 	virtual void GetRecommendedRenderTargetSize( uint32_t *pnWidth, uint32_t *pnHeight ) = 0;
 
-	/** Gets the viewport in the frame buffer to draw the output of the disortion into */
-	virtual void GetEyeOutputViewport( Hmd_Eye eEye, GraphicsAPIConvention eAPIType, uint32_t *pnX, uint32_t *pnY, uint32_t *pnWidth, uint32_t *pnHeight ) = 0;
+	/** Gets the viewport in the frame buffer to draw the output of the distortion into */
+	virtual void GetEyeOutputViewport( Hmd_Eye eEye, uint32_t *pnX, uint32_t *pnY, uint32_t *pnWidth, uint32_t *pnHeight ) = 0;
 	
 	/** The projection matrix for the specified eye */
 	virtual HmdMatrix44_t GetProjectionMatrix( Hmd_Eye eEye, float fNearZ, float fFarZ, GraphicsAPIConvention eProjType ) = 0;
@@ -96,11 +96,11 @@ public:
 	* the upper left of that eye's viewport and 1,1 in the lower right of that eye's viewport. */
 	virtual DistortionCoordinates_t ComputeDistortion( Hmd_Eye eEye, float fU, float fV ) = 0;
 
-	/** Returns the transform between the view space and eye space. Eye space is the per-eye flavor of view
-	* space that provides stereo disparity. Instead of Model * View * Projection the model is Model * View * Eye * Projection. 
-	* Normally View and Eye will be multiplied together and treated as View in your application. 
+	/** Returns the transform from eye space to the head space. Eye space is the per-eye flavor of head
+	* space that provides stereo disparity. Instead of Model * View * Projection the sequence is Model * View * Eye^-1 * Projection. 
+	* Normally View and Eye^-1 will be multiplied together and treated as View in your application. 
 	*/
-	virtual HmdMatrix44_t GetEyeMatrix( Hmd_Eye eEye ) = 0;
+	virtual HmdMatrix34_t GetHeadFromEyePose( Hmd_Eye eEye ) = 0;
 
 	/** For use in simple VR apps, this method returns the concatenation of the 
 	* tracking pose and the eye matrix to get a full view matrix for each eye.
@@ -113,6 +113,12 @@ public:
 	*/
 	virtual int32_t GetD3D9AdapterIndex() = 0;
 
+	/** [D3D10/11 Only]
+	* Returns the adapter index and output index that the user should pass into EnumAdapters adn EnumOutputs 
+	* to create the device and swap chain in DX10 and DX11. If an error occurs both indices will be set to -1.
+	*/
+	virtual void GetDXGIOutputInfo( int32_t *pnAdapterIndex, int32_t *pnAdapterOutputIndex ) = 0;
+
 	// ------------------------------------
 	// Tracking Methods
 	// ------------------------------------
@@ -120,18 +126,18 @@ public:
 	/** The pose that the tracker thinks that the HMD will be in at the specified
 	* number of seconds into the future. Pass 0 to get the current state. 
 	*
-	* This is roughly analagous to the inverse of the view matrix in most applications, though 
+	* This is roughly analogous to the inverse of the view matrix in most applications, though 
 	* many games will need to do some additional rotation or translation on top of the rotation
 	* and translation provided by the head pose.
 	*
 	* If this function returns true the pose has been populated with a pose that can be used by the application.
 	* Check peResult for details about the pose, including messages that should be displayed to the user.
 	*/
-	virtual bool GetWorldFromHeadPose( float fPredictedSecondsFromNow, HmdMatrix34_t *pmPose, HmdTrackingResult *peResult ) = 0;
+	virtual bool GetTrackerFromHeadPose( float fPredictedSecondsFromNow, HmdMatrix34_t *pmPose, HmdTrackingResult *peResult ) = 0;
 
 	/** Passes back the pose matrix from the last successful call to GetWorldFromHeadPose(). Returns true if that matrix is 
 	* valid (because there has been a previous successful pose.) */
-	virtual bool GetLastWorldFromHeadPose( HmdMatrix34_t *pmPose ) = 0;
+	virtual bool GetLastTrackerFromHeadPose( HmdMatrix34_t *pmPose ) = 0;
 
 	/** Returns true if the tracker for this HMD will drift the Yaw component of its pose over time regardless of
 	* actual head motion. This is true for gyro-based trackers with no ground truth. */
@@ -142,6 +148,10 @@ public:
 	* up in the real world, so the next pose returned from GetWorldFromHeadPose after a call to ZeroTracker may not be
 	* exactly an identity matrix. */
 	virtual void ZeroTracker() = 0;
+
+	/** Returns the zero pose for the tracker coordinate system. If the tracker has never had a valid pose, this
+	* will be an identity matrix. */
+	virtual HmdMatrix34_t GetTrackerZeroPose() = 0;
 
 	// ------------------------------------
 	// Administrative methods
@@ -158,7 +168,7 @@ public:
 	virtual uint32_t GetDisplayId( char *pchBuffer, uint32_t unBufferLen ) = 0;
 };
 
-static const char * const IHmd_Version = "IHmd_002";
+static const char * const IHmd_Version = "IHmd_004";
 
 /** error codes returned by Vr_Init */
 enum HmdError

@@ -571,13 +571,11 @@ bool CGameEngineWin32::BCreateGameWindow( int nShowCommand )
 	{
 		int32 x, y;
 		uint32 w, h;
-		if ( m_pVRHmd->GetWindowBounds( &x, &y, &w, &h ) )
-		{
-			m_nWindowWidth = w;
-			m_nWindowHeight = h;
-			windowX = x;
-			windowY = y;
-		}
+		m_pVRHmd->GetWindowBounds( &x, &y, &w, &h );
+		m_nWindowWidth = w;
+		m_nWindowHeight = h;
+		windowX = x;
+		windowY = y;
 	}
 
 	WNDCLASS wc;
@@ -970,7 +968,7 @@ void CGameEngineWin32::EndFrame()
 
 			// get the viewport from the Hmd
 			uint32 vpx, vpy, vpw, vph;
-			m_pVRHmd->GetEyeOutputViewport( eye, vr::API_DirectX, &vpx, &vpy, &vpw, &vph );
+			m_pVRHmd->GetEyeOutputViewport( eye, &vpx, &vpy, &vpw, &vph );
 
 			if ( FAILED( m_pD3D9Device->SetPixelShader( m_pVRDistortionPixelShader ) ) )
 			{

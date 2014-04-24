@@ -189,7 +189,7 @@ public:
 	// Render the menu
 	virtual void Render()
 	{
-		const int32 iMaxMenuItems = 13;
+		const int32 iMaxMenuItems = 14;
 		int32 iNumItems = (int32)m_VecMenuItems.size();
 		uint32 uBoxHeight = MIN( iNumItems, iMaxMenuItems ) * ( MENU_FONT_HEIGHT + MENU_ITEM_PADDING );
 		uint32 yPos = m_pGameEngine->GetViewportHeight()/2 - uBoxHeight/2;

@@ -15,6 +15,7 @@
 #include "time.h"
 #include "ServerBrowser.h"
 #include "Leaderboards.h"
+#include "musicplayer.h"
 #include "clanchatroom.h"
 #include "Lobby.h"
 #include "p2pauth.h"
@@ -139,6 +140,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
 	m_pLeaderboards = new CLeaderboards( pGameEngine );
+	m_pMusicPlayer = new CMusicPlayer( pGameEngine );
 	m_pClanChatRoom = new CClanChatRoom( pGameEngine );
 
 	// Remote Storage page
@@ -990,6 +992,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		m_pRemoteStorage->Show();
 		SteamFriends()->SetRichPresence( "status", "Viewing remote storage" );
 	}
+	else if ( m_eGameState == k_EClientMusic )
+	{
+		// we've switched to the music player menu
+		m_pMusicPlayer->Show();
+		SteamFriends()->SetRichPresence( "status", "Using music player" );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1412,6 +1420,16 @@ void CSpaceWarClient::RunFrame()
 #endif
 		}
 
+		break;
+	case k_EClientMusic:
+		m_pStarField->Render();
+
+		m_pMusicPlayer->RunFrame();		
+
+		if ( bEscapePressed )
+		{
+			SetGameState( k_EClientGameMenu );
+		}
 		break;
 	default:
 		OutputDebugString( "Unhandled game state in CSpaceWar::RunFrame\n" );

@@ -17,6 +17,7 @@
 #include "Ship.h"
 #include "StatsAndAchievements.h"
 #include "RemoteStorage.h"
+#include "musicplayer.h"
 
 // Forward class declaration
 class CConnectingMenu;
@@ -85,6 +86,9 @@ struct LeaderboardMenuItem_t
 };
 
 
+
+
+
 class CSpaceWarClient 
 {
 public:
@@ -142,6 +146,8 @@ public:
 	void OnMenuSelection( LobbyMenuItem_t selection );
 	void OnMenuSelection( LeaderboardMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
+
+	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
 
 	// Set game state
 	void SetGameState( EClientGameState eState );
@@ -342,6 +348,7 @@ private:
 	CStatsAndAchievements *m_pStatsAndAchievements;
 
 	CLeaderboards *m_pLeaderboards;
+	CMusicPlayer *m_pMusicPlayer;
 	CClanChatRoom *m_pClanChatRoom;
 	CServerBrowser *m_pServerBrowser;
 

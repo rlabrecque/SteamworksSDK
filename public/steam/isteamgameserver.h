@@ -56,10 +56,7 @@ public:
 	/// @see SteamServersConnected_t
 	/// @see SteamServerConnectFailure_t
 	/// @see SteamServersDisconnected_t
-	virtual void LogOn(
-		const char *pszAccountName,
-		const char *pszPassword
-	) = 0;
+	virtual void LogOn( const char *pszToken ) = 0;
 
 	/// Login to a generic, anonymous account.
 	///
@@ -250,7 +247,7 @@ public:
 
 };
 
-#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer011"
+#define STEAMGAMESERVER_INTERFACE_VERSION "SteamGameServer012"
 
 // game server flags
 const uint32 k_unServerFlagNone			= 0x00;

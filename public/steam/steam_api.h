@@ -20,10 +20,12 @@
 #include "isteamnetworking.h"
 #include "isteamremotestorage.h"
 #include "isteamscreenshots.h"
+#include "isteammusic.h"
 #include "isteamhttp.h"
 #include "isteamunifiedmessages.h"
 #include "isteamcontroller.h"
 #include "isteamugc.h"
+#include "isteamapplist.h"
 
 #if defined( _PS3 )
 #include "steamps3params.h"
@@ -120,6 +122,8 @@ S_API ISteamHTTP *S_CALLTYPE SteamHTTP();
 S_API ISteamUnifiedMessages *S_CALLTYPE SteamUnifiedMessages();
 S_API ISteamController *S_CALLTYPE SteamController();
 S_API ISteamUGC *S_CALLTYPE SteamUGC();
+S_API ISteamAppList *S_CALLTYPE SteamAppList();
+S_API ISteamMusic *S_CALLTYPE SteamMusic();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender *S_CALLTYPE SteamPS3OverlayRender();
 #endif
@@ -402,6 +406,8 @@ public:
 	ISteamUnifiedMessages*	SteamUnifiedMessages()			{ return m_pSteamUnifiedMessages; }
 	ISteamController*	SteamController()					{ return m_pController; }
 	ISteamUGC*			SteamUGC()							{ return m_pSteamUGC; }
+	ISteamAppList*		SteamAppList()						{ return m_pSteamAppList; }
+	ISteamMusic*		SteamMusic()						{ return m_pSteamMusic; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
 #endif
@@ -421,6 +427,8 @@ private:
 	ISteamUnifiedMessages*m_pSteamUnifiedMessages;
 	ISteamController	*m_pController;
 	ISteamUGC			*m_pSteamUGC;
+	ISteamAppList		*m_pSteamAppList;
+	ISteamMusic			*m_pSteamMusic;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -444,9 +452,11 @@ inline void CSteamAPIContext::Clear()
 	m_pSteamRemoteStorage = NULL;
 	m_pSteamHTTP = NULL;
 	m_pSteamScreenshots = NULL;
+	m_pSteamMusic = NULL;
 	m_pSteamUnifiedMessages = NULL;
 	m_pController = NULL;
 	m_pSteamUGC = NULL;
+	m_pSteamAppList = NULL;
 #ifdef _PS3
 	m_pSteamPS3OverlayRender = NULL;
 #endif
@@ -517,6 +527,16 @@ inline bool CSteamAPIContext::Init()
 	if ( !m_pSteamUGC )
 		return false;
 
+	m_pSteamAppList = SteamClient()->GetISteamAppList( hSteamUser, hSteamPipe, STEAMAPPLIST_INTERFACE_VERSION );
+	if ( !m_pSteamAppList )
+		return false;
+
+	m_pSteamMusic = SteamClient()->GetISteamMusic( hSteamUser, hSteamPipe, STEAMMUSIC_INTERFACE_VERSION );
+	if ( !m_pSteamMusic )
+	{
+		return false;
+	}
+	
 #ifdef _PS3
 	m_pSteamPS3OverlayRender = SteamClient()->GetISteamPS3OverlayRender();
 #endif

@@ -17,6 +17,10 @@
 // Define compile time assert macros to let us validate the structure sizes.
 #define VALVE_COMPILE_TIME_ASSERT( pred ) typedef char compile_time_assert_type[(pred) ? 1 : -1];
 
+#ifndef REFERENCE
+#define REFERENCE(arg) ((void)arg)
+#endif
+
 #if defined(__linux__) || defined(__APPLE__) 
 // The 32-bit version of gcc has the alignment requirement for uint64 and double set to
 // 4 meaning that even with #pragma pack(8) these types will only be four-byte aligned.
@@ -83,12 +87,14 @@ class ISteamApps;
 class ISteamNetworking;
 class ISteamRemoteStorage;
 class ISteamScreenshots;
+class ISteamMusic;
 class ISteamGameServerStats;
 class ISteamPS3OverlayRender;
 class ISteamHTTP;
 class ISteamUnifiedMessages;
 class ISteamController;
 class ISteamUGC;
+class ISteamAppList;
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface to creating a new steam instance, or to
@@ -196,9 +202,15 @@ public:
 
 	// Exposes the ISteamUGC interface
 	virtual ISteamUGC *GetISteamUGC( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
+	// returns app list interface, only available on specially registered apps
+	virtual ISteamAppList *GetISteamAppList( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+	
+	// Music Player
+	virtual ISteamMusic *GetISteamMusic( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient012"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient014"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -241,6 +253,9 @@ enum { k_iClientUGCCallbacks = 3400 };
 enum { k_iSteamStreamClientCallbacks = 3500 };
 enum { k_IClientProductBuilderCallbacks = 3600 };
 enum { k_iClientShortcutsCallbacks = 3700 };
+enum { k_iClientRemoteControlManagerCallbacks = 3800 };
+enum { k_iSteamAppListCallbacks = 3900 };
+enum { k_iSteamMusicCallbacks = 4000 };
 
 
 //-----------------------------------------------------------------------------
@@ -291,7 +306,7 @@ struct callbackname : SteamCallback_t { \
 
 #define END_DEFINE_CALLBACK_0() \
 	static uint32  GetNumMemberVariables() { return 0; } \
-	static bool    GetMemberVariable( uint32 index, uint32 &varOffset, uint32 &varSize,  uint32 &varCount, const char **pszName, const char **pszType ) { return false; } \
+	static bool    GetMemberVariable( uint32 index, uint32 &varOffset, uint32 &varSize,  uint32 &varCount, const char **pszName, const char **pszType ) { REFERENCE( pszType ); REFERENCE( pszName ); REFERENCE( varCount ); REFERENCE( varSize ); REFERENCE( varOffset ); REFERENCE( index ); return false; } \
 	};
 	
 

@@ -1036,6 +1036,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						{
 							fields.m_pciVendorID = *((UInt32*)CFDataGetBytePtr(vendorID));
                             CFRelease( vendorID );
+							vendorID = NULL;
 						}
 						else
 						{
@@ -1046,6 +1047,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						{
 							fields.m_pciDeviceID = *((UInt32*)CFDataGetBytePtr(deviceID));
                             CFRelease( deviceID );
+							deviceID = NULL;
 						}
 						else
 						{
@@ -1058,6 +1060,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 							char *data = (char*)CFDataGetBytePtr(model);
 							strncpy( fields.m_pciModelString, data, sizeof(fields.m_pciModelString) );
                             CFRelease( model );
+							model = NULL;
 						}
 						else
 						{
@@ -1150,14 +1153,6 @@ void	GLMDisplayDB::PopulateRenderers( void )
 							IOObjectRelease(ioAccelerator);
 							IOObjectRelease(ioIterator);
 						}
-
-						// Release vendorID, deviceID, and model as appropriate
-						if(vendorID)
-							CFRelease(vendorID);
-						if(deviceID)
-							CFRelease(deviceID);
-						if(model)
-							CFRelease(model);
 
 						// generate shorthand bools
 						switch( fields.m_pciVendorID )
