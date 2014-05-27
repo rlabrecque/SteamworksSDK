@@ -124,6 +124,7 @@ struct SteamUGCDetails_t
 	uint32 m_unVotesUp;												// number of votes up
 	uint32 m_unVotesDown;											// number of votes down
 	float m_flScore;												// calculated score
+	uint32 m_unNumChildren;											// if m_eFileType == k_EWorkshopFileTypeCollection, then this number will be the number of children contained within the collection
 };
 
 //-----------------------------------------------------------------------------
