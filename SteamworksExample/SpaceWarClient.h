@@ -85,6 +85,26 @@ struct LeaderboardMenuItem_t
 	bool m_bNextLeaderboard;
 };
 
+#define MAX_WORKSHOP_ITEMS 16
+
+// a Steam Workshop item
+class CWorkshopItem : public CVectorEntity
+{
+public:
+
+	CWorkshopItem( IGameEngine *pGameEngine, uint32 uCollisionRadius ) : CVectorEntity( pGameEngine, uCollisionRadius )
+	{
+		memset( &m_ItemDetails, 0, sizeof(m_ItemDetails) );
+	}
+	
+	void OnUGCDetailsResult(SteamUGCRequestUGCDetailsResult_t *pCallback, bool bIOFailure)
+	{
+		m_ItemDetails = pCallback->m_details;
+	}
+
+	SteamUGCDetails_t m_ItemDetails; // meta data
+	CCallResult<CWorkshopItem, SteamUGCRequestUGCDetailsResult_t> m_SteamCallResultUGCDetails;
+};
 
 
 
@@ -219,6 +239,16 @@ private:
 	// Updates what we show to friends about what we're doing and how to connect
 	void UpdateRichPresenceConnectionInfo();
 
+	// Draw description for all subscribed workshop items
+	void DrawWorkshopItems();
+
+	// load subscribed workshop items
+	void LoadWorkshopItems();
+
+	// load a workshop item from file
+	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
+	CWorkshopItem *LoadWorkshopItemFromFile( const char *pszFileName );
+
 	// Server we are connected to
 	CSpaceWarServer *m_pServer;
 
@@ -330,6 +360,10 @@ private:
 	// Sun instance
 	CSun *m_pSun;
 
+	// Steam Workshop items
+	CWorkshopItem *m_rgpWorkshopItems[ MAX_WORKSHOP_ITEMS ];
+	int m_nNumWorkshopItems; // items in m_rgpWorkshopItems
+
 	// Main menu instance
 	CMainMenu *m_pMainMenu;
 
@@ -360,6 +394,7 @@ private:
 	// callback for when we're creating a new lobby
 	void OnLobbyCreated( LobbyCreated_t *pCallback, bool bIOFailure );
 	CCallResult<CSpaceWarClient, LobbyCreated_t> m_SteamCallResultLobbyCreated;
+
 	// callback for when we've joined a lobby
 	void OnLobbyEntered( LobbyEnter_t *pCallback, bool bIOFailure );
 	CCallResult<CSpaceWarClient, LobbyEnter_t> m_SteamCallResultLobbyEntered;
@@ -377,6 +412,9 @@ private:
 	
 	// callback when getting the results of a web call
 	STEAM_CALLBACK( CSpaceWarClient, OnGameWebCallback, GameWebCallback_t, m_CallbackGameWebCallback );
+
+	// callback when new Workshop item was installed
+	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t, m_CallbackWorkshopItemInstalled);
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

@@ -67,27 +67,26 @@ public:
 
 	// Get the distance traveled each frame
 	float GetDistanceTraveledLastFrame();
-
-protected:
-
+	
 	// Add a line to the entity
-	void AddLine( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor );
+	void AddLine(float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor);
 
 	// Set the objects current position
-	void SetPosition( float xPos, float yPos );
+	void SetPosition(float xPos, float yPos);
+
+	// Set the velocity of the entity (normally you should just set acceleration and this will be computed)
+	void SetVelocity(float xVelocity, float yVelocity) { m_flXVelocity = xVelocity; m_flYVelocity = yVelocity; }
+
+protected:
 
 	// Set the rotation to be applied next frame
 	void SetRotationDeltaNextFrame( float flRotationInRadians );
 
 	// Set the acceleration to be applied next frame
 	void SetAcceleration( float xAccel, float yAccel );
-
 	// Set the cumulative rotation for this entity (overriding any existing value)
 	void SetAccumulatedRotation( float flRotation ) { m_flAccumulatedRotation = flRotation; }
-
-	// Set the velocity of the entity (normally you should just set acceleration and this will be computed)
-	void SetVelocity ( float xVelocity, float yVelocity ) { m_flXVelocity = xVelocity; m_flYVelocity = yVelocity; }
-
+	
 	// Reset velocity of the entity
 	void ResetVelocity() { m_flXVelocity = 0; m_flYVelocity = 0; }
 

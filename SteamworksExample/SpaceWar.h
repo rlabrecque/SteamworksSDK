@@ -185,6 +185,7 @@ enum EClientGameState
 	k_EClientClanChatRoom,
 	k_EClientWebCallback,
 	k_EClientMusic,
+	k_EClientWorkshop,
 };
 
 

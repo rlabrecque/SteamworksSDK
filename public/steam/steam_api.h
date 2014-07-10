@@ -21,6 +21,7 @@
 #include "isteamremotestorage.h"
 #include "isteamscreenshots.h"
 #include "isteammusic.h"
+#include "isteammusicremote.h"
 #include "isteamhttp.h"
 #include "isteamunifiedmessages.h"
 #include "isteamcontroller.h"
@@ -124,6 +125,7 @@ S_API ISteamController *S_CALLTYPE SteamController();
 S_API ISteamUGC *S_CALLTYPE SteamUGC();
 S_API ISteamAppList *S_CALLTYPE SteamAppList();
 S_API ISteamMusic *S_CALLTYPE SteamMusic();
+S_API ISteamMusicRemote *S_CALLTYPE SteamMusicRemote();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender *S_CALLTYPE SteamPS3OverlayRender();
 #endif
@@ -408,6 +410,7 @@ public:
 	ISteamUGC*			SteamUGC()							{ return m_pSteamUGC; }
 	ISteamAppList*		SteamAppList()						{ return m_pSteamAppList; }
 	ISteamMusic*		SteamMusic()						{ return m_pSteamMusic; }
+	ISteamMusicRemote*	SteamMusicRemote()					{ return m_pSteamMusicRemote; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
 #endif
@@ -429,6 +432,7 @@ private:
 	ISteamUGC			*m_pSteamUGC;
 	ISteamAppList		*m_pSteamAppList;
 	ISteamMusic			*m_pSteamMusic;
+	ISteamMusicRemote	*m_pSteamMusicRemote;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -536,7 +540,13 @@ inline bool CSteamAPIContext::Init()
 	{
 		return false;
 	}
-	
+
+	m_pSteamMusicRemote = SteamClient()->GetISteamMusicRemote( hSteamUser, hSteamPipe, STEAMMUSICREMOTE_INTERFACE_VERSION );
+	if ( !m_pSteamMusicRemote )
+	{
+		return false;
+	}
+
 #ifdef _PS3
 	m_pSteamPS3OverlayRender = SteamClient()->GetISteamPS3OverlayRender();
 #endif

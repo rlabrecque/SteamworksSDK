@@ -28,5 +28,6 @@ CMainMenu::CMainMenu( IGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( 
 	AddMenuItem( MenuItem_t( "Write Minidump", k_EClientMinidump ) );
 	AddMenuItem( MenuItem_t( "Web Callback", k_EClientWebCallback ) );
 	AddMenuItem( MenuItem_t( "Music Player", k_EClientMusic ) );
+	AddMenuItem( MenuItem_t( "Workshop Items", k_EClientWorkshop ) );
 	AddMenuItem( MenuItem_t( "Exit Game", k_EClientGameExiting ) );
 }

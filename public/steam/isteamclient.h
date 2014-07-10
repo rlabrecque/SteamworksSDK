@@ -88,6 +88,7 @@ class ISteamNetworking;
 class ISteamRemoteStorage;
 class ISteamScreenshots;
 class ISteamMusic;
+class ISteamMusicRemote;
 class ISteamGameServerStats;
 class ISteamPS3OverlayRender;
 class ISteamHTTP;
@@ -208,9 +209,12 @@ public:
 	
 	// Music Player
 	virtual ISteamMusic *GetISteamMusic( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0;
+
+	// Music Player Remote
+	virtual ISteamMusicRemote *GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion) = 0;
 };
 
-#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient014"
+#define STEAMCLIENT_INTERFACE_VERSION		"SteamClient015"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -229,7 +233,7 @@ enum { k_iSteamAppsCallbacks = 1000 };
 enum { k_iSteamUserStatsCallbacks = 1100 };
 enum { k_iSteamNetworkingCallbacks = 1200 };
 enum { k_iClientRemoteStorageCallbacks = 1300 };
-enum { k_iSteamUserItemsCallbacks = 1400 };
+enum { k_iClientDepotBuilderCallbacks = 1400 };
 enum { k_iSteamGameServerItemsCallbacks = 1500 };
 enum { k_iClientUtilsCallbacks = 1600 };
 enum { k_iSteamGameCoordinatorCallbacks = 1700 };
@@ -256,7 +260,8 @@ enum { k_iClientShortcutsCallbacks = 3700 };
 enum { k_iClientRemoteControlManagerCallbacks = 3800 };
 enum { k_iSteamAppListCallbacks = 3900 };
 enum { k_iSteamMusicCallbacks = 4000 };
-
+enum { k_iSteamMusicRemoteCallbacks = 4100 };
+enum { k_iClientVRCallbacks = 4200 };
 
 //-----------------------------------------------------------------------------
 // The CALLBACK macros are for client side callback logging enabled with

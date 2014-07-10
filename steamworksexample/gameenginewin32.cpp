@@ -790,6 +790,7 @@ bool CGameEngineWin32::StartFrame()
 			OutputDebugString( "Reset() call on device failed\n" );
 			::MessageBox( m_hWnd, "m_pD3D9Device->Reset() call has failed unexpectedly\n", "Fatal Error", MB_OK );
 			Shutdown();
+			return false;
 		}
 	}
 

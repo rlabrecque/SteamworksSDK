@@ -12,6 +12,21 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.30 10th July 2014
+----------------------------------------------------------------
+
+General:
+* Added a new Workshop item content API in ISteamUGC that is easy to use and allows multiple files per item without any size limits. It uses the same 
+  content system that handles regular content depots, resulting in faster and smaller downloads due to delta patching. Subscribed workshop items will
+  be placed in unique subfolders in the install folder, so the game doesn't need to fetch them using ISteamRemoteStorage anymore. The new API is not
+  backwards compatible with old items created with ISteamRemoteStorage. Added Workshop feature to steamworksexample using ISteamUGC.
+
+
+Steam VR:
+* VR_Init now requires that you call SteamAPI_Init first.
+
+
+----------------------------------------------------------------
 v1.29 24th April 2014
 ----------------------------------------------------------------
 

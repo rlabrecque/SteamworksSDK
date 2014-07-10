@@ -151,7 +151,7 @@ inline bool CSteamGameServerAPIContext::Init()
 		return false;
 
 	m_pSteamHTTP = g_pSteamClientGameServer->GetISteamHTTP( hSteamUser, hSteamPipe, STEAMHTTP_INTERFACE_VERSION );
-	if ( !m_pSteamGameServerStats )
+	if ( !m_pSteamHTTP )
 		return false;
 
 	return true;
