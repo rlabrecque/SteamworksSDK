@@ -37,6 +37,14 @@ typedef int HGAMEVOICECHANNEL;
 #define VOICE_OUTPUT_SAMPLE_RATE_IDEAL		11025
 #define BYTES_PER_SAMPLE					2
 
+// Texture formats we support for upload to textures
+enum ETEXTUREFORMAT
+{
+	eTextureFormat_RGBA, // 8 bits per channel
+	eTextureFormat_BGRA, // 8 bits per channel
+	eTextureFormat_BGRA16, // 16 bits per channel
+};
+
 // used for VR support
 namespace vr { class IHmd; }
 
@@ -81,8 +89,11 @@ public:
 	// Create a new font returning our internal handle value for it (0 means failure)
 	virtual HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont ) = 0;
 
-	// Create a new texture returning our internal handle value for it (0 means failure)
-	virtual HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight ) = 0;
+	// Create a new texture returning our internal handle value for it (0 means failure), texture type specifies the type of data contained in pData
+	virtual HGAMETEXTURE HCreateTexture( byte *pData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat = eTextureFormat_RGBA ) = 0;
+
+	// update an existing texture, texture type specifies the type of data contained in pData
+	virtual bool UpdateTexture( HGAMETEXTURE texture, byte *pData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat = eTextureFormat_RGBA ) = 0;
 
 	// Draw a line, the engine itself will manage batching these (although you can explicitly flush if you need to)
 	virtual bool BDrawLine( float xPos0, float yPos0, DWORD dwColor0, float xPos1, float yPos1, DWORD dwColor1 ) = 0;

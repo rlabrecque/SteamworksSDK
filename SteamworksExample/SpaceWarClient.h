@@ -32,6 +32,7 @@ class CClanChatRoom;
 class CP2PAuthPlayer;
 class CP2PAuthedGame;
 class CVoiceChat;
+class CHTMLSurface;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -427,6 +428,9 @@ private:
 	
 	// p2p voice chat 
 	CVoiceChat *m_pVoiceChat;
+
+	// html page viewer
+	CHTMLSurface *m_pHTMLSurface;
 
 	// connection handler
 	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );

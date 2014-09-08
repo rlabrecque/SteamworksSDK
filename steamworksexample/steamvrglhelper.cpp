@@ -193,6 +193,8 @@ bool CSteamVRGLHelper::BInitPredistortRenderTarget()
 	// Set the list of draw buffers.
 	GLenum rDrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(ARRAYSIZE( rDrawBuffers ), rDrawBuffers);
+
+	return true;
 }
 
 

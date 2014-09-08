@@ -27,6 +27,7 @@
 #include "isteamcontroller.h"
 #include "isteamugc.h"
 #include "isteamapplist.h"
+#include "isteamhtmlsurface.h"
 
 #if defined( _PS3 )
 #include "steamps3params.h"
@@ -126,6 +127,7 @@ S_API ISteamUGC *S_CALLTYPE SteamUGC();
 S_API ISteamAppList *S_CALLTYPE SteamAppList();
 S_API ISteamMusic *S_CALLTYPE SteamMusic();
 S_API ISteamMusicRemote *S_CALLTYPE SteamMusicRemote();
+S_API ISteamHTMLSurface *S_CALLTYPE SteamHTMLSurface();
 #ifdef _PS3
 S_API ISteamPS3OverlayRender *S_CALLTYPE SteamPS3OverlayRender();
 #endif
@@ -411,6 +413,7 @@ public:
 	ISteamAppList*		SteamAppList()						{ return m_pSteamAppList; }
 	ISteamMusic*		SteamMusic()						{ return m_pSteamMusic; }
 	ISteamMusicRemote*	SteamMusicRemote()					{ return m_pSteamMusicRemote; }
+	ISteamHTMLSurface*	SteamHTMLSurface()					{ return m_pSteamHTMLSurface; }
 #ifdef _PS3
 	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
 #endif
@@ -433,6 +436,7 @@ private:
 	ISteamAppList		*m_pSteamAppList;
 	ISteamMusic			*m_pSteamMusic;
 	ISteamMusicRemote	*m_pSteamMusicRemote;
+	ISteamHTMLSurface	*m_pSteamHTMLSurface;
 #ifdef _PS3
 	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
 #endif
@@ -461,6 +465,9 @@ inline void CSteamAPIContext::Clear()
 	m_pController = NULL;
 	m_pSteamUGC = NULL;
 	m_pSteamAppList = NULL;
+	m_pSteamMusic = NULL;
+	m_pSteamMusicRemote= NULL;
+	m_pSteamHTMLSurface = NULL;
 #ifdef _PS3
 	m_pSteamPS3OverlayRender = NULL;
 #endif
@@ -543,6 +550,12 @@ inline bool CSteamAPIContext::Init()
 
 	m_pSteamMusicRemote = SteamClient()->GetISteamMusicRemote( hSteamUser, hSteamPipe, STEAMMUSICREMOTE_INTERFACE_VERSION );
 	if ( !m_pSteamMusicRemote )
+	{
+		return false;
+	}
+
+	m_pSteamHTMLSurface = SteamClient()->GetISteamHTMLSurface( hSteamUser, hSteamPipe, STEAMHTMLSURFACE_INTERFACE_VERSION );
+	if ( !m_pSteamHTMLSurface )
 	{
 		return false;
 	}

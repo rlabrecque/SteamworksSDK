@@ -1693,7 +1693,7 @@ bool CGameEngineGL::BFlushQuadBuffer()
 //-----------------------------------------------------------------------------
 // Purpose: Creates a new texture 
 //-----------------------------------------------------------------------------
-HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight )
+HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat )
 {
 	#if DX9MODE
 		if ( !m_pD3D9Device )
@@ -1732,7 +1732,7 @@ HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 	
 		// build our texture mipmaps
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)pRGBAData );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, eTextureFormat == eTextureFormat_RGBA ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE, (void *)pRGBAData );
 		glDisable( GL_TEXTURE_2D );
 	
 		int nHandle = m_nNextTextureHandle;
@@ -1741,6 +1741,39 @@ HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint
 	
 		return nHandle;
 	#endif
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: update an exiting textue
+//-----------------------------------------------------------------------------
+bool CGameEngineGL::UpdateTexture( HGAMETEXTURE texture, byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat )
+{
+#if DX9MODE
+		
+	return false;
+#else
+	if ( m_bShuttingDown )
+		return false;
+	
+	std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
+	iter = m_MapTextures.find( texture );
+	if ( iter == m_MapTextures.end() )
+	{
+		OutputDebugString( "BDrawTexturedQuad called with invalid hTexture value\n" );
+		return false;
+	}
+
+	glEnable( GL_TEXTURE_2D );
+	glBindTexture( GL_TEXTURE_2D, iter->second.m_uTextureID );
+	
+	// build our texture mipmaps
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, eTextureFormat == eTextureFormat_RGBA ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE, (void *)pRGBAData );
+	glDisable( GL_TEXTURE_2D );
+	
+	return true;
+#endif
+	
 }
 
 

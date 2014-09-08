@@ -127,7 +127,10 @@ public:
 	HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont );
 
 	// Create a new texture returning our internal handle value for it (0 means failure)
-	HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight );
+	HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat = eTextureFormat_RGBA );
+
+	// update an existing texture
+	bool UpdateTexture( HGAMETEXTURE texture, byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat );
 
 	// Draw a line, the engine itself will manage batching these (although you can explicitly flush if you need to)
 	bool BDrawLine( float xPos0, float yPos0, DWORD dwColor0, float xPos1, float yPos1, DWORD dwColor1 );
@@ -203,9 +206,6 @@ public:
 	void RecordKeyUp( DWORD dwVK );
 
 private:
-	// Create a new texture returning our internal handle value for it (0 means failure)
-	HGAMETEXTURE HCreateTextureInternal( byte *pRGBAData, uint32 uWidth, uint32 uHeight, D3DFORMAT eFormat );
-
 
 	// Creates the hwnd for the game
 	bool BCreateGameWindow( int nShowCommand );
@@ -309,7 +309,8 @@ private:
 		uint32 m_uHeight;
 		LPDIRECT3DTEXTURE9 m_pTexture;
 		LPDIRECT3DSURFACE9 m_pDepthSurface; // render targets only
-		D3DFORMAT m_eFormat;
+		D3DFORMAT m_eFormat; // format for the texture on the card itself
+		ETEXTUREFORMAT m_eTextureFormat; // format of the data you provide
 	};
 	std::map<HGAMETEXTURE, TextureData_t> m_MapTextures;
 

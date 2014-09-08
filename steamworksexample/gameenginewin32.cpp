@@ -1846,17 +1846,22 @@ bool CGameEngineWin32::BRenderPrimitive( D3DPRIMITIVETYPE primType, uint32 uStar
 //-----------------------------------------------------------------------------
 // Purpose: Creates a new texture 
 //-----------------------------------------------------------------------------
-HGAMETEXTURE CGameEngineWin32::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight )
-{
-	return HCreateTextureInternal( pRGBAData, uWidth, uHeight, D3DFMT_A8R8G8B8 );
-}
-
-
-// Create a new texture returning our internal handle value for it (0 means failure)
-HGAMETEXTURE CGameEngineWin32::HCreateTextureInternal( byte *pRGBAData, uint32 uWidth, uint32 uHeight, D3DFORMAT eFormat )
+HGAMETEXTURE CGameEngineWin32::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat )
 {
 	if ( !m_pD3D9Device )
 		return 0;
+
+	D3DFORMAT eD3DDeviceFormat = D3DFMT_A8R8G8B8;
+
+	switch ( eTextureFormat )
+	{
+	case eTextureFormat_RGBA:
+	case eTextureFormat_BGRA:
+		eD3DDeviceFormat = D3DFMT_A8R8G8B8;
+		break;
+	case eTextureFormat_BGRA16:
+		eD3DDeviceFormat = D3DFMT_A16B16G16R16;
+	}
 
 	TextureData_t TexData;
 	TexData.m_uWidth = uWidth;
@@ -1864,11 +1869,11 @@ HGAMETEXTURE CGameEngineWin32::HCreateTextureInternal( byte *pRGBAData, uint32 u
 	if ( pRGBAData )
 	{
 		size_t dataSize = 0;
-		if ( eFormat == D3DFMT_A8B8G8R8 )
+		if ( eD3DDeviceFormat == D3DFMT_A8R8G8B8 )
 		{
 			dataSize = uWidth*uHeight * 4;
 		}
-		else if ( eFormat == D3DFMT_A16B16G16R16 )
+		else if ( eD3DDeviceFormat == D3DFMT_A16B16G16R16 )
 		{
 			dataSize = sizeof(uint16)* 4 * uWidth * uHeight;
 		}
@@ -1881,7 +1886,8 @@ HGAMETEXTURE CGameEngineWin32::HCreateTextureInternal( byte *pRGBAData, uint32 u
 	}
 	TexData.m_pTexture = NULL;
 	TexData.m_pDepthSurface = NULL;
-	TexData.m_eFormat = eFormat;
+	TexData.m_eFormat = eD3DDeviceFormat;
+	TexData.m_eTextureFormat = eTextureFormat;
 
 	int nHandle = m_nNextTextureHandle;
 	++m_nNextTextureHandle;
@@ -2162,6 +2168,78 @@ bool CGameEngineWin32::AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pV
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: update an existing texture
+//-----------------------------------------------------------------------------
+bool CGameEngineWin32::UpdateTexture( HGAMETEXTURE hTexture, byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat )
+{
+	std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
+	iter = m_MapTextures.find( hTexture );
+	if (iter == m_MapTextures.end())
+	{
+		OutputDebugString( "BFlushQuadBuffer failed with invalid m_hLastTexture value\n" );
+		return false;
+	}
+
+	// Put the data into the texture
+	D3DLOCKED_RECT rect;
+	HRESULT hRes = iter->second.m_pTexture->LockRect( 0, &rect, NULL, 0 );
+	if (FAILED( hRes ))
+	{
+		OutputDebugString( "LockRect call failed\n" );
+		iter->second.m_pTexture->Release();
+		iter->second.m_pTexture = NULL;
+		return false;
+	}
+
+	if (iter->second.m_eFormat == D3DFMT_A8R8G8B8)
+	{
+		DWORD *pARGB = (DWORD *)rect.pBits;
+		byte *pRGBA = (byte *)pRGBAData;
+
+		byte r, g, b, a;
+		for (uint32 y = 0; y < uHeight; ++y)
+		{
+			for (uint32 x = 0; x < uWidth; ++x)
+			{
+				// swap position of alpha value from back to front to be in correct format for d3d...
+				r = *pRGBA++;
+				g = *pRGBA++;
+				b = *pRGBA++;
+				a = *pRGBA++;
+
+				if ( eTextureFormat == eTextureFormat_RGBA )
+					*pARGB++ = D3DCOLOR_ARGB( a, r, g, b );
+				else if ( eTextureFormat == eTextureFormat_BGRA)
+					*pARGB++ = D3DCOLOR_ARGB( a, b, g, r );
+			}
+		}
+	}
+	else if (iter->second.m_eFormat == D3DFMT_A16B16G16R16)
+	{
+		uint16 *pDest = (uint16 *)rect.pBits;
+		uint16 *pSrc = (uint16 *)pRGBAData;
+
+		if ( eTextureFormat != eTextureFormat_BGRA16 )
+			OutputDebugString( "Unsupported texture format for BGRA16 texture \n" );
+
+		memcpy( pDest, pSrc, sizeof( uint16 )* uWidth * uHeight * 4 );
+	}
+
+	hRes = iter->second.m_pTexture->UnlockRect( 0 );
+	if (FAILED( hRes ))
+	{
+		OutputDebugString( "UnlockRect call failed\n" );
+		iter->second.m_pTexture->Release();
+		iter->second.m_pTexture = NULL;
+		return false;
+	}
+
+	return true;
+}
+
+
 bool CGameEngineWin32::BReadyTexture( HGAMETEXTURE hTexture )
 {
 	std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
@@ -2215,7 +2293,7 @@ bool CGameEngineWin32::BReadyTexture( HGAMETEXTURE hTexture )
 				return false;
 			}
 
-			if ( iter->second.m_eFormat == D3DFMT_A8B8G8R8 )
+			if ( iter->second.m_eFormat == D3DFMT_A8R8G8B8 )
 			{
 				DWORD *pARGB = (DWORD *)rect.pBits;
 				byte *pRGBA = (byte *)iter->second.m_pRGBAData;
@@ -2231,7 +2309,10 @@ bool CGameEngineWin32::BReadyTexture( HGAMETEXTURE hTexture )
 						b = *pRGBA++;
 						a = *pRGBA++;
 
-						*pARGB++ = D3DCOLOR_ARGB( a, r, g, b );
+						if ( iter->second.m_eTextureFormat == eTextureFormat_RGBA )
+							*pARGB++ = D3DCOLOR_ARGB( a, r, g, b );
+						else
+							*pARGB++ = D3DCOLOR_ARGB( a, b, g, r );
 					}
 				}
 			}
@@ -2239,6 +2320,9 @@ bool CGameEngineWin32::BReadyTexture( HGAMETEXTURE hTexture )
 			{
 				uint16 *pDest = (uint16 *)rect.pBits;
 				uint16 *pSrc = (uint16 *)iter->second.m_pRGBAData;
+		
+				if ( iter->second.m_eTextureFormat != eTextureFormat_BGRA16 )
+					OutputDebugString( "Unsupported texture format for BGRA16 texture \n" );
 
 				memcpy( pDest, pSrc, sizeof(uint16)* iter->second.m_uWidth * iter->second.m_uHeight * 4 );
 			}
@@ -2515,7 +2599,7 @@ bool CGameEngineWin32::BInitializeVRShader()
 			}
 		}
 
-		m_hVRDistortionMap[i] = HCreateTextureInternal( (byte *)pData, nDistSize, nDistSize, D3DFMT_A16B16G16R16 );
+		m_hVRDistortionMap[i] = HCreateTexture( (byte *)pData, nDistSize, nDistSize, eTextureFormat_BGRA16 );
 		free( pData );
 		if ( !m_hVRDistortionMap[i] )
 		{

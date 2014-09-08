@@ -198,7 +198,7 @@ void CLeaderboards::OnMenuSelection( LeaderboardMenuItem_t selection )
 	}
 	else if ( selection.m_bNextLeaderboard )
 	{
-		m_nCurrentLeaderboard = ++m_nCurrentLeaderboard % 2;
+		m_nCurrentLeaderboard = (m_nCurrentLeaderboard+1) % 2;
 		Show();
 	}
 }

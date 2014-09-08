@@ -20,6 +20,7 @@
 #include "Lobby.h"
 #include "p2pauth.h"
 #include "voicechat.h"
+#include "htmlsurface.h"
 #include "steam/steamencryptedappticket.h"
 #ifdef WIN32
 #include <direct.h>
@@ -156,6 +157,9 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// P2P voice chat 
 	m_pVoiceChat = new CVoiceChat( pGameEngine );
 
+	// HTML Surface page
+	m_pHTMLSurface = new CHTMLSurface(pGameEngine);
+
 	LoadWorkshopItems();
 }
 
@@ -203,6 +207,9 @@ CSpaceWarClient::~CSpaceWarClient()
 
 	if ( m_pVoiceChat )
 		delete m_pVoiceChat;
+
+	if ( m_pHTMLSurface )
+		delete m_pHTMLSurface;
 
 	for( uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i )
 	{
@@ -1016,6 +1023,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		m_pMusicPlayer->Show();
 		SteamFriends()->SetRichPresence( "status", "Using music player" );
 	}
+	else if ( m_eGameState == k_EClientHTMLSurface )
+	{
+		// we've switched to the html page
+		m_pHTMLSurface->Show();
+		SteamFriends()->SetRichPresence("status", "Using the web");
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1357,6 +1370,12 @@ void CSpaceWarClient::RunFrame()
 		m_pStarField->Render();
 		m_pRemoteStorage->Render();
 		break;
+
+	case k_EClientHTMLSurface:
+		m_pHTMLSurface->RunFrame();
+		m_pHTMLSurface->Render();
+		break;
+
 
 	case k_EClientMinidump:
 #ifdef _WIN32
@@ -2101,11 +2120,20 @@ bool CSpaceWarClient::LoadWorkshopItem( PublishedFileId_t workshopItemID )
 
 	uint64 unSizeOnDisk = 0;
 	char szItemFolder[1024] = { 0 };
-	if ( !SteamUGC()->GetItemInstallInfo( workshopItemID, &unSizeOnDisk, szItemFolder, sizeof(szItemFolder) ) )
+	bool bLegacyItem = false;
+	if ( !SteamUGC()->GetItemInstallInfo( workshopItemID, &unSizeOnDisk, szItemFolder, sizeof(szItemFolder), &bLegacyItem ) )
 		return false;
 
 	char szFile[1024];
-	_snprintf(szFile, sizeof(szFile), "%s/workshopitem.txt", szItemFolder);
+	if( bLegacyItem )
+	{
+		// szItemFolder just points directly to the item for legacy items that were published with the RemoteStorage API.
+		_snprintf( szFile, sizeof( szFile ), "%s", szItemFolder );
+	}
+	else
+	{
+		_snprintf( szFile, sizeof( szFile ), "%s/workshopitem.txt", szItemFolder );
+	}
 
 	CWorkshopItem *pItem = LoadWorkshopItemFromFile( szFile );
 

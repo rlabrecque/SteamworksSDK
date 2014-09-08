@@ -50,6 +50,7 @@
 		50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE61362190C000FC072 /* glmgrext.cpp */; };
 		50E77DF61362190C000FC072 /* mathlite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE91362190C000FC072 /* mathlite.cpp */; };
 		50E77DF813621991000FC072 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50E77DF713621991000FC072 /* IOKit.framework */; };
+		840B387019BB91C50084B9F1 /* htmlsurface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 840B386E19BB91C50084B9F1 /* htmlsurface.cpp */; };
 		F803305119087F9200344590 /* musicplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F803305019087F9200344590 /* musicplayer.cpp */; };
 		F80330831908872600344590 /* controller.vdf in Resources */ = {isa = PBXBuildFile; fileRef = F80330821908872600344590 /* controller.vdf */; };
 /* End PBXBuildFile section */
@@ -155,6 +156,8 @@
 		50E77DE91362190C000FC072 /* mathlite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mathlite.cpp; path = ../glmgr/mathlite.cpp; sourceTree = "<group>"; };
 		50E77DEA1362190C000FC072 /* mathlite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mathlite.h; path = ../glmgr/mathlite.h; sourceTree = "<group>"; };
 		50E77DF713621991000FC072 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		840B386E19BB91C50084B9F1 /* htmlsurface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = htmlsurface.cpp; sourceTree = "<group>"; };
+		840B386F19BB91C50084B9F1 /* htmlsurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = htmlsurface.h; sourceTree = "<group>"; };
 		F803304F19087DA600344590 /* musicplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = musicplayer.h; sourceTree = "<group>"; };
 		F803305019087F9200344590 /* musicplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = musicplayer.cpp; sourceTree = "<group>"; };
 		F80330821908872600344590 /* controller.vdf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = controller.vdf; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				50E77DCF136218F5000FC072 /* glmgr */,
+				840B386E19BB91C50084B9F1 /* htmlsurface.cpp */,
 				503C6CED1268F49F00B66E3B /* p2pauth.cpp */,
 				503C6CEF1268F49F00B66E3B /* PhotonBeam.cpp */,
 				503C6CF11268F49F00B66E3B /* QuitMenu.cpp */,
@@ -253,6 +257,7 @@
 		503C6D291268F4EE00B66E3B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				840B386F19BB91C50084B9F1 /* htmlsurface.h */,
 				50D642861461EF3200A5739B /* clanchatroom.h */,
 				503C6CEE1268F49F00B66E3B /* p2pauth.h */,
 				503C6CF01268F49F00B66E3B /* PhotonBeam.h */,
@@ -380,6 +385,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				840B387019BB91C50084B9F1 /* htmlsurface.cpp in Sources */,
 				503C6D0F1268F49F00B66E3B /* BaseMenu.cpp in Sources */,
 				503C6D101268F49F00B66E3B /* connectingmenu.cpp in Sources */,
 				F803305119087F9200344590 /* musicplayer.cpp in Sources */,

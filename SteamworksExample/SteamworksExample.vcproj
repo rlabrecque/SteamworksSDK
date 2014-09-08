@@ -394,6 +394,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\htmlsurface.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Leaderboards.cpp"
 					>
 				</File>
@@ -501,6 +505,10 @@
 				</File>
 				<File
 					RelativePath=".\connectingmenu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\htmlsurface.h"
 					>
 				</File>
 				<File

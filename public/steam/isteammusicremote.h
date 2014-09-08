@@ -6,8 +6,8 @@
 #pragma once
 #endif
 
-#include "steam/isteamclient.h"
-#include "steam/isteammusic.h"
+#include "isteamclient.h"
+#include "isteammusic.h"
 
 #define k_SteamMusicNameMaxLength 255
 #define k_SteamMusicPNGMaxLength 65535

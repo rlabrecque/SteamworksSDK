@@ -186,6 +186,7 @@ enum EClientGameState
 	k_EClientWebCallback,
 	k_EClientMusic,
 	k_EClientWorkshop,
+	k_EClientHTMLSurface,
 };
 
 

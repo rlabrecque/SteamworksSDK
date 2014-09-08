@@ -198,11 +198,13 @@ public:
 	virtual uint32 GetNumSubscribedItems() = 0; // number of subscribed items 
 	virtual uint32 GetSubscribedItems( PublishedFileId_t* pvecPublishedFileID, uint32 cMaxEntries ) = 0; // all subscribed item PublishFileIDs
 
-	virtual bool GetItemInstallInfo( PublishedFileId_t nPublishedFileID, uint64 *punSizeOnDisk, char *pchFolder, uint32 cchFolderSize ) = 0; // returns true if item is installed
+	// Get info about the item on disk.  If you are supporting items published through the legacy RemoteStorage APIs then *pbLegacyItem will be set to true
+	// and pchFolder will contain the full path to the file rather than the containing folder.
+	virtual bool GetItemInstallInfo( PublishedFileId_t nPublishedFileID, uint64 *punSizeOnDisk, char *pchFolder, uint32 cchFolderSize, bool *pbLegacyItem ) = 0; // returns true if item is installed
 	virtual bool GetItemUpdateInfo( PublishedFileId_t nPublishedFileID, bool *pbNeedsUpdate, bool *pbIsDownloading, uint64 *punBytesDownloaded, uint64 *punBytesTotal ) = 0;
 };
 
-#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION002"
+#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION003"
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for querying UGC

@@ -12,6 +12,28 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.31 8th September 2014
+----------------------------------------------------------------
+
+UGC:
+* The Workshop item content API in ISteamUGC now supports legacy workshop items uploaded via the ISteamRemoteStorage interface. ISteamUGC::GetItemInstallInfo(). This will return whether the item was a legacy item or a new item. If it is a legacy item, then the pchFolder variable will be the full path to the file.
+
+HTML:
+* Added initial version of ISteamHTMLSurface API, which allows games to get textures for html pages and interact with them. There is also a sample implementation in the SteamworksExample.
+
+Virtual Reality:
+* Added VR_IsHmdPresent, which returns true if an HMD appears to be present but does not initialize the VR API. This is useful when enabling/disabling UI elements to offer VR mode to a user.
+* Added VR_GetStringForHmdError which turns an HmdError enum value into a string.
+
+SteamPipe
+* The example Steampipe batch file (run_build.bat) now uses run_app_build_http instead of run_app_build by default.
+
+ContentPrep.app
+* Updated wxPython requirements for this app (version 2.7 and 2.8 supported). App will prompt with updated URL to download compatible packages if necessary.
+
+
+
+----------------------------------------------------------------
 v1.30 10th July 2014
 ----------------------------------------------------------------
 

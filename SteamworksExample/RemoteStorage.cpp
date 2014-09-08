@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Class for tracking stats and achievements
 //
@@ -300,7 +300,7 @@ void CRemoteStorageScreen::Render()
 	}
 
 	const int32 width = m_pGameEngine->GetViewportWidth();
-	const int32 height = m_pGameEngine->GetViewportHeight();
+	//const int32 height = m_pGameEngine->GetViewportHeight();
 
 	const int32 pxColumn1Left = width / 2 - CLOUDDISP_COLUMN_WIDTH / 2;
 
