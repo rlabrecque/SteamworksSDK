@@ -3673,7 +3673,7 @@ void	CGLMEditableTextItem::GenBaseNameAndFullPath(  char *prefix, char *suffix  
 
 	// bring this code back if you need the live shader edit/debug mode.
 	#if 0	
-		Q_binarytohex( m_origDigest, sizeof(m_origDigest), temp, sizeof( temp ) );
+		V_binarytohex( m_origDigest, sizeof(m_origDigest), temp, sizeof( temp ) );
 		if (suffix)
 		{
 			strcat( temp, suffix );

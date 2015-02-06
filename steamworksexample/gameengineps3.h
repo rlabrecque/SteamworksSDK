@@ -19,7 +19,9 @@ struct PS3DbgFont_t
 	float m_nScale;
 };
 
-class CGameEnginePS3 : public IGameEngine
+class CVoiceContext;
+
+class CGameEnginePS3 : public IGameEngine, public ISteamPS3OverlayRenderHost
 {
 public:
 
@@ -63,7 +65,7 @@ public:
 	bool BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWORD dwFormat, const char *pchText );
 
 	// Create a new font returning our internal handle value for it (0 means failure)
-	HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont );
+	HGAMEFONT HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont );
 
 	// Create a new texture returning our internal handle value for it (0 means failure)
 	HGAMETEXTURE HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight );
@@ -114,7 +116,24 @@ public:
 	// Check if the game engine hwnd currently has focus (and a working d3d device)
 	bool BGameEngineHasFocus() { return true; }
 
+	// Voice chat functions
+	virtual HGAMEVOICECHANNEL HCreateVoiceChannel();
+	virtual void DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel );
+	virtual bool AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoiceData, uint32 uLength );
+
+	// ISteamPS3OverlayRenderHost implementation
+	virtual void DrawTexturedRect( int x0, int y0, int x1, int y1, float u0, float v0, float u1, float v1, int32 iTextureID, DWORD colorStart, DWORD colorEnd, EOverlayGradientDirection eDirection );
+	virtual void LoadOrUpdateTexture( int32 iTextureID, bool bIsFullTexture, int x0, int y0, uint32 uWidth, uint32 uHeight, int32 iBytes, char *pData );
+	virtual void DeleteTexture( int32 iTextureID );
+	virtual void DeleteAllTextures();
+
 private:
+
+	// Draw a textured rectangle 
+	bool BDrawTexturedGradientQuad( float xPos0, float yPos0, float xPos1, float yPos1, 
+		float u0, float v0, float u1, float v1,
+		DWORD dwColorTopLeft, DWORD dwColorTopRight, DWORD dwColorBottomLeft, DWORD dwColorBottomRight, HGAMETEXTURE hTexture );
+
 
 	// Initialize the PSGL rendering interfaces and default state
 	bool BInitializePSGL();
@@ -124,6 +143,10 @@ private:
 
 	// Initialize libpad for controller input
 	bool BInitializeLibPad();
+
+	bool BInitializeAudio();
+
+	void RunAudio();
 
 
 private:
@@ -199,6 +222,13 @@ private:
 
 	// Map of button state, translated to VK for win32.
 	std::set< DWORD > m_SetKeysDown;
+
+	// Map of voice handles
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
+	uint32 m_unVoiceChannelCount;
+
+	// Map of Steam texture ids to our engine texture handles
+	std::map< int, HGAMETEXTURE> m_MapSteamTextures;
 
 };
 

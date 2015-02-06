@@ -159,7 +159,7 @@ private:
 #define V_strstr strstr
 #define __cdecl
 
-#define Q_memset(dst,count,val)	memset(dst,count,val)
+#define V_memset(dst,count,val)	memset(dst,count,val)
 
 int			V_stricmp(const char *s1, const char *s2 );
 char const* V_stristr( char const* pStr, char const* pSearch );

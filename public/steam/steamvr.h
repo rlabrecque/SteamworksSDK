@@ -202,6 +202,8 @@ enum HmdError
 
 	HmdError_VendorSpecific_UnableToConnectToOculusRuntime = 1000,
 
+	HmdError_Steam_SteamInstallationNotFound = 2000,
+
 };
 
 

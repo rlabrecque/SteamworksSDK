@@ -13,6 +13,9 @@ root\SteamService.exe :
   Helper application to run all additional 3rd party installers from a single
   elevated process under Vista. If you don't need to run 3rd party installers,
   this executable can be removed.
+
+root\SteamSetup.exe
+  Used to install Steam on the users machine.
   
 root\autorun.inf : 
   Tells Windows to run Setup.exe when user inserts disc
@@ -33,10 +36,6 @@ root\resources\setup_<language>.ini :
   Currently supported language names are: english, german, french, italian,
   korean, spanish, schinese, tchinese, russian, thai, japanese, portuguese,
   polish, danish, dutch, finnish, norwegian, swedish, hungarian, czech
-  
-root\resources\SteamInstall_<language>.msi :
-  Steam MSIs that install Steam on the users machine. Can be removed if no
-  matching setup_<language>.ini is provided.
   
 root\resources\installscript.vdf :
   This is a script file in KeyValues format to run 3rd party installers before 

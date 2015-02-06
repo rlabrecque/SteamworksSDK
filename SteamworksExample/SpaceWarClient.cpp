@@ -15,12 +15,14 @@
 #include "time.h"
 #include "ServerBrowser.h"
 #include "Leaderboards.h"
+#include "Friends.h"
 #include "musicplayer.h"
 #include "clanchatroom.h"
 #include "Lobby.h"
 #include "p2pauth.h"
 #include "voicechat.h"
 #include "htmlsurface.h"
+#include "Inventory.h"
 #include "steam/steamencryptedappticket.h"
 #ifdef WIN32
 #include <direct.h>
@@ -148,6 +150,7 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// Init stats
 	m_pStatsAndAchievements = new CStatsAndAchievements( pGameEngine );
 	m_pLeaderboards = new CLeaderboards( pGameEngine );
+	m_pFriendsList = new CFriendsList( pGameEngine );
 	m_pMusicPlayer = new CMusicPlayer( pGameEngine );
 	m_pClanChatRoom = new CClanChatRoom( pGameEngine );
 
@@ -931,6 +934,15 @@ void CSpaceWarClient::OnMenuSelection( LeaderboardMenuItem_t selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing a leaderboard
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( FriendsListMenuItem_t selection )
+{
+	m_pFriendsList->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Handles menu actions when viewing the remote storage sync screen
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
@@ -987,17 +999,29 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		}
 
 		SteamFriends()->SetRichPresence( "status", "Main menu" );
+
+		// Refresh inventory
+		SpaceWarLocalInventory()->RefreshFromServer();
 	}
 	else if ( m_eGameState == k_EClientGameWinner || m_eGameState == k_EClientGameDraw )
 	{
 		// game over.. update the leaderboard
 		m_pLeaderboards->UpdateLeaderboards( m_pStatsAndAchievements );
+
+		// Check if the user is due for an item drop
+		SpaceWarLocalInventory()->CheckForItemDrops();
 	}
 	else if ( m_eGameState == k_EClientLeaderboards )
 	{
 		// we've switched to the leaderboard menu
 		m_pLeaderboards->Show();
 		SteamFriends()->SetRichPresence( "status", "Viewing leaderboards" );
+	}
+	else if ( m_eGameState == k_EClientFriendsList )
+	{
+		// we've switched to the friends list menu
+		m_pFriendsList->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing friends list" );
 	}
 	else if ( m_eGameState == k_EClientClanChatRoom )
 	{
@@ -1007,6 +1031,9 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 	}
 	else if ( m_eGameState == k_EClientGameActive )
 	{
+		// Load Inventory
+		SpaceWarLocalInventory()->RefreshFromServer();
+
 		// start voice chat 
 		m_pVoiceChat->StartVoiceChat();
 		SteamFriends()->SetRichPresence( "status", "In match" );
@@ -1349,10 +1376,22 @@ void CSpaceWarClient::RunFrame()
 
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );
+		if (m_pGameEngine->BIsKeyDown( 0x31 ) )
+		{
+			SpaceWarLocalInventory()->DoExchange();
+		}
 		break;
 	case k_EClientLeaderboards:
 		m_pStarField->Render();
 		m_pLeaderboards->RunFrame();		
+
+		if ( bEscapePressed )
+			SetGameState( k_EClientGameMenu );
+		break;
+
+	case k_EClientFriendsList:
+		m_pStarField->Render();
+		m_pFriendsList->RunFrame();
 
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );
@@ -1425,7 +1464,9 @@ void CSpaceWarClient::RunFrame()
 	case k_EClientGameActive:
 		m_pStarField->Render();
 		
-
+		// SendHeartbeat is safe to call on every frame since the API is internally rate-limited.
+		// Ideally you would only call this once per second though, to minimize unnecessary calls.
+		SteamInventory()->SendItemDropHeartbeat();
 
 		// Update all the entities...
 		m_pSun->RunFrame();
@@ -1643,7 +1684,7 @@ void CSpaceWarClient::DrawHUDText()
 
 			if ( hTexture )
 			{
-				m_pGameEngine->BDrawTexturedQuad( (float)rect.left, (float)rect.top, (float)rect.left+nAvatarWidth, (float)rect.bottom, 
+				m_pGameEngine->BDrawTexturedRect( (float)rect.left, (float)rect.top, (float)rect.left+nAvatarWidth, (float)rect.bottom, 
 					0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), hTexture );
 				rect.left += nAvatarWidth + nSpaceBetweenAvatarAndScore;
 				rect.right += nAvatarWidth + nSpaceBetweenAvatarAndScore;
@@ -1661,7 +1702,7 @@ void CSpaceWarClient::DrawHUDText()
 
 			if ( hTexture )
 			{
-				m_pGameEngine->BDrawTexturedQuad( (float)rect.right - nAvatarWidth, (float)rect.top, (float)rect.right, (float)rect.bottom, 
+				m_pGameEngine->BDrawTexturedRect( (float)rect.right - nAvatarWidth, (float)rect.top, (float)rect.right, (float)rect.bottom, 
 					0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), hTexture );
 				rect.right -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
 				rect.left -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
@@ -1678,7 +1719,7 @@ void CSpaceWarClient::DrawHUDText()
 
 			if ( hTexture )
 			{
-				m_pGameEngine->BDrawTexturedQuad( (float)rect.left, (float)rect.top, (float)rect.left+nAvatarWidth, (float)rect.bottom, 
+				m_pGameEngine->BDrawTexturedRect( (float)rect.left, (float)rect.top, (float)rect.left+nAvatarWidth, (float)rect.bottom, 
 					0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), hTexture );
 				rect.right += nAvatarWidth + nSpaceBetweenAvatarAndScore;
 				rect.left += nAvatarWidth + nSpaceBetweenAvatarAndScore;
@@ -1695,7 +1736,7 @@ void CSpaceWarClient::DrawHUDText()
 
 			if ( hTexture )
 			{
-				m_pGameEngine->BDrawTexturedQuad( (float)rect.right - nAvatarWidth, (float)rect.top, (float)rect.right, (float)rect.bottom, 
+				m_pGameEngine->BDrawTexturedRect( (float)rect.right - nAvatarWidth, (float)rect.top, (float)rect.right, (float)rect.bottom, 
 					0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), hTexture );
 				rect.right -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
 				rect.left -= nAvatarWidth + nSpaceBetweenAvatarAndScore;
@@ -1740,7 +1781,7 @@ void CSpaceWarClient::DrawInstructions()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu\n Build ID:%d", SteamApps()->GetAppBuildId() );
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 }
@@ -1811,6 +1852,8 @@ void CSpaceWarClient::DrawConnectionFailureText()
 void CSpaceWarClient::DrawWinnerDrawOrWaitingText()
 {
 	int nSecondsToRestart = ((MILLISECONDS_BETWEEN_ROUNDS - (int)(m_pGameEngine->GetGameTickCount() - m_ulStateTransitionTime) )/1000) + 1;
+	if ( nSecondsToRestart < 0 )
+		nSecondsToRestart = 0;
 
 	RECT rect;
 	rect.top = 0;
@@ -1849,6 +1892,20 @@ void CSpaceWarClient::DrawWinnerDrawOrWaitingText()
 
 		sprintf_safe( rgchBuffer, "%s wins!\n\nStarting again in %d seconds...", rgchPlayerName, nSecondsToRestart );
 		
+		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
+	}
+
+	// Note: GetLastDroppedItem is the result of an async function, this will not render the reward right away. Could wait for it.
+	const CSpaceWarItem *pItem = SpaceWarLocalInventory()->GetLastDroppedItem();
+	if ( pItem )
+	{
+		// (We're not really bothering to localize everything else, this is just an example.)
+		sprintf_safe( rgchBuffer, "You won a brand new %s!", pItem->GetLocalizedName().c_str() );
+
+		rect.top = 0;
+		rect.bottom = int(m_pGameEngine->GetViewportHeight()*0.4f);
+		rect.left = 0;
+		rect.right = m_pGameEngine->GetViewportWidth();
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 	}
 }
@@ -2252,4 +2309,3 @@ void CSpaceWarClient::DrawWorkshopItems()
 	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
 	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
 }
-

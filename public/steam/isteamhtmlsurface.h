@@ -13,7 +13,7 @@
 #include "isteamclient.h"
 
 typedef uint32 HHTMLBrowser;
-const uint32 INVALID_HTTMLBROWSER = 0;
+const uint32 INVALID_HTMLBROWSER = 0;
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for displaying HTML pages and interacting with them
@@ -123,10 +123,10 @@ public:
 
 	enum EHTMLKeyModifiers
 	{
-		eHTMLKeyModifier_None = 0,
-		eHTMLKeyModifier_AltDown = 1 << 0,
-		eHTMLKeyModifier_CrtlDown = 1 << 1,
-		eHTMLKeyModifier_ShiftDown = 1 << 2,
+		k_eHTMLKeyModifier_None = 0,
+		k_eHTMLKeyModifier_AltDown = 1 << 0,
+		k_eHTMLKeyModifier_CtrlDown = 1 << 1,
+		k_eHTMLKeyModifier_ShiftDown = 1 << 2,
 	};
 
 	// keyboard interactions, native keycode is the virtual key code value from your OS
@@ -160,7 +160,7 @@ public:
 	// set a webcookie for the hostname in question
 	virtual void SetCookie( const char *pchHostname, const char *pchKey, const char *pchValue, const char *pchPath = "/", RTime32 nExpires = 0, bool bSecure = false, bool bHTTPOnly = false ) = 0;
 
-	// Zoom the current page by flZoom ( from 0.0 to 4.0, so to zoom to 120% use 1.2 ), zooming around point X,Y in the page (use 0,0 if you don't care)
+	// Zoom the current page by flZoom ( from 0.0 to 2.0, so to zoom to 120% use 1.2 ), zooming around point X,Y in the page (use 0,0 if you don't care)
 	virtual void SetPageScaleFactor( HHTMLBrowser unBrowserHandle, float flZoom, int nPointX, int nPointY ) = 0;
 
 	// CALLBACKS
@@ -334,8 +334,8 @@ END_DEFINE_CALLBACK_6()
 //-----------------------------------------------------------------------------
 DEFINE_CALLBACK( HTML_LinkAtPosition_t, k_iSteamHTMLSurfaceCallbacks + 13 )
 CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
-CALLBACK_MEMBER( 1, uint32, x ) // 
-CALLBACK_MEMBER( 2, uint32, y ) // 
+CALLBACK_MEMBER( 1, uint32, x ) // NOTE - Not currently set
+CALLBACK_MEMBER( 2, uint32, y ) // NOTE - Not currently set
 CALLBACK_MEMBER( 3, const char *, pchURL ) // 
 CALLBACK_MEMBER( 4, bool, bInput ) // 
 CALLBACK_MEMBER( 5, bool, bLiveLink ) // 
@@ -364,8 +364,8 @@ END_DEFINE_CALLBACK_2()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: show a Javascript confirmation dialog, call JSDialogResponse 
-//   when the user dismisses this dialog (or right away to ignore it)
+// Purpose: when received show a file open dialog
+//   then call FileLoadDialogResponse with the file(s) the user selected.
 //-----------------------------------------------------------------------------
 DEFINE_CALLBACK( HTML_FileOpenDialog_t, k_iSteamHTMLSurfaceCallbacks + 16 )
 CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 

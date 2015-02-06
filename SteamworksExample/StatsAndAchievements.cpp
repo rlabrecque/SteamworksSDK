@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "StatsAndAchievements.h"
+#include "Inventory.h"
 #include <math.h>
 #include "SpaceWarClient.h"
 
@@ -459,7 +460,7 @@ void CStatsAndAchievements::Render()
 	{
 		// COLUMN 1
 		// Achievements above the midline 
-		int32 pxVertOffset = height / 2 - 2 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
+		int32 pxVertOffset = height / 2 - 3 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + ACHDISP_IMG_SIZE;
 		rect.left = pxColumn1Left;
@@ -475,7 +476,7 @@ void CStatsAndAchievements::Render()
 		DrawAchievementInfo( rect, g_rgAchievements[1] );
 
 		// Stats below the midline
-		pxVertOffset = height / 2 + ACHDISP_VERT_SPACING;
+		pxVertOffset = height / 2 + ACHDISP_VERT_SPACING - 1 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + ACHDISP_FONT_HEIGHT;
@@ -495,9 +496,26 @@ void CStatsAndAchievements::Render()
 
 		DrawStatInfo( rect, "Games Lost", static_cast<float>( m_nTotalNumLosses ) );
 
+		rect.top = pxVertOffset;
+		rect.bottom = rect.top + ACHDISP_FONT_HEIGHT;
+		pxVertOffset = rect.bottom + ACHDISP_VERT_SPACING;
+
+		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, "Inventory" );
+
+		std::list<CSpaceWarItem *>::const_iterator iter;
+		for ( iter = SpaceWarLocalInventory()->GetItemList().begin(); iter != SpaceWarLocalInventory()->GetItemList().end(); ++iter )
+		{
+			rect.top = pxVertOffset;
+			rect.bottom = rect.top + ACHDISP_FONT_HEIGHT;
+			pxVertOffset = rect.bottom + ACHDISP_VERT_SPACING;
+
+			DrawInventory( rect, ( *iter )->GetItemId() );
+		}
+
+
 		// COLUMN 2
 		// Achievements above the midline
-		pxVertOffset = height / 2 - 2 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
+		pxVertOffset = height / 2 - 3 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
 		
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + ACHDISP_IMG_SIZE;
@@ -514,7 +532,7 @@ void CStatsAndAchievements::Render()
 		DrawAchievementInfo( rect, g_rgAchievements[3] );
 
 		// Stats below the midline
-		pxVertOffset = height / 2 + ACHDISP_VERT_SPACING;
+		pxVertOffset = height / 2 + ACHDISP_VERT_SPACING - 1 * ( ACHDISP_IMG_SIZE + ACHDISP_VERT_SPACING );
 
 		rect.top = pxVertOffset;
 		rect.bottom = rect.top + ACHDISP_FONT_HEIGHT;
@@ -537,7 +555,7 @@ void CStatsAndAchievements::Render()
 		// Footer
 		rect.left = 0;
 		rect.right = width;
-		rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
+		rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
 		char rgchBuffer[256];
@@ -562,7 +580,7 @@ void CStatsAndAchievements::DrawAchievementInfo( RECT &rect, Achievement_t &ach 
 	// could still be zero if the image isn't downloaded yet
 	if (hTexture )
 	{
-		m_pGameEngine->BDrawTexturedQuad( (float)rect2.left, (float)rect2.top, (float)rect2.left+ACHDISP_IMG_SIZE, (float)rect2.bottom, 
+		m_pGameEngine->BDrawTexturedRect( (float)rect2.left, (float)rect2.top, (float)rect2.left+ACHDISP_IMG_SIZE, (float)rect2.bottom, 
 			0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), hTexture );
 
 		rect2.left += ACHDISP_IMG_SIZE + ACHDISP_IMG_PAD;
@@ -583,6 +601,18 @@ void CStatsAndAchievements::DrawStatInfo( RECT &rect, const char *pchName, float
 	// todo: divide up so can draw image
 	char rgchBuffer[256];
 	sprintf_safe( rgchBuffer, "%s: %.1f", pchName, flValue );
+	m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
+}
+
+void CStatsAndAchievements::DrawInventory( RECT &rect, SteamItemInstanceID_t itemid )
+{
+	const CSpaceWarItem *pItem = SpaceWarLocalInventory()->GetItem( itemid );
+	if ( pItem == nullptr )
+		return;
+
+	// todo: divide up so can draw image
+	char rgchBuffer[256];
+	sprintf_safe( rgchBuffer, "%s", pItem->GetLocalizedName().c_str() );
 	m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_LEFT|TEXTPOS_VCENTER, rgchBuffer );
 }
 

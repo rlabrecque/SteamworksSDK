@@ -69,7 +69,10 @@ void CVectorEntity::AddLine( float xPos0, float yPos0, float xPos1, float yPos1,
 	m_VecVertexes.push_back( vert );
 }
 
-
+void CVectorEntity::ClearVertexes()
+{
+	m_VecVertexes.clear();
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Set the current position for the object
@@ -125,20 +128,21 @@ void CVectorEntity::RunFrame()
 
 	// Update our acceleration, velocity, and finally position
 	// Note: The min here is so we don't get massive acceleration if frames for some reason don't run for a bit
-	float ulElapsedSeconds = MIN( (float)m_pGameEngine->GetGameTicksFrameDelta() / 1000.0f, 2 );
+	float ulElapsedSeconds = MIN( (float)m_pGameEngine->GetGameTicksFrameDelta() / 1000.0f, 0.1f );
 	m_flXVelocity += m_flXAccel * ulElapsedSeconds;
 	m_flYVelocity += m_flYAccel * ulElapsedSeconds;
 
 	// Make sure velocity does not exceed maximum allowed
-	if ( m_flXVelocity > 0 && m_flXVelocity > m_flMaximumVelocity )
-		m_flXVelocity = m_flMaximumVelocity;
-	else if ( m_flXVelocity < 0 && m_flYVelocity < -1.0f*m_flMaximumVelocity )
-		m_flXVelocity = -1.0f * m_flMaximumVelocity;
 
-	if ( m_flYVelocity > 0 && m_flYVelocity > m_flMaximumVelocity )
-		m_flYVelocity = m_flMaximumVelocity;
-	else if ( m_flYVelocity < 0 && m_flYVelocity < -1.0f*m_flMaximumVelocity )
-		m_flYVelocity = -1.0f * m_flMaximumVelocity;
+	float flVelocity = sqrt( m_flXVelocity*m_flXVelocity + m_flYVelocity*m_flYVelocity );
+
+	if ( flVelocity > m_flMaximumVelocity )
+	{
+		float flRatio = m_flMaximumVelocity / flVelocity;
+
+		m_flXVelocity = m_flXVelocity * flRatio;
+		m_flYVelocity = m_flYVelocity * flRatio;
+	}
 
 	m_flXPos += m_flXVelocity * ulElapsedSeconds;
 	m_flYPos += m_flYVelocity * ulElapsedSeconds;
@@ -174,6 +178,9 @@ void CVectorEntity::Render()
 	float flSinRotation = (float)sin(m_flAccumulatedRotation);
 	float flCosRotation = (float)cos(m_flAccumulatedRotation);
 
+	if ( m_VecVertexes.size() < 2 )
+		return;
+
 	// Iterate our vector of vertexes 2 at a time drawing lines
 	for( size_t i=0; i < m_VecVertexes.size() - 1; ++i )
 	{
@@ -201,6 +208,56 @@ void CVectorEntity::Render()
 		xPos1 = m_VecVertexes[i].x;
 		yPos1 = m_VecVertexes[i].y;
 		dwColor1 = m_VecVertexes[i].color;
+
+		// Apply any needed rotation
+		xPrime1 = flCosRotation*xPos1 - flSinRotation*yPos1;
+		yPrime1 = flSinRotation*xPos1 + flCosRotation*yPos1;
+
+		// Apply translation to current position
+		xPrime1 += m_flXPos;
+		yPrime1 += m_flYPos;
+
+		// Have the game engine draw the actual line (it batches these operations)
+		m_pGameEngine->BDrawLine( xPrime0, yPrime0, dwColor0, xPrime1, yPrime1, dwColor1 );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Render the entity with an override color instead of the vertex color
+//-----------------------------------------------------------------------------
+void CVectorEntity::Render(DWORD overrideColor)
+{
+	// Compute values which will be used for rotation below
+	float flSinRotation = (float)sin(m_flAccumulatedRotation);
+	float flCosRotation = (float)cos(m_flAccumulatedRotation);
+
+	// Iterate our vector of vertexes 2 at a time drawing lines
+	for( size_t i=0; i < m_VecVertexes.size() - 1; ++i )
+	{
+		DWORD dwColor0, dwColor1;
+		float xPos0, yPos0, xPos1, yPos1;
+		float xPrime0, yPrime0, xPrime1, yPrime1;
+
+		// Grab the first point and apply rotation and translation
+		xPos0 = m_VecVertexes[i].x;
+		yPos0 = m_VecVertexes[i].y;
+		dwColor0 = overrideColor;
+
+		// Apply any needed rotation
+		xPrime0 = flCosRotation*xPos0 - flSinRotation*yPos0;
+		yPrime0 = flSinRotation*xPos0 + flCosRotation*yPos0;
+
+		// Apply translation to current position
+		xPrime0 += m_flXPos;
+		yPrime0 += m_flYPos;
+
+		// Next vertex, we use 2 per iteration
+		++i;
+
+		// Grab the second point and apply rotation and translation
+		xPos1 = m_VecVertexes[i].x;
+		yPos1 = m_VecVertexes[i].y;
+		dwColor1 = overrideColor;
 
 		// Apply any needed rotation
 		xPrime1 = flCosRotation*xPos1 - flSinRotation*yPos1;

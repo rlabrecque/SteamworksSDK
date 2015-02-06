@@ -11,6 +11,23 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+
+----------------------------------------------------------------
+v1.32 5th February 2015
+----------------------------------------------------------------
+
+General:
+* Added an auto-generated "flat" C-style API for common Steamworks features (steam_api_flat.h)
+* Added an auto-generated C# binding for common Steamworks features (steam_api_interop.cs)
+* Expanded the ISteamFriends interface to include steam levels and friends groups
+* Expanded the ISteamHTTP interface to include cookie handling, SSL certificate verification, and network timeouts
+* Fixed typos in ISteamHTMLSurface interface constants
+
+Inventory:
+* Added the initial version of ISteamInventory, a developer-preview release of our new Steam Inventory Service for managing and tracking a Steam-compatible inventory of in-game items. Please see the documentation for the Inventory Service on the partner website for more details.
+
+
+
 ----------------------------------------------------------------
 v1.31 8th September 2014
 ----------------------------------------------------------------

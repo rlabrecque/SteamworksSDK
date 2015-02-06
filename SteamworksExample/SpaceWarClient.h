@@ -28,6 +28,7 @@ class CServerBrowser;
 class CLobbyBrowser;
 class CLobby;
 class CLeaderboards;
+class CFriendsList;
 class CClanChatRoom;
 class CP2PAuthPlayer;
 class CP2PAuthedGame;
@@ -84,6 +85,12 @@ struct LeaderboardMenuItem_t
 {
 	bool m_bBack;
 	bool m_bNextLeaderboard;
+};
+
+// a friends list item
+struct FriendsListMenuItem_t
+{
+	CSteamID m_steamIDFriend;
 };
 
 #define MAX_WORKSHOP_ITEMS 16
@@ -166,6 +173,7 @@ public:
 
 	void OnMenuSelection( LobbyMenuItem_t selection );
 	void OnMenuSelection( LeaderboardMenuItem_t selection );
+	void OnMenuSelection( FriendsListMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
 
 	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
@@ -383,6 +391,7 @@ private:
 	CStatsAndAchievements *m_pStatsAndAchievements;
 
 	CLeaderboards *m_pLeaderboards;
+	CFriendsList *m_pFriendsList;
 	CMusicPlayer *m_pMusicPlayer;
 	CClanChatRoom *m_pClanChatRoom;
 	CServerBrowser *m_pServerBrowser;

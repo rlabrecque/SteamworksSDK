@@ -17,6 +17,9 @@
 typedef uint32 HTTPRequestHandle;
 #define INVALID_HTTPREQUEST_HANDLE		0
 
+typedef uint32 HTTPCookieContainerHandle;
+#define INVALID_HTTPCOOKIE_HANDLE		0
+
 //-----------------------------------------------------------------------------
 // Purpose: interface to http client
 //-----------------------------------------------------------------------------
@@ -105,6 +108,35 @@ public:
 	// have already been set for the request.  Setting this raw body makes it the only contents for the post, the pchContentType
 	// parameter will set the content-type header for the request so the server may know how to interpret the body.
 	virtual bool SetHTTPRequestRawPostBody( HTTPRequestHandle hRequest, const char *pchContentType, uint8 *pubBody, uint32 unBodyLen ) = 0;
+
+	// Creates a cookie container handle which you must later free with ReleaseCookieContainer().  If bAllowResponsesToModify=true
+	// than any response to your requests using this cookie container may add new cookies which may be transmitted with
+	// future requests.  If bAllowResponsesToModify=false than only cookies you explicitly set will be sent.  This API is just for
+	// during process lifetime, after steam restarts no cookies are persisted and you have no way to access the cookie container across
+	// repeat executions of your process.
+	virtual HTTPCookieContainerHandle CreateCookieContainer( bool bAllowResponsesToModify ) = 0;
+
+	// Release a cookie container you are finished using, freeing it's memory
+	virtual bool ReleaseCookieContainer( HTTPCookieContainerHandle hCookieContainer ) = 0;
+
+	// Adds a cookie to the specified cookie container that will be used with future requests.
+	virtual bool SetCookie( HTTPCookieContainerHandle hCookieContainer, const char *pchHost, const char *pchUrl, const char *pchCookie ) = 0;
+
+	// Set the cookie container to use for a HTTP request
+	virtual bool SetHTTPRequestCookieContainer( HTTPRequestHandle hRequest, HTTPCookieContainerHandle hCookieContainer ) = 0;
+
+	// Set the extra user agent info for a request, this doesn't clobber the normal user agent, it just adds the extra info on the end
+	virtual bool SetHTTPRequestUserAgentInfo( HTTPRequestHandle hRequest, const char *pchUserAgentInfo ) = 0;
+
+	// Set that https request should require verified SSL certificate via machines certificate trust store
+	virtual bool SetHTTPRequestRequiresVerifiedCertificate( HTTPRequestHandle hRequest, bool bRequireVerifiedCertificate ) = 0;
+
+	// Set an absolute timeout on the HTTP request, this is just a total time timeout different than the network activity timeout
+	// which can bump everytime we get more data
+	virtual bool SetHTTPRequestAbsoluteTimeoutMS( HTTPRequestHandle hRequest, uint32 unMilliseconds ) = 0;
+
+	// Check if the reason the request failed was because we timed it out (rather than some harder failure)
+	virtual bool GetHTTPRequestWasTimedOut( HTTPRequestHandle hRequest, bool *pbWasTimedOut ) = 0;
 };
 
 #define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION002"

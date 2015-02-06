@@ -99,6 +99,9 @@ public:
 	// Set whether the ship is exploding
 	void SetExploding( bool bExploding );
 
+	// Rebuild the geometry when we change decoration
+	void BuildGeometry();
+
 	// Set whether the ship is disabled
 	void SetDisabled( bool bDisabled ) { m_bDisabled = bDisabled; }
 
@@ -135,6 +138,9 @@ public:
 	// Get the name for this ship (only really works server side)
 	const char* GetPlayerName();
 
+	int GetShieldStrength() { return m_nShipShieldStrength;  }
+	void SetShieldStrength( int strength ) { m_nShipShieldStrength = strength; }
+
 private:
 
 	// Last time we sent an update on our local data to the server
@@ -158,6 +164,9 @@ private:
 	// is the ship disabled for now?
 	bool m_bDisabled;
 
+	// cloak fade out
+	int m_nFade;
+
 	// vector of beams we have fired (in order of firing time)
 	CPhotonBeam * m_rgPhotonBeams[MAX_PHOTON_BEAMS_PER_SHIP];
 
@@ -166,6 +175,20 @@ private:
 
 	// Color for this ship
 	DWORD m_dwShipColor;
+
+	// Decoration for this ship
+	int m_nShipDecoration;
+
+	// Weapon for this ship
+	int m_nShipWeapon;
+
+	// Power for this ship
+	int m_nShipPower;
+
+	// Power for this ship
+	int m_nShipShieldStrength;
+
+	HGAMETEXTURE m_hTextureWhite;
 
 	// Thrusters for this ship
 	CForwardThrusters m_ForwardThrusters;

@@ -801,7 +801,10 @@ void CSpaceWarServer::CheckForCollisions()
 		if ( !m_rgpShips[i] )
 			continue;
 
-		rgbExplodingShips[i] |= m_rgpShips[i]->BCollidesWith( m_pSun );
+		if ( m_rgpShips[i]->BCollidesWith( m_pSun ) )
+		{
+			rgbExplodingShips[i] |= 1;
+		}
 
 		for( uint32 j=0; j<MAX_PLAYERS_PER_SERVER; ++j )
 		{
@@ -810,7 +813,19 @@ void CSpaceWarServer::CheckForCollisions()
 				continue;
 			
 			rgbExplodingShips[i] |= m_rgpShips[i]->BCollidesWith( m_rgpShips[j] );
-			rgbExplodingShips[i] |= m_rgpShips[j]->BCheckForPhotonsCollidingWith( m_rgpShips[i] );
+			if ( m_rgpShips[j]->BCheckForPhotonsCollidingWith( m_rgpShips[i] ) )
+			{
+				if ( m_rgpShips[i]->GetShieldStrength() > 200 )
+				{
+					// Shield protects from the hit
+					m_rgpShips[i]->SetShieldStrength( 0 );
+					m_rgpShips[j]->DestroyPhotonsColldingWith( m_rgpShips[i] );
+				}
+				else
+				{
+					rgbExplodingShips[i] |= 1;
+				}
+			}
 		}
 	}
 

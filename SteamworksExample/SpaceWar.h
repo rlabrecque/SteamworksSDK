@@ -8,6 +8,7 @@
 #ifndef SPACEWAR_H
 #define SPACEWAR_H
 
+
 // The Steamworks API's are modular, you can use some subsystems without using others
 // When USE_GS_AUTH_API is defined you get the following Steam features:
 // - Strong user authentication and authorization
@@ -62,7 +63,7 @@
 #define PHOTON_BEAM_FIRE_INTERVAL_TICKS 250
 
 // Amount of space needed for beams per ship
-#define MAX_PHOTON_BEAMS_PER_SHIP PHOTON_BEAM_LIFETIME_IN_TICKS/PHOTON_BEAM_FIRE_INTERVAL_TICKS
+#define MAX_PHOTON_BEAMS_PER_SHIP (PHOTON_BEAM_LIFETIME_IN_TICKS/PHOTON_BEAM_FIRE_INTERVAL_TICKS)
 
 // Time to timeout a connection attempt in
 #define MILLISECONDS_CONNECTION_TIMEOUT 30000
@@ -177,6 +178,7 @@ enum EClientGameState
 	k_EClientFindLANServers,
 	k_EClientRemoteStorage,
 	k_EClientLeaderboards,
+	k_EClientFriendsList,
 	k_EClientMinidump,
 	k_EClientConnectingToSteam,
 	k_EClientLinkSteamAccount,
@@ -280,6 +282,18 @@ struct ServerShipUpdateData_t
 	void SetReverseThrustersActive( bool bActive ) { m_bReverseThrustersActive = bActive; }
 	bool GetReverseThrustersActive() { return m_bReverseThrustersActive; }
 
+	void SetDecoration( int nDecoration ) { m_nShipDecoration = nDecoration;  }
+	int GetDecoration() { return m_nShipDecoration; }
+
+	void SetWeapon( int nWeapon ) { m_nShipWeapon = nWeapon;  }
+	int GetWeapon() { return m_nShipWeapon; }
+
+	void SetPower( int nPower ) { m_nShipPower = nPower;  }
+	int GetPower() { return m_nShipPower; }
+
+	void SetShieldStrength( int nShieldStrength ) { m_nShieldStrength = nShieldStrength;  }
+	int GetShieldStrength() { return m_nShieldStrength; }
+
 	ServerPhotonBeamUpdateData_t *AccessPhotonBeamData( int iIndex ) { return &m_PhotonBeamData[iIndex]; }
 
 private:
@@ -310,6 +324,16 @@ private:
 	// Are the thrusters to be drawn?
 	bool m_bForwardThrustersActive;
 	bool m_bReverseThrustersActive;
+
+	// Decoration for this ship
+	int m_nShipDecoration;
+
+	// Weapon for this ship
+	int m_nShipWeapon;
+
+	// Power for this ship
+	int m_nShipPower;
+	int m_nShieldStrength;
 
 	// Photon beam positions and data
 	ServerPhotonBeamUpdateData_t m_PhotonBeamData[MAX_PHOTON_BEAMS_PER_SHIP];
@@ -378,6 +402,18 @@ struct ClientSpaceWarUpdateData_t
 	void SetReverseThrustersPressed( bool bIsPressed ) { m_bReverseThrustersPressed = bIsPressed; }
 	bool GetReverseThrustersPressed() { return m_bReverseThrustersPressed; }
 
+	void SetDecoration( int nDecoration ) { m_nShipDecoration = nDecoration;  }
+	int GetDecoration() { return m_nShipDecoration; }
+
+	void SetWeapon( int nWeapon ) { m_nShipWeapon = nWeapon;  }
+	int GetWeapon() { return m_nShipWeapon; }
+
+	void SetPower( int nPower ) { m_nShipPower = nPower;  }
+	int GetPower() { return m_nShipPower; }
+
+	void SetShieldStrength( int nShieldPower ) { m_nShieldStrength = nShieldPower;  }
+	int GetShieldStrength() { return m_nShieldStrength; }
+
 private:
 	// Key's which are done
 	bool m_bFirePressed;
@@ -385,6 +421,17 @@ private:
 	bool m_bTurnRightPressed;
 	bool m_bForwardThrustersPressed;
 	bool m_bReverseThrustersPressed;
+
+	// Decoration for this ship
+	int m_nShipDecoration;
+
+	// Weapon for this ship
+	int m_nShipWeapon;
+
+	// Power for this ship
+	int m_nShipPower;
+
+	int m_nShieldStrength;
 
 	// Name of the player (needed server side to tell master server about)
 	// bugbug jmccaskey - Really lame to send this every update instead of event driven...

@@ -18,7 +18,7 @@ struct VectorEntityVertex_t
 	DWORD color;
 };
 
-#define DEFAULT_MAXIMUM_VELOCITY 350.0f
+#define DEFAULT_MAXIMUM_VELOCITY 450.0f
 
 #define PI_VALUE 3.14159265f
 
@@ -36,6 +36,9 @@ public:
 
 	// Render the sun field
 	virtual void Render();
+
+	// Render with an explicit color
+	virtual void Render(DWORD overrideColor);
 
 	// Check if the entity is colliding with another given entity
 	bool BCollidesWith( CVectorEntity * pTarget );
@@ -70,6 +73,9 @@ public:
 	
 	// Add a line to the entity
 	void AddLine(float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor);
+
+	// Clear all lines in the entity
+	void ClearVertexes();
 
 	// Set the objects current position
 	void SetPosition(float xPos, float yPos);

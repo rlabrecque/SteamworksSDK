@@ -6,9 +6,17 @@
 //=============================================================================
 
 #include "stdafx.h"
+#include "steam/isteamps3overlayrenderer.h"
 #include "GameEnginePS3.h"
+#include "steam/steamps3params_internal.h"
+#include <sysutil/sysutil_gamecontent.h>
 #include <map>
 #include <cell/sysmodule.h>
+#include <cell/voice.h>
+#include <sysutil/sysutil_userinfo.h>
+
+
+#define DebuggerBreak() {  __asm volatile ("tw 31,1,1"); }
 
 // Allocate static member
 std::map<void *, CGameEnginePS3* > CGameEnginePS3::m_MapEngineInstances;
@@ -24,6 +32,345 @@ std::map<void *, CGameEnginePS3* > CGameEnginePS3::m_MapEngineInstances;
 
 // Only a single global console can be setup for output, track that here
 CellDbgFontConsoleId g_DbgFontConsoleID = -1;
+
+// Global for PS3 params
+SteamPS3Params_t g_SteamPS3Params;
+
+void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const char *pchLobbyID  );
+extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDebugText );
+
+void OutputDebugString( const char *pchMsg )
+{
+#ifndef _CERT
+	fprintf( stderr, "%s", pchMsg );
+	cellDbgFontConsolePrintf( g_DbgFontConsoleID, "%s", pchMsg );
+#endif
+}
+
+// taken from sample
+static const char s_npCommunicationSignature[STEAM_PS3_COMMUNICATION_SIG_MAX] = {
+		0xb9,0xdd,0xe1,0x3b,0x01,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x1d,0x3c,0x55,0x0f,
+		0x35,0xb5,0x54,0xfe,0x4e,0x97,0x1a,0x01,
+		0x23,0x38,0xaa,0xd6,0x3d,0xda,0x6a,0xac,
+		0x3e,0x95,0xff,0x09,0x49,0xd7,0xb3,0xda,
+		0x11,0xae,0xf0,0xde,0xd6,0x2b,0x70,0x96,
+		0x40,0x09,0x0e,0xed,0x8c,0x38,0x1d,0xa4,
+		0xc3,0x0e,0xc9,0x30,0xc1,0xcc,0x66,0x92,
+		0xd1,0xb0,0x6e,0x01,0xc0,0x44,0xb2,0xa2,
+		0xd0,0x62,0x88,0xa8,0x26,0x7f,0x91,0xb5,
+		0x7b,0x40,0x0c,0x6a,0xc9,0x3b,0x5c,0x89,
+		0x43,0x22,0x16,0x4e,0x27,0x56,0x46,0x4a,
+		0x63,0xc4,0x55,0xce,0xb3,0xce,0xf7,0x92,
+		0x07,0x71,0x13,0x60,0x6e,0xcb,0xad,0xd5,
+		0xf0,0x60,0xd6,0x71,0x3a,0x45,0xaa,0x25,
+		0x38,0x60,0x11,0x1a,0xa5,0x0e,0xcf,0xa4,
+		0x21,0xc8,0x94,0x6d,0xf2,0x0d,0xac,0xcf,
+		0x67,0x8d,0x4a,0x14,0x14,0x4e,0xed,0x45,
+		0x67,0x40,0x60,0x93,0x2b,0x00,0xeb,0xb7,
+		0xf3,0x2f,0x09,0x36,0xb6,0x59,0x84,0x0e
+	};
+
+//-----------------------------------------------------------------------------
+// Purpose: Loads the Steam PS3 module
+//-----------------------------------------------------------------------------
+sys_prx_id_t g_sys_prx_id_steam = -1;
+static bool LoadSteamPS3Module()
+{
+	g_sys_prx_id_steam = sys_prx_load_module( SYS_APP_HOME "/steam_api_ps3.sprx", 0, NULL );
+	if ( g_sys_prx_id_steam < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to load steam_api_ps3\n" );
+		return false;
+	}
+
+	int modres;
+	int res = sys_prx_start_module( g_sys_prx_id_steam, 0, NULL, &modres, 0, NULL);
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to start steam_api_ps3\n" );
+		return false;
+	}
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Unloads the Steam PS3 module
+//-----------------------------------------------------------------------------
+static bool UnloadSteamPS3Module()
+{
+	// check if loaded
+	if ( g_sys_prx_id_steam < CELL_OK )
+		return false;
+
+	int modres;
+	int res = sys_prx_stop_module( g_sys_prx_id_steam, 0, NULL, &modres, 0, NULL);
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to stop steam_api_ps3\n" );
+		return false;
+	}
+
+	res = sys_prx_unload_module( g_sys_prx_id_steam, 0, NULL );
+	if ( res < CELL_OK )
+	{
+		OutputDebugString( "LoadSteamModule() - failed to unload steam_api_ps3\n" );
+		return false;
+	}
+
+	g_sys_prx_id_steam = -1;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Initializes Steam PS3 params for our application
+//			This is very similar to CPs3ContentPathInfo::Init
+//-----------------------------------------------------------------------------
+SteamPS3ParamsInternal_t g_steamPS3ParamsInternal = { STEAM_PS3_PARAMS_INTERNAL_VERSION, k_EUniverseBeta, "", true };
+bool SetSteamPS3Params( SteamPS3Params_t *pParams )
+{
+	char bootdir[CELL_GAME_DIRNAME_SIZE] = { 0 };
+	char gameHDDataPath[CELL_GAME_DIRNAME_SIZE];
+	char gameTitle[CELL_GAME_SYSP_TITLE_SIZE];
+	char gameTitleID[CELL_GAME_SYSP_TITLEID_SIZE]; // CELL_GAME_PARAMID_TITLE_ID
+	char gameAppVer[CELL_GAME_SYSP_VERSION_SIZE]; // CELL_GAME_PARAMID_APP_VER
+	char gameContentPath[CELL_GAME_PATH_MAX]; // as returned by contentPermit but usually meaningless (?)
+	char gameBasePath[CELL_GAME_PATH_MAX];
+
+	unsigned int nBootType = 0; /// either CELL_GAME_GAMETYPE_DISC or CELL_GAME_GAMETYPE_HDD
+	unsigned int nBootAttribs = 0; /// some combination of attribute masks -- see .cpp for details
+
+	CellSysCacheParam sysCacheParams;
+	memset( &sysCacheParams, 0, sizeof( CellSysCacheParam ) );
+
+	CellGameContentSize size;
+	memset(&size, 0, sizeof(CellGameContentSize));
+
+
+	/////////////////////////////////////////////////////////////////////////
+	//
+	// load sysutil GAME
+	//
+	//////////////////////////////////////////////////////////////////////////
+
+	// we'll need to haul libsysutil into memory  ( CELL_SYSMODULE_SYSUTIL_GAME )
+	bool bSysModuleIsLoaded = cellSysmoduleIsLoaded( CELL_SYSMODULE_SYSUTIL_GAME ) == CELL_SYSMODULE_LOADED ;
+	// if this assert trips, then:
+	// 1) look at where the sysutil_game module is loaded to make sure it still needs to be loaded at this point (maybe you can dump it to save memory)
+	// 2) if it's being taken care of somewhere else, we don't need to load the module here. 
+	if ( !bSysModuleIsLoaded )
+	{
+		//  SYSUTIL_GAME module not loaded yet
+		if ( CELL_OK != cellSysmoduleLoadModule( CELL_SYSMODULE_SYSUTIL_GAME ) )
+			return false;
+	}
+
+	// get the base to the content directory.
+	bool bSuccess = CELL_GAME_RET_OK == cellGameBootCheck( &nBootType, &nBootAttribs, &size, bootdir );
+
+	if ( bSuccess )
+	{
+
+		bSuccess &= CELL_GAME_RET_OK == cellGameGetParamString( CELL_GAME_PARAMID_TITLE, gameTitle, sizeof( gameTitle ) ); 
+		bSuccess &= CELL_GAME_RET_OK == cellGameGetParamString( CELL_GAME_PARAMID_TITLE_ID, gameTitleID, sizeof( gameTitleID ) );
+		bSuccess &= CELL_GAME_RET_OK == cellGameGetParamString( CELL_GAME_PARAMID_APP_VER, gameAppVer, sizeof( gameAppVer ) ); 
+	}
+
+	if ( bSuccess )
+	{
+		bSuccess = CELL_GAME_RET_OK == cellGameContentPermit( gameContentPath, gameBasePath ) ; 
+	}
+
+	if ( bSuccess )
+	{
+		// Get the game data directory on the hard disk. 
+		memset(&size, 0, sizeof(CellGameContentSize));
+		const int ret = cellGameDataCheck( CELL_GAME_GAMETYPE_GAMEDATA, gameTitleID, &size );
+		if ( ret == CELL_GAME_RET_NONE )
+		{
+			// create game directory for the first time
+			CellGameSetInitParams init; memset( &init, 0, sizeof( init ) );
+			memcpy( init.title, gameTitle, sizeof( gameTitle ) );
+			memcpy( init.titleId, gameTitleID, sizeof( gameTitleID ) );
+			memcpy( init.version, gameAppVer, sizeof( gameAppVer ) );
+
+			char tmp_contentInfoPath[CELL_GAME_PATH_MAX] = {0};
+			char tmp_usrdirPath[CELL_GAME_PATH_MAX] = {0};
+
+			bSuccess = CELL_GAME_RET_OK == cellGameCreateGameData( &init, tmp_contentInfoPath, tmp_usrdirPath );
+		}
+		else if ( ret != CELL_GAME_RET_OK )
+		{
+			// failure
+			bSuccess = false;
+		}
+	}
+
+	if ( bSuccess )
+	{
+		char contentInfoPath[256];
+		bSuccess = CELL_GAME_RET_OK == cellGameContentPermit( contentInfoPath, gameHDDataPath );
+	}
+
+	if ( bSuccess )
+	{
+		// Steam needs the system cache path. Passing an empty string so it is always cleared for testing
+		// memcpy( sysCacheParams.cacheId, gameTitleID, sizeof( gameTitleID ) );
+		sysCacheParams.cacheId[0] = '\0';
+
+		const int ret = cellSysCacheMount( &sysCacheParams );
+		bSuccess =  ( ret == CELL_SYSCACHE_RET_OK_CLEARED ) || ( ret == CELL_SYSCACHE_RET_OK_RELAYED );
+	}
+
+	if ( !bSysModuleIsLoaded )
+	{
+		// actually this means it wasn't loaded when we got into the function. unload again
+		cellSysmoduleUnloadModule( CELL_SYSMODULE_SYSUTIL_GAME );
+	}
+
+	if ( bSuccess )
+	{
+		// Internal params, not used by public games.
+		pParams->pReserved = &g_steamPS3ParamsInternal;
+
+		// configure the Steamworks PS3 parameters. All params need to be set.
+		pParams->m_nAppId = 480;
+
+		pParams->m_cSteamInputTTY = SYS_TTYP3;
+
+		strncpy( pParams->m_rgchNpServiceID, "UD0031-NPXX00848_00", STEAM_PS3_SERVICE_ID_MAX );
+		strncpy( pParams->m_rgchNpCommunicationID, "NPXS00022", STEAM_PS3_COMMUNICATION_ID_MAX );
+		memcpy( pParams->m_rgchNpCommunicationSig, s_npCommunicationSignature, STEAM_PS3_COMMUNICATION_SIG_MAX );
+		strncpy( pParams->m_rgchInstallationPath, SYS_APP_HOME, STEAM_PS3_PATH_MAX );
+		strncpy( pParams->m_rgchSystemCache, sysCacheParams.getCachePath, STEAM_PS3_PATH_MAX );
+		strncpy( pParams->m_rgchGameData, gameHDDataPath, STEAM_PS3_PATH_MAX );
+		strncpy( pParams->m_rgchSteamLanguage, "english", STEAM_PS3_LANGUAGE_MAX );
+		strncpy( pParams->m_rgchRegionCode, "SCEA", STEAM_PS3_REGION_CODE_MAX );
+
+		pParams->m_sysNetInitInfo.m_bNeedInit = true;	// default network initialization
+		pParams->m_sysJpgInitInfo.m_bNeedInit = true;
+		pParams->m_sysSysUtilUserInfo.m_bNeedInit = true;
+		pParams->m_sysPngInitInfo.m_bNeedInit = true;
+	}
+
+	return bSuccess;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Path to save user data
+//-----------------------------------------------------------------------------
+static char g_rgchUserDataPath[CELL_GAME_PATH_MAX] = {0};
+bool SetUserSaveDataPath()
+{	
+	// On PS3, we need to save the user's stats & achievement information into the save container. In this example, we are simply
+	// saving the data to a known location on disk.	
+
+	// To get a unique path per user, include the local user id in the file name
+
+	// need the user info module
+	if ( cellSysmoduleLoadModule( CELL_SYSMODULE_SYSUTIL_USERINFO ) != CELL_OK )
+		return false;
+
+	// get local id
+	CellSysutilUserId unLocalUserID;
+	if ( cellUserInfoGetList( NULL, NULL, &unLocalUserID ) != CELL_USERINFO_RET_OK )
+		return false;
+
+	// can now unload the module
+	cellSysmoduleUnloadModule( CELL_SYSMODULE_SYSUTIL_USERINFO );
+
+	// save to the game directory
+	if ( snprintf( g_rgchUserDataPath, sizeof( g_rgchUserDataPath ), "%s/%u_stats.bin", g_SteamPS3Params.m_rgchGameData, unLocalUserID ) > sizeof( g_rgchUserDataPath ) - 1 )
+		return false;
+
+	return true;
+}
+
+const char *GetUserSaveDataPath()
+{
+	return g_rgchUserDataPath;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Main entry point for the program -- ps3
+//-----------------------------------------------------------------------------
+int main( int argc, char *argv[] )
+{
+#ifdef PS3_MTT_DEBUG
+	mttLogInit( "/app_home/libmtt_log.txt" );
+#endif
+	OutputDebugString( "PS3 main\n" );
+
+	// Initialize 6 SPUs but reserve 1 SPU as a raw SPU for PSGL
+	sys_spu_initialize(6, 1);	
+
+	// Load Steam
+	if ( !LoadSteamPS3Module() )
+		return EXIT_FAILURE;
+
+	// Construct a new instance of the game engine 
+	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
+	CGameEnginePS3 *pGameEngine = new CGameEnginePS3();
+
+	// No restart app if necessary, or CEG initialization on PS3
+
+	// Initialize SteamAPI, if this fails we bail out since we depend on Steam for lots of stuff.
+	// You don't necessarily have to though if you write your code to check whether all the Steam
+	// interfaces are NULL before using them and provide alternate paths when they are unavailable.
+
+	if ( !SetSteamPS3Params( &g_SteamPS3Params ) )
+	{
+		OutputDebugString( "SetSteamPS3Params() failed\n" );
+		return EXIT_FAILURE;
+	}
+
+	// do before SteamAPI_Init(), so we can load and unload the userinfo module (we will tell Steam it isn't loaded)
+	if ( !SetUserSaveDataPath() )
+	{
+		OutputDebugString( "SetUserSaveDataPath() failed\n" );
+		return EXIT_FAILURE;
+	}
+
+	if ( !SteamAPI_Init( &g_SteamPS3Params ) )
+	{
+		OutputDebugString( "SteamAPI_Init() failed\n" );
+		return EXIT_FAILURE;
+	}
+
+	// set our debug handler
+	SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
+
+	// set text for Steam to use for PSN game invites
+	SteamUtils()->SetPSNGameBootInviteStrings( "Spacewar Invite", "You've been invited to join a Spacewar lobby!" );
+
+	// Setup overlay render interface for PS3 Steam overlay
+	SteamPS3OverlayRender()->BHostInitialize( pGameEngine->GetViewportWidth(), pGameEngine->GetViewportHeight(), 60, pGameEngine, NULL );
+
+	// No +connect support on PS3 since Steam isn't launching us, but we check for PSN boot invites, and this may postback a lobby join 
+	// requested callback to us.
+
+	// bugbug jmccaskey - MUST call cellGameBootCheck() to get attributes param to pass here!
+	SteamMatchmaking()->CheckForPSNGameBootInvite( 0 );
+
+	// This call will block and run until the game exits
+	RunGameLoop( pGameEngine, NULL, NULL );
+
+#ifdef PS3_MTT_DEBUG
+	mttLogShutdown();
+#endif
+
+	// Shutdown the SteamAPI
+	SteamAPI_Shutdown();
+
+	// Unload Steam
+	UnloadSteamPS3Module();
+
+	// exit
+	return 0;	
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: PS3 callback handler
@@ -49,9 +396,43 @@ static void PS3SysutilCallback( uint64_t status, uint64_t param, void* userdata 
 			OutputDebugString( "System menu closed!\n" );
 			break;
 		default:
-			OutputDebugString( "PS3SysutilCallback: Unknown status received\n" );
+			// Ok that we don't know them all, Steam handles some that we don't know.
+			//OutputDebugString( "PS3SysutilCallback: Unknown status received\n" );
+			break;
 	}
+
+	// Must call this to pass along to Steam which may need async status provided by these
+	// callbacks as well.
+	SteamUtils()->PostPS3SysutilCallback( status, param, userdata );
 }
+
+struct PacketQueue_t
+{
+	uint32 unSize;
+	void *pData;
+	uint32 unWritten;
+	PacketQueue_t *pNext;
+};
+
+class CVoiceContext 
+{
+public:
+	CVoiceContext() 
+	{
+		m_PortIdInput = 0;
+		m_PortIdOutput = 0;
+		m_pQueue = NULL;
+	}
+	virtual ~CVoiceContext()
+	{
+		// 
+	}
+
+	uint32_t m_PortIdInput;
+	uint32_t m_PortIdOutput;
+	PacketQueue_t *m_pQueue;
+
+};
 
 
 //-----------------------------------------------------------------------------
@@ -85,6 +466,7 @@ CGameEnginePS3::CGameEnginePS3()
 	m_rgflQuadsColorData = new GLubyte[ 16*QUAD_BUFFER_TOTAL_SIZE ];
 	m_rgflQuadsTextureData = new GLfloat[ 8*QUAD_BUFFER_TOTAL_SIZE ];
 	m_dwQuadsToFlush = 0;
+	m_unVoiceChannelCount = 0;
 
 
 	CGameEnginePS3::AddInstanceToPtrMap( this );
@@ -112,14 +494,18 @@ CGameEnginePS3::CGameEnginePS3()
 		return;
 	}
 
-
-	// 7 is the magic maximum number of controllers
 	if ( !BInitializeLibPad() )
 	{
 		OutputDebugString( "!! Initializing libpad failed\n" );
 		return;
 	}
 	
+	if ( !BInitializeAudio() )
+	{
+		OutputDebugString( "!! Initializing audio failed\n" );
+		return;
+	}
+
 	m_bEngineReadyForUse = true;
 }
 
@@ -217,6 +603,41 @@ void CGameEnginePS3::Shutdown()
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Initialize voice/audio interfaces
+//-----------------------------------------------------------------------------
+bool CGameEnginePS3::BInitializeAudio()
+{
+	int ret = cellSysmoduleLoadModule(CELL_SYSMODULE_VOICE);
+	if ( ret < 0 )
+		return false;
+
+	CellVoiceInitParam Params;
+	memset(&Params, 0, sizeof(CellVoiceInitParam)); 
+	Params.appType = CELLVOICE_APPTYPE_GAME_1MB;
+	Params.version = CELLVOICE_VERSION_100;
+
+	ret = cellVoiceInitEx( &Params );
+
+	if (ret != CELL_OK )
+		return false;
+
+	sys_ipc_key_t voiceEventKey;
+	sys_event_queue_t voiceQueue;
+	int err = cellVoiceCreateNotifyEventQueue(&voiceQueue, &voiceEventKey);
+	if (err != CELL_OK)
+		return false;
+
+	uint64_t source = 12345;
+
+	err = cellVoiceSetNotifyEventQueue(voiceEventKey, source);
+
+	if (err != CELL_OK)
+		return false;
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Initialize libpad for controller input
 //-----------------------------------------------------------------------------
 bool CGameEnginePS3::BInitializeLibPad()
@@ -257,7 +678,7 @@ bool CGameEnginePS3::BInitializePSGL()
 		transientMemorySize: 0,
 		errorConsole: 0,
 		fifoSize: 0,	
-		hostMemorySize: 128*1024*1024,  // 128 mbs for host memory 
+		hostMemorySize: 8*1024*1024,  // 8mb for host memory 
 	};
 
 	psglInit( &initOpts );
@@ -284,6 +705,9 @@ bool CGameEnginePS3::BInitializePSGL()
 
 	// Make this context current for the device we initialized
 	psglMakeCurrent( m_pPSGLContext, m_pPSGLDevice );
+
+	// Our sub texture updates trigger this warning, we don't care since this is a trivial example app.
+	psglDisableReport( PSGL_REPORT_TEXTURE_COPY_BACK );
 
 	// Since we're using fixed function stuff (i.e. not using our own shader
 	// yet), we need to load shaders.bin that contains the fixed function 
@@ -432,6 +856,9 @@ void CGameEnginePS3::SetBackgroundColor( short a, short r, short g, short b )
 //-----------------------------------------------------------------------------
 bool CGameEnginePS3::StartFrame()
 {
+#ifdef PS3_MTT_DEBUG
+	mttLogNewFrame();
+#endif
 	// Pump PS3 system callbacks
 	MessagePump();
 
@@ -472,8 +899,37 @@ void CGameEnginePS3::EndFrame()
 	// Flush dbg font data
 	cellDbgFontDraw();
 
+	// Tell the Steam overlay to draw now
+	SteamPS3OverlayRender()->Render();
+
+	// Draw a few lines, for 10% and 15% safe boundaries
+	DWORD dwColor = D3DCOLOR_ARGB( 50, 255, 0, 0 );
+
+	float flXSafe = GetViewportWidth()*0.05f;
+	float flYSafe = GetViewportHeight()*0.05f;
+	BDrawLine( flXSafe, flYSafe, dwColor, flXSafe, GetViewportHeight()-flYSafe, dwColor );
+	BDrawLine( flXSafe, flYSafe, dwColor, GetViewportWidth()-flXSafe, flYSafe, dwColor );
+	BDrawLine( GetViewportWidth()-flXSafe, flYSafe, dwColor, GetViewportWidth()-flXSafe, GetViewportHeight()-flYSafe, dwColor );
+	BDrawLine( flXSafe, GetViewportHeight()-flYSafe, dwColor, GetViewportWidth()-flXSafe, GetViewportHeight()-flYSafe, dwColor );
+
+	dwColor = D3DCOLOR_ARGB( 50, 255, 255, 0 );
+	flXSafe = GetViewportWidth()*0.075f;
+	flYSafe = GetViewportHeight()*0.075f;
+	BDrawLine( flXSafe, flYSafe, dwColor, flXSafe, GetViewportHeight()-flYSafe, dwColor );
+	BDrawLine( flXSafe, flYSafe, dwColor, GetViewportWidth()-flXSafe, flYSafe, dwColor );
+	BDrawLine( GetViewportWidth()-flXSafe, flYSafe, dwColor, GetViewportWidth()-flXSafe, GetViewportHeight()-flYSafe, dwColor );
+	BDrawLine( flXSafe, GetViewportHeight()-flYSafe, dwColor, GetViewportWidth()-flXSafe, GetViewportHeight()-flYSafe, dwColor );
+
+	// Flush quads a second time, as Steam may have queued more batches.
+	BFlushQuadBuffer();
+
+	// Flush lines again
+	BFlushLineBuffer();
+	
 	// Swap buffers now that everything is flushed
 	psglSwap();
+
+	RunAudio();
 }
 
 
@@ -613,6 +1069,16 @@ bool CGameEnginePS3::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, flo
 //-----------------------------------------------------------------------------
 bool CGameEnginePS3::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
 {
+	return BDrawTexturedGradientQuad( xPos0, yPos0, xPos1, yPos1, u0, v0, u1, v1, dwColor, dwColor, dwColor, dwColor, hTexture );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Draw a textured quad, with different colors at each vertex
+//-----------------------------------------------------------------------------
+bool CGameEnginePS3::BDrawTexturedGradientQuad( float xPos0, float yPos0, float xPos1, float yPos1, 
+		float u0, float v0, float u1, float v1, 
+		DWORD dwColorTopLeft, DWORD dwColorTopRight, DWORD dwColorBottomLeft, DWORD dwColorBottomRight, HGAMETEXTURE hTexture )
+{
 	if ( m_bShuttingDown || !m_pPSGLDevice || !m_pPSGLContext )
 		return false;
 
@@ -638,34 +1104,34 @@ bool CGameEnginePS3::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, f
 	DWORD dwOffset = m_dwQuadsToFlush*12;
 	m_rgflQuadsData[dwOffset] = xPos0;
 	m_rgflQuadsData[dwOffset+1] = yPos0;
-	m_rgflQuadsData[dwOffset+2] = 1.0;
+	m_rgflQuadsData[dwOffset+2] = 1.0f;
 	m_rgflQuadsData[dwOffset+3] = xPos1;
 	m_rgflQuadsData[dwOffset+4] = yPos0;
-	m_rgflQuadsData[dwOffset+5] = 1.0;
+	m_rgflQuadsData[dwOffset+5] = 1.0f;
 	m_rgflQuadsData[dwOffset+6] = xPos1;
 	m_rgflQuadsData[dwOffset+7] = yPos1;
-	m_rgflQuadsData[dwOffset+8] = 1.0;
+	m_rgflQuadsData[dwOffset+8] = 1.0f;
 	m_rgflQuadsData[dwOffset+9] = xPos0;
 	m_rgflQuadsData[dwOffset+10] = yPos1;
-	m_rgflQuadsData[dwOffset+11] = 1.0;
+	m_rgflQuadsData[dwOffset+11] = 1.0f;
 
 	dwOffset = m_dwQuadsToFlush*16;
-	m_rgflQuadsColorData[dwOffset] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+1] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+2] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+3] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+4] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+5] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+6] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+7] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+8] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+9] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+10] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+11] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+12] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+13] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+14] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+15] = COLOR_ALPHA( dwColor );
+	m_rgflQuadsColorData[dwOffset] = COLOR_RED( dwColorTopLeft );
+	m_rgflQuadsColorData[dwOffset+1] = COLOR_GREEN( dwColorTopLeft );
+	m_rgflQuadsColorData[dwOffset+2] = COLOR_BLUE( dwColorTopLeft );
+	m_rgflQuadsColorData[dwOffset+3] = COLOR_ALPHA( dwColorTopLeft );
+	m_rgflQuadsColorData[dwOffset+4] = COLOR_RED( dwColorTopRight );
+	m_rgflQuadsColorData[dwOffset+5] = COLOR_GREEN( dwColorTopRight );
+	m_rgflQuadsColorData[dwOffset+6] = COLOR_BLUE( dwColorTopRight );
+	m_rgflQuadsColorData[dwOffset+7] = COLOR_ALPHA( dwColorTopRight );
+	m_rgflQuadsColorData[dwOffset+8] = COLOR_RED( dwColorBottomLeft );
+	m_rgflQuadsColorData[dwOffset+9] = COLOR_GREEN( dwColorBottomLeft );
+	m_rgflQuadsColorData[dwOffset+10] = COLOR_BLUE( dwColorBottomLeft );
+	m_rgflQuadsColorData[dwOffset+11] = COLOR_ALPHA( dwColorBottomLeft );
+	m_rgflQuadsColorData[dwOffset+12] = COLOR_RED( dwColorBottomRight );
+	m_rgflQuadsColorData[dwOffset+13] = COLOR_GREEN( dwColorBottomRight );
+	m_rgflQuadsColorData[dwOffset+14] = COLOR_BLUE( dwColorBottomRight );
+	m_rgflQuadsColorData[dwOffset+15] = COLOR_ALPHA( dwColorBottomRight );
 
 	dwOffset = m_dwQuadsToFlush*8;
 	m_rgflQuadsTextureData[dwOffset] = u0;
@@ -720,6 +1186,8 @@ HGAMETEXTURE CGameEnginePS3::HCreateTexture( byte *pRGBAData, uint32 uWidth, uin
 	if ( m_bShuttingDown || !m_pPSGLDevice || !m_pPSGLContext )
 		return 0;
 
+	BFlushQuadBuffer();
+
 	TextureData_t TexData;
 	TexData.m_uWidth = uWidth;
 	TexData.m_uHeight = uHeight;
@@ -737,7 +1205,7 @@ HGAMETEXTURE CGameEnginePS3::HCreateTexture( byte *pRGBAData, uint32 uWidth, uin
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
 	// build our texture mipmaps
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)pRGBAData );
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, (void *)pRGBAData );
 	glDisable( GL_TEXTURE_2D );
 
 	int nHandle = m_nNextTextureHandle;
@@ -751,7 +1219,7 @@ HGAMETEXTURE CGameEnginePS3::HCreateTexture( byte *pRGBAData, uint32 uWidth, uin
 //-----------------------------------------------------------------------------
 // Purpose: Creates a new font
 //-----------------------------------------------------------------------------
-HGAMEFONT CGameEnginePS3::HCreateFont( int nHeight, int nFontWeight, bool bItalic, char * pchFont )
+HGAMEFONT CGameEnginePS3::HCreateFont( int nHeight, int nFontWeight, bool bItalic, const char * pchFont )
 {
 	HGAMEFONT hFont = m_nNextFontHandle;
 	++m_nNextFontHandle;
@@ -885,13 +1353,13 @@ void CGameEnginePS3::MessagePump()
 					if ( (padInfo.port_status[i] & CELL_PAD_STATUS_CONNECTED) == 0 )
 					{
 						char rgchBuffer[512];
-						_snprintf( rgchBuffer, 512, "Gamepad %d removed\n", i );
+						sprintf_safe( rgchBuffer, "Gamepad %d removed\n", i );
 						OutputDebugString( rgchBuffer );
 					}
 					else if ( (padInfo.port_status[i] & CELL_PAD_STATUS_CONNECTED) > 0 )
 					{
 						char rgchBuffer[512];
-						_snprintf( rgchBuffer, 512, "Gamepad %d connected\n", i );
+						sprintf_safe( rgchBuffer, "Gamepad %d connected\n", i );
 						OutputDebugString( rgchBuffer );
 					}
 				}
@@ -904,15 +1372,27 @@ void CGameEnginePS3::MessagePump()
 				}
 			}
 
+			if ( padInfo.system_info & CELL_PAD_INFO_INTERCEPTED )
+			{
+				// Pass zeroed pad data to overlay to clear it's button state too
+				SteamPS3OverlayRender()->BResetInputState();
+
+				// Clear all keys 
+				m_SetKeysDown.clear();
+			}
+
 			if ( !bControllerFound )
 			{
 				// Definitely no appropriate controller plugged in, can't do input
 				static DWORD dwLastSpewTime = 0;
-				if ( GetGameTickCount() - dwLastSpewTime > 1000 || dwLastSpewTime == 0 || dwLastSpewTime > GetGameTickCount() )
+				if ( GetGameTickCount() - dwLastSpewTime > 3000 || dwLastSpewTime == 0 || dwLastSpewTime > GetGameTickCount() )
 				{
 					dwLastSpewTime = GetGameTickCount();
 					OutputDebugString( "No supported controllers are active, activate one.\n" );
 				}
+
+				// Pass zeroed pad data to overlay to clear it's button state too
+				SteamPS3OverlayRender()->BResetInputState();
 
 				// Clear all keys 
 				m_SetKeysDown.clear();
@@ -926,79 +1406,82 @@ void CGameEnginePS3::MessagePump()
 				// If we got data ok, and if the data is new (len != 0) then process it
 				if ( ret == CELL_OK && padData.len )
 				{
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_R2 )
+					if ( !SteamPS3OverlayRender()->BHandleCellPadData( padData ) )
 					{
-						m_SetKeysDown.insert( 0x57 ); // W key, thrusters, mapped to R2 on PS3
-					}
-					else
-					{
-						m_SetKeysDown.erase( 0x57 );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_R2 )
+						{
+							m_SetKeysDown.insert( 0x57 ); // W key, thrusters, mapped to R2 on PS3
+						}
+						else
+						{
+							m_SetKeysDown.erase( 0x57 );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_L2 )
-					{
-						m_SetKeysDown.insert( 0x53 ); // S key, reverse thrusters, mapped to L2 on PS3
-					}
-					else
-					{
-						m_SetKeysDown.erase( 0x53 );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_L2 )
+						{
+							m_SetKeysDown.insert( 0x53 ); // S key, reverse thrusters, mapped to L2 on PS3
+						}
+						else
+						{
+							m_SetKeysDown.erase( 0x53 );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_CROSS )
-					{
-						// Mapped to both enter in menus, and fire in game
-						m_SetKeysDown.insert( VK_RETURN );
-						m_SetKeysDown.insert( VK_SPACE );
-					}
-					else
-					{
-						m_SetKeysDown.erase( VK_RETURN );
-						m_SetKeysDown.erase( VK_SPACE );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_CROSS )
+						{
+							// Mapped to both enter in menus, and fire in game
+							m_SetKeysDown.insert( VK_RETURN );
+							m_SetKeysDown.insert( VK_SPACE );
+						}
+						else
+						{
+							m_SetKeysDown.erase( VK_RETURN );
+							m_SetKeysDown.erase( VK_SPACE );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_CIRCLE )
-					{
-						m_SetKeysDown.insert( VK_ESCAPE );
-					}
-					else
-					{
-						m_SetKeysDown.erase( VK_ESCAPE );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_CIRCLE )
+						{
+							m_SetKeysDown.insert( VK_ESCAPE );
+						}
+						else
+						{
+							m_SetKeysDown.erase( VK_ESCAPE );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_UP || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_Y] == 0x00 )
-					{
-						m_SetKeysDown.insert( VK_UP );
-					}
-					else
-					{
-						m_SetKeysDown.erase( VK_UP );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_UP || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_Y] == 0x00 )
+						{
+							m_SetKeysDown.insert( VK_UP );
+						}
+						else
+						{
+							m_SetKeysDown.erase( VK_UP );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_DOWN || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_Y] == 0xFF )
-					{
-						m_SetKeysDown.insert( VK_DOWN );
-					}
-					else
-					{
-						m_SetKeysDown.erase( VK_DOWN );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_DOWN || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_Y] == 0xFF )
+						{
+							m_SetKeysDown.insert( VK_DOWN );
+						}
+						else
+						{
+							m_SetKeysDown.erase( VK_DOWN );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_LEFT || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_X] == 0x00 )
-					{
-						m_SetKeysDown.insert( 0x41 ); // A Key, mapped to left on PS3
-					}
-					else
-					{
-						m_SetKeysDown.erase( 0x41 );
-					}
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_LEFT || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_X] == 0x00 )
+						{
+							m_SetKeysDown.insert( 0x41 ); // A Key, mapped to left on PS3
+						}
+						else
+						{
+							m_SetKeysDown.erase( 0x41 );
+						}
 
-					if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_RIGHT || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_X] == 0xFF )
-					{
-						m_SetKeysDown.insert( 0x44 ); // D key, mapped to right on PS3
-					}
-					else
-					{
-						m_SetKeysDown.erase( 0x44 );
+						if ( padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_RIGHT || padData.button[CELL_PAD_BTN_OFFSET_ANALOG_LEFT_X] == 0xFF )
+						{
+							m_SetKeysDown.insert( 0x44 ); // D key, mapped to right on PS3
+						}
+						else
+						{
+							m_SetKeysDown.erase( 0x44 );
+						}
 					}
 				}
 			}
@@ -1074,3 +1557,284 @@ void CGameEnginePS3::RemoveInstanceFromPtrMap( void *ptr )
 		m_MapEngineInstances.erase( iter );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+HGAMEVOICECHANNEL CGameEnginePS3::HCreateVoiceChannel()
+{
+	m_unVoiceChannelCount++;
+	CVoiceContext* pVoiceContext = new CVoiceContext;
+
+	CellVoicePortParam PortArgs;
+	memset( &PortArgs, 0, sizeof(PortArgs) );
+
+	PortArgs.portType                  = CELLVOICE_PORTTYPE_IN_PCMAUDIO;
+	PortArgs.bMute                     = false;
+	PortArgs.threshold                 = 100;
+	PortArgs.volume                    = 1.0f;
+	PortArgs.pcmaudio.format.sampleRate= CELLVOICE_SAMPLINGRATE_16000;
+	PortArgs.pcmaudio.format.dataType  = CELLVOICE_PCM_SHORT;
+	PortArgs.pcmaudio.bufSize          = 11000;
+	
+	int ret= cellVoiceCreatePort( &pVoiceContext->m_PortIdInput, &PortArgs );
+
+	PortArgs.portType                  = CELLVOICE_PORTTYPE_OUT_SECONDARY;
+	PortArgs.bMute                     = false;
+	PortArgs.threshold                 = 100;                   
+	PortArgs.volume                    = 1.0f;
+	PortArgs.device.playerId           = 0;
+	
+	ret = cellVoiceCreatePort( &pVoiceContext->m_PortIdOutput, &PortArgs );
+
+	ret = cellVoiceConnectIPortToOPort( pVoiceContext->m_PortIdInput, pVoiceContext->m_PortIdOutput );
+
+	if( ret != CELL_OK )
+	{
+		delete pVoiceContext;
+		return 0; // failed
+	}
+
+	if ( m_unVoiceChannelCount == 1 )
+	{
+		CellVoiceStartParam startParams;
+		startParams.container = SYS_MEMORY_CONTAINER_ID_INVALID;
+		ret = sys_memory_container_create(&startParams.container,1024*1024);
+		ret = cellVoiceStartEx(&startParams);
+	}
+
+	m_MapVoiceChannel[m_unVoiceChannelCount] = pVoiceContext;
+
+	return m_unVoiceChannelCount;
+}
+
+void CGameEnginePS3::RunAudio()
+{
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* >::iterator iter;
+
+	for( iter = m_MapVoiceChannel.begin(); iter!=m_MapVoiceChannel.end(); ++iter)
+	{
+		CVoiceContext* pVoiceContext = iter->second;
+
+		PacketQueue_t *pVoicePacket = pVoiceContext->m_pQueue;
+
+		if ( pVoicePacket )
+		{
+			CellVoiceBasePortInfo PortInfo;
+			memset(&PortInfo, 0, sizeof(PortInfo));
+			int Result = cellVoiceGetPortInfo( pVoiceContext->m_PortIdInput, &PortInfo );
+			if (Result != CELL_OK && Result != CELL_VOICE_ERROR_SERVICE_DETACHED )
+			{
+				printf("cellVoiceGetPortInfo PCMInputPort failed %x\n",Result);
+			}
+
+			if ( PortInfo.numByte > pVoicePacket->unSize )
+			{
+				uint32_t bytes = pVoicePacket->unSize;
+				Result = cellVoiceWriteToIPort( pVoiceContext->m_PortIdInput, pVoicePacket->pData, &bytes );
+				pVoicePacket->unWritten += bytes;
+			
+				if ( pVoicePacket->unWritten >= pVoicePacket->unSize )
+				{
+					pVoiceContext->m_pQueue = pVoicePacket->pNext;
+					free( pVoicePacket->pData );
+					delete pVoicePacket;
+				}
+			}
+		}
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CGameEnginePS3::DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel )
+{
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* >::iterator iter;
+	iter = m_MapVoiceChannel.find( hChannel );
+	if ( iter != m_MapVoiceChannel.end() )
+	{
+		CVoiceContext* pVoiceContext = iter->second;
+		
+		// free outstanding voice packets
+
+		PacketQueue_t *pVoicePacket = pVoiceContext->m_pQueue;
+
+		while( pVoicePacket )
+		{
+			PacketQueue_t *pNextPacket = pVoicePacket->pNext;
+
+			free( pVoicePacket->pData );
+			delete pVoicePacket;
+
+			pVoicePacket = pNextPacket;
+		}
+		
+		// stop voice
+
+		cellVoiceDisconnectIPortFromOPort( pVoiceContext->m_PortIdInput,  pVoiceContext->m_PortIdOutput );
+		cellVoiceDeletePort( pVoiceContext->m_PortIdInput );
+		cellVoiceDeletePort( pVoiceContext->m_PortIdOutput );
+
+		delete pVoiceContext;
+
+		m_MapVoiceChannel.erase( iter );
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CGameEnginePS3::AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoiceData, uint32 uLength )
+{
+	std::map<HGAMEVOICECHANNEL, CVoiceContext* >::iterator iter;
+	iter = m_MapVoiceChannel.find( hChannel );
+	if ( iter == m_MapVoiceChannel.end() )
+		return false; // channel not found
+
+	CVoiceContext* pVoiceContext = iter->second;
+
+	PacketQueue_t *pVoicePacket = new PacketQueue_t;
+
+	pVoicePacket->pData = malloc ( uLength );
+	memcpy( pVoicePacket->pData, pVoiceData, uLength );
+	pVoicePacket->unSize = uLength;
+	pVoicePacket->pNext = NULL;
+	pVoicePacket->unWritten = 0;
+
+	if ( pVoiceContext->m_pQueue == NULL )
+	{
+		// start queue 
+		pVoiceContext->m_pQueue = pVoicePacket;
+	}
+	else
+	{
+		PacketQueue_t *pLastPacket = pVoiceContext->m_pQueue;
+
+		// find tail
+		while ( pLastPacket->pNext )
+			pLastPacket = pLastPacket->pNext;
+
+		// append to tail
+		pLastPacket->pNext = pVoicePacket;
+	}
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Part of the render host interface for Steam overlay to draw through
+//-----------------------------------------------------------------------------
+void CGameEnginePS3::DrawTexturedRect( int x0, int y0, int x1, int y1, float u0, float v0, float u1, float v1, int32 iTextureID, DWORD colorStart, DWORD colorEnd, EOverlayGradientDirection eDirection )
+{
+	std::map<int, HGAMETEXTURE>::iterator iter;
+	iter = m_MapSteamTextures.find( iTextureID );
+	if ( iter != m_MapSteamTextures.end() )
+	{
+		if ( eDirection == k_EOverlayGradientHorizontal )
+			BDrawTexturedGradientQuad( x0, y0, x1, y1, u0, v0, u1, v1, colorStart, colorEnd, colorEnd, colorStart, iter->second );
+		else if ( eDirection == k_EOverlayGradientVertical )
+			BDrawTexturedGradientQuad( x0, y0, x1, y1, u0, v0, u1, v1, colorStart, colorStart, colorEnd, colorEnd, iter->second );
+		else
+			BDrawTexturedGradientQuad( x0, y0, x1, y1, u0, v0, u1, v1, colorStart, colorStart, colorStart, colorStart, iter->second );
+
+	}
+	else
+	{
+		char rgchBuf[512];
+		sprintf_safe( rgchBuf, "Steam trying to draw for invalid textureid: %d\n", iTextureID );
+		OutputDebugString( rgchBuf );
+
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Part of the render host interface for Steam overlay to draw through
+//-----------------------------------------------------------------------------
+void CGameEnginePS3::LoadOrUpdateTexture( int32 iTextureID, bool bIsFullTexture, int x0, int y0, uint32 uWidth, uint32 uHeight, int32 iBytes, char *pData )
+{
+	BFlushQuadBuffer();
+	m_hLastTexture = 0;
+
+	if ( !bIsFullTexture )
+	{
+		bool bUpdated = false;
+		std::map<int, HGAMETEXTURE>::iterator iter_steam;
+		iter_steam = m_MapSteamTextures.find( iTextureID );
+		if ( iter_steam != m_MapSteamTextures.end() )
+		{
+			std::map<HGAMETEXTURE, TextureData_t>::iterator iter_game; 
+			iter_game = m_MapTextures.find( iter_steam->second );
+			if ( iter_game != m_MapTextures.end() )
+			{
+				TextureData_t &TexData = iter_game->second;
+
+				glEnable( GL_TEXTURE_2D );
+				glBindTexture( GL_TEXTURE_2D, TexData.m_uTextureID );
+				glTexSubImage2D( GL_TEXTURE_2D, 0, x0, y0, uWidth, uHeight, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, pData );
+				glDisable( GL_TEXTURE_2D );
+				
+				bUpdated = true;
+			}
+			else
+			{
+				char rgchBuf[512];
+				sprintf_safe( rgchBuf, "Couldn't find texture: %d\n", iTextureID );
+				OutputDebugString( rgchBuf );
+			}
+		}
+		else
+		{
+			char rgchBuf[512];
+			sprintf_safe( rgchBuf, "Couldn't find Steam mapping for texture: %d\n", iTextureID );
+			OutputDebugString( rgchBuf );
+		}
+
+		if ( !bUpdated )
+		{
+			char rgchBuf[512];
+			sprintf_safe( rgchBuf, "Failed updating texture: %d\n", iTextureID );
+			OutputDebugString( rgchBuf );
+		}
+	}
+	else
+	{
+		HGAMETEXTURE hGameTexture = HCreateTexture( (byte*)pData, uWidth, uHeight );
+		m_MapSteamTextures[iTextureID] = hGameTexture;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Part of the render host interface for Steam overlay to draw through
+//-----------------------------------------------------------------------------
+void CGameEnginePS3::DeleteTexture( int32 iTextureID )
+{
+	std::map<int, HGAMETEXTURE>::iterator iter;
+	iter = m_MapSteamTextures.find( iTextureID );
+	if ( iter != m_MapSteamTextures.end() )
+	{
+		// Our game engine doesn't know how to free textures, lol.
+		m_MapSteamTextures.erase( iter );
+	}
+	else
+	{
+		char rgchBuf[512];
+		sprintf_safe( rgchBuf, "Got DeleteTexture from Steam for texture we don't have mapped: %d\n", iTextureID );
+		OutputDebugString( rgchBuf );
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Part of the render host interface for Steam overlay to draw through
+//-----------------------------------------------------------------------------
+void CGameEnginePS3::DeleteAllTextures()
+{
+	m_MapSteamTextures.clear();
+
+	// Don't really know how to delete textures in the engine, lol.
+}

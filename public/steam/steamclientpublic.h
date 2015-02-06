@@ -114,6 +114,8 @@ enum EResult
 	k_EResultAccountLoginDeniedThrottle = 87,	// login attempt failed, try to throttle response to possible attacker
 	k_EResultTwoFactorCodeMismatch = 88,		// two factor code mismatch
 	k_EResultTwoFactorActivationCodeMismatch = 89,	// activation code for two-factor didn't match
+	k_EResultAccountAssociatedToMultiplePartners = 90,	// account has been associated with multiple partners
+	k_EResultNotModified = 91, // data not modified
 };
 
 // Error codes for use with the voice functions
@@ -127,11 +129,13 @@ enum EVoiceResult
 	k_EVoiceResultDataCorrupted = 5,
 	k_EVoiceResultRestricted = 6,
 	k_EVoiceResultUnsupportedCodec = 7,
+	k_EVoiceResultReceiverOutOfDate = 8,
+	k_EVoiceResultReceiverDidNotAnswer = 9,
 
 };
 
 // Result codes to GSHandleClientDeny/Kick
-typedef enum
+enum EDenyReason
 {
 	k_EDenyInvalid = 0,
 	k_EDenyInvalidVersion = 1,
@@ -149,14 +153,14 @@ typedef enum
 	k_EDenySteamResponseTimedOut = 13,
 	k_EDenySteamValidationStalled = 14,
 	k_EDenySteamOwnerLeftGuestUser = 15,
-} EDenyReason;
+};
 
 // return type of GetAuthSessionTicket
 typedef uint32 HAuthTicket;
 const HAuthTicket k_HAuthTicketInvalid = 0;
 
 // results from BeginAuthSession
-typedef enum
+enum EBeginAuthSessionResult
 {
 	k_EBeginAuthSessionResultOK = 0,						// Ticket is valid for this game and this steamID.
 	k_EBeginAuthSessionResultInvalidTicket = 1,				// Ticket is not valid.
@@ -164,10 +168,10 @@ typedef enum
 	k_EBeginAuthSessionResultInvalidVersion = 3,			// Ticket is from an incompatible interface version
 	k_EBeginAuthSessionResultGameMismatch = 4,				// Ticket is not for this game
 	k_EBeginAuthSessionResultExpiredTicket = 5,				// Ticket has expired
-} EBeginAuthSessionResult;
+};
 
 // Callback values for callback ValidateAuthTicketResponse_t which is a response to BeginAuthSession
-typedef enum
+enum EAuthSessionResponse
 {
 	k_EAuthSessionResponseOK = 0,							// Steam has verified the user is online, the ticket is valid and ticket has not been reused.
 	k_EAuthSessionResponseUserNotConnectedToSteam = 1,		// The user in question is not connected to steam
@@ -179,15 +183,15 @@ typedef enum
 	k_EAuthSessionResponseAuthTicketInvalidAlreadyUsed = 7,	// This ticket has already been used, it is not valid.
 	k_EAuthSessionResponseAuthTicketInvalid = 8,			// This ticket is not from a user instance currently connected to steam.
 	k_EAuthSessionResponsePublisherIssuedBan = 9,			// The user is banned for this game. The ban came via the web api and not VAC
-} EAuthSessionResponse;
+};
 
 // results from UserHasLicenseForApp
-typedef enum
+enum EUserHasLicenseForAppResult
 {
 	k_EUserHasLicenseResultHasLicense = 0,					// User has a license for specified app
 	k_EUserHasLicenseResultDoesNotHaveLicense = 1,			// User does not have a license for the specified app
 	k_EUserHasLicenseResultNoAuth = 2,						// User has not been authenticated
-} EUserHasLicenseForAppResult;
+};
 
 
 // Steam account types
@@ -896,10 +900,10 @@ public:
 		m_gameID.m_nType = k_EGameIDTypeGameMod;
 
 		char rgchModDir[MAX_PATH];
-		Q_FileBase( pchModPath, rgchModDir, sizeof( rgchModDir ) );
+		V_FileBase( pchModPath, rgchModDir, sizeof( rgchModDir ) );
 		CRC32_t crc32;
 		CRC32_Init( &crc32 );
-		CRC32_ProcessBuffer( &crc32, rgchModDir, Q_strlen( rgchModDir ) );
+		CRC32_ProcessBuffer( &crc32, rgchModDir, V_strlen( rgchModDir ) );
 		CRC32_Final( &crc32 );
 
 		// set the high-bit on the mod-id 
@@ -916,8 +920,8 @@ public:
 
 		CRC32_t crc32;
 		CRC32_Init( &crc32 );
-		CRC32_ProcessBuffer( &crc32, pchExePath, Q_strlen( pchExePath ) );
-		CRC32_ProcessBuffer( &crc32, pchAppName, Q_strlen( pchAppName ) );
+		CRC32_ProcessBuffer( &crc32, pchExePath, V_strlen( pchExePath ) );
+		CRC32_ProcessBuffer( &crc32, pchAppName, V_strlen( pchAppName ) );
 		CRC32_Final( &crc32 );
 
 		// set the high-bit on the mod-id 
@@ -937,7 +941,7 @@ public:
 		CRC32_t crc32;
 		CRC32_Init( &crc32 );
 		const char *pchFileId = vstFileID.Render();
-		CRC32_ProcessBuffer( &crc32, pchFileId, Q_strlen( pchFileId ) );
+		CRC32_ProcessBuffer( &crc32, pchFileId, V_strlen( pchFileId ) );
 		CRC32_Final( &crc32 );
 
 		// set the high-bit on the mod-id 

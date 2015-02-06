@@ -21,7 +21,7 @@ CHTMLSurface::CHTMLSurface( IGameEngine *pGameEngine ) :
 	m_FinishedRequest( this, &CHTMLSurface::OnFinishedRequest )
 {
 	m_pGameEngine = pGameEngine;
-	m_unBrowserHandle = INVALID_HTTMLBROWSER;
+	m_unBrowserHandle = INVALID_HTMLBROWSER;
 	m_hHTMLTexture = -1;
 
 	m_unHTMLWide = m_pGameEngine->GetViewportWidth() - 100;
@@ -40,7 +40,7 @@ CHTMLSurface::~CHTMLSurface()
 {
 	if ( m_unBrowserHandle )
 		SteamHTMLSurface()->RemoveBrowser( m_unBrowserHandle );
-	m_unBrowserHandle = INVALID_HTTMLBROWSER;
+	m_unBrowserHandle = INVALID_HTMLBROWSER;
 }
 
 
@@ -70,7 +70,7 @@ void CHTMLSurface::Render()
 		rect.right = m_unHTMLWide + rect.left;
 		rect.bottom = m_unHTMLTall + rect.top;
 
-		m_pGameEngine->BDrawTexturedQuad( (float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom,
+		m_pGameEngine->BDrawTexturedRect( (float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom,
 			0.0f, 0.0f, 1.0, 1.0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), m_hHTMLTexture );
 	}
 
@@ -106,7 +106,7 @@ void CHTMLSurface::Show()
 //-----------------------------------------------------------------------------
 void CHTMLSurface::OnCloseBrowser( HTML_CloseBrowser_t *pParam  )
 {
-	m_unBrowserHandle = INVALID_HTTMLBROWSER;
+	m_unBrowserHandle = INVALID_HTMLBROWSER;
 
 }
 

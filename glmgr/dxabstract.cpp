@@ -992,7 +992,7 @@ HRESULT IDirect3D9::GetDeviceCaps(UINT Adapter,D3DDEVTYPE DeviceType,D3DCAPS9* p
 	// just leave glmRendererInfo filled out for subsequent code to look at as needed.
 	
 	// fill in the pCaps record for adapter... we zero most of it and just fill in the fields that we think the caller wants.
-	Q_memset( pCaps, 0, sizeof(*pCaps) );
+	V_memset( pCaps, 0, sizeof(*pCaps) );
 	
 
     /* Device Info */
@@ -1113,7 +1113,7 @@ HRESULT IDirect3D9::GetAdapterIdentifier( UINT Adapter, DWORD Flags, D3DADAPTER_
 
 	Assert( Flags == D3DENUM_WHQL_LEVEL );	// we're not handling any other queries than this yet
 	
-	Q_memset( pIdentifier, 0, sizeof(*pIdentifier) );
+	V_memset( pIdentifier, 0, sizeof(*pIdentifier) );
 
 	GLMDisplayDB *db = g_engine->GetDisplayDB();
 	int glmRendererIndex = -1;
@@ -1144,8 +1144,8 @@ HRESULT IDirect3D9::GetAdapterIdentifier( UINT Adapter, DWORD Flags, D3DADAPTER_
 
 	#if 0
 		// this came from the shaderapigl effort	
-		Q_strncpy( pIdentifier->Driver, "Fake-Video-Card", MAX_DEVICE_IDENTIFIER_STRING );
-		Q_strncpy( pIdentifier->Description, "Fake-Video-Card", MAX_DEVICE_IDENTIFIER_STRING );
+		V_strncpy( pIdentifier->Driver, "Fake-Video-Card", MAX_DEVICE_IDENTIFIER_STRING );
+		V_strncpy( pIdentifier->Description, "Fake-Video-Card", MAX_DEVICE_IDENTIFIER_STRING );
 		pIdentifier->VendorId				= 4318;
 		pIdentifier->DeviceId				= 401;
 		pIdentifier->SubSysId				= 3358668866;
@@ -5461,7 +5461,7 @@ HRESULT IDirect3DDevice9::SetScissorRect(CONST RECT* pRect)
 {
 	int nSurfaceHeight = m_drawableFBO->m_attach[ kAttColor0 ].m_tex->m_layout->m_key.m_ySize;
 	
-	GLScissorBox_t newScissorBox = { pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top };
+	GLScissorBox_t newScissorBox = { (GLint)pRect->left, (GLint)pRect->top, (GLint)(pRect->right - pRect->left), (GLint)(pRect->bottom - pRect->top) };
 	gl.m_ScissorBox	= newScissorBox;
 	gl.m_stateDirtyMask |= (1<<kGLScissorBox);
 	return S_OK;

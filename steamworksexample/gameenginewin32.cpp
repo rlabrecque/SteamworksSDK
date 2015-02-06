@@ -986,7 +986,7 @@ void CGameEngineWin32::EndFrame()
 			}
 
 
-			BDrawTexturedQuad( (float)vpx, (float)vpy, (float)(vpx + vpw), (float)(vpy + vph), 0, 0, 1.f, 1.f, D3DCOLOR_ARGB( 255, 255, 255, 255 ), m_hVRSceneRenderTarget );
+			BDrawTexturedRect( (float)vpx, (float)vpy, (float)(vpx + vpw), (float)(vpy + vph), 0, 0, 1.f, 1.f, D3DCOLOR_ARGB( 255, 255, 255, 255 ), m_hVRSceneRenderTarget );
 			BFlushQuadBuffer();
 
 			m_pD3D9Device->SetTexture( 1, NULL );
@@ -1454,7 +1454,7 @@ bool CGameEngineWin32::BFlushPointBuffer()
 //-----------------------------------------------------------------------------
 // Purpose: Draw a filled quad
 //-----------------------------------------------------------------------------
-bool CGameEngineWin32::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor )
+bool CGameEngineWin32::BDrawFilledRect( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor )
 {
 	if ( !m_hTextureWhite )
 	{
@@ -1464,13 +1464,13 @@ bool CGameEngineWin32::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, f
 		delete[] pRGBAData;
 	}
 
-	return BDrawTexturedQuad( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
+	return BDrawTexturedRect( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Draw a textured quad
 //-----------------------------------------------------------------------------
-bool CGameEngineWin32::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
+bool CGameEngineWin32::BDrawTexturedRect( float xPos0, float yPos0, float xPos1, float yPos1, float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
 {
 	if ( !m_pD3D9Device )
 		return false;
@@ -1569,6 +1569,111 @@ bool CGameEngineWin32::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1,
 
 	return true;
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Draw a textured quad
+//-----------------------------------------------------------------------------
+bool CGameEngineWin32::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float xPos2, float yPos2 , float xPos3, float yPos3,
+	float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
+{
+	if ( !m_pD3D9Device )
+		return false;
+
+	if ( m_bDeviceLost )
+		return true; // Fail silently in this case
+
+	// Find the texture
+	std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
+	iter = m_MapTextures.find( hTexture );
+	if ( iter == m_MapTextures.end() )
+	{
+		OutputDebugString( "BDrawTexturedQuad called with invalid hTexture value\n" );
+		return false;
+	}
+
+	if ( !m_hQuadBuffer )
+	{
+		// Create the line buffer
+		m_hQuadBuffer = HCreateVertexBuffer( sizeof(TexturedQuadVertex_t)* QUAD_BUFFER_TOTAL_SIZE * 4, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1 );
+
+		if ( !m_hQuadBuffer )
+		{
+			OutputDebugString( "Can't BDrawTexturedQuad() because vertex buffer creation failed\n" );
+			return false;
+		}
+	}
+
+	// Check if we are out of room and need to flush the buffer
+	if ( m_dwQuadsToFlush == QUAD_BUFFER_BATCH_SIZE )
+	{
+		BFlushQuadBuffer();
+	}
+
+	// Check if the texture changed so we need to flush the buffer
+	if ( m_hLastTexture != hTexture )
+	{
+		BFlushQuadBuffer();
+	}
+
+	// Save the texture to use for next flush
+	m_hLastTexture = hTexture;
+
+	if ( !BSetFVF( D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1 ) )
+	{
+		OutputDebugString( "Setting FVF failed for textured rect drawing\n" );
+		return false;
+	}
+
+	// Lock the vertex buffer into memory
+	if ( !m_pQuadVertexes )
+	{
+		if ( !BLockEntireVertexBuffer( m_hQuadBuffer, (void**)&m_pQuadVertexes, m_dwQuadBufferBatchPos ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) )
+		{
+			m_pQuadVertexes = NULL;
+			OutputDebugString( "BDrawTexturedQuad failed because locking vertex buffer failed\n" );
+			return false;
+		}
+	}
+
+	TexturedQuadVertex_t *pVertData = &m_pQuadVertexes[m_dwQuadBufferBatchPos * 4 + m_dwQuadsToFlush * 4];
+
+	pVertData[0].color = dwColor;
+	pVertData[0].rhw = 1.0f;
+	pVertData[0].z = 1.0f;
+	pVertData[0].x = xPos0;
+	pVertData[0].y = yPos0;
+	pVertData[0].u = u0;
+	pVertData[0].v = v0;
+
+	pVertData[1].color = dwColor;
+	pVertData[1].rhw = 1.0f;
+	pVertData[1].z = 1.0f;
+	pVertData[1].x = xPos1;
+	pVertData[1].y = yPos1;
+	pVertData[1].u = u1;
+	pVertData[1].v = v0;
+
+	pVertData[2].color = dwColor;
+	pVertData[2].rhw = 1.0f;
+	pVertData[2].z = 1.0f;
+	pVertData[2].x = xPos2;
+	pVertData[2].y = yPos2;
+	pVertData[2].u = u0;
+	pVertData[2].v = v1;
+
+	pVertData[3].color = dwColor;
+	pVertData[3].rhw = 1.0f;
+	pVertData[3].z = 1.0f;
+	pVertData[3].x = xPos3;
+	pVertData[3].y = yPos3;
+	pVertData[3].u = u1;
+	pVertData[3].v = v1;
+
+	++m_dwQuadsToFlush;
+
+	return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Draw a 3D textured quad

@@ -6,10 +6,12 @@
 //=============================================================================
 
 #include "stdafx.h"
+#include "GameEngine.h"
 #include "Ship.h"
 #include "stdlib.h"
 #include "SpaceWarServer.h"
 #include "StatsAndAchievements.h"
+#include "Inventory.h"
 #include <math.h>
 #include <string.h>
 
@@ -134,6 +136,7 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	m_ulLastThrustStartedTickCount = 0;
 	m_dwVKLeft = 0;
 	m_dwVKRight = 0;
+	m_nFade = 255;
 	m_dwVKForwardThrusters = 0;
 	m_dwVKReverseThrusters = 0;
 	m_dwVKFire = 0;
@@ -144,6 +147,11 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	m_bIsLocalPlayer = false;
 	m_ulLastClientUpdateTick = 0;
 	m_bIsServerInstance = bIsServerInstance;
+	m_nShipDecoration = 0;
+	m_nShipPower = 0;
+	m_nShipWeapon = 0;
+	m_hTextureWhite = 0;
+	m_nShipShieldStrength = 0;
 
 	memset( &m_SpaceWarClientUpdateData, 0, sizeof( m_SpaceWarClientUpdateData ) );
 
@@ -152,14 +160,46 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 		m_rgPhotonBeams[i] = NULL;
 	}
 
-	// Initialize our geometry
-	AddLine( -9.0f, 12.0f, 0.0f, -12.0f, dwShipColor );
-	AddLine( 0.0f, -12.0f, 9.0f, 12.0f, dwShipColor );
-	AddLine( 9.0f, 12.0f, -9.0f, 12.0f, dwShipColor );
+	BuildGeometry();
+
 	SetPosition( xPos, yPos );
 }
 #pragma warning( pop )
 
+void CShip::BuildGeometry()
+{
+	ClearVertexes();
+
+	// Initialize our geometry
+	AddLine( -9.0f, 12.0f, 0.0f, -12.0f, m_dwShipColor );
+	AddLine( 0.0f, -12.0f, 9.0f, 12.0f, m_dwShipColor );
+	AddLine( 9.0f, 12.0f, -9.0f, 12.0f, m_dwShipColor );
+
+	switch ( m_nShipDecoration )
+	{
+	case 1:
+		AddLine( 0.0f, -12.0f, -0.0f, 12.0f, m_dwShipColor );
+		AddLine( 4.5f, 0.0f, -4.5f, 0.0f, m_dwShipColor );
+		break;
+	case 2:
+		AddLine( 0.0f, -12.0f, -0.0f, 12.0f, m_dwShipColor );
+		AddLine( 4.5f, 0.0f, -4.5f, 0.0f, m_dwShipColor );
+		AddLine( 2.5f, -6.0f, -9.0f, 12.0f, m_dwShipColor );
+		AddLine( 9.0f, 12.0f, -2.5f, -6.0f, m_dwShipColor );
+		break;
+	case 3:
+		AddLine( 0.0f, -12.0f, 0.0f, 12.0f, m_dwShipColor );
+		AddLine( 2.0f, -8.0f, 2.0f, 12.0f, m_dwShipColor );
+		AddLine( -2.0f, -8.0f, -2.0f, 12.0f, m_dwShipColor );
+		break;
+	case 4:
+		AddLine( -12.0,  12.0f, -3.0f,-12.0f, m_dwShipColor );
+		AddLine( -17.0f,  4.0f,-11.0f,-10.0f, m_dwShipColor );
+		AddLine( -17.0f,  4.0f,-10.0f, 7.0f, m_dwShipColor );
+		AddLine( -11.0f,-10.0f, -3.0f,-7.0f, m_dwShipColor );
+		break;
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
@@ -205,6 +245,17 @@ void CShip::OnReceiveServerUpdate( ServerShipUpdateData_t *pUpdateData )
 	SetVelocity( pUpdateData->GetXVelocity(), pUpdateData->GetYVelocity() );
 	SetAccumulatedRotation( pUpdateData->GetRotation() );
 
+	m_nShipPower = pUpdateData->GetPower();
+	m_nShipWeapon = pUpdateData->GetWeapon();
+	if ( m_nShipDecoration != pUpdateData->GetDecoration() )
+	{
+		m_nShipDecoration = pUpdateData->GetDecoration();
+		BuildGeometry();
+	}
+	if ( !m_bIsLocalPlayer || pUpdateData->GetShieldStrength() == 0 )
+	{
+		m_nShipShieldStrength = pUpdateData->GetShieldStrength();
+	}
 
 	m_bForwardThrustersActive = pUpdateData->GetForwardThrustersActive();
 	m_bReverseThrustersActive = pUpdateData->GetReverseThrustersActive();
@@ -249,6 +300,12 @@ void CShip::OnReceiveClientUpdate( ClientSpaceWarUpdateData_t *pUpdateData )
 		OutputDebugString( "Should not be receiving client updates on non-server instances\n" );
 		return;
 	}
+
+	m_nShipDecoration = pUpdateData->GetDecoration();
+	m_nShipPower = pUpdateData->GetPower();
+	m_nShipWeapon = pUpdateData->GetWeapon();
+	m_nShipShieldStrength = pUpdateData->GetShieldStrength();
+
 	memcpy( &m_SpaceWarClientUpdateData, pUpdateData, sizeof( ClientSpaceWarUpdateData_t ) );
 }
 
@@ -268,6 +325,10 @@ bool CShip::BGetClientUpdateData( ClientSpaceWarUpdateData_t *pUpdateData  )
 	if ( m_bIsLocalPlayer )
 	{
 		m_SpaceWarClientUpdateData.SetPlayerName( SteamFriends()->GetFriendPersonaName( SteamUser()->GetSteamID() ) );
+		m_SpaceWarClientUpdateData.SetDecoration( m_nShipDecoration );
+		m_SpaceWarClientUpdateData.SetWeapon( m_nShipWeapon );
+		m_SpaceWarClientUpdateData.SetPower( m_nShipPower );
+		m_SpaceWarClientUpdateData.SetShieldStrength( m_nShipShieldStrength );
 	}
 
 	memcpy( pUpdateData, &m_SpaceWarClientUpdateData, sizeof( ClientSpaceWarUpdateData_t ) );
@@ -374,6 +435,52 @@ void CShip::RunFrame()
 				m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
 			}
 		}
+
+		// Hardcoded keys to choose various outfits and weapon powerups which require inventory. Note that this is not
+		// a "secure" multiplayer model - clients can lie about what they own. A more robust solution, if your items
+		// matter enough to bother, would be to use SerializeResult / DeserializeResult to encode the fact that your
+		// steamid owns certain items, and then send that encoded result to the server which decodes and verifies it.
+		if ( m_pGameEngine->BIsKeyDown( 0x30 ) )
+		{
+			m_nShipDecoration = 0;
+			BuildGeometry();
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x31 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipDecoration1 ) )
+		{
+			m_nShipDecoration = 1;
+			BuildGeometry();
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x32 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipDecoration2 ) )
+		{
+			m_nShipDecoration = 2;
+			BuildGeometry();
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x33 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipDecoration3 ) )
+		{
+			m_nShipDecoration = 3;
+			BuildGeometry();
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x34 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipDecoration4 ) )
+		{
+			m_nShipDecoration = 4;
+			BuildGeometry();
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x35 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipWeapon1 ) )
+		{
+			m_nShipWeapon = 1;
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x36 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipWeapon2 ) )
+		{
+			m_nShipWeapon = 2;
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x37 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipSpecial1 ) )
+		{
+			m_nShipPower = 1;
+		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x38 ) && SpaceWarLocalInventory()->HasInstanceOf( k_SpaceWarItem_ShipSpecial2 ) )
+		{
+			m_nShipPower = 2;
+		}
 	}
 	else if ( m_bIsServerInstance )
 	{
@@ -433,14 +540,57 @@ void CShip::RunFrame()
 		{
 			m_ulLastPhotonTickCount = ulCurrentTickCount;
 
-			float xVelocity = GetXVelocity() + ( sinvalue * 275 );
-			float yVelocity = GetYVelocity() - ( cosvalue * 275 );
+			if ( m_nShipWeapon == 1 ) // Item#101
+			{
+				float sinvalue1 = (float)sin( GetAccumulatedRotation() - .1f );
+				float cosvalue1 = (float)cos( GetAccumulatedRotation() - .1f );
+				float sinvalue2 = (float)sin( GetAccumulatedRotation() + .1f );
+				float cosvalue2 = (float)cos( GetAccumulatedRotation() + .1f );
 
-			// Offset 12 points up from the center of the ship, compensating for rotation
-			float xPos = GetXPos() - sinvalue*-12.0f;
-			float yPos = GetYPos() + cosvalue*-12.0f;
+				float xVelocity = GetXVelocity() + ( sinvalue1 * 275 );
+				float yVelocity = GetYVelocity() - ( cosvalue1 * 275 );
 
-			m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+				// Offset 12 points up from the center of the ship, compensating for rotation
+				float xPos = GetXPos() - sinvalue1*-12.0f;
+				float yPos = GetYPos() + cosvalue1*-12.0f;
+
+				m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+
+				nNextAvailablePhotonBeamSlot = -1;  // Track next available slot for use spawning new beams below
+				for( int i=0; i < MAX_PHOTON_BEAMS_PER_SHIP; ++i )
+				{
+					if ( !m_rgPhotonBeams[i] && nNextAvailablePhotonBeamSlot == -1 )
+						nNextAvailablePhotonBeamSlot = i;
+				}
+
+				if ( nNextAvailablePhotonBeamSlot != -1 )
+				{
+					xVelocity = GetXVelocity() + ( sinvalue2 * 275 );
+					yVelocity = GetYVelocity() - ( cosvalue2 * 275 );
+
+					// Offset 12 points up from the center of the ship, compensating for rotation
+					xPos = GetXPos() - sinvalue2*-12.0f;
+					yPos = GetYPos() + cosvalue2*-12.0f;
+
+					m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+				}
+			}
+			else
+			{
+				float speed = 275;
+				if ( m_nShipWeapon == 2 ) // Item#102
+				{
+					speed = 500;
+				}
+				float xVelocity = GetXVelocity() + ( sinvalue * speed );
+				float yVelocity = GetYVelocity() - ( cosvalue * speed );
+
+				// Offset 12 points up from the center of the ship, compensating for rotation
+				float xPos = GetXPos() - sinvalue*-12.0f;
+				float yPos = GetYPos() + cosvalue*-12.0f;
+
+				m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+			}
 		}
 	}
 
@@ -457,40 +607,105 @@ void CShip::RunFrame()
 //-----------------------------------------------------------------------------
 void CShip::Render()
 {
+	int beamCount = 0;
+
 	if ( m_bDisabled )
 		return;
 
 	// render all the photon beams we have outstanding
-	for( int i=0; i < MAX_PHOTON_BEAMS_PER_SHIP; ++i )
+	for ( int i = 0; i < MAX_PHOTON_BEAMS_PER_SHIP; ++i )
 	{
 		if ( m_rgPhotonBeams[i] )
+		{
 			m_rgPhotonBeams[i]->Render();
+			beamCount++;
+		}
 	}
 
 
-	if ( m_bExploding )	
+	if ( m_bExploding )
 	{
 		// Don't draw actual ship, instead draw the pieces created in the explosion
 		std::list<CShipDebris *>::iterator iter;
-		for( iter = m_ListDebris.begin(); iter != m_ListDebris.end(); ++iter )
-			(*iter)->Render();
+		for ( iter = m_ListDebris.begin(); iter != m_ListDebris.end(); ++iter )
+			( *iter )->Render();
 		return;
 	}
 
 	// Check if we should be drawing thrusters
 	if ( m_bForwardThrustersActive )
 	{
-		if ( rand()%3 == 0 )
+		if ( rand() % 3 == 0 )
 			m_ForwardThrusters.Render();
 	}
 
 	if ( m_bReverseThrustersActive )
 	{
-		if ( rand()%3 == 0 )
+		if ( rand() % 3 == 0 )
 			m_ReverseThrusters.Render();
 	}
 
-	CSpaceWarEntity::Render();
+	DWORD actualColor = m_dwShipColor;
+
+	if ( m_nShipPower == 1 ) // Item#103 but need to check if the other guy has it sometimes?
+	{
+		if ( beamCount > 0 )
+		{
+			m_nFade = 255;
+		}
+		else if ( m_nFade > 0 )
+		{
+			m_nFade -= 5;
+			if ( m_nFade < 0 )
+				m_nFade = 0;
+			if ( m_bIsLocalPlayer && m_nFade < 50 )
+			{
+				m_nFade = 128;
+			}
+		}
+		actualColor = (actualColor & 0xffffff) | (m_nFade<<24);
+	}
+
+	DWORD shieldColor = 0x00af8f00;
+	
+	if ( m_nShipPower == 2 )
+	{
+		shieldColor = shieldColor | ((m_nShipShieldStrength / 4)<<24);
+		if ( m_nShipShieldStrength < 256 )
+			m_nShipShieldStrength++;
+
+		if ( !m_hTextureWhite )
+		{
+			byte *pRGBAData = new byte[1 * 1 * 4];
+			memset( pRGBAData, 255, 1 * 1 * 4 );
+			m_hTextureWhite = m_pGameEngine->HCreateTexture( pRGBAData, 1, 1 );
+			delete[] pRGBAData;
+		}
+
+		float rotationClockwise = (m_pGameEngine->GetGameTickCount() / 500.0f);
+		float rotationCounter = -(m_pGameEngine->GetGameTickCount() / 500.0f);
+
+		float x1 = 28.0f * cos( rotationClockwise );
+		float y1 = 28.0f * sin( rotationClockwise );
+		float x2 = 28.0f * cos( rotationCounter );
+		float y2 = 28.0f * sin( rotationCounter );
+
+		m_pGameEngine->BDrawTexturedQuad(
+			this->GetXPos() - x1, this->GetYPos() - y1, this->GetXPos() + y1, this->GetYPos() - x1,
+			this->GetXPos() - y1, this->GetYPos() + x1, this->GetXPos() + x1, this->GetYPos() + y1, 
+			0, 0, 1, 1, shieldColor, m_hTextureWhite );
+
+		m_pGameEngine->BDrawTexturedQuad(
+			this->GetXPos() - x2, this->GetYPos() - y2, this->GetXPos() + y2, this->GetYPos() - x2,
+			this->GetXPos() - y2, this->GetYPos() + x2, this->GetXPos() + x2, this->GetYPos() + y2, 
+			0, 0, 1, 1, shieldColor, m_hTextureWhite );
+	}
+	else
+	{
+		m_nShipShieldStrength = 0;
+	}
+
+	CSpaceWarEntity::Render(actualColor);
 }
 
 //-----------------------------------------------------------------------------
@@ -584,6 +799,10 @@ void CShip::BuildServerUpdate( ServerShipUpdateData_t *pUpdateData )
 	pUpdateData->SetRotationDeltaLastFrame( GetRotationDeltaLastFrame() );
 	pUpdateData->SetForwardThrustersActive( m_bForwardThrustersActive );
 	pUpdateData->SetReverseThrustersActive( m_bReverseThrustersActive );
+	pUpdateData->SetDecoration( m_nShipDecoration );
+	pUpdateData->SetWeapon( m_nShipWeapon );
+	pUpdateData->SetPower( m_nShipPower );
+	pUpdateData->SetShieldStrength( m_nShipShieldStrength );
 
 	BuildServerPhotonBeamUpdate( pUpdateData );
 }

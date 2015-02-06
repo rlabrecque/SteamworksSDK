@@ -54,7 +54,7 @@ typedef uint64_t uint64;
 
 // Only add fields to the end of this struct, or if you need to change it in a larger
 // way add a new message id and new struct completely so as to not break old clients.
-typedef struct 
+struct SteamControllerState_t
 {
 	// If packet num matches that on your prior call, then the controller state hasn't been changed since 
 	// your last call and there is no need to process it
@@ -71,7 +71,7 @@ typedef struct
 	short sRightPadX;
 	short sRightPadY;
 
-} SteamControllerState_t; 
+}; 
 
 #pragma pack()
 

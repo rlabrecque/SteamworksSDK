@@ -108,10 +108,14 @@ public:
 	virtual bool BFlushPointBuffer() = 0;
 
 	// Draw a filled quad
-	virtual bool BDrawFilledQuad( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor ) = 0;
+	virtual bool BDrawFilledRect( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor ) = 0;
 
 	// Draw a textured rectangle 
-	virtual bool BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, 
+	virtual bool BDrawTexturedRect( float xPos0, float yPos0, float xPos1, float yPos1, 
+		float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture ) = 0;
+
+	// Draw a textured arbitrary quad
+	virtual bool BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float xPos2, float yPos2, float xPos3, float yPos3,
 		float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture ) = 0;
 
 	// Flush any still cached quad buffers

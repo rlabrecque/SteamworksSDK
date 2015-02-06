@@ -624,7 +624,7 @@ bool CGameEngineGL::BInitializeGraphics()
 #else	
 	void CGameEngineGL::AdjustViewport()
 	{
-		NSRect viewBounds = { { 0, 0 }, { m_nWindowWidth, m_nWindowHeight} };
+		NSRect viewBounds = { { 0, 0 }, { static_cast<CGFloat>(m_nWindowWidth), static_cast<CGFloat>(m_nWindowHeight) } };
 		
 		if( !NSEqualRects( [m_view bounds], viewBounds ) )
 		{
@@ -1333,7 +1333,7 @@ bool CGameEngineGL::BFlushPointBuffer()
 //-----------------------------------------------------------------------------
 // Purpose: Draw a filled quad
 //-----------------------------------------------------------------------------
-bool CGameEngineGL::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor )
+bool CGameEngineGL::BDrawFilledRect( float xPos0, float yPos0, float xPos1, float yPos1, DWORD dwColor )
 {
 	#if DX9MODE
 		if ( !m_hTextureWhite )
@@ -1361,7 +1361,7 @@ bool CGameEngineGL::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, floa
 			delete[] pRGBAData;
 		}
 
-		return BDrawTexturedQuad( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
+		return BDrawTexturedRect( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
 	#else
 		if ( !m_hTextureWhite )
 		{
@@ -1371,15 +1371,15 @@ bool CGameEngineGL::BDrawFilledQuad( float xPos0, float yPos0, float xPos1, floa
 			delete[] pRGBAData;
 		}
 	
-		return BDrawTexturedQuad( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
+		return BDrawTexturedRect( xPos0, yPos0, xPos1, yPos1, 0.0f, 0.0f, 1.0f, 1.0f, dwColor, m_hTextureWhite );
 	#endif
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Draw a textured quad
+// Purpose: Draw a textured rect
 //-----------------------------------------------------------------------------
-bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
+bool CGameEngineGL::BDrawTexturedRect( float xPos0, float yPos0, float xPos1, float yPos1, float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
 {
 	if ( m_bShuttingDown )
 		return false;
@@ -1393,7 +1393,7 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 		iter = m_MapTextures.find( hTexture );
 		if ( iter == m_MapTextures.end() )
 		{
-			OutputDebugString( "BDrawTexturedQuad called with invalid hTexture value\n" );
+			OutputDebugString( "BDrawTexturedRect called with invalid hTexture value\n" );
 			return false;
 		}
 
@@ -1404,7 +1404,7 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 
 			if ( !m_hQuadBuffer )
 			{
-				OutputDebugString( "Can't BDrawTexturedQuad() because vertex buffer creation failed\n" );
+				OutputDebugString( "Can't BDrawTexturedRect() because vertex buffer creation failed\n" );
 				return false;
 			}
 		}
@@ -1430,7 +1430,7 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 			if ( !BLockEntireVertexBuffer( m_hQuadBuffer, (void**)&m_pQuadVertexes, m_dwQuadBufferBatchPos ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) )
 			{
 				m_pQuadVertexes = NULL;
-				OutputDebugString( "BDrawTexturedQuad failed because locking vertex buffer failed\n" );
+				OutputDebugString( "BDrawTexturedRect failed because locking vertex buffer failed\n" );
 				return false;
 			}
 		}
@@ -1512,6 +1512,180 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 		m_rgflQuadsData[dwOffset+8] = 1.0;
 		m_rgflQuadsData[dwOffset+9] = xPos0;
 		m_rgflQuadsData[dwOffset+10] = yPos1;
+		m_rgflQuadsData[dwOffset+11] = 1.0;
+	
+		dwOffset = m_dwQuadsToFlush*16;
+		m_rgflQuadsColorData[dwOffset] = COLOR_RED( dwColor );
+		m_rgflQuadsColorData[dwOffset+1] = COLOR_GREEN( dwColor );
+		m_rgflQuadsColorData[dwOffset+2] = COLOR_BLUE( dwColor );
+		m_rgflQuadsColorData[dwOffset+3] = COLOR_ALPHA( dwColor );
+		m_rgflQuadsColorData[dwOffset+4] = COLOR_RED( dwColor );
+		m_rgflQuadsColorData[dwOffset+5] = COLOR_GREEN( dwColor );
+		m_rgflQuadsColorData[dwOffset+6] = COLOR_BLUE( dwColor );
+		m_rgflQuadsColorData[dwOffset+7] = COLOR_ALPHA( dwColor );
+		m_rgflQuadsColorData[dwOffset+8] = COLOR_RED( dwColor );
+		m_rgflQuadsColorData[dwOffset+9] = COLOR_GREEN( dwColor );
+		m_rgflQuadsColorData[dwOffset+10] = COLOR_BLUE( dwColor );
+		m_rgflQuadsColorData[dwOffset+11] = COLOR_ALPHA( dwColor );
+		m_rgflQuadsColorData[dwOffset+12] = COLOR_RED( dwColor );
+		m_rgflQuadsColorData[dwOffset+13] = COLOR_GREEN( dwColor );
+		m_rgflQuadsColorData[dwOffset+14] = COLOR_BLUE( dwColor );
+		m_rgflQuadsColorData[dwOffset+15] = COLOR_ALPHA( dwColor );
+	
+		dwOffset = m_dwQuadsToFlush*8;
+		m_rgflQuadsTextureData[dwOffset] = u0;
+		m_rgflQuadsTextureData[dwOffset+1] = v0;
+		m_rgflQuadsTextureData[dwOffset+2] = u1;
+		m_rgflQuadsTextureData[dwOffset+3] = v0;
+		m_rgflQuadsTextureData[dwOffset+4] = u1;
+		m_rgflQuadsTextureData[dwOffset+5] = v1;
+		m_rgflQuadsTextureData[dwOffset+6] = u0;
+		m_rgflQuadsTextureData[dwOffset+7] = v1;
+	
+	
+		++m_dwQuadsToFlush;
+	#endif
+	
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Draw a textured rect
+//-----------------------------------------------------------------------------
+bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, float yPos1, float xPos2, float yPos2, float xPos3, float yPos3,
+	float u0, float v0, float u1, float v1, DWORD dwColor, HGAMETEXTURE hTexture )
+{
+	if ( m_bShuttingDown )
+		return false;
+
+	#if DX9MODE
+		if ( !m_pD3D9Device )
+			return false;
+
+		// Find the texture
+		std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
+		iter = m_MapTextures.find( hTexture );
+		if ( iter == m_MapTextures.end() )
+		{
+			OutputDebugString( "BDrawTexturedRect called with invalid hTexture value\n" );
+			return false;
+		}
+
+		if ( !m_hQuadBuffer )
+		{
+			// Create the line buffer
+			m_hQuadBuffer = HCreateVertexBuffer( sizeof( TexturedQuadVertex_t ) * QUAD_BUFFER_TOTAL_SIZE * 4, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1 );
+
+			if ( !m_hQuadBuffer )
+			{
+				OutputDebugString( "Can't BDrawTexturedRect() because vertex buffer creation failed\n" );
+				return false;
+			}
+		}
+
+		// Check if we are out of room and need to flush the buffer
+		if ( m_dwQuadsToFlush == QUAD_BUFFER_BATCH_SIZE )
+		{
+			BFlushQuadBuffer();
+		}
+
+		// Check if the texture changed so we need to flush the buffer
+		if ( m_hLastTexture != hTexture )
+		{
+			BFlushQuadBuffer();
+		}	
+
+		// Save the texture to use for next flush
+		m_hLastTexture = hTexture;
+
+		// Lock the vertex buffer into memory
+		if ( !m_pQuadVertexes )
+		{
+			if ( !BLockEntireVertexBuffer( m_hQuadBuffer, (void**)&m_pQuadVertexes, m_dwQuadBufferBatchPos ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) )
+			{
+				m_pQuadVertexes = NULL;
+				OutputDebugString( "BDrawTexturedRect failed because locking vertex buffer failed\n" );
+				return false;
+			}
+		}
+
+		TexturedQuadVertex_t *pVertData = &m_pQuadVertexes[ m_dwQuadBufferBatchPos*4+m_dwQuadsToFlush*4 ];
+
+		#if GLMDEBUG && 0
+			GLMPRINTF(("-D- m_dwQuadBufferBatchPos = %d, m_dwQuadsToFlush = %d, net vertex index = %d(offset $%08x), m_pQuadVertexes is %08x, pVertData is %08x " ,
+				m_dwQuadBufferBatchPos,
+				m_dwQuadsToFlush,
+				m_dwQuadBufferBatchPos*4+m_dwQuadsToFlush*4,
+				(m_dwQuadBufferBatchPos*4+m_dwQuadsToFlush*4) * sizeof( m_pQuadVertexes[0] ),
+				m_pQuadVertexes,
+				pVertData
+				));
+		#endif
+		pVertData[0].color = dwColor;
+		pVertData[0].rhw = 1.0f;
+		pVertData[0].z = 1.0f;
+		pVertData[0].x = xPos0;
+		pVertData[0].y = yPos0;
+		pVertData[0].u = u0;
+		pVertData[0].v = v0;
+
+		pVertData[1].color = dwColor;
+		pVertData[1].rhw = 1.0f;
+		pVertData[1].z = 1.0f;
+		pVertData[1].x = xPos1;
+		pVertData[1].y = yPos1;
+		pVertData[1].u = u1;
+		pVertData[1].v = v0;
+
+		pVertData[2].color = dwColor;
+		pVertData[2].rhw = 1.0f;
+		pVertData[2].z = 1.0f;
+		pVertData[2].x = xPos2;
+		pVertData[2].y = yPos2;
+		pVertData[2].u = u0;
+		pVertData[2].v = v1;
+
+		pVertData[3].color = dwColor;
+		pVertData[3].rhw = 1.0f;
+		pVertData[3].z = 1.0f;
+		pVertData[3].x = xPos3;
+		pVertData[3].y = yPos3;
+		pVertData[3].u = u1;
+		pVertData[3].v = v1;
+
+		++m_dwQuadsToFlush;
+	#else
+		// Find the texture
+		std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
+		iter = m_MapTextures.find( hTexture );
+		if ( iter == m_MapTextures.end() )
+		{
+			OutputDebugString( "BDrawTexturedQuad called with invalid hTexture value\n" );
+			return false;
+		}
+	
+		// Check if we are out of room and need to flush the buffer, or if our texture is changing
+		// then we also need to flush the buffer.
+		if ( m_dwQuadsToFlush == QUAD_BUFFER_TOTAL_SIZE || m_hLastTexture != hTexture )	
+		{
+			BFlushQuadBuffer();
+		}
+	
+		// Bind the new texture
+		glBindTexture( GL_TEXTURE_2D, iter->second.m_uTextureID );
+	
+		DWORD dwOffset = m_dwQuadsToFlush*12;
+		m_rgflQuadsData[dwOffset] = xPos0;
+		m_rgflQuadsData[dwOffset+1] = yPos0;
+		m_rgflQuadsData[dwOffset+2] = 1.0;
+		m_rgflQuadsData[dwOffset+3] = xPos1;
+		m_rgflQuadsData[dwOffset+4] = yPos1;
+		m_rgflQuadsData[dwOffset+5] = 1.0;
+		m_rgflQuadsData[dwOffset+6] = xPos2;
+		m_rgflQuadsData[dwOffset+7] = yPos2;
+		m_rgflQuadsData[dwOffset+8] = 1.0;
+		m_rgflQuadsData[dwOffset+9] = xPos3;
+		m_rgflQuadsData[dwOffset+10] = yPos3;
 		m_rgflQuadsData[dwOffset+11] = 1.0;
 	
 		dwOffset = m_dwQuadsToFlush*16;
@@ -1882,7 +2056,7 @@ bool CGameEngineGL::BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWOR
 			posx = stringleft + (7.0f * (float)charindex);
 			posy = stringtop;
 			
-			BDrawTexturedQuad( posx, posy, posx + 6.0f, posy + 11.0f, leftU, topV, rightU, bottomV, dwColor, font );		
+			BDrawTexturedRect( posx, posy, posx + 6.0f, posy + 11.0f, leftU, topV, rightU, bottomV, dwColor, font );		
 		}
 	
 	#else
@@ -1895,7 +2069,7 @@ bool CGameEngineGL::BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWOR
 		AutoReleasePool pool;
 		
 		NSFont *pFont = (NSFont*) m_MapGameFonts[ hFont ];
-		NSRect box = { { rect.left, rect.top }, { rect.right-rect.left, rect.bottom-rect.top } };
+		NSRect box = { { static_cast<CGFloat>(rect.left), static_cast<CGFloat>(rect.top) }, { static_cast<CGFloat>(rect.right-rect.left), static_cast<CGFloat>(rect.bottom-rect.top) } };
 		NSColor *pColor = [NSColor colorWithCalibratedRed:COLOR_RED(dwColor)/255.0
 													green:COLOR_GREEN(dwColor)/255.0
 													 blue:COLOR_BLUE(dwColor)/255.0

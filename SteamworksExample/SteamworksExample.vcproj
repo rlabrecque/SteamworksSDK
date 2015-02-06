@@ -394,7 +394,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Friends.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\htmlsurface.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inventory.cpp"
 					>
 				</File>
 				<File
@@ -508,7 +516,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Friends.h"
+					>
+				</File>
+				<File
 					RelativePath=".\htmlsurface.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inventory.h"
 					>
 				</File>
 				<File

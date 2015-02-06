@@ -205,13 +205,6 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// set our debug handler
 	SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
 
-	// Tell Steam where it's overlay should show notification dialogs, this can be top right, top left,
-	// bottom right, bottom left. The default position is the bottom left if you don't call this.  
-	// Generally you should use the default and not call this as users will be most comfortable with 
-	// the default position.  The API is provided in case the bottom right creates a serious conflict 
-	// with important UI in your game.
-	SteamUtils()->SetOverlayNotificationPosition( k_EPositionTopRight );
-
 	// Ensure that the user has logged into Steam. This will always return true if the game is launched
 	// from Steam, but if Steam is at the login prompt when you run your game from the debugger, it
 	// will return false.
@@ -323,7 +316,7 @@ int main(int argc, const char **argv)
 {
     char szCmdLine[1024];
     char *pszStart = szCmdLine;
-    char * const pszEnd = szCmdLine + Q_ARRAYSIZE(szCmdLine);
+    char * const pszEnd = szCmdLine + V_ARRAYSIZE(szCmdLine);
 
     *szCmdLine = '\0';
     
@@ -342,7 +335,7 @@ int main(int argc, const char **argv)
             *pszStart++ = ' ';
     }
     
-    szCmdLine[Q_ARRAYSIZE(szCmdLine) - 1] = '\0';
+    szCmdLine[V_ARRAYSIZE(szCmdLine) - 1] = '\0';
     
     return RealMain( szCmdLine, 0, 0 );
 }
@@ -352,7 +345,7 @@ int main(int argc, const char **argv)
 {
     char szCmdLine[1024];
     char *pszStart = szCmdLine;
-    char * const pszEnd = szCmdLine + Q_ARRAYSIZE(szCmdLine);
+    char * const pszEnd = szCmdLine + V_ARRAYSIZE(szCmdLine);
     *szCmdLine = '\0';
     for ( int i = 1; i < argc; i++ )
     {
@@ -366,7 +359,7 @@ int main(int argc, const char **argv)
         if ( i < argc-1 )
             *pszStart++ = ' ';
     }
-    szCmdLine[Q_ARRAYSIZE(szCmdLine) - 1] = '\0';
+    szCmdLine[V_ARRAYSIZE(szCmdLine) - 1] = '\0';
     return RealMain( szCmdLine, 0, 0 );
 }
 #endif

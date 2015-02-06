@@ -187,7 +187,7 @@ extern void OutputDebugString( const char *pchMsg );
 extern int Alert( const char *lpCaption, const char *lpText );
 extern const char *GetUserSaveDataPath();
 
-#define Q_ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
+#define V_ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
 
 #endif	// POSIX
 

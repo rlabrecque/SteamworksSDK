@@ -10,6 +10,7 @@
 
 #include "SpaceWar.h"
 #include "GameEngine.h"
+#include "Inventory.h"
 
 enum EAchievements
 {
@@ -73,6 +74,7 @@ private:
 	// Render helpers
 	void DrawAchievementInfo( RECT &rect, Achievement_t &ach );
 	void DrawStatInfo( RECT &rect, const char *pchName, float flValue );
+	void DrawInventory( RECT &rect, SteamItemInstanceID_t itemid );
 
 	// PS3 specific
 	bool LoadUserStatsOnPS3();
