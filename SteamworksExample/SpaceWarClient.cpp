@@ -792,9 +792,8 @@ void CSpaceWarClient::OnGameJoinRequested( GameRichPresenceJoinRequested_t *pCal
 {
 	// parse out the connect 
 	const char *pchServerAddress, *pchLobbyID;
-	bool bUseVR = false;
-	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID, bool *pbUseVR );
-	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID, &bUseVR );
+	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID );
+	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID );
 
 	// exec
 	ExecCommandLineConnect( pchServerAddress, pchLobbyID );
@@ -2175,14 +2174,20 @@ bool CSpaceWarClient::LoadWorkshopItem( PublishedFileId_t workshopItemID )
 	if ( m_nNumWorkshopItems == MAX_WORKSHOP_ITEMS )
 		return false; // too much
 
+	uint32 unItemState = SteamUGC()->GetItemState( workshopItemID );
+
+	if ( !(unItemState & k_EItemStateInstalled) )
+		return false;
+
+	uint32 unTimeStamp = 0;
 	uint64 unSizeOnDisk = 0;
 	char szItemFolder[1024] = { 0 };
-	bool bLegacyItem = false;
-	if ( !SteamUGC()->GetItemInstallInfo( workshopItemID, &unSizeOnDisk, szItemFolder, sizeof(szItemFolder), &bLegacyItem ) )
+	
+	if ( !SteamUGC()->GetItemInstallInfo( workshopItemID, &unSizeOnDisk, szItemFolder, sizeof(szItemFolder), &unTimeStamp ) )
 		return false;
 
 	char szFile[1024];
-	if( bLegacyItem )
+	if( unItemState & k_EItemStateLegacyItem )
 	{
 		// szItemFolder just points directly to the item for legacy items that were published with the RemoteStorage API.
 		_snprintf( szFile, sizeof( szFile ), "%s", szItemFolder );

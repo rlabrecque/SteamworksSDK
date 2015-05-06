@@ -46,7 +46,7 @@ enum ETEXTUREFORMAT
 };
 
 // used for VR support
-namespace vr { class IHmd; }
+namespace vr { class IVRSystem; }
 
 //
 // Interface that needs to be implemented for game engines on all platforms

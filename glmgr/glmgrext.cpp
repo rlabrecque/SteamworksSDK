@@ -19,7 +19,8 @@ PFNglGetFramebufferAttachmentParameteriv pfnglGetFramebufferAttachmentParameteri
 PFNglUniformBufferEXT pfnglUniformBufferEXT;
 
 // NSSymbol was deprecated in 10.5.
-#pragma clang diagnostic warning "-Wdeprecated-declarations"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 void * NSGLGetProcAddress (const char *name)
 {
@@ -34,6 +35,7 @@ void * NSGLGetProcAddress (const char *name)
     return symbol ? NSAddressOfSymbol (symbol) : NULL;
 }
 
+#pragma clang diagnostic pop
 
 void GLMSetupExtensions( void )
 {

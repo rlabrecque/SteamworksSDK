@@ -2577,7 +2577,7 @@ HRESULT IDirect3DDevice9::GetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurfa
 	if ( !m_rtSurfaces[ RenderTargetIndex ] )
 		return D3DERR_NOTFOUND;
 	
-	if ( ( RenderTargetIndex < 0 ) || ( RenderTargetIndex > 4 ) || !ppRenderTarget )
+	if ( ( RenderTargetIndex > 4 ) || !ppRenderTarget )
 		return D3DERR_INVALIDCALL;
 
 	// safe because of early exit on NULL above

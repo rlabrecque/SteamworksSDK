@@ -11,6 +11,23 @@ website at: http://partner.steamgames.com
 
 Revision History:
 
+----------------------------------------------------------------
+v1.33 6th May 2015
+----------------------------------------------------------------
+
+UGC:
+* Added DownloadItem(), which will force download a piece of UGC (it will be cached based on usage). This can be used by stand-alone game servers.
+* Renamed GetItemUpdateInfo() => GetItemDownloadInfo() and added GetItemState() which can be used to determine whether an item is currently being downloaded, has already been downloaded, etc.
+* Added ability to set and retrieve developer metadata for an item
+* Added ability to modify a user's favorites list
+* Added ability to retrieve preview image & video URLs
+* Added ability to retrieve "children" for an item (e.g. for collections)
+* Added ability to retrieve stats, such as current number of subscribers, lifetime unique subscribers, etc.
+
+
+SteamVR
+* steamvr.h has been removed. You can use the OpenVR SDK to access those interfaces: https://github.com/ValveSoftware/openvr
+
 
 ----------------------------------------------------------------
 v1.32 5th February 2015

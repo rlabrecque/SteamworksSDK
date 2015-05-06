@@ -28,8 +28,8 @@ class ISteamHTTP
 public:
 
 	// Initializes a new HTTP request, returning a handle to use in further operations on it.  Requires
-	// the method (GET or POST) and the absolute URL for the request.  Only http requests (ie, not https) are
-	// currently supported, so this string must start with http:// or https:// and should look like http://store.steampowered.com/app/250/ 
+	// the method (GET or POST) and the absolute URL for the request.  Both http and https are supported,
+	// so this string must start with http:// or https:// and should look like http://store.steampowered.com/app/250/ 
 	// or such.
 	virtual HTTPRequestHandle CreateHTTPRequest( EHTTPMethod eHTTPRequestMethod, const char *pchAbsoluteURL ) = 0;
 
@@ -168,6 +168,8 @@ struct HTTPRequestCompleted_t
 	// Will be the HTTP status code value returned by the server, k_EHTTPStatusCode200OK is the normal
 	// OK response, if you get something else you probably need to treat it as a failure.
 	EHTTPStatusCode m_eStatusCode;
+
+	uint32 m_unBodySize; // Same as GetHTTPResponseBodySize()
 };
 
 

@@ -90,7 +90,7 @@ public:
 	static void RemoveInstanceFromHWNDMap( HWND hWnd );
 
 	// Constructor
-	CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32 nWindowWidth, int32 nWindowHeight, bool bUseVR );
+	CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32 nWindowWidth, int32 nWindowHeight );
 
 	// Destructor
 	~CGameEngineWin32() { Shutdown(); }
@@ -247,18 +247,12 @@ private:
 	// Handle reseting the d3d device (ie, acquire resources again)
 	bool BHandleResetDevice();
 
-	// Loads the VR distortion shader off disk
-	bool BInitializeVRShader();
-
 private:
 	// Tracks whether the engine is ready for use
 	bool m_bEngineReadyForUse;
 
 	// Tracks if we are shutting down
 	bool m_bShuttingDown;
-
-	// if this is not NULL we are in VR mode
-	vr::IHmd *m_pVRHmd;
 
 	// Color we clear the background of the window to each frame
 	DWORD m_dwBackgroundColor;
@@ -317,12 +311,6 @@ private:
 		ETEXTUREFORMAT m_eTextureFormat; // format of the data you provide
 	};
 	std::map<HGAMETEXTURE, TextureData_t> m_MapTextures;
-
-	// the render target we draw the 2D game into for VR
-	HGAMETEXTURE m_hVR2DRenderTarget;
-
-	// the render target we draw the 3D scene into for VR
-	HGAMETEXTURE m_hVRSceneRenderTarget;
 
 	// Vertex buffer for textured quads
 	HGAMEVERTBUF m_hQuadBuffer;
@@ -414,12 +402,6 @@ private:
 	// Map of font handles to font objects
 	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
 	uint32 m_unVoiceChannelCount;
-
-	// Pixel shader for VR distortion correction
-	IDirect3DPixelShader9* m_pVRDistortionPixelShader;
-
-	// the distortion map used by the VR distortion pixel shader (one per eye)
-	HGAMETEXTURE m_hVRDistortionMap[2];
 };
 
 #endif // GAMEENGINEWIN32_H

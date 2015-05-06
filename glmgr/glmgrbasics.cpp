@@ -529,7 +529,9 @@ GLMValueEntry_t g_d3d_vtxdeclusages_short[] =
 	{ D3DDECLUSAGE_SAMPLE		,"M" }
 };
 
-GLMValueEntry_t	g_cgl_rendids[] =			// need to mask with 0xFFFFFF00 to match on these (ex: 8800GT == 0x00022608 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+GLMValueEntry_t	g_cgl_rendids[] =			// need to mask with 0xFFFFFF00 to match on these (ex: 8800GT == 0x00022608
 {
 	VE( kCGLRendererGenericID ),
 	VE( kCGLRendererGenericFloatID ),
@@ -551,6 +553,7 @@ GLMValueEntry_t	g_cgl_rendids[] =			// need to mask with 0xFFFFFF00 to match on 
 
 	VE( TERMVALUE )
 };
+#pragma clang diagnostic pop
 
 GLMValueEntry_t g_gl_errors[] = 
 {

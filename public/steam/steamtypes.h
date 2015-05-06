@@ -117,12 +117,13 @@ typedef uint64 GID_t;
 const GID_t k_GIDNil = 0xffffffffffffffffull;
 
 // For convenience, we define a number of types that are just new names for GIDs
-typedef GID_t JobID_t;			// Each Job has a unique ID
+typedef uint64 JobID_t;			// Each Job has a unique ID
 typedef GID_t TxnID_t;			// Each financial transaction has a unique ID
 
 const GID_t k_TxnIDNil = k_GIDNil;
 const GID_t k_TxnIDUnknown = 0;
 
+const JobID_t k_JobIDNil = 0xffffffffffffffffull;
 
 // this is baked into client messages and interfaces as an int, 
 // make sure we never break this.
@@ -131,7 +132,7 @@ const PackageId_t k_uPackageIdFreeSub = 0x0;
 const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 
 typedef uint32 BundleId_t;
-
+const BundleId_t k_uBundleIdInvalid = 0;
 
 // this is baked into client messages and interfaces as an int, 
 // make sure we never break this.

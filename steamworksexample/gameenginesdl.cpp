@@ -14,17 +14,16 @@
 #include <GL/glew.h>
 
 #include "gameenginesdl.h"
-#include "steamvrglhelper.h"
 
 CGameEngineGL *g_engine;		// dxabstract will use this.. it is set by the engine constructor
 
-IGameEngine *CreateGameEngineSDL( bool bUseVR )
+IGameEngine *CreateGameEngineSDL( )
 {
 	static CGameEngineGL* s_pGameEngine = NULL;
 	
 	if (!s_pGameEngine)
 	{
-		s_pGameEngine = new CGameEngineGL( bUseVR );
+		s_pGameEngine = new CGameEngineGL( );
 	}
 	
 	return s_pGameEngine;
@@ -82,7 +81,7 @@ power_of_two(int input)
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for game engine instance
 //-----------------------------------------------------------------------------
-CGameEngineGL::CGameEngineGL( bool bUseVR )
+CGameEngineGL::CGameEngineGL( )
 {
 	g_engine = this;
 	
@@ -114,23 +113,7 @@ CGameEngineGL::CGameEngineGL( bool bUseVR )
 	m_rgflQuadsTextureData = new GLfloat[ 8*QUAD_BUFFER_TOTAL_SIZE ];
 	m_dwQuadsToFlush = 0;
 
-	m_pVRGLHelper = NULL;
-	m_pHmd = NULL;
-
 	TTF_Init();
-
-	if( bUseVR )
-	{
-		vr::HmdError error;
-		m_pHmd = vr::VR_Init( &error );
-		if( !m_pHmd )
-		{
-			fprintf( stderr, "VR_Init returned error %d\n", error );
-			OutputDebugString( "!! Initialize Steamworks VR failed\n" );
-			return;
-		}
-		m_pVRGLHelper = new CSteamVRGLHelper();
-	}
 
 	if( !BInitializeGraphics() )
 	{
@@ -155,13 +138,6 @@ void CGameEngineGL::Shutdown()
 {
 	// Flag that we are shutting down so the frame loop will stop running
 	m_bShuttingDown = true;
-
-	if ( m_pVRGLHelper )
-	{
-		m_pVRGLHelper->Shutdown();
-		delete m_pVRGLHelper;
-		m_pVRGLHelper = NULL;
-	}
 
 	if ( m_context ) {
 		SDL_GL_DeleteContext( m_context );
@@ -256,20 +232,8 @@ bool CGameEngineGL::BInitializeGraphics()
 	int windowX = SDL_WINDOWPOS_CENTERED;
 	int windowY = SDL_WINDOWPOS_CENTERED;
 	int nWindowWidth, nWindowHeight;
-	if( !m_pHmd )
-	{
-		nWindowWidth = m_nWindowWidth = 1024;
-		nWindowHeight = m_nWindowHeight = 768;
-	}
-	else
-	{
-		uint32_t unWidth, unHeight;
-		m_pHmd->GetWindowBounds( &windowX, &windowY, &unWidth, &unHeight );
-		nWindowWidth = unWidth;
-		nWindowHeight = unHeight;
-		m_nWindowWidth = 640;
-		m_nWindowHeight = 480;
-	}
+	nWindowWidth = m_nWindowWidth = 1024;
+	nWindowHeight = m_nWindowHeight = 768;
 
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
@@ -342,18 +306,6 @@ bool CGameEngineGL::BInitializeGraphics()
 
 	glDepthRange( 0.0f, 1.0f );
 	
-	// create some other VR-related resources
-	if( m_pHmd )
-	{
-		if( !m_pVRGLHelper->BInit( m_pHmd ) )
-		{
-			OutputDebugString( "Unable to init VRGLHelper\n" );
-			return false;
-		}
-		m_pVRGLHelper->InitUIRenderTarget( m_nWindowWidth, m_nWindowHeight );
-		m_pVRGLHelper->BInitPredistortRenderTarget();
-	}
-
 	AdjustViewport();
 
 	return true;
@@ -361,17 +313,8 @@ bool CGameEngineGL::BInitializeGraphics()
 
 void CGameEngineGL::AdjustViewport()
 {
-	if( m_pHmd )
-	{
-		m_pVRGLHelper->BPushUIRenderTarget();
-		// don't update m_nWindowWidth and m_nWindowHeight here
-		// because they're actually the size of the UI render target
-	}
-	else
-	{
-		SDL_GetWindowSize( m_window, &m_nWindowWidth, &m_nWindowHeight );
-		glBindFramebuffer(GL_FRAMEBUFFER, 0 );
-	}
+	SDL_GetWindowSize( m_window, &m_nWindowWidth, &m_nWindowHeight );
+	glBindFramebuffer(GL_FRAMEBUFFER, 0 );
 
 	// Perspective
 	glMatrixMode(GL_PROJECTION);
@@ -486,42 +429,6 @@ void CGameEngineGL::EndFrame()
 
 	// Flush quad buffer
 	BFlushQuadBuffer();
-
-	// do quad renderering and distortion pass for VR
-	if( m_pHmd )
-	{
-		// draw some lines around the edge of the "screen" in the 2D texture so that it's very obvious
-		// where the boundary is to aid stereo fusion
-		uint32 dwBorderColor = 0x888888FF;
-		float fViewWidth = (float)GetViewportWidth();
-		float fViewHeight = (float)GetViewportHeight();
-		for ( float f = 0; f < 5.f; f += 1.f )
-		{
-			BDrawLine( 0 + f, 0 + f, dwBorderColor, fViewWidth - f, 0 + f, dwBorderColor );
-			BDrawLine( 0 + f, fViewHeight - f, dwBorderColor, fViewWidth - f, fViewHeight - f, dwBorderColor );
-			BDrawLine( 0 + f, 0 + f, dwBorderColor, 0 + f, fViewHeight - f, dwBorderColor );
-			BDrawLine( fViewWidth - f, 0 + f, dwBorderColor, fViewWidth - f, fViewHeight - f, dwBorderColor );
-		}
-		BFlushLineBuffer();
-
-		vr::HmdMatrix34_t matWorldFromHead;
-		vr::HmdTrackingResult result;
-		if( m_pHmd->GetTrackerFromHeadPose( 0, &matWorldFromHead, &result ) )
-		{
-			for( int i=0; i<2; i++ )
-			{
-				vr::Hmd_Eye eye = (vr::Hmd_Eye)i;
-				m_pVRGLHelper->PushPredistortRenderTarget();
-				m_pVRGLHelper->PushViewAndProjection( eye, 0.1f, 100.f, matWorldFromHead );
-
-				BDrawVRScreenQuad();
-				BFlushQuadBuffer();
-
-				m_pVRGLHelper->DrawPredistortToFrameBuffer( eye );
-			}
-		}
-
-	}
 
 	// Swap buffers now that everything is flushed
 	SDL_GL_SwapWindow( m_window );
@@ -802,78 +709,6 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 	m_rgflQuadsTextureData[dwOffset+5] = v1;
 	m_rgflQuadsTextureData[dwOffset+6] = u0;
 	m_rgflQuadsTextureData[dwOffset+7] = v1;
-
-
-	++m_dwQuadsToFlush;
-
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Draw a textured quad
-//-----------------------------------------------------------------------------
-bool CGameEngineGL::BDrawVRScreenQuad()
-{
-	if ( m_bShuttingDown )
-		return false;
-
-	// Check if we are out of room and need to flush the buffer, or if our texture is changing
-	// then we also need to flush the buffer.
-	if ( m_dwQuadsToFlush > 0  )
-	{
-		BFlushQuadBuffer();
-	}
-
-	// Bind the new texture
-	glBindTexture( GL_TEXTURE_2D, m_pVRGLHelper->GetUITexture() );
-	float fHeight = m_pVRGLHelper->GetAspectRatio();
-
-	DWORD dwOffset = m_dwQuadsToFlush*12;
-	m_rgflQuadsData[dwOffset] = -1.f;
-	m_rgflQuadsData[dwOffset+1] = -fHeight;
-	m_rgflQuadsData[dwOffset+2] = -2.f;
-
-	m_rgflQuadsData[dwOffset+3] = 1.f;
-	m_rgflQuadsData[dwOffset+4] = -fHeight;
-	m_rgflQuadsData[dwOffset+5] = -2.f;
-
-	m_rgflQuadsData[dwOffset+6] = 1.f;
-	m_rgflQuadsData[dwOffset+7] = fHeight;
-	m_rgflQuadsData[dwOffset+8] = -2.f;
-
-	m_rgflQuadsData[dwOffset+9] = -1.f;
-	m_rgflQuadsData[dwOffset+10] = fHeight;
-	m_rgflQuadsData[dwOffset+11] = -2.f;
-
-	uint32 dwColor = 0xFFFFFFFF;
-	dwOffset = m_dwQuadsToFlush*16;
-	m_rgflQuadsColorData[dwOffset] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+1] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+2] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+3] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+4] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+5] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+6] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+7] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+8] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+9] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+10] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+11] = COLOR_ALPHA( dwColor );
-	m_rgflQuadsColorData[dwOffset+12] = COLOR_RED( dwColor );
-	m_rgflQuadsColorData[dwOffset+13] = COLOR_GREEN( dwColor );
-	m_rgflQuadsColorData[dwOffset+14] = COLOR_BLUE( dwColor );
-	m_rgflQuadsColorData[dwOffset+15] = COLOR_ALPHA( dwColor );
-
-	dwOffset = m_dwQuadsToFlush*8;
-	m_rgflQuadsTextureData[dwOffset] = 0;
-	m_rgflQuadsTextureData[dwOffset+1] = 0;
-	m_rgflQuadsTextureData[dwOffset+2] = 1.f;
-	m_rgflQuadsTextureData[dwOffset+3] = 0;
-	m_rgflQuadsTextureData[dwOffset+4] = 1.f;
-	m_rgflQuadsTextureData[dwOffset+5] = 1.f;
-	m_rgflQuadsTextureData[dwOffset+6] = 0;
-	m_rgflQuadsTextureData[dwOffset+7] = 1.f;
 
 
 	++m_dwQuadsToFlush;
@@ -1200,7 +1035,7 @@ void CGameEngineGL::MessagePump()
 	}
 	else if ( event.type == SDL_QUIT )
 	{
-		CreateGameEngineSDL( false )->Shutdown();
+		CreateGameEngineSDL( )->Shutdown();
 	}
 
     } while ( !BShuttingDown() );

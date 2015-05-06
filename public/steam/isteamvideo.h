@@ -25,7 +25,7 @@
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Steam Video api
+// Purpose: Steam Video API
 //-----------------------------------------------------------------------------
 class ISteamVideo
 {
@@ -33,10 +33,19 @@ public:
 
 	// Get a URL suitable for streaming the given Video app ID's video
 	virtual void GetVideoURL( AppId_t unVideoAppID ) = 0;
-	
+
+	// returns true if user is uploading a live broadcast
+	virtual bool IsBroadcasting( int *pnNumViewers ) = 0;
 };
 
 #define STEAMVIDEO_INTERFACE_VERSION "STEAMVIDEO_INTERFACE_V001"
+
+DEFINE_CALLBACK( BroadcastUploadStart_t, k_iClientVideoCallbacks + 4 )
+END_DEFINE_CALLBACK_0()
+
+DEFINE_CALLBACK( BroadcastUploadStop_t, k_iClientVideoCallbacks + 5 )
+	CALLBACK_MEMBER( 0, EBroadcastUploadResult, m_eResult )
+END_DEFINE_CALLBACK_1()
 
 DEFINE_CALLBACK( GetVideoURLResult_t, k_iClientVideoCallbacks + 11 )
 	CALLBACK_MEMBER( 0, EResult, m_eResult )

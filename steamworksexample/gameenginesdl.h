@@ -60,14 +60,13 @@ typedef unsigned char byte;
 
 class CVoiceContext;
 class GLString;
-class CSteamVRGLHelper;
 
 class CGameEngineGL : public IGameEngine
 {
 public:
 
 	// Constructor
-	CGameEngineGL( bool bUseVR );
+	CGameEngineGL( );
 
 	// Destructor
 	~CGameEngineGL() { Shutdown(); }
@@ -178,9 +177,6 @@ public:
 
 	void UpdateKey( uint32_t vkKey, int nDown );
 
-	// draw the VR screen quad in the world
-	bool BDrawVRScreenQuad();
-
 	// Tracks whether the engine is ready for use
 	bool m_bEngineReadyForUse;
 
@@ -254,10 +250,6 @@ public:
 	// Map of voice handles
 	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
 	uint32 m_unVoiceChannelCount;
-
-	// handle to the Steamworks VR HMD interface
-	vr::IHmd *m_pHmd;
-	CSteamVRGLHelper *m_pVRGLHelper;
 
 };
 

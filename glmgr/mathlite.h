@@ -616,8 +616,6 @@ inline void VectorMultiply( const Vector& a, vec_t b, Vector& result );
 inline void VectorMultiply( const Vector& a, const Vector& b, Vector& result );
 inline void VectorDivide( const Vector& a, vec_t b, Vector& result );
 inline void VectorDivide( const Vector& a, const Vector& b, Vector& result );
-inline void VectorScale ( const Vector& in, vec_t scale, Vector& result );
-inline void VectorMA( const Vector& start, float scale, const Vector& direction, Vector& dest );
 
 // Vector equality with tolerance
 bool VectorsAreEqual( const Vector& src1, const Vector& src2, float tolerance = 0.0f );
@@ -1315,13 +1313,6 @@ inline void VectorMultiply( const Vector& a, const Vector& b, Vector& c )
 	c.z = a.z * b.z;
 }
 
-// for backwards compatability
-inline void VectorScale ( const Vector& in, vec_t scale, Vector& result )
-{
-	VectorMultiply( in, scale, result );
-}
-
-
 inline void VectorDivide( const Vector& a, vec_t b, Vector& c )
 {
 	CHECK_VALID(a);
@@ -1544,7 +1535,8 @@ inline void ComputeClosestPoint( const Vector& vecStart, float flMaxDist, const 
 	else
 	{
 		vecDelta /= FastSqrt( flDistSqr );
-		VectorMA( vecStart, flMaxDist, vecDelta, *pResult );
+		vecDelta *= flMaxDist;
+		VectorAdd( vecStart, vecDelta, *pResult );
 	}
 }
 
@@ -2026,15 +2018,6 @@ inline void VectorCopy( RadianEuler const& src, RadianEuler &dst )
 	dst.x = src.x;
 	dst.y = src.y;
 	dst.z = src.z;
-}
-
-inline void VectorScale( RadianEuler const& src, float b, RadianEuler &dst )
-{
-	CHECK_VALID(src);
-	Assert( IsFinite(b) );
-	dst.x = src.x * b;
-	dst.y = src.y * b;
-	dst.z = src.z * b;
 }
 
 inline bool RadianEuler::IsValid() const

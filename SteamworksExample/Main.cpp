@@ -21,7 +21,7 @@
 	extern IGameEngine *CreateGameEngineOSX();
 #elif defined(SDL)
 	#include "GameEngine.h"
-	extern IGameEngine *CreateGameEngineSDL( bool bUseVR );
+	extern IGameEngine *CreateGameEngineSDL( );
 #endif
 
 #include "SpaceWarClient.h"
@@ -78,7 +78,7 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 //-----------------------------------------------------------------------------
 // Purpose: Extracts some feature from the command line
 //-----------------------------------------------------------------------------
-void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID, bool *pbUseVR )
+void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID )
 {
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find
@@ -103,11 +103,6 @@ void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, c
 		*ppchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
 	}
 
-	// look for -vr on command line. Switch to VR mode if it's thre
-	const char *pchVRParam = "-vr";
-	const char *pchVR = strstr( pchCmdLine, pchVRParam );
-	if ( pchVR )
-		*pbUseVR = true;
 }
 
 
@@ -239,24 +234,21 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 		return EXIT_FAILURE;
 	}
 
-	bool bUseVR = SteamUtils()->IsSteamRunningInVR();
 	const char *pchServerAddress, *pchLobbyID;
-	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID, &bUseVR );
+	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
 
 	// do a DRM self check
 	Steamworks_SelfCheck();
-
-	// init VR before we make the window
 
 	// Construct a new instance of the game engine 
 	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
 	IGameEngine *pGameEngine = 
 #if defined(_WIN32)
-        new CGameEngineWin32( hInstance, nCmdShow, 1024, 768, bUseVR );
+        new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
 #elif defined(OSX)
         CreateGameEngineOSX();
 #elif defined(SDL)
-	CreateGameEngineSDL( bUseVR );
+	CreateGameEngineSDL( );
 #else
 #error	Need CreateGameEngine()
 #endif

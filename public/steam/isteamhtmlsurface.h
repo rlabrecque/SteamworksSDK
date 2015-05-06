@@ -375,55 +375,17 @@ END_DEFINE_CALLBACK_3()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: a popup item (i.e combo box) on the page needs rendering
-//-----------------------------------------------------------------------------
-DEFINE_CALLBACK( HTML_ComboNeedsPaint_t, k_iSteamHTMLSurfaceCallbacks + 17 )
-CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
-CALLBACK_MEMBER( 1, const char *, pBGRA ) // a pointer to the B8G8R8A8 data for this surface, valid until SteamAPI_RunCallbacks is next called
-CALLBACK_MEMBER( 2, uint32, unWide ) // the total width of the pBGRA texture
-CALLBACK_MEMBER( 3, uint32, unTall ) // the total height of the pBGRA texture
-END_DEFINE_CALLBACK_4()
-
-
-//-----------------------------------------------------------------------------
-// Purpose: a popup (i.e combo box) wants to display
-//-----------------------------------------------------------------------------
-DEFINE_CALLBACK( HTML_ShowPopup_t, k_iSteamHTMLSurfaceCallbacks + 18 )
-CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
-END_DEFINE_CALLBACK_1()
-
-
-//-----------------------------------------------------------------------------
-// Purpose: a popup (i.e combo box) wants to hide
-//-----------------------------------------------------------------------------
-DEFINE_CALLBACK( HTML_HidePopup_t, k_iSteamHTMLSurfaceCallbacks + 19 )
-CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
-END_DEFINE_CALLBACK_1()
-
-
-//-----------------------------------------------------------------------------
-// Purpose: a popup (i.e combo box) wants to hide
-//-----------------------------------------------------------------------------
-DEFINE_CALLBACK( HTML_SizePopup_t, k_iSteamHTMLSurfaceCallbacks + 20 )
-CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
-CALLBACK_MEMBER( 1, uint32, unX ) // the x pos into the page to display the popup
-CALLBACK_MEMBER( 2, uint32, unY ) // the y pos into the page to display the popup
-CALLBACK_MEMBER( 3, uint32, unWide ) // the total width of the pBGRA texture
-CALLBACK_MEMBER( 4, uint32, unTall ) // the total height of the pBGRA texture
-END_DEFINE_CALLBACK_5()
-
-
-//-----------------------------------------------------------------------------
 // Purpose: a new html window has been created 
 //-----------------------------------------------------------------------------
 DEFINE_CALLBACK( HTML_NewWindow_t, k_iSteamHTMLSurfaceCallbacks + 21 )
-CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the surface 
+CALLBACK_MEMBER( 0, HHTMLBrowser, unBrowserHandle ) // the handle of the current surface 
 CALLBACK_MEMBER( 1, const char *, pchURL ) // the page to load
 CALLBACK_MEMBER( 2, uint32, unX ) // the x pos into the page to display the popup
 CALLBACK_MEMBER( 3, uint32, unY ) // the y pos into the page to display the popup
 CALLBACK_MEMBER( 4, uint32, unWide ) // the total width of the pBGRA texture
 CALLBACK_MEMBER( 5, uint32, unTall ) // the total height of the pBGRA texture
-END_DEFINE_CALLBACK_6()
+CALLBACK_MEMBER( 6, HHTMLBrowser, unNewWindow_BrowserHandle ) // the handle of the new window surface 
+END_DEFINE_CALLBACK_7()
 
 
 //-----------------------------------------------------------------------------
