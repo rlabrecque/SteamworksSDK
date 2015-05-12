@@ -24,9 +24,11 @@ UGC:
 * Added ability to retrieve "children" for an item (e.g. for collections)
 * Added ability to retrieve stats, such as current number of subscribers, lifetime unique subscribers, etc.
 
-
 SteamVR
 * steamvr.h has been removed. You can use the OpenVR SDK to access those interfaces: https://github.com/ValveSoftware/openvr
+
+SteamVideo
+* Added ability to check if a user is currently broadcasting
 
 
 ----------------------------------------------------------------

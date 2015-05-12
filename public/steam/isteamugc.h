@@ -175,7 +175,7 @@ public:
 	// Query for all matching UGC. Creator app id or consumer app id must be valid and be set to the current running app. unPage should start at 1.
 	virtual UGCQueryHandle_t CreateQueryAllUGCRequest( EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage ) = 0;
 
-	// Query for the details of the given published file ids (this RequestUGCDetails call is deprecated and replaced with this)
+	// Query for the details of the given published file ids (the RequestUGCDetails call is deprecated and replaced with this)
 	virtual UGCQueryHandle_t CreateQueryUGCDetailsRequest( PublishedFileId_t *pvecPublishedFileID, uint32 unNumPublishedFileIDs ) = 0;
 
 	// Send the query to Steam
