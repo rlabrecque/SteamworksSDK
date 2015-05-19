@@ -1078,6 +1078,8 @@ internal static extern void SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(IntPtr 
 internal static extern void SteamAPI_ISteamHTMLSurface_SetCookie(IntPtr instancePtr, string pchHostname, string pchKey, string pchValue, string pchPath, ulong nExpires, bool bSecure, bool bHTTPOnly);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_SetPageScaleFactor")]
 internal static extern void SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(IntPtr instancePtr, uint unBrowserHandle, float flZoom, int nPointX, int nPointY);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_SetBackgroundMode")]
+internal static extern void SteamAPI_ISteamHTMLSurface_SetBackgroundMode(IntPtr instancePtr, uint unBrowserHandle, bool bBackgroundMode);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_AllowStartRequest")]
 internal static extern void SteamAPI_ISteamHTMLSurface_AllowStartRequest(IntPtr instancePtr, uint unBrowserHandle, bool bAllowed);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_JSDialogResponse")]
@@ -2037,6 +2039,7 @@ namespace Valve.Steamworks
 		public abstract void GetLinkAtPosition(uint unBrowserHandle,int x,int y);
 		public abstract void SetCookie(string pchHostname,string pchKey,string pchValue,string pchPath,ulong nExpires,bool bSecure,bool bHTTPOnly);
 		public abstract void SetPageScaleFactor(uint unBrowserHandle,float flZoom,int nPointX,int nPointY);
+		public abstract void SetBackgroundMode(uint unBrowserHandle,bool bBackgroundMode);
 		public abstract void AllowStartRequest(uint unBrowserHandle,bool bAllowed);
 		public abstract void JSDialogResponse(uint unBrowserHandle,bool bResult);
 		public abstract void FileLoadDialogResponse(uint unBrowserHandle,string pchSelectedFiles);
@@ -5785,6 +5788,11 @@ public override void SetPageScaleFactor(uint unBrowserHandle,float flZoom,int nP
 {
 	CheckIfUsable();
 	NativeEntrypoints.SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(m_pSteamHTMLSurface,unBrowserHandle,flZoom,nPointX,nPointY);
+}
+public override void SetBackgroundMode(uint unBrowserHandle,bool bBackgroundMode)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamHTMLSurface_SetBackgroundMode(m_pSteamHTMLSurface,unBrowserHandle,bBackgroundMode);
 }
 public override void AllowStartRequest(uint unBrowserHandle,bool bAllowed)
 {

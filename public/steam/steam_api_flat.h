@@ -545,6 +545,7 @@ S_API void SteamAPI_ISteamHTMLSurface_StopFind(intptr_t instancePtr, HHTMLBrowse
 S_API void SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, int x, int y);
 S_API void SteamAPI_ISteamHTMLSurface_SetCookie(intptr_t instancePtr, const char * pchHostname, const char * pchKey, const char * pchValue, const char * pchPath, RTime32 nExpires, bool bSecure, bool bHTTPOnly);
 S_API void SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, float flZoom, int nPointX, int nPointY);
+S_API void SteamAPI_ISteamHTMLSurface_SetBackgroundMode(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bBackgroundMode);
 S_API void SteamAPI_ISteamHTMLSurface_AllowStartRequest(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bAllowed);
 S_API void SteamAPI_ISteamHTMLSurface_JSDialogResponse(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bResult);
 S_API void SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, const char ** pchSelectedFiles);

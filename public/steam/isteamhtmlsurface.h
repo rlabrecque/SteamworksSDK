@@ -163,6 +163,12 @@ public:
 	// Zoom the current page by flZoom ( from 0.0 to 2.0, so to zoom to 120% use 1.2 ), zooming around point X,Y in the page (use 0,0 if you don't care)
 	virtual void SetPageScaleFactor( HHTMLBrowser unBrowserHandle, float flZoom, int nPointX, int nPointY ) = 0;
 
+	// Enable/disable low-resource background mode, where javascript and repaint timers are throttled, resources are
+	// more aggressively purged from memory, and audio/video elements are paused. When background mode is enabled,
+	// all HTML5 video and audio objects will execute ".pause()" and gain the property "._steam_background_paused = 1".
+	// When background mode is disabled, any video or audio objects with that property will resume with ".play()".
+	virtual void SetBackgroundMode( HHTMLBrowser unBrowserHandle, bool bBackgroundMode ) = 0;
+
 	// CALLBACKS
 	//
 	//  These set of functions are used as responses to callback requests
@@ -182,7 +188,7 @@ public:
 	virtual void FileLoadDialogResponse( HHTMLBrowser unBrowserHandle, const char **pchSelectedFiles ) = 0;
 };
 
-#define STEAMHTMLSURFACE_INTERFACE_VERSION "STEAMHTMLSURFACE_INTERFACE_VERSION_002"
+#define STEAMHTMLSURFACE_INTERFACE_VERSION "STEAMHTMLSURFACE_INTERFACE_VERSION_003"
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

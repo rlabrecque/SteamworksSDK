@@ -6387,6 +6387,15 @@
 }
 ,{
 	"classname": "ISteamHTMLSurface",
+	"methodname": "SetBackgroundMode",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "unBrowserHandle" ,"paramtype": "HHTMLBrowser"},
+{	"paramname": "bBackgroundMode" ,"paramtype": "bool"}
+	 ]
+}
+,{
+	"classname": "ISteamHTMLSurface",
 	"methodname": "AllowStartRequest",
 	"returntype": "void",
 	"params": [ 
