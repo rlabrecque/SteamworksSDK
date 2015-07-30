@@ -173,7 +173,7 @@ typedef void* VD3DHANDLE;
 			#endif
 		};
 		
-		void	AddRef( int which=0, char *comment = NULL )
+		void	AddRef( int which=0, const char *comment = NULL )
 		{
 			Assert( which >= 0 );
 			Assert( which < 2 );
@@ -191,7 +191,7 @@ typedef void* VD3DHANDLE;
 			#endif
 		};
 		
-		ULONG __stdcall	Release( int which=0, char *comment = NULL )
+		ULONG __stdcall	Release( int which=0, const char *comment = NULL )
 		{
 			Assert( which >= 0 );
 			Assert( which < 2 );

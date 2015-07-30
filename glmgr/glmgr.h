@@ -654,7 +654,7 @@ class	GLMContext
 
 		// textures
 		// Lock and Unlock reqs go directly to the tex object
-		CGLMTex	*NewTex( GLMTexLayoutKey *key, char *debugLabel=NULL );
+		CGLMTex	*NewTex( GLMTexLayoutKey *key, const char *debugLabel=NULL );
 		void	DelTex( CGLMTex	*tex );	
 
 			// options for Blit (replacement for ResolveTex and BlitTex)

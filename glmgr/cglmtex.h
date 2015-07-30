@@ -30,7 +30,7 @@ class	IDirect3DSurface9;
 
 struct GLMTexFormatDesc
 {
-	char		*m_formatSummary;	// for debug visibility
+	const char		*m_formatSummary;	// for debug visibility
 	
 	D3DFORMAT	m_d3dFormat;		// what D3D knows it as; see public/bitmap/imageformat.h
 	
@@ -240,7 +240,7 @@ protected:
 	friend class IDirect3DCubeTexture9;
 	friend class IDirect3DVolumeTexture9;
 	
-			CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *sampling, char *debugLabel = NULL );
+			CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *sampling, const char *debugLabel = NULL );
 			~CGLMTex( );
 	
 	int						CalcSliceIndex( int face, int mip );

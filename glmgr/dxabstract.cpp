@@ -3076,11 +3076,11 @@ HRESULT IDirect3DDevice9::CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixe
 			//------ find the frag program metadata and extract it.. note this takes place even for passthrough shaders, so they need to supply the needed string too
 
 			// find the highwater mark
-			char *highWaterPrefix = "//HIGHWATER-";		// try to arrange this so it can work with pure GLSL if needed
-			char *highWaterStr = strstr( (char *)transbuf.Base(), highWaterPrefix );
+			const char *highWaterPrefix = "//HIGHWATER-";		// try to arrange this so it can work with pure GLSL if needed
+			const char *highWaterStr = strstr( (char *)transbuf.Base(), highWaterPrefix );
 			if (highWaterStr)
 			{
-				char *highWaterActualData = highWaterStr + strlen( highWaterPrefix );
+				const char *highWaterActualData = highWaterStr + strlen( highWaterPrefix );
 				
 				int value = -1;
 				sscanf( highWaterActualData, "%d", &value );
@@ -3094,7 +3094,7 @@ HRESULT IDirect3DDevice9::CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixe
 			}
 			
 			// find the sampler map
-			char *samplerMaskPrefix = "//SAMPLERMASK-";		// try to arrange this so it can work with pure GLSL if needed
+			const char *samplerMaskPrefix = "//SAMPLERMASK-";		// try to arrange this so it can work with pure GLSL if needed
 			
 			char *samplerMaskStr = strstr( (char *)transbuf.Base(), samplerMaskPrefix );
 			if (samplerMaskStr)
@@ -3295,11 +3295,11 @@ HRESULT IDirect3DDevice9::CreateVertexShader(CONST DWORD* pFunction, IDirect3DVe
 
 			// find the highwater mark.. note this takes place even for passthrough shaders, so they need to supply the needed string too
 
-			char *highWaterPrefix = "//HIGHWATER-";		// try to arrange this so it can work with pure GLSL if needed
-			char *highWaterStr = strstr( (char *)transbuf.Base(), highWaterPrefix );
+			const char *highWaterPrefix = "//HIGHWATER-";		// try to arrange this so it can work with pure GLSL if needed
+			const char *highWaterStr = strstr( (char *)transbuf.Base(), highWaterPrefix );
 			if (highWaterStr)
 			{
-				char *highWaterActualData = highWaterStr + strlen( highWaterPrefix );
+				const char *highWaterActualData = highWaterStr + strlen( highWaterPrefix );
 				
 				int value = -1;
 				sscanf( highWaterActualData, "%d", &value );
@@ -3313,17 +3313,17 @@ HRESULT IDirect3DDevice9::CreateVertexShader(CONST DWORD* pFunction, IDirect3DVe
 			}
 			
 			// find the attrib map..
-			char *attribMapPrefix = "//ATTRIBMAP-";		// try to arrange this so it can work with pure GLSL if needed
-			char *textbase = (char *)transbuf.Base();
+			const char *attribMapPrefix = "//ATTRIBMAP-";		// try to arrange this so it can work with pure GLSL if needed
+			const char *textbase = (char *)transbuf.Base();
 			
-			char *attribMapStr = strstr( textbase, attribMapPrefix );
+			const char *attribMapStr = strstr( textbase, attribMapPrefix );
 			if (attribMapStr)
 			{
-				char *attribMapActualData = attribMapStr + strlen( attribMapPrefix );
+				const char *attribMapActualData = attribMapStr + strlen( attribMapPrefix );
 				for( int i=0; i<16; i++)
 				{
 					int value = -1;
-					char *dataItem = attribMapActualData + (i*3);
+					const char *dataItem = attribMapActualData + (i*3);
 					sscanf( dataItem, "%02x", &value );
 					if (value >=0)
 					{
@@ -4933,7 +4933,7 @@ HRESULT IDirect3DDevice9::FlushSamplers( uint mask )
 					
 					if (srgbCapableTex && !renderableTex)
 					{
-						char *texname = m_textures[index]->m_tex->m_debugLabel;
+						const char *texname = m_textures[index]->m_tex->m_debugLabel;
 						if (!texname) texname = "-";
 						
 						m_textures[index]->m_srgbFlipCount++;
@@ -4961,8 +4961,7 @@ HRESULT IDirect3DDevice9::FlushSamplers( uint mask )
 						
 						if ( print_it )
 						{
-							char	*formatStr;
-							formatStr = "srgb change (samp=%d): tex '%-30s' %08x %s (srgb=%d, %d times)";
+							const char	*formatStr = "srgb change (samp=%d): tex '%-30s' %08x %s (srgb=%d, %d times)";
 							
 							if (strlen(texname) >= 30)
 							{

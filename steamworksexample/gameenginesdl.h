@@ -11,7 +11,6 @@
 typedef unsigned char byte;
 
 #include "GameEngine.h"
-#include "steam/steamvr.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>

@@ -490,7 +490,7 @@ struct GLMTextSection
 class CGLMTextSectioner
 {
 public:
-					CGLMTextSectioner( char *text, int textSize, char **markers );		// constructor finds all the sections
+					CGLMTextSectioner( const char *text, int textSize, const char **markers );		// constructor finds all the sections
 					~CGLMTextSectioner( );
 					
 	int				Count( void );			// how many sections found

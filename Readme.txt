@@ -12,6 +12,18 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.34 28th July 2015
+----------------------------------------------------------------
+ISteamUGC:
+
+* Added ability to set and retrieve key-value tags on an item. There can be multiple values for each key.
+* Added ability to query all UGC that have matching key-value tags.
+* Added ability to specify a title and description on an item for a specific language (defaults to English).
+* Added ability to query for items and return the title and description in a preferred language.
+* Added ability to vote on an item and retrieve the current user's vote on a given item (duplicated from ISteamRemoteStorage).
+
+
+----------------------------------------------------------------
 v1.33 6th May 2015
 ----------------------------------------------------------------
 

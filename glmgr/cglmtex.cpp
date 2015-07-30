@@ -564,7 +564,7 @@ GLMTexLayout *CGLMTexLayoutTable::NewLayoutRef( GLMTexLayoutKey *key )
 		// "target, format, +/- mips, base size"
 		char scratch[1024];
 
-		char	*targetname;
+		const char	*targetname;
 		switch( key->m_texGLTarget )
 		{
 			case GL_TEXTURE_2D:			targetname = "2D  ";		break;
@@ -634,7 +634,7 @@ void CGLMTexLayoutTable::DumpStats( )
 #endif
 
 
-CGLMTex::CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *sampling, char *debugLabel )
+CGLMTex::CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *sampling, const char *debugLabel )
 {
 	// caller has responsibility to make 'ctx' current, but we check to be sure.
 	ctx->CheckCurrent();

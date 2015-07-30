@@ -122,6 +122,9 @@ enum EResult
 	k_EResultAccountLimitExceeded = 95,			// Too many accounts access this resource
 	k_EResultAccountActivityLimitExceeded = 96,	// Too many changes to this account
 	k_EResultPhoneActivityLimitExceeded = 97,	// Too many changes to this phone
+	k_EResultRefundToWallet = 98,				// Cannot refund to payment method, must use wallet
+	k_EResultEmailSendFailure = 99,				// Cannot send an email
+	k_EResultNotSettled = 100,					// Can't perform operation till payment has settled
 };
 
 // Error codes for use with the voice functions

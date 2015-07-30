@@ -104,7 +104,7 @@ public:
 	ISteamGameServerStats *SteamGameServerStats() { return m_pSteamGameServerStats; }
 	ISteamHTTP *SteamHTTP() { return m_pSteamHTTP; }
 	ISteamInventory *SteamInventory() { return m_pSteamInventory; }
-	ISteamUGC *SteamUGC() { return m_SteamUGC; }
+	ISteamUGC *SteamUGC() { return m_pSteamUGC; }
 
 private:
 	ISteamGameServer			*m_pSteamGameServer;
@@ -113,7 +113,7 @@ private:
 	ISteamGameServerStats		*m_pSteamGameServerStats;
 	ISteamHTTP					*m_pSteamHTTP;
 	ISteamInventory				*m_pSteamInventory;
-	ISteamUGC					*m_SteamUGC;
+	ISteamUGC					*m_pSteamUGC;
 };
 
 inline CSteamGameServerAPIContext::CSteamGameServerAPIContext()
@@ -129,7 +129,7 @@ inline void CSteamGameServerAPIContext::Clear()
 	m_pSteamGameServerStats = NULL;
 	m_pSteamHTTP = NULL;
 	m_pSteamInventory = NULL;
-	m_SteamUGC = NULL;
+	m_pSteamUGC = NULL;
 }
 
 S_API ISteamClient *g_pSteamClientGameServer;
@@ -166,8 +166,8 @@ inline bool CSteamGameServerAPIContext::Init()
 	if ( !m_pSteamInventory )
 		return false;
 
-	m_SteamUGC = g_pSteamClientGameServer->GetISteamUGC( hSteamUser, hSteamPipe, STEAMUGC_INTERFACE_VERSION );
-	if ( !m_SteamUGC )
+	m_pSteamUGC = g_pSteamClientGameServer->GetISteamUGC( hSteamUser, hSteamPipe, STEAMUGC_INTERFACE_VERSION );
+	if ( !m_pSteamUGC )
 		return false;
 
 	return true;

@@ -506,7 +506,7 @@ void	DefaultSamplingParams( GLMTexSamplingParams *samp, GLMTexLayoutKey *key )
 	samp->m_srgb = false;
 }
 
-CGLMTex	*GLMContext::NewTex( GLMTexLayoutKey *key, char *debugLabel )
+CGLMTex	*GLMContext::NewTex( GLMTexLayoutKey *key, const char *debugLabel )
 {
 	//hushed GLM_FUNC;
 	MakeCurrent();
@@ -3569,7 +3569,7 @@ enum EGLMVertDumpMode
 	eLastDumpVertsMode
 };
 
-char *g_vertDumpModeNames[] = 
+const char *g_vertDumpModeNames[] =
 {
 	"noTransformDump",
 	"transformedByViewProj",
@@ -3691,7 +3691,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 				strcpy( transtemp, "no translation info" );
 			}
 			
-			char *linkpath = "no file link";
+			const char *linkpath = "no file link";
 
 			#if GLMDEBUG && 0 // no editable shader support in example code
 				linkpath = vp->m_editable->m_mirror->m_path;
@@ -3728,7 +3728,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 				strcpy( transtemp, "no translation info" );
 			}
 			
-			char *linkpath = "no file link";
+			const char *linkpath = "no file link";
 
 			#if GLMDEBUG && 0 // no editable shader support in example code
 				linkpath = fp->m_editable->m_mirror->m_path;
@@ -3757,7 +3757,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 	{
 		GLMPRINTF(("-D-"));
 		GLMPRINTF(("-D- VP parameters" ));
-		char *label = "";
+		const char *label = "";
 		int labelcounter = 0;
 		
 		static int vmaskranges[] = { /*18,47,*/ -1,-1 };
@@ -4073,7 +4073,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 						{
 							for( int which = 0; which < desc->m_datasize; which++ )
 							{
-								static char *fieldname = "xyzw";
+								static const char *fieldname = "xyzw";
 								switch( desc->m_datatype )
 								{
 									case GL_FLOAT:
@@ -4161,7 +4161,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 			{
 				// if transform dumping requested, and we've reached the actual vert dump phase, do it
 				float	vtxout[4];
-				char	*translabel = NULL;   // NULL means no print...
+				const char	*translabel = NULL;   // NULL means no print...
 				
 				switch( g_vertDumpMode )
 				{
@@ -4276,7 +4276,7 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 }
 
 // here is the table that binds knob numbers to names.  change at will.
-char	*g_knobnames[] = 
+const char	*g_knobnames[] =
 {
 /*0*/	"dummy",
 

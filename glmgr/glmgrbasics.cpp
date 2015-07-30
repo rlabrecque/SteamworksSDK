@@ -3836,7 +3836,7 @@ void	CGLMEditableTextItem::GenMungedText( bool fromMirror )
 
 // resolved.  there is no default section for text that doesn't have a marker in front of it.  mark it or miss it.
 
-CGLMTextSectioner::CGLMTextSectioner( char *text, int textLength, char **markers )
+CGLMTextSectioner::CGLMTextSectioner( const char *text, int textLength, const char **markers )
 {
 	// find lines
 	// for each line, see if it starts with a marker
@@ -3844,16 +3844,16 @@ CGLMTextSectioner::CGLMTextSectioner( char *text, int textLength, char **markers
 
 	GLMTextSection *curSection = NULL;		// no current section until we see a marker
 	
-	char *cursor = text;
-	char *textLimit = text+textLength;
+	const char *cursor = text;
+	const char *textLimit = text+textLength;
 	
 	int foundMarker;
-	char **markerCursor;
+	const char **markerCursor;
 	while( cursor < textLimit )
 	{
 		// top of loop.  cursor points to start of a line.
 		// find the end of the line and keep that handy.
-		char *eol = strchr( cursor, '\n' );
+		const char *eol = strchr( cursor, '\n' );
 		int charsInLine = (eol) ? (eol-cursor)+1 : strlen(cursor);
 		
 		//see if any of the marker strings is located here.
