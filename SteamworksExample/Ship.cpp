@@ -392,29 +392,57 @@ void CShip::RunFrame()
 		m_SpaceWarClientUpdateData.SetTurnLeftPressed( false );
 		m_SpaceWarClientUpdateData.SetTurnRightPressed( false );
 
-		if ( m_pGameEngine->BIsKeyDown( m_dwVKLeft ) )
+		if ( m_pGameEngine->BIsKeyDown( m_dwVKLeft )
+			|| m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_TurnLeft ) )
 		{
 			m_SpaceWarClientUpdateData.SetTurnLeftPressed( true );
 		}
 		
-		if ( m_pGameEngine->BIsKeyDown( m_dwVKRight ) )
+		if ( m_pGameEngine->BIsKeyDown( m_dwVKRight ) 
+			|| m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_TurnRight ) )
 		{
 			m_SpaceWarClientUpdateData.SetTurnRightPressed( true );
+		}
+
+		// The Steam Controller can also map an anlog axis to thrust and steer
+		float fTurnSpeed, fUnused;
+		m_pGameEngine->GetControllerAnalogAction( eControllerAnalogAction_AnalogControls, &fTurnSpeed, &fUnused );
+
+		if ( fTurnSpeed > 0.0f )
+		{
+			m_SpaceWarClientUpdateData.SetTurnRightPressed( true );
+			m_SpaceWarClientUpdateData.SetTurnSpeed( fTurnSpeed );
+		}
+		else if ( fTurnSpeed < 0.0f )
+		{
+			m_SpaceWarClientUpdateData.SetTurnLeftPressed( true );
+			m_SpaceWarClientUpdateData.SetTurnSpeed( fTurnSpeed );
 		}
 	}
 	else if ( m_bIsServerInstance )
 	{
 		// Server side
+		const float fMaxTurnSpeed = (PI_VALUE / 2.0f) * (float)m_pGameEngine->GetGameTicksFrameDelta( ) / 400.0f;
+
 		float flRotationDelta = 0.0f;
-		if ( m_SpaceWarClientUpdateData.GetTurnLeftPressed() )
+		float fTurnSpeed = m_SpaceWarClientUpdateData.GetTurnSpeed();
+		if ( fTurnSpeed != 0.0f )
 		{
-			flRotationDelta += (PI_VALUE/2.0f) * -1.0f * (float)m_pGameEngine->GetGameTicksFrameDelta()/400.0f;
+			flRotationDelta += fMaxTurnSpeed * fTurnSpeed;
+		}
+		else
+		{
+			if ( m_SpaceWarClientUpdateData.GetTurnLeftPressed( ) )
+			{
+				flRotationDelta += -1.0f * fMaxTurnSpeed;
+			}
+
+			if ( m_SpaceWarClientUpdateData.GetTurnRightPressed( ) )
+			{
+				flRotationDelta += fMaxTurnSpeed;
+			}
 		}
 
-		if ( m_SpaceWarClientUpdateData.GetTurnRightPressed() )
-		{
-			flRotationDelta += (PI_VALUE/2.0f) * (float)m_pGameEngine->GetGameTicksFrameDelta()/400.0f;
-		}
 		SetRotationDeltaNextFrame( flRotationDelta );
 	}
 	
@@ -424,17 +452,34 @@ void CShip::RunFrame()
 		// client side
 		m_SpaceWarClientUpdateData.SetReverseThrustersPressed( false );
 		m_SpaceWarClientUpdateData.SetForwardThrustersPressed( false );
-		if ( m_pGameEngine->BIsKeyDown( m_dwVKForwardThrusters ) || m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) )
+		
+		if ( m_pGameEngine->BIsKeyDown( m_dwVKForwardThrusters ) ||
+			m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_ForwardThrust ) )
 		{
-			if ( m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) )
-			{
-				m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
-			}
-			else
-			{
-				m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
-			}
+			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
 		}
+
+		if ( m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) ||
+			m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_ReverseThrust ) )
+		{
+			m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
+		}
+
+		// The Steam Controller can also map an anlog axis to thrust and steer
+		float fThrusterLevel, fUnused;
+		m_pGameEngine->GetControllerAnalogAction( eControllerAnalogAction_AnalogControls, &fUnused, &fThrusterLevel );
+
+		if ( fThrusterLevel > 0.0f )
+		{
+			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
+			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
+		}
+		else if ( fThrusterLevel < 0.0f )
+		{
+			m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
+			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
+		}
+
 
 		// Hardcoded keys to choose various outfits and weapon powerups which require inventory. Note that this is not
 		// a "secure" multiplayer model - clients can lie about what they own. A more robust solution, if your items
@@ -502,6 +547,12 @@ void CShip::RunFrame()
 				m_bForwardThrustersActive = true;
 			}
 
+			float fThrusterLevel = m_SpaceWarClientUpdateData.GetThrustersLevel();
+			if ( fThrusterLevel != 0.0f )
+			{
+				flSign = fThrusterLevel;
+			}
+
 			if ( m_ulLastThrustStartedTickCount == 0 )
 				m_ulLastThrustStartedTickCount = ulCurrentTickCount;
 
@@ -528,7 +579,8 @@ void CShip::RunFrame()
 	if ( m_bIsLocalPlayer )
 	{
 		// client side
-		if ( m_pGameEngine->BIsKeyDown( m_dwVKFire ) )
+		if ( m_pGameEngine->BIsKeyDown( m_dwVKFire ) ||
+			m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_FireLasers ) )
 		{
 			m_SpaceWarClientUpdateData.SetFirePressed( true );
 		}

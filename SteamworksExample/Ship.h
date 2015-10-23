@@ -199,6 +199,10 @@ private:
 	// Thrusters for this ship
 	CReverseThrusters m_ReverseThrusters;
 
+	// Thrust and rotation speed can be anlog when using a Steam Controller
+	float m_fThrusterLevel;
+	float m_fTurnSpeed;
+
 	// Track whether to draw the thrusters next render call
 	bool m_bReverseThrustersActive;
 

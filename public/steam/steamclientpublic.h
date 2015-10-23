@@ -125,6 +125,7 @@ enum EResult
 	k_EResultRefundToWallet = 98,				// Cannot refund to payment method, must use wallet
 	k_EResultEmailSendFailure = 99,				// Cannot send an email
 	k_EResultNotSettled = 100,					// Can't perform operation till payment has settled
+	k_EResultNeedCaptcha = 101,					// Needs to provide a valid captcha
 };
 
 // Error codes for use with the voice functions
@@ -258,6 +259,7 @@ enum EAppOwnershipFlags
 	k_EAppOwnershipFlags_LicenseRecurring	= 0x1000,	// Recurring license, user is charged periodically
 	k_EAppOwnershipFlags_LicenseCanceled	= 0x2000,	// Mark as canceled, but might be still active if recurring
 	k_EAppOwnershipFlags_AutoGrant			= 0x4000,	// Ownership is based on any kind of autogrant license
+	k_EAppOwnershipFlags_PendingGift		= 0x8000,	// user has pending gift to redeem
 };
 
 
@@ -427,6 +429,31 @@ enum EBroadcastUploadResult
 	k_EBroadcastUploadResultSettingsChanged = 10,	// the client changed broadcast settings 
 	k_EBroadcastUploadResultMissingAudio = 11,	// client failed to send audio data
 	k_EBroadcastUploadResultTooFarBehind = 12,	// clients was too slow uploading
+	k_EBroadcastUploadResultTranscodeBehind = 13,	// server failed to keep up with transcode
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: codes for well defined launch options
+//-----------------------------------------------------------------------------
+enum ELaunchOptionType
+{
+	k_ELaunchOptionType_None		= 0,	// unknown what launch option does
+	k_ELaunchOptionType_Default		= 1,	// runs the game, app, whatever in default mode
+	k_ELaunchOptionType_SafeMode	= 2,	// runs the game in safe mode
+	k_ELaunchOptionType_Multiplayer = 3,	// runs the game in multiplayer mode
+	k_ELaunchOptionType_Config		= 4,	// runs config tool for this game
+	k_ELaunchOptionType_VR			= 5,	// runs game in VR mode
+	k_ELaunchOptionType_Server		= 6,	// runs dedicated server for this game
+	k_ELaunchOptionType_Editor		= 7,	// runs game editor
+	k_ELaunchOptionType_Manual		= 8,	// shows game manual
+	k_ELaunchOptionType_Benchmark	= 9,	// runs game benchmark
+	k_ELaunchOptionType_Option1		= 10,	// generic run option, uses description field for game name
+	k_ELaunchOptionType_Option2		= 11,	// generic run option, uses description field for game name
+	k_ELaunchOptionType_Option3     = 12,	// generic run option, uses description field for game name
+	
+	
+	k_ELaunchOptionType_Dialog 		= 1000, // show launch options dialog
 };
 
 

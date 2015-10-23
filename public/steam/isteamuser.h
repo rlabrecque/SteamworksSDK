@@ -250,6 +250,7 @@ struct SteamServerConnectFailure_t
 {
 	enum { k_iCallback = k_iSteamUserCallbacks + 2 };
 	EResult m_eResult;
+	bool m_bStillRetrying;
 };
 
 

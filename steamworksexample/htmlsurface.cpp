@@ -50,7 +50,8 @@ CHTMLSurface::~CHTMLSurface()
 //-----------------------------------------------------------------------------
 void CHTMLSurface::RunFrame()
 {
-	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) )
+	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) || 
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_MenuCancel ) )
 	{
 		SpaceWarClient()->SetGameState( k_EClientGameMenu );
 	}

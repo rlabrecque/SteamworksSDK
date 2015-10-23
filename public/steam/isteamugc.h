@@ -46,6 +46,7 @@ enum EUGCMatchingUGCType
 	k_EUGCMatchingUGCType_UsableInGame		 = 10,		// ready-to-use items and integrated guides
 	k_EUGCMatchingUGCType_ControllerBindings = 11,
 	k_EUGCMatchingUGCType_GameManagedItems	 = 12,		// game managed items (not managed by users)
+	k_EUGCMatchingUGCType_All				 = ~0,		// return everything
 };
 
 // Different lists of published UGC for a user.
@@ -263,6 +264,13 @@ public:
 	// then files on disk should not be used until callback received. If item is not subscribed to, it will be cached for some time.
 	// If bHighPriority is set, any other item download will be suspended and this item downloaded ASAP.
 	virtual bool DownloadItem( PublishedFileId_t nPublishedFileID, bool bHighPriority ) = 0;
+
+	// game servers can set a specific workshop folder before issuing any UGC commands.
+	// This is helpful if you want to support multiple game servers running out of the same install folder
+	virtual bool BInitWorkshopForGameServer( DepotId_t unWorkshopDepotID, const char *pszFolder ) = 0;
+
+	// SuspendDownloads( true ) will suspend all workshop downloads until SuspendDownloads( false ) is called or the game ends
+	virtual void SuspendDownloads( bool bSuspend ) = 0;
 };
 
 #define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION007"

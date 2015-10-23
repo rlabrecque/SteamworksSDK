@@ -10,6 +10,7 @@
 #include <direct.h>
 #else
 #define MAX_PATH PATH_MAX
+#include <unistd.h>
 #define _getcwd getcwd
 #endif
 
@@ -227,12 +228,6 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #else
 	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "controller.vdf" );
 #endif
-	if( !SteamController()->Init( rgchFullPath ) )
-	{
-		OutputDebugString( "SteamController()->Init() failed\n" );
-		Alert( "Fatal Error", "Steam Controller Init failed. Is controller.vdf in the current working directory?\n" );
-		return EXIT_FAILURE;
-	}
 
 	const char *pchServerAddress, *pchLobbyID;
 	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
@@ -242,22 +237,28 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 
 	// Construct a new instance of the game engine 
 	// bugbug jmccaskey - make screen resolution dynamic, maybe take it on command line?
-	IGameEngine *pGameEngine = 
+	IGameEngine *pGameEngine =
 #if defined(_WIN32)
-        new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
+		new CGameEngineWin32( hInstance, nCmdShow, 1024, 768 );
 #elif defined(OSX)
-        CreateGameEngineOSX();
+		CreateGameEngineOSX();
 #elif defined(SDL)
-	CreateGameEngineSDL( );
+		CreateGameEngineSDL( );
 #else
 #error	Need CreateGameEngine()
 #endif
+
+	if ( !SteamController()->Init() )
+	{
+		OutputDebugString( "SteamController()->Init failed.\n" );
+		Alert( "Fatal Error", "SteamController()->Init failed.\n" );
+		return EXIT_FAILURE;
+	}
     
 	// This call will block and run until the game exits
 	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );
 
 	// Shutdown the SteamAPI
-	SteamController()->Shutdown();
 	SteamAPI_Shutdown();
 
 	// Shutdown Steam CEG

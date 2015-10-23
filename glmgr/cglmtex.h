@@ -101,7 +101,7 @@ struct GLMTexLayoutKey
 
 struct LessThan_GLMTexLayoutKey
 {
-	bool operator()(const GLMTexLayoutKey &a, const GLMTexLayoutKey &b)
+	bool operator()(const GLMTexLayoutKey &a, const GLMTexLayoutKey &b) const
 	{
 		#define	DO_LESS(fff) if (a.fff != b.fff) { return (a.fff< b.fff); }
 	

@@ -176,6 +176,12 @@ class ISteamRemoteStorage
 		// file operations
 		virtual bool	FileWrite( const char *pchFile, const void *pvData, int32 cubData ) = 0;
 		virtual int32	FileRead( const char *pchFile, void *pvData, int32 cubDataToRead ) = 0;
+		
+		virtual SteamAPICall_t FileWriteAsync( const char *pchFile, const void *pvData, uint32 cubData ) = 0;
+		
+		virtual SteamAPICall_t FileReadAsync( const char *pchFile, uint32 nOffset, uint32 cubToRead ) = 0;
+		virtual bool	FileReadAsyncComplete( SteamAPICall_t hReadCall, void *pvBuffer, uint32 cubToRead ) = 0;
+		
 		virtual bool	FileForget( const char *pchFile ) = 0;
 		virtual bool	FileDelete( const char *pchFile ) = 0;
 		virtual SteamAPICall_t FileShare( const char *pchFile ) = 0;
@@ -282,7 +288,7 @@ class ISteamRemoteStorage
 		virtual SteamAPICall_t UGCDownloadToLocation( UGCHandle_t hContent, const char *pchLocation, uint32 unPriority ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION012"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION013"
 
 
 // callbacks
@@ -642,7 +648,26 @@ struct RemoteStoragePublishedFileUpdated_t
 	UGCHandle_t m_hFile;					// The new content
 };
 
+//-----------------------------------------------------------------------------
+// Purpose: Called when a FileWriteAsync completes
+//-----------------------------------------------------------------------------
+struct RemoteStorageFileWriteAsyncComplete_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 31 };
+	EResult	m_eResult;						// result
+};
 
+//-----------------------------------------------------------------------------
+// Purpose: Called when a FileReadAsync completes
+//-----------------------------------------------------------------------------
+struct RemoteStorageFileReadAsyncComplete_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 32 };
+	SteamAPICall_t m_hFileReadAsync;		// call handle of the async read which was made
+	EResult	m_eResult;						// result
+	uint32 m_nOffset;						// offset in the file this read was at
+	uint32 m_cubRead;						// amount read - will the <= the amount requested
+};
 
 #pragma pack( pop )
 

@@ -12,6 +12,19 @@ website at: http://partner.steamgames.com
 Revision History:
 
 ----------------------------------------------------------------
+v1.35 21st September 2015
+----------------------------------------------------------------
+
+ISteamController:
+ * The controller API has been redesigned to work with production Steam Controllers and take advantage of the configuration panel inside of Steam. The documentation on the partner site has a full overview of the new API.
+
+ISteamRemoteStorage:
+ * Added asynchronous file read and write methods. These methods will not block your calling thread for the duration of the disk IO. Additionally, the IO is performed in a worker thread in the Steam engine, so they will not impact other Steam API calls.
+  - FileWriteAsync: Similar in use to FileWrite, however it returns a SteamAPICall_t handle. Use the RemoteStorageFileWriteAsyncComplete_t structure with your asynchronous Steam API handler, and that will indicate the results of the write. The data buffer passed in to FileWriteAsync is immediately copied, so you do not have to ensure it is valid throughout the entire asynchronous process.
+  - FileReadAsync: This function queues an asynchronous read on the file specified, and also returns a SteamAPICall_t handle. The completion event uses the new RemoteStorageFileReadAsyncComplete_t structure. Upon successful completion, you can use the new FileReadAsyncComplete function to read the data -- passing in the original call handle, a pointer to a buffer for the data, and the amount to read (which generally should be equal to the amount read as specified by the callback structure, which generally will be equal to the amount requested). Additionally, the FileReadAsync function lets you specify an offset to read at, so it is no longer necessary to read the entire file in one call.
+
+
+----------------------------------------------------------------
 v1.34 28th July 2015
 ----------------------------------------------------------------
 ISteamUGC:

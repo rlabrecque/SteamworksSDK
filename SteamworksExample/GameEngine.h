@@ -45,6 +45,42 @@ enum ETEXTUREFORMAT
 	eTextureFormat_BGRA16, // 16 bits per channel
 };
 
+#define MAX_CONTROLLERS 4
+
+enum ECONTROLLERDIGITALACTION
+{
+	eControllerDigitalAction_TurnLeft,
+	eControllerDigitalAction_TurnRight,
+	eControllerDigitalAction_ForwardThrust,
+	eControllerDigitalAction_ReverseThrust,
+	eControllerDigitalAction_FireLasers,
+	eControllerDigitalAction_PauseMenu,
+
+	eControllerDigitalAction_MenuUp,
+	eControllerDigitalAction_MenuDown,
+	eControllerDigitalAction_MenuLeft,
+	eControllerDigitalAction_MenuRight,
+	eControllerDigitalAction_MenuSelect,
+	eControllerDigitalAction_MenuCancel,
+
+	eControllerDigitalAction_NumActions
+};
+
+enum ECONTROLLERANALOGACTION
+{
+	eControllerAnalogAction_AnalogControls,
+
+	eControllerAnalogAction_NumActions
+};
+
+enum ECONTROLLERACTIONSET
+{
+	eControllerActionSet_ShipControls,
+	eControllerActionSet_MenuControls,
+
+	eControllerActionSet_NumSets
+};
+
 // used for VR support
 namespace vr { class IVRSystem; }
 
@@ -126,6 +162,25 @@ public:
 
 	// Get the first (in some arbitrary order) key down, if any
 	virtual bool BGetFirstKeyDown( DWORD *pdwVK ) = 0;
+
+	// Return true if there is an active Steam Controller
+	virtual bool BIsSteamControllerActive() = 0;
+		
+	// Get the current state of a controller action
+	virtual bool BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction ) = 0;
+
+	// Find an active Steam controller
+	virtual void FindActiveSteamController() = 0;
+
+	// Get the current state of a controller analog action
+	virtual void GetControllerAnalogAction( ECONTROLLERANALOGACTION dwAction, float *x, float *y ) = 0;
+
+	// Set the current Steam Controller Action set
+	virtual void SetSteamControllerActionSet( ECONTROLLERACTIONSET dwActionSet ) = 0;
+
+	// These calls return a string describing which controller button the action is currently bound to
+	virtual const char *GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction ) = 0;
+	virtual const char *GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction ) = 0;
 
 	// Get current tick count for the game engine
 	virtual uint64 GetGameTickCount() = 0;

@@ -410,21 +410,21 @@ private:
 	CCallResult<CSpaceWarClient, LobbyEnter_t> m_SteamCallResultLobbyEntered;
 
 	// callback for when the lobby game server has started
-	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t, m_LobbyGameCreated );
-	STEAM_CALLBACK( CSpaceWarClient, OnGameJoinRequested, GameRichPresenceJoinRequested_t, m_GameJoinRequested );
-	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t, m_AvatarImageLoadedCreated );
+	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnGameJoinRequested, GameRichPresenceJoinRequested_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t );
 
 	// callbacks for Steam connection state
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t, m_SteamServersConnected );
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersDisconnected, SteamServersDisconnected_t, m_SteamServersDisconnected );
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t, m_SteamServerConnectFailure );
-	STEAM_CALLBACK( CSpaceWarClient, OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersDisconnected, SteamServersDisconnected_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnGameOverlayActivated, GameOverlayActivated_t );
 	
 	// callback when getting the results of a web call
-	STEAM_CALLBACK( CSpaceWarClient, OnGameWebCallback, GameWebCallback_t, m_CallbackGameWebCallback );
+	STEAM_CALLBACK( CSpaceWarClient, OnGameWebCallback, GameWebCallback_t );
 
 	// callback when new Workshop item was installed
-	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t, m_CallbackWorkshopItemInstalled);
+	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t);
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;
@@ -442,19 +442,17 @@ private:
 	CHTMLSurface *m_pHTMLSurface;
 
 	// connection handler
-	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
+	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t );
 
 	// ipc failure handler
-	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t, m_IPCFailureCallback );
+	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t );
 
 	// Steam wants to shut down, Game for Windows applications should shutdown too
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamShutdown, SteamShutdown_t, m_SteamShutdownCallback );
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamShutdown, SteamShutdown_t );
 
 	// Called when SteamUser()->RequestEncryptedAppTicket() returns asynchronously
 	void OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t *pEncryptedAppTicketResponse, bool bIOFailure );
 	CCallResult< CSpaceWarClient, EncryptedAppTicketResponse_t > m_SteamCallResultEncryptedAppTicket;
-
-	bool m_bLastControllerStateInMenu;
 };
 
 // Must define this stuff before BaseMenu.h as it depends on calling back into us through these accessors

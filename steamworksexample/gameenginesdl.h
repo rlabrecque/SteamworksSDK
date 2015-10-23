@@ -139,6 +139,31 @@ public:
 	// Get the first (in some arbitrary order) key down, if any
 	bool BGetFirstKeyDown( DWORD *pdwVK );
 
+	// Return true if there is an active Steam Controller
+	bool BIsSteamControllerActive( );
+
+	// Find an active Steam controller
+	void FindActiveSteamController( );
+
+	// Get the current state of a controller action
+	bool BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction );
+
+	// Get the current state of a controller action
+	void GetControllerAnalogAction( ECONTROLLERANALOGACTION dwAction, float *x, float *y );
+
+	// Set the current Steam Controller Action set
+	void SetSteamControllerActionSet( ECONTROLLERACTIONSET dwActionSet );
+
+	// These calls return a string describing which controller button the action is currently bound to
+	const char *GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction );
+	const char *GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction );
+
+	// Initialize the Steam Controller interfaces
+	void InitSteamController( );
+
+	// Called each frame to update the Steam Controller interface
+	void PollSteamController();
+
 	// Get current tick count for the game engine
 	uint64 GetGameTickCount() { return m_ulGameTickCount; }
 
@@ -249,6 +274,25 @@ public:
 	// Map of voice handles
 	std::map<HGAMEVOICECHANNEL, CVoiceContext* > m_MapVoiceChannel;
 	uint32 m_unVoiceChannelCount;
+
+	// An array of handles to Steam Controller events that player can bind to controls
+	ControllerDigitalActionHandle_t m_ControllerDigitalActionHandles[eControllerDigitalAction_NumActions];
+
+	// An array of handles to Steam Controller events that player can bind to controls
+	ControllerAnalogActionHandle_t m_ControllerAnalogActionHandles[eControllerAnalogAction_NumActions];
+
+	// An array of handles to different Steam Controller action set configurations
+	ControllerActionSetHandle_t m_ControllerActionSetHandles[eControllerActionSet_NumSets];
+
+	// A handle to the currently active Steam Controller. 
+	ControllerHandle_t m_ActiveControllerHandle;
+
+	// Origins for all the Steam Controller actions. The 'origin' is where the action is currently bound to,
+	// ie 'jump' is currently bound to the 'A' button.
+	EControllerActionOrigin m_ControllerDigitalActionOrigins[eControllerDigitalAction_NumActions];
+	EControllerActionOrigin m_ControllerAnalogActionOrigins[eControllerDigitalAction_NumActions];
+
+	static const char *pOriginStrings[k_EControllerActionOrigin_Count];
 
 };
 

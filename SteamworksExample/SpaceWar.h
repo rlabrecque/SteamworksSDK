@@ -294,6 +294,12 @@ struct ServerShipUpdateData_t
 	void SetShieldStrength( int nShieldStrength ) { m_nShieldStrength = nShieldStrength;  }
 	int GetShieldStrength() { return m_nShieldStrength; }
 
+	void SetThrustersLevel( float fLevel ) { m_fThrusterLevel = fLevel; }
+	float GetThrustersLevel( ) { return m_fThrusterLevel; }
+
+	void SetTurnSpeed( float fSpeed ) { m_fTurnSpeed = fSpeed; }
+	float GetTurnSpeed( ) { return m_fTurnSpeed; }
+
 	ServerPhotonBeamUpdateData_t *AccessPhotonBeamData( int iIndex ) { return &m_PhotonBeamData[iIndex]; }
 
 private:
@@ -337,6 +343,10 @@ private:
 
 	// Photon beam positions and data
 	ServerPhotonBeamUpdateData_t m_PhotonBeamData[MAX_PHOTON_BEAMS_PER_SHIP];
+
+	// Thrust and rotation speed can be anlog when using a Steam Controller
+	float m_fThrusterLevel;
+	float m_fTurnSpeed;
 };
 
 
@@ -414,6 +424,12 @@ struct ClientSpaceWarUpdateData_t
 	void SetShieldStrength( int nShieldPower ) { m_nShieldStrength = nShieldPower;  }
 	int GetShieldStrength() { return m_nShieldStrength; }
 
+	void SetThrustersLevel( float fLevel ) { m_fThrusterLevel = fLevel; }
+	float GetThrustersLevel( ) { return m_fThrusterLevel; }
+
+	void SetTurnSpeed( float fSpeed ) { m_fTurnSpeed = fSpeed; }
+	float GetTurnSpeed( ) { return m_fTurnSpeed; }
+
 private:
 	// Key's which are done
 	bool m_bFirePressed;
@@ -436,6 +452,10 @@ private:
 	// Name of the player (needed server side to tell master server about)
 	// bugbug jmccaskey - Really lame to send this every update instead of event driven...
 	char m_rgchPlayerName[64];
+
+	// Thrust and rotation speed can be anlog when using a Steam Controller
+	float m_fThrusterLevel;
+	float m_fTurnSpeed;
 };
 
 #pragma pack( pop )

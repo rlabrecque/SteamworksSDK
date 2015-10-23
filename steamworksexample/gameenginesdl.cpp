@@ -78,6 +78,51 @@ power_of_two(int input)
     return value;
 }
 
+// These are human-readable names for each of the origin enumerations. It is preferred to 
+// show the supplied icons in-game, but for a simple application these strings can be useful.
+const char *CGameEngineGL::pOriginStrings[k_EControllerActionOrigin_Count] =
+{
+	"None",
+	"A Button",
+	"B Button",
+	"X Button",
+	"Y Button",
+	"Left Bumper",
+	"Right Bumper",
+	"Left Grip",
+	"Right Grip",
+	"Start Button",
+	"Back Button",
+	"Left Pad Touch",
+	"Left Pad Swipe",
+	"Left Pad Click",
+	"Left Pad D-Pad Up",
+	"Left Pad D-Pad Down",
+	"Left Pad D-Pad West",
+	"Left Pad D-Pad East",
+	"Right Pad Touch",
+	"Right Pad Swipe",
+	"Right Pad Click",
+	"Right Pad D-Pad Up",
+	"Right Pad D-Pad Down",
+	"Right Pad D-Pad West",
+	"Right Pad D-Pad East",
+	"Left Trigger Pull",
+	"Left Trigger Click",
+	"Right Trigger Pull",
+	"Right Trigger Click",
+	"Left Stick Move",
+	"Left Stick Click",
+	"Left Pad D-Pad Up",
+	"Left Pad D-Pad Down",
+	"Left Pad D-Pad Left",
+	"Left Pad D-Pad Right",
+	"Gyro Move",
+	"Gyro Pitch",
+	"Gyro Roll",
+	"Gyro Yaw"
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor for game engine instance
 //-----------------------------------------------------------------------------
@@ -1182,4 +1227,169 @@ bool CGameEngineGL::AddVoiceData( HGAMEVOICECHANNEL hChannel, const uint8 *pVoic
 
 	return true;
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Return true if there is an active Steam Controller
+//-----------------------------------------------------------------------------
+bool CGameEngineGL::BIsSteamControllerActive( )
+{
+	if ( m_ActiveControllerHandle )
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Initialize the steam controller actions
+//-----------------------------------------------------------------------------
+void CGameEngineGL::InitSteamController( )
+{
+	// Digital game actions
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_TurnLeft] = SteamController( )->GetDigitalActionHandle( "turn_left" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_TurnRight] = SteamController( )->GetDigitalActionHandle( "turn_right" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_ForwardThrust] = SteamController( )->GetDigitalActionHandle( "forward_thrust" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_ReverseThrust] = SteamController( )->GetDigitalActionHandle( "backward_thrust" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_FireLasers] = SteamController( )->GetDigitalActionHandle( "fire_lasers" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_PauseMenu] = SteamController( )->GetDigitalActionHandle( "pause_menu" );
+
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuUp] = SteamController( )->GetDigitalActionHandle( "menu_up" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuDown] = SteamController( )->GetDigitalActionHandle( "menu_down" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuLeft] = SteamController( )->GetDigitalActionHandle( "menu_left" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuRight] = SteamController( )->GetDigitalActionHandle( "menu_right" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuSelect] = SteamController( )->GetDigitalActionHandle( "menu_select" );
+	m_ControllerDigitalActionHandles[eControllerDigitalAction_MenuCancel] = SteamController( )->GetDigitalActionHandle( "menu_cancel" );
+
+	// Analog game actions
+	m_ControllerAnalogActionHandles[eControllerAnalogAction_AnalogControls] = SteamController( )->GetAnalogActionHandle( "analog_controls" );
+
+	// Action set handles
+	m_ControllerActionSetHandles[eControllerActionSet_ShipControls] = SteamController( )->GetActionSetHandle( "ship_controls" );
+	m_ControllerActionSetHandles[eControllerActionSet_MenuControls] = SteamController( )->GetActionSetHandle( "menu_controls" );
+
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Find an active Steam controller
+//-----------------------------------------------------------------------------
+void CGameEngineGL::FindActiveSteamController( )
+{
+	// Use the first available steam controller for all interaction. We can call this each frame to handle
+	// a controller disconnecting and a different one reconnecting. Handles are guaranteed to be unique for
+	// a given controller, even across power cycles.
+
+	// See how many Steam Controllers are active. 
+	ControllerHandle_t pHandles[STEAM_CONTROLLER_MAX_COUNT];
+	int nNumActive = SteamController( )->GetConnectedControllers( pHandles );
+
+	// If there's an active controller, and if we're not already using it, select the first one.
+	if ( nNumActive && (m_ActiveControllerHandle != pHandles[0]) )
+	{
+		m_ActiveControllerHandle = pHandles[0];
+	}
+}
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Purpose: For a given in-game action in a given action set, return a human-reaadable string to use as a prompt.
+//--------------------------------------------------------------------------------------------------------------
+const char *CGameEngineGL::GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction )
+{
+	EControllerActionOrigin origins[STEAM_CONTROLLER_MAX_ORIGINS];
+	int nNumOrigins = SteamController( )->GetDigitalActionOrigins( m_ActiveControllerHandle, m_ControllerActionSetHandles[dwActionSet], m_ControllerDigitalActionHandles[dwDigitalAction], origins );
+
+	if ( nNumOrigins )
+	{
+		// We should handle the case where this action is bound to multiple buttons, but
+		// here we just grab the first.
+		return pOriginStrings[origins[0]];
+	}
+
+	return pOriginStrings[0]; // Return "None"
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// Purpose: For a given in-game action in a given action set, return a human-reaadable string to use as a prompt.
+//--------------------------------------------------------------------------------------------------------------
+const char *CGameEngineGL::GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction )
+{
+	EControllerActionOrigin origins[STEAM_CONTROLLER_MAX_ORIGINS];
+	int nNumOrigins = SteamController( )->GetAnalogActionOrigins( m_ActiveControllerHandle, m_ControllerActionSetHandles[dwActionSet], m_ControllerDigitalActionHandles[dwDigitalAction], origins );
+
+	if ( nNumOrigins )
+	{
+		// We should handle the case where this action is bound to multiple buttons, but
+		// here we just grab the first.
+		return pOriginStrings[origins[0]];
+	}
+
+	return pOriginStrings[0]; // Return "None"
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called each frame
+//-----------------------------------------------------------------------------
+void CGameEngineGL::PollSteamController( )
+{
+	// There's a bug where the action handles aren't non-zero until a config is done loading. Soon config
+	// information will be available immediately. Until then try to init as long as the handles are invalid.
+	if ( m_ControllerDigitalActionHandles[eControllerDigitalAction_TurnLeft] == 0 )
+	{
+		InitSteamController( );
+		return;
+	}
+
+	// Each frame check our active controller handle
+	FindActiveSteamController( );
+
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Find out if a controller event is currently active
+//-----------------------------------------------------------------------------
+bool CGameEngineGL::BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction )
+{
+	ControllerDigitalActionData_t digitalData = SteamController( )->GetDigitalActionData( m_ActiveControllerHandle, m_ControllerDigitalActionHandles[dwAction] );
+
+	// Actions are only 'active' when they're assigned to a control in an action set, and that action set is active.
+	if ( digitalData.bActive )
+		return digitalData.bState;
+	
+	return false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+// Purpose: Get the current x,y state of the analog action. Examples of an analog action are a virtual joystick on the trackpad or the real joystick.
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+void CGameEngineGL::GetControllerAnalogAction( ECONTROLLERANALOGACTION dwAction, float *x, float *y )
+{
+	ControllerAnalogActionData_t analogData = SteamController( )->GetAnalogActionData( m_ActiveControllerHandle, m_ControllerAnalogActionHandles[dwAction] );
+
+	// Actions are only 'active' when they're assigned to a control in an action set, and that action set is active.
+	if ( analogData.bActive )
+	{
+		*x = analogData.x;
+		*y = analogData.y;
+	}
+	else
+	{
+		*x = 0.0f;
+		*y = 0.0f;
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+// Purpose: Put the controller into a specific action set. Action sets are collections of game-context actions ie "walking", "flying" or "menu"
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+void CGameEngineGL::SetSteamControllerActionSet( ECONTROLLERACTIONSET dwActionSet )
+{
+	if ( m_ActiveControllerHandle == 0 )
+		return;
+
+	// This call is low-overhead and can be called repeatedly from game code that is active in a specific mode.
+	SteamController( )->ActivateActionSet( m_ActiveControllerHandle, m_ControllerActionSetHandles[dwActionSet] );
+}
+
+
 

@@ -65,16 +65,16 @@ private:
 
 
 	// Tells us when we have successfully connected to Steam
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnected, SteamServersConnected_t, m_CallbackSteamServersConnected );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnected, SteamServersConnected_t );
 
 	// Tells us when there was a failure to connect to Steam
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnectFailure, SteamServerConnectFailure_t, m_CallbackSteamServersConnectFailure );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersConnectFailure, SteamServerConnectFailure_t );
 
 	// Tells us when we have been logged out of Steam
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersDisconnected, SteamServersDisconnected_t, m_CallbackSteamServersDisconnected );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnSteamServersDisconnected, SteamServersDisconnected_t );
 
 	// Tells us that Steam has set our security policy (VAC on or off)
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnPolicyResponse, GSPolicyResponse_t, m_CallbackPolicyResponse );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnPolicyResponse, GSPolicyResponse_t );
 
 	//
 	// Various callback functions that Steam will call to let us know about whether we should
@@ -82,11 +82,11 @@ private:
 	//
 
 	// Tells us a client has been authenticated and approved to play by Steam (passes auth, license check, VAC status, etc...)
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnValidateAuthTicketResponse, ValidateAuthTicketResponse_t, m_CallbackGSAuthTicketResponse );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnValidateAuthTicketResponse, ValidateAuthTicketResponse_t );
 
 	// client connection state
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionRequest, P2PSessionRequest_t, m_CallbackP2PSessionRequest );
-	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionRequest, P2PSessionRequest_t );
+	STEAM_GAMESERVER_CALLBACK( CSpaceWarServer, OnP2PSessionConnectFail, P2PSessionConnectFail_t );
 
 	// Function to tell Steam about our servers details
 	void SendUpdatedServerDetailsToSteam();

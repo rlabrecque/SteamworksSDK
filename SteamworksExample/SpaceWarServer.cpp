@@ -21,14 +21,6 @@ extern SteamPS3Params_t g_SteamPS3Params;
 // Purpose: Constructor -- note the syntax for setting up Steam API callback handlers
 //-----------------------------------------------------------------------------
 CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine ) 
-:
-	m_CallbackSteamServersConnected( this, &CSpaceWarServer::OnSteamServersConnected ),
-	m_CallbackSteamServersDisconnected( this, &CSpaceWarServer::OnSteamServersDisconnected ),
-	m_CallbackSteamServersConnectFailure( this, &CSpaceWarServer::OnSteamServersConnectFailure ),
-	m_CallbackPolicyResponse( this, &CSpaceWarServer::OnPolicyResponse ),
-	m_CallbackGSAuthTicketResponse( this, &CSpaceWarServer::OnValidateAuthTicketResponse ),
-	m_CallbackP2PSessionConnectFail( this, &CSpaceWarServer::OnP2PSessionConnectFail ),
-	m_CallbackP2PSessionRequest( this, &CSpaceWarServer::OnP2PSessionRequest )
 {
 	m_bConnectedToSteam = false;
 

@@ -468,6 +468,12 @@ internal static extern void SteamAPI_ISteamMatchmakingServers_CancelServerQuery(
 internal static extern bool SteamAPI_ISteamRemoteStorage_FileWrite(IntPtr instancePtr, string pchFile, IntPtr pvData, int cubData);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileRead")]
 internal static extern int SteamAPI_ISteamRemoteStorage_FileRead(IntPtr instancePtr, string pchFile, IntPtr pvData, int cubDataToRead);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileWriteAsync")]
+internal static extern ulong SteamAPI_ISteamRemoteStorage_FileWriteAsync(IntPtr instancePtr, string pchFile, IntPtr pvData, uint cubData);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileReadAsync")]
+internal static extern ulong SteamAPI_ISteamRemoteStorage_FileReadAsync(IntPtr instancePtr, string pchFile, uint nOffset, uint cubToRead);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete")]
+internal static extern bool SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(IntPtr instancePtr, ulong hReadCall, IntPtr pvBuffer, uint cubToRead);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileForget")]
 internal static extern bool SteamAPI_ISteamRemoteStorage_FileForget(IntPtr instancePtr, string pchFile);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemoteStorage_FileDelete")]
@@ -903,17 +909,37 @@ internal static extern bool SteamAPI_ISteamUnifiedMessages_ReleaseMethod(IntPtr 
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUnifiedMessages_SendNotification")]
 internal static extern bool SteamAPI_ISteamUnifiedMessages_SendNotification(IntPtr instancePtr, string pchServiceNotification, IntPtr pNotificationBuffer, uint unNotificationBufferSize);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_Init")]
-internal static extern bool SteamAPI_ISteamController_Init(IntPtr instancePtr, string pchAbsolutePathToControllerConfigVDF);
+internal static extern bool SteamAPI_ISteamController_Init(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_Shutdown")]
 internal static extern bool SteamAPI_ISteamController_Shutdown(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_RunFrame")]
 internal static extern void SteamAPI_ISteamController_RunFrame(IntPtr instancePtr);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetControllerState")]
-internal static extern bool SteamAPI_ISteamController_GetControllerState(IntPtr instancePtr, uint unControllerIndex, ref SteamControllerState001_t pState);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetConnectedControllers")]
+internal static extern int SteamAPI_ISteamController_GetConnectedControllers(IntPtr instancePtr, ref ulong handlesOut);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_ShowBindingPanel")]
+internal static extern bool SteamAPI_ISteamController_ShowBindingPanel(IntPtr instancePtr, ulong controllerHandle);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetActionSetHandle")]
+internal static extern ulong SteamAPI_ISteamController_GetActionSetHandle(IntPtr instancePtr, string pszActionSetName);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_ActivateActionSet")]
+internal static extern void SteamAPI_ISteamController_ActivateActionSet(IntPtr instancePtr, ulong controllerHandle, ulong actionSetHandle);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetCurrentActionSet")]
+internal static extern ulong SteamAPI_ISteamController_GetCurrentActionSet(IntPtr instancePtr, ulong controllerHandle);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetDigitalActionHandle")]
+internal static extern ulong SteamAPI_ISteamController_GetDigitalActionHandle(IntPtr instancePtr, string pszActionName);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetDigitalActionData")]
+internal static extern ControllerDigitalActionData_t SteamAPI_ISteamController_GetDigitalActionData(IntPtr instancePtr, ulong controllerHandle, ulong digitalActionHandle);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetDigitalActionOrigins")]
+internal static extern int SteamAPI_ISteamController_GetDigitalActionOrigins(IntPtr instancePtr, ulong controllerHandle, ulong actionSetHandle, ulong digitalActionHandle, ref uint originsOut);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetAnalogActionHandle")]
+internal static extern ulong SteamAPI_ISteamController_GetAnalogActionHandle(IntPtr instancePtr, string pszActionName);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetAnalogActionData")]
+internal static extern ControllerAnalogActionData_t SteamAPI_ISteamController_GetAnalogActionData(IntPtr instancePtr, ulong controllerHandle, ulong analogActionHandle);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_GetAnalogActionOrigins")]
+internal static extern int SteamAPI_ISteamController_GetAnalogActionOrigins(IntPtr instancePtr, ulong controllerHandle, ulong actionSetHandle, ulong analogActionHandle, ref uint originsOut);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_StopAnalogActionMomentum")]
+internal static extern void SteamAPI_ISteamController_StopAnalogActionMomentum(IntPtr instancePtr, ulong controllerHandle, ulong eAction);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_TriggerHapticPulse")]
-internal static extern void SteamAPI_ISteamController_TriggerHapticPulse(IntPtr instancePtr, uint unControllerIndex, uint eTargetPad, char usDurationMicroSec);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_SetOverrideMode")]
-internal static extern void SteamAPI_ISteamController_SetOverrideMode(IntPtr instancePtr, string pchMode);
+internal static extern void SteamAPI_ISteamController_TriggerHapticPulse(IntPtr instancePtr, ulong controllerHandle, uint eTargetPad, char usDurationMicroSec);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_CreateQueryUserUGCRequest")]
 internal static extern ulong SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(IntPtr instancePtr, uint unAccountID, uint eListType, uint eMatchingUGCType, uint eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_CreateQueryAllUGCRequest")]
@@ -1026,6 +1052,10 @@ internal static extern bool SteamAPI_ISteamUGC_GetItemInstallInfo(IntPtr instanc
 internal static extern bool SteamAPI_ISteamUGC_GetItemDownloadInfo(IntPtr instancePtr, ulong nPublishedFileID, ref ulong punBytesDownloaded, ref ulong punBytesTotal);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_DownloadItem")]
 internal static extern bool SteamAPI_ISteamUGC_DownloadItem(IntPtr instancePtr, ulong nPublishedFileID, bool bHighPriority);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_BInitWorkshopForGameServer")]
+internal static extern bool SteamAPI_ISteamUGC_BInitWorkshopForGameServer(IntPtr instancePtr, uint unWorkshopDepotID, string pszFolder);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_SuspendDownloads")]
+internal static extern void SteamAPI_ISteamUGC_SuspendDownloads(IntPtr instancePtr, bool bSuspend);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamAppList_GetNumInstalledApps")]
 internal static extern uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamAppList_GetInstalledApps")]
@@ -1560,6 +1590,9 @@ namespace Valve.Steamworks
 		public abstract IntPtr GetIntPtr();
 		public abstract bool FileWrite(string pchFile,IntPtr pvData,int cubData);
 		public abstract int FileRead(string pchFile,IntPtr pvData,int cubDataToRead);
+		public abstract ulong FileWriteAsync(string pchFile,IntPtr pvData,uint cubData);
+		public abstract ulong FileReadAsync(string pchFile,uint nOffset,uint cubToRead);
+		public abstract bool FileReadAsyncComplete(ulong hReadCall,IntPtr pvBuffer,uint cubToRead);
 		public abstract bool FileForget(string pchFile);
 		public abstract bool FileDelete(string pchFile);
 		public abstract ulong FileShare(string pchFile);
@@ -1831,12 +1864,22 @@ namespace Valve.Steamworks
 	public abstract class ISteamController
 	{
 		public abstract IntPtr GetIntPtr();
-		public abstract bool Init(string pchAbsolutePathToControllerConfigVDF);
+		public abstract bool Init();
 		public abstract bool Shutdown();
 		public abstract void RunFrame();
-		public abstract bool GetControllerState(uint unControllerIndex,ref SteamControllerState001_t pState);
-		public abstract void TriggerHapticPulse(uint unControllerIndex,uint eTargetPad,char usDurationMicroSec);
-		public abstract void SetOverrideMode(string pchMode);
+		public abstract int GetConnectedControllers(ref ulong handlesOut);
+		public abstract bool ShowBindingPanel(ulong controllerHandle);
+		public abstract ulong GetActionSetHandle(string pszActionSetName);
+		public abstract void ActivateActionSet(ulong controllerHandle,ulong actionSetHandle);
+		public abstract ulong GetCurrentActionSet(ulong controllerHandle);
+		public abstract ulong GetDigitalActionHandle(string pszActionName);
+		public abstract ControllerDigitalActionData_t GetDigitalActionData(ulong controllerHandle,ulong digitalActionHandle);
+		public abstract int GetDigitalActionOrigins(ulong controllerHandle,ulong actionSetHandle,ulong digitalActionHandle,ref uint originsOut);
+		public abstract ulong GetAnalogActionHandle(string pszActionName);
+		public abstract ControllerAnalogActionData_t GetAnalogActionData(ulong controllerHandle,ulong analogActionHandle);
+		public abstract int GetAnalogActionOrigins(ulong controllerHandle,ulong actionSetHandle,ulong analogActionHandle,ref uint originsOut);
+		public abstract void StopAnalogActionMomentum(ulong controllerHandle,ulong eAction);
+		public abstract void TriggerHapticPulse(ulong controllerHandle,uint eTargetPad,char usDurationMicroSec);
 	}
 
 
@@ -1899,6 +1942,8 @@ namespace Valve.Steamworks
 		public abstract bool GetItemInstallInfo(ulong nPublishedFileID,ref ulong punSizeOnDisk,string pchFolder,uint cchFolderSize,ref uint punTimeStamp);
 		public abstract bool GetItemDownloadInfo(ulong nPublishedFileID,ref ulong punBytesDownloaded,ref ulong punBytesTotal);
 		public abstract bool DownloadItem(ulong nPublishedFileID,bool bHighPriority);
+		public abstract bool BInitWorkshopForGameServer(uint unWorkshopDepotID,string pszFolder);
+		public abstract void SuspendDownloads(bool bSuspend);
 	}
 
 
@@ -3604,6 +3649,24 @@ public override int FileRead(string pchFile,IntPtr pvData,int cubDataToRead)
 	int result = NativeEntrypoints.SteamAPI_ISteamRemoteStorage_FileRead(m_pSteamRemoteStorage,pchFile,pvData,cubDataToRead);
 	return result;
 }
+public override ulong FileWriteAsync(string pchFile,IntPtr pvData,uint cubData)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamRemoteStorage_FileWriteAsync(m_pSteamRemoteStorage,pchFile,pvData,cubData);
+	return result;
+}
+public override ulong FileReadAsync(string pchFile,uint nOffset,uint cubToRead)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamRemoteStorage_FileReadAsync(m_pSteamRemoteStorage,pchFile,nOffset,cubToRead);
+	return result;
+}
+public override bool FileReadAsyncComplete(ulong hReadCall,IntPtr pvBuffer,uint cubToRead)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(m_pSteamRemoteStorage,hReadCall,pvBuffer,cubToRead);
+	return result;
+}
 public override bool FileForget(string pchFile)
 {
 	CheckIfUsable();
@@ -5129,10 +5192,10 @@ private void CheckIfUsable()
 		throw new Exception("Steam Pointer not configured");
 	}
 }
-public override bool Init(string pchAbsolutePathToControllerConfigVDF)
+public override bool Init()
 {
 	CheckIfUsable();
-	bool result = NativeEntrypoints.SteamAPI_ISteamController_Init(m_pSteamController,pchAbsolutePathToControllerConfigVDF);
+	bool result = NativeEntrypoints.SteamAPI_ISteamController_Init(m_pSteamController);
 	return result;
 }
 public override bool Shutdown()
@@ -5146,21 +5209,83 @@ public override void RunFrame()
 	CheckIfUsable();
 	NativeEntrypoints.SteamAPI_ISteamController_RunFrame(m_pSteamController);
 }
-public override bool GetControllerState(uint unControllerIndex,ref SteamControllerState001_t pState)
+public override int GetConnectedControllers(ref ulong handlesOut)
 {
 	CheckIfUsable();
-	bool result = NativeEntrypoints.SteamAPI_ISteamController_GetControllerState(m_pSteamController,unControllerIndex,ref pState);
+	handlesOut = 0;
+	int result = NativeEntrypoints.SteamAPI_ISteamController_GetConnectedControllers(m_pSteamController,ref handlesOut);
 	return result;
 }
-public override void TriggerHapticPulse(uint unControllerIndex,uint eTargetPad,char usDurationMicroSec)
+public override bool ShowBindingPanel(ulong controllerHandle)
 {
 	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamController_TriggerHapticPulse(m_pSteamController,unControllerIndex,eTargetPad,usDurationMicroSec);
+	bool result = NativeEntrypoints.SteamAPI_ISteamController_ShowBindingPanel(m_pSteamController,controllerHandle);
+	return result;
 }
-public override void SetOverrideMode(string pchMode)
+public override ulong GetActionSetHandle(string pszActionSetName)
 {
 	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamController_SetOverrideMode(m_pSteamController,pchMode);
+	ulong result = NativeEntrypoints.SteamAPI_ISteamController_GetActionSetHandle(m_pSteamController,pszActionSetName);
+	return result;
+}
+public override void ActivateActionSet(ulong controllerHandle,ulong actionSetHandle)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamController_ActivateActionSet(m_pSteamController,controllerHandle,actionSetHandle);
+}
+public override ulong GetCurrentActionSet(ulong controllerHandle)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamController_GetCurrentActionSet(m_pSteamController,controllerHandle);
+	return result;
+}
+public override ulong GetDigitalActionHandle(string pszActionName)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamController_GetDigitalActionHandle(m_pSteamController,pszActionName);
+	return result;
+}
+public override ControllerDigitalActionData_t GetDigitalActionData(ulong controllerHandle,ulong digitalActionHandle)
+{
+	CheckIfUsable();
+	ControllerDigitalActionData_t result = NativeEntrypoints.SteamAPI_ISteamController_GetDigitalActionData(m_pSteamController,controllerHandle,digitalActionHandle);
+	return result;
+}
+public override int GetDigitalActionOrigins(ulong controllerHandle,ulong actionSetHandle,ulong digitalActionHandle,ref uint originsOut)
+{
+	CheckIfUsable();
+	originsOut = 0;
+	int result = NativeEntrypoints.SteamAPI_ISteamController_GetDigitalActionOrigins(m_pSteamController,controllerHandle,actionSetHandle,digitalActionHandle,ref originsOut);
+	return result;
+}
+public override ulong GetAnalogActionHandle(string pszActionName)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamController_GetAnalogActionHandle(m_pSteamController,pszActionName);
+	return result;
+}
+public override ControllerAnalogActionData_t GetAnalogActionData(ulong controllerHandle,ulong analogActionHandle)
+{
+	CheckIfUsable();
+	ControllerAnalogActionData_t result = NativeEntrypoints.SteamAPI_ISteamController_GetAnalogActionData(m_pSteamController,controllerHandle,analogActionHandle);
+	return result;
+}
+public override int GetAnalogActionOrigins(ulong controllerHandle,ulong actionSetHandle,ulong analogActionHandle,ref uint originsOut)
+{
+	CheckIfUsable();
+	originsOut = 0;
+	int result = NativeEntrypoints.SteamAPI_ISteamController_GetAnalogActionOrigins(m_pSteamController,controllerHandle,actionSetHandle,analogActionHandle,ref originsOut);
+	return result;
+}
+public override void StopAnalogActionMomentum(ulong controllerHandle,ulong eAction)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamController_StopAnalogActionMomentum(m_pSteamController,controllerHandle,eAction);
+}
+public override void TriggerHapticPulse(ulong controllerHandle,uint eTargetPad,char usDurationMicroSec)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamController_TriggerHapticPulse(m_pSteamController,controllerHandle,eTargetPad,usDurationMicroSec);
 }
 }
 
@@ -5528,6 +5653,17 @@ public override bool DownloadItem(ulong nPublishedFileID,bool bHighPriority)
 	CheckIfUsable();
 	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_DownloadItem(m_pSteamUGC,nPublishedFileID,bHighPriority);
 	return result;
+}
+public override bool BInitWorkshopForGameServer(uint unWorkshopDepotID,string pszFolder)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_BInitWorkshopForGameServer(m_pSteamUGC,unWorkshopDepotID,pszFolder);
+	return result;
+}
+public override void SuspendDownloads(bool bSuspend)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamUGC_SuspendDownloads(m_pSteamUGC,bSuspend);
 }
 }
 
@@ -6515,6 +6651,7 @@ public enum EResult
 	k_EResultRefundToWallet = 98,
 	k_EResultEmailSendFailure = 99,
 	k_EResultNotSettled = 100,
+	k_EResultNeedCaptcha = 101,
 }
 public enum EVoiceResult
 {
@@ -6617,6 +6754,7 @@ public enum EAppOwnershipFlags
 	k_EAppOwnershipFlags_LicenseRecurring = 4096,
 	k_EAppOwnershipFlags_LicenseCanceled = 8192,
 	k_EAppOwnershipFlags_AutoGrant = 16384,
+	k_EAppOwnershipFlags_PendingGift = 32768,
 }
 public enum EAppType
 {
@@ -6716,6 +6854,24 @@ public enum EBroadcastUploadResult
 	k_EBroadcastUploadResultSettingsChanged = 10,
 	k_EBroadcastUploadResultMissingAudio = 11,
 	k_EBroadcastUploadResultTooFarBehind = 12,
+	k_EBroadcastUploadResultTranscodeBehind = 13,
+}
+public enum ELaunchOptionType
+{
+	k_ELaunchOptionType_None = 0,
+	k_ELaunchOptionType_Default = 1,
+	k_ELaunchOptionType_SafeMode = 2,
+	k_ELaunchOptionType_Multiplayer = 3,
+	k_ELaunchOptionType_Config = 4,
+	k_ELaunchOptionType_VR = 5,
+	k_ELaunchOptionType_Server = 6,
+	k_ELaunchOptionType_Editor = 7,
+	k_ELaunchOptionType_Manual = 8,
+	k_ELaunchOptionType_Benchmark = 9,
+	k_ELaunchOptionType_Option1 = 10,
+	k_ELaunchOptionType_Option2 = 11,
+	k_ELaunchOptionType_Option3 = 12,
+	k_ELaunchOptionType_Dialog = 1000,
 }
 public enum EFailureType
 {
@@ -7071,6 +7227,75 @@ public enum ESteamControllerPad
 	k_ESteamControllerPad_Left = 0,
 	k_ESteamControllerPad_Right = 1,
 }
+public enum EControllerSource
+{
+	k_EControllerSource_None = 0,
+	k_EControllerSource_LeftTrackpad = 1,
+	k_EControllerSource_RightTrackpad = 2,
+	k_EControllerSource_Joystick = 3,
+	k_EControllerSource_ABXY = 4,
+	k_EControllerSource_Switch = 5,
+	k_EControllerSource_LeftTrigger = 6,
+	k_EControllerSource_RightTrigger = 7,
+	k_EControllerSource_Gyro = 8,
+}
+public enum EControllerSourceMode
+{
+	k_EControllerSourceMode_None = 0,
+	k_EControllerSourceMode_Dpad = 1,
+	k_EControllerSourceMode_Buttons = 2,
+	k_EControllerSourceMode_FourButtons = 3,
+	k_EControllerSourceMode_AbsoluteMouse = 4,
+	k_EControllerSourceMode_RelativeMouse = 5,
+	k_EControllerSourceMode_JoystickMove = 6,
+	k_EControllerSourceMode_JoystickCamera = 7,
+	k_EControllerSourceMode_ScrollWheel = 8,
+	k_EControllerSourceMode_Trigger = 9,
+	k_EControllerSourceMode_TouchMenu = 10,
+}
+public enum EControllerActionOrigin
+{
+	k_EControllerActionOrigin_None = 0,
+	k_EControllerActionOrigin_A = 1,
+	k_EControllerActionOrigin_B = 2,
+	k_EControllerActionOrigin_X = 3,
+	k_EControllerActionOrigin_Y = 4,
+	k_EControllerActionOrigin_LeftBumper = 5,
+	k_EControllerActionOrigin_RightBumper = 6,
+	k_EControllerActionOrigin_LeftGrip = 7,
+	k_EControllerActionOrigin_RightGrip = 8,
+	k_EControllerActionOrigin_Start = 9,
+	k_EControllerActionOrigin_Back = 10,
+	k_EControllerActionOrigin_LeftPad_Touch = 11,
+	k_EControllerActionOrigin_LeftPad_Swipe = 12,
+	k_EControllerActionOrigin_LeftPad_Click = 13,
+	k_EControllerActionOrigin_LeftPad_DPadNorth = 14,
+	k_EControllerActionOrigin_LeftPad_DPadSouth = 15,
+	k_EControllerActionOrigin_LeftPad_DPadWest = 16,
+	k_EControllerActionOrigin_LeftPad_DPadEast = 17,
+	k_EControllerActionOrigin_RightPad_Touch = 18,
+	k_EControllerActionOrigin_RightPad_Swipe = 19,
+	k_EControllerActionOrigin_RightPad_Click = 20,
+	k_EControllerActionOrigin_RightPad_DPadNorth = 21,
+	k_EControllerActionOrigin_RightPad_DPadSouth = 22,
+	k_EControllerActionOrigin_RightPad_DPadWest = 23,
+	k_EControllerActionOrigin_RightPad_DPadEast = 24,
+	k_EControllerActionOrigin_LeftTrigger_Pull = 25,
+	k_EControllerActionOrigin_LeftTrigger_Click = 26,
+	k_EControllerActionOrigin_RightTrigger_Pull = 27,
+	k_EControllerActionOrigin_RightTrigger_Click = 28,
+	k_EControllerActionOrigin_LeftStick_Move = 29,
+	k_EControllerActionOrigin_LeftStick_Click = 30,
+	k_EControllerActionOrigin_LeftStick_DPadNorth = 31,
+	k_EControllerActionOrigin_LeftStick_DPadSouth = 32,
+	k_EControllerActionOrigin_LeftStick_DPadWest = 33,
+	k_EControllerActionOrigin_LeftStick_DPadEast = 34,
+	k_EControllerActionOrigin_Gyro_Move = 35,
+	k_EControllerActionOrigin_Gyro_Pitch = 36,
+	k_EControllerActionOrigin_Gyro_Yaw = 37,
+	k_EControllerActionOrigin_Gyro_Roll = 38,
+	k_EControllerActionOrigin_Count = 39,
+}
 public enum EUGCMatchingUGCType
 {
 	k_EUGCMatchingUGCType_Items = 0,
@@ -7086,6 +7311,7 @@ public enum EUGCMatchingUGCType
 	k_EUGCMatchingUGCType_UsableInGame = 10,
 	k_EUGCMatchingUGCType_ControllerBindings = 11,
 	k_EUGCMatchingUGCType_GameManagedItems = 12,
+	k_EUGCMatchingUGCType_All = -1,
 }
 public enum EUserUGCList
 {
@@ -7258,6 +7484,7 @@ public enum ESteamItemFlags
 [StructLayout(LayoutKind.Sequential)] public struct SteamServerConnectFailure_t
 {
 	public EResult m_eResult;
+	public bool m_bStillRetrying;
 }
 [StructLayout(LayoutKind.Sequential)] public struct SteamServersDisconnected_t
 {
@@ -7758,6 +7985,17 @@ public enum ESteamItemFlags
 	public uint m_nAppID;
 	public ulong m_hFile;
 }
+[StructLayout(LayoutKind.Sequential)] public struct RemoteStorageFileWriteAsyncComplete_t
+{
+	public EResult m_eResult;
+}
+[StructLayout(LayoutKind.Sequential)] public struct RemoteStorageFileReadAsyncComplete_t
+{
+	public ulong m_hFileReadAsync;
+	public EResult m_eResult;
+	public uint m_nOffset;
+	public uint m_cubRead;
+}
 [StructLayout(LayoutKind.Sequential)] public struct LeaderboardEntry_t
 {
 	public ulong m_steamIDUser;
@@ -7947,14 +8185,17 @@ public enum ESteamItemFlags
 	public EResult m_eResult;
 	public uint m_unResponseSize;
 }
-[StructLayout(LayoutKind.Sequential)] public struct SteamControllerState001_t
+[StructLayout(LayoutKind.Sequential)] public struct ControllerAnalogActionData_t
 {
-	public uint unPacketNum;
-	public ulong ulButtons;
-	public char sLeftPadX;
-	public char sLeftPadY;
-	public char sRightPadX;
-	public char sRightPadY;
+	public EControllerSourceMode eMode;
+	public float x;
+	public float y;
+	public bool bActive;
+}
+[StructLayout(LayoutKind.Sequential)] public struct ControllerDigitalActionData_t
+{
+	public bool bState;
+	public bool bActive;
 }
 [StructLayout(LayoutKind.Sequential)] public struct SteamUGCDetails_t
 {

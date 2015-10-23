@@ -28,6 +28,7 @@
 #include <direct.h>
 #else
 #define MAX_PATH PATH_MAX
+#include <unistd.h>
 #define _getcwd getcwd
 #endif
 
@@ -43,19 +44,7 @@ CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine ) :
-		m_CallbackP2PSessionConnectFail( this, &CSpaceWarClient::OnP2PSessionConnectFail ),
-		m_LobbyGameCreated( this, &CSpaceWarClient::OnLobbyGameCreated ),
-		m_AvatarImageLoadedCreated( this, &CSpaceWarClient::OnAvatarImageLoaded ),
-		m_IPCFailureCallback( this, &CSpaceWarClient::OnIPCFailure ),
-		m_SteamShutdownCallback( this, &CSpaceWarClient::OnSteamShutdown ),
-		m_SteamServersConnected( this, &CSpaceWarClient::OnSteamServersConnected ),
-		m_SteamServersDisconnected( this, &CSpaceWarClient::OnSteamServersDisconnected ),
-		m_SteamServerConnectFailure( this, &CSpaceWarClient::OnSteamServerConnectFailure ),
-		m_GameJoinRequested( this, &CSpaceWarClient::OnGameJoinRequested ),
-		m_CallbackGameOverlayActivated( this, &CSpaceWarClient::OnGameOverlayActivated ),
-		m_CallbackGameWebCallback( this, &CSpaceWarClient::OnGameWebCallback ),
-		m_CallbackWorkshopItemInstalled( this, &CSpaceWarClient::OnWorkshopItemInstalled )
+CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine )
 {
 	Init( pGameEngine );
 }
@@ -84,7 +73,6 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	}
 #endif
 
-	m_bLastControllerStateInMenu = false;
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
 	m_uPlayerWhoWonGame = 0;
@@ -1175,7 +1163,8 @@ void CSpaceWarClient::RunFrame()
 
 	// Check if escape has been pressed, we'll use that info in a couple places below
 	bool bEscapePressed = false;
-	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) )
+	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) ||
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_PauseMenu ) )
 	{
 		static uint64 m_ulLastESCKeyTick = 0;
 		uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
@@ -1199,36 +1188,14 @@ void CSpaceWarClient::RunFrame()
 		OnGameStateChanged( m_eGameState );
 	}
 
-	bool bInMenuNow = false;
-	switch( m_eGameState )
-	{
-	case k_EClientGameMenu:
-	case k_EClientGameQuitMenu:
-		bInMenuNow = true;
-		break;
-	default:
-		bInMenuNow = false;
-		break;
-	}
-
-	// Update steam controller override mode appropriately
-	if ( bInMenuNow && !m_bLastControllerStateInMenu )
-	{
-		m_bLastControllerStateInMenu = true;
-		SteamController()->SetOverrideMode( "menu" );
-	}
-	else if ( !bInMenuNow && m_bLastControllerStateInMenu )
-	{
-		m_bLastControllerStateInMenu = false;
-		SteamController()->SetOverrideMode( "" );
-	}
-
 	// Update state for everything
 	switch ( m_eGameState )
 	{
 	case k_EClientConnectingToSteam:
 		m_pStarField->Render();
 		m_pConnectingMenu->RunFrame();
+		// Make sure the Steam Controller is in the correct mode.
+		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_MenuControls );
 		break;
 	case k_EClientRetrySteamConnection:
 #ifdef _PS3
@@ -1263,6 +1230,8 @@ void CSpaceWarClient::RunFrame()
 	case k_EClientGameMenu:
 		m_pStarField->Render();
 		m_pMainMenu->RunFrame();
+		// Make sure the Steam Controller is in the correct mode.
+		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_MenuControls );
 		break;
 	case k_EClientFindInternetServers:
 	case k_EClientFindLANServers:
@@ -1353,6 +1322,9 @@ void CSpaceWarClient::RunFrame()
 
 		// Now draw the menu
 		m_pQuitMenu->RunFrame();
+
+		// Make sure the Steam Controller is in the correct mode.
+		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_MenuControls );
 		break;
 	case k_EClientGameInstructions:
 		m_pStarField->Render();
@@ -1461,6 +1433,9 @@ void CSpaceWarClient::RunFrame()
 		break;
 
 	case k_EClientGameActive:
+		// Make sure the Steam Controller is in the correct mode.
+		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_ShipControls );
+
 		m_pStarField->Render();
 		
 		// SendHeartbeat is safe to call on every frame since the API is internally rate-limited.
@@ -1749,6 +1724,31 @@ void CSpaceWarClient::DrawHUDText()
 			break;
 		}
 	}
+
+	// Draw a Steam Controller tooltip
+	if ( m_pGameEngine->BIsSteamControllerActive( ) )
+	{
+		char rgchHint[128];
+		const char *rgchFireOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_ShipControls, eControllerDigitalAction_FireLasers );
+
+		if ( strcmp( rgchFireOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchHint, "No Fire action bound." );
+		}
+		else
+		{
+			sprintf_safe( rgchHint, "Press '%s' to Fire", rgchFireOrigin );
+		}
+
+		RECT rect;
+		int nBorder = 30;
+		rect.top = m_pGameEngine->GetViewportHeight( ) - nBorder;
+		rect.bottom = m_pGameEngine->GetViewportHeight( )*2;
+		rect.left = nBorder;
+		rect.right = m_pGameEngine->GetViewportWidth( );
+		m_pGameEngine->BDrawString( m_hHUDFont, rect, D3DCOLOR_ARGB( 255, 255, 255, 255 ), TEXTPOS_LEFT | TEXTPOS_TOP, rgchHint );
+	}
+
 }
 
 
