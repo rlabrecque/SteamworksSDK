@@ -31,9 +31,6 @@
 #include "isteaminventory.h"
 #include "isteamvideo.h"
 
-#if defined( _PS3 )
-#include "steamps3params.h"
-#endif
 
 // Steam API export macro
 #if defined( _WIN32 ) && !defined( _X360 )
@@ -103,14 +100,12 @@ S_API ISteamClient *S_CALLTYPE SteamClient();
 // functions below to get at the Steam interfaces.
 //
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
+
 S_API bool S_CALLTYPE SteamAPI_InitSafe();
+
 #else
 
-#if defined(_PS3)
-S_API bool S_CALLTYPE SteamAPI_Init( SteamPS3Params_t *pParams );
-#else
 S_API bool S_CALLTYPE SteamAPI_Init();
-#endif
 
 S_API ISteamUser *S_CALLTYPE SteamUser();
 S_API ISteamFriends *S_CALLTYPE SteamFriends();
@@ -132,10 +127,16 @@ S_API ISteamMusicRemote *S_CALLTYPE SteamMusicRemote();
 S_API ISteamHTMLSurface *S_CALLTYPE SteamHTMLSurface();
 S_API ISteamInventory *S_CALLTYPE SteamInventory();
 S_API ISteamVideo *S_CALLTYPE SteamVideo();
-#ifdef _PS3
-S_API ISteamPS3OverlayRender *S_CALLTYPE SteamPS3OverlayRender();
-#endif
+
 #endif // VERSION_SAFE_STEAM_API_INTERFACES
+
+
+// Most Steam API functions allocate some amount of thread-local memory for
+// parameter storage. The SteamAPI_ReleaseCurrentThreadMemory() function
+// will free all API-related memory associated with the calling thread.
+// This memory is also released automatically by SteamAPI_RunCallbacks(), so
+// a single-threaded program does not need to explicitly call this function.
+S_API void S_CALLTYPE SteamAPI_ReleaseCurrentThreadMemory();
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -466,9 +467,6 @@ public:
 	ISteamHTMLSurface*	SteamHTMLSurface()					{ return m_pSteamHTMLSurface; }
 	ISteamInventory*	SteamInventory()					{ return m_pSteamInventory; }
 	ISteamVideo*		SteamVideo()						{ return m_pSteamVideo; }
-#ifdef _PS3
-	ISteamPS3OverlayRender* SteamPS3OverlayRender()		{ return m_pSteamPS3OverlayRender; }
-#endif
 
 private:
 	ISteamUser		*m_pSteamUser;
@@ -491,9 +489,6 @@ private:
 	ISteamHTMLSurface	*m_pSteamHTMLSurface;
 	ISteamInventory		*m_pSteamInventory;
 	ISteamVideo			*m_pSteamVideo;
-#ifdef _PS3
-	ISteamPS3OverlayRender *m_pSteamPS3OverlayRender;
-#endif
 };
 
 inline CSteamAPIContext::CSteamAPIContext()
@@ -523,9 +518,6 @@ inline void CSteamAPIContext::Clear()
 	m_pSteamMusicRemote= NULL;
 	m_pSteamHTMLSurface = NULL;
 	m_pSteamInventory = NULL;
-#ifdef _PS3
-	m_pSteamPS3OverlayRender = NULL;
-#endif
 }
 
 // This function must be inlined so the module using steam_api.dll gets the version names they want.
@@ -627,10 +619,6 @@ inline bool CSteamAPIContext::Init()
 		return false;
 	}
 
-#ifdef _PS3
-	m_pSteamPS3OverlayRender = SteamClient()->GetISteamPS3OverlayRender();
-#endif
-
 	return true;
 }
 
@@ -638,8 +626,8 @@ inline bool CSteamAPIContext::Init()
 
 #if defined(USE_BREAKPAD_HANDLER) || defined(STEAM_API_EXPORTS)
 // this should be called before the game initialized the steam APIs
-// pchDate should be of the format "Mmm dd yyyy" (such as from the __DATE__ macro )
-// pchTime should be of the format "hh:mm:ss" (such as from the __TIME__ macro )
+// pchDate should be of the format "Mmm dd yyyy" (such as from the under under DATE under under macro )
+// pchTime should be of the format "hh:mm:ss" (such as from the under under TIME under under macro )
 // bFullMemoryDumps (Win32 only) -- writes out a uuid-full.dmp in the client/dumps folder
 // pvContext-- can be NULL, will be the void * context passed into m_pfnPreMinidumpCallback
 // PFNPreMinidumpCallback m_pfnPreMinidumpCallback   -- optional callback which occurs just before a .dmp file is written during a crash.  Applications can hook this to allow adding additional information into the .dmp comment stream.
