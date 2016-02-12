@@ -27,7 +27,7 @@
 // and will not be transferred to another player or re-used for another item.
 typedef uint64 SteamItemInstanceID_t;
 
-static const SteamItemInstanceID_t k_SteamItemInstanceIDInvalid = ~(SteamItemInstanceID_t)0;
+static const SteamItemInstanceID_t k_SteamItemInstanceIDInvalid = (SteamItemInstanceID_t)~0;
 
 // Types of items in your game are identified by a 32-bit "item definition number".
 // Valid definition numbers are between 1 and 999999999; numbers less than or equal to

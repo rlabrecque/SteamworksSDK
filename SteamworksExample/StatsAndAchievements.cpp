@@ -607,7 +607,7 @@ void CStatsAndAchievements::DrawStatInfo( RECT &rect, const char *pchName, float
 void CStatsAndAchievements::DrawInventory( RECT &rect, SteamItemInstanceID_t itemid )
 {
 	const CSpaceWarItem *pItem = SpaceWarLocalInventory()->GetItem( itemid );
-	if ( pItem == nullptr )
+	if ( !pItem )
 		return;
 
 	// todo: divide up so can draw image

@@ -161,6 +161,8 @@ S_API void S_CALLTYPE SteamAPI_ReleaseCurrentThreadMemory();
 //	delivered/executed when your application calls SteamAPI_RunCallbacks().
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+// SteamAPI_RunCallbacks is safe to call from multiple threads simultaneously,
+// but if you choose to do this, callback code may be executed on any thread.
 S_API void S_CALLTYPE SteamAPI_RunCallbacks();
 
 
@@ -406,7 +408,8 @@ public:
 //	The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-// pumps out all the steam messages, calling the register callback
+// Pumps out all the steam messages, calling registered callbacks.
+// NOT THREADSAFE - do not call from multiple threads simultaneously.
 S_API void Steam_RunCallbacks( HSteamPipe hSteamPipe, bool bGameServerCallbacks );
 
 // register the callback funcs to use to interact with the steam dll

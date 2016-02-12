@@ -14,6 +14,133 @@
 #include <stdint.h>
 
 
+typedef unsigned char uint8;
+typedef unsigned char uint8;
+typedef signed char int8;
+typedef short int16;
+typedef unsigned short uint16;
+typedef int int32;
+typedef unsigned int uint32;
+typedef long long int64;
+typedef unsigned long long uint64;
+typedef int64 lint64;
+typedef uint64 ulint64;
+typedef uint8 Salt_t[8];
+typedef uint64 GID_t;
+typedef uint64 JobID_t;
+typedef GID_t TxnID_t;
+typedef uint32 PackageId_t;
+typedef uint32 BundleId_t;
+typedef uint32 AppId_t;
+typedef uint64 AssetClassId_t;
+typedef uint32 PhysicalItemId_t;
+typedef uint32 DepotId_t;
+typedef uint32 RTime32;
+typedef uint32 CellID_t;
+typedef uint64 SteamAPICall_t;
+typedef uint32 AccountID_t;
+typedef uint32 PartnerId_t;
+typedef uint64 ManifestId_t;
+typedef uint32 HAuthTicket;
+typedef void * BREAKPAD_HANDLE;
+typedef char compile_time_assert_type[1];
+typedef int32 HSteamPipe;
+typedef int32 HSteamUser;
+typedef int32 HSteamCall;
+typedef int16 FriendsGroupID_t;
+typedef void * HServerListRequest;
+typedef int HServerQuery;
+typedef uint64 UGCHandle_t;
+typedef uint64 PublishedFileUpdateHandle_t;
+typedef uint64 PublishedFileId_t;
+typedef uint64 UGCFileWriteStreamHandle_t;
+typedef char compile_time_assert_type[1];
+typedef uint64 SteamLeaderboard_t;
+typedef uint64 SteamLeaderboardEntries_t;
+typedef uint32 SNetSocket_t;
+typedef uint32 SNetListenSocket_t;
+typedef uint32 ScreenshotHandle;
+typedef uint32 HTTPRequestHandle;
+typedef uint32 HTTPCookieContainerHandle;
+typedef uint64 ClientUnifiedMessageHandle;
+typedef uint64 ControllerHandle_t;
+typedef uint64 ControllerActionSetHandle_t;
+typedef uint64 ControllerDigitalActionHandle_t;
+typedef uint64 ControllerAnalogActionHandle_t;
+typedef uint64 UGCQueryHandle_t;
+typedef uint64 UGCUpdateHandle_t;
+typedef uint32 HHTMLBrowser;
+typedef uint64 SteamItemInstanceID_t;
+typedef int32 SteamItemDef_t;
+typedef int32 SteamInventoryResult_t;
+// OpenVR Constants
+int const_k_iSteamUserCallbacks = 100;
+int const_k_iSteamGameServerCallbacks = 200;
+int const_k_iSteamFriendsCallbacks = 300;
+int const_k_iSteamBillingCallbacks = 400;
+int const_k_iSteamMatchmakingCallbacks = 500;
+int const_k_iSteamContentServerCallbacks = 600;
+int const_k_iSteamUtilsCallbacks = 700;
+int const_k_iClientFriendsCallbacks = 800;
+int const_k_iClientUserCallbacks = 900;
+int const_k_iSteamAppsCallbacks = 1000;
+int const_k_iSteamUserStatsCallbacks = 1100;
+int const_k_iSteamNetworkingCallbacks = 1200;
+int const_k_iClientRemoteStorageCallbacks = 1300;
+int const_k_iClientDepotBuilderCallbacks = 1400;
+int const_k_iSteamGameServerItemsCallbacks = 1500;
+int const_k_iClientUtilsCallbacks = 1600;
+int const_k_iSteamGameCoordinatorCallbacks = 1700;
+int const_k_iSteamGameServerStatsCallbacks = 1800;
+int const_k_iSteam2AsyncCallbacks = 1900;
+int const_k_iSteamGameStatsCallbacks = 2000;
+int const_k_iClientHTTPCallbacks = 2100;
+int const_k_iClientScreenshotsCallbacks = 2200;
+int const_k_iSteamScreenshotsCallbacks = 2300;
+int const_k_iClientAudioCallbacks = 2400;
+int const_k_iClientUnifiedMessagesCallbacks = 2500;
+int const_k_iSteamStreamLauncherCallbacks = 2600;
+int const_k_iClientControllerCallbacks = 2700;
+int const_k_iSteamControllerCallbacks = 2800;
+int const_k_iClientParentalSettingsCallbacks = 2900;
+int const_k_iClientDeviceAuthCallbacks = 3000;
+int const_k_iClientNetworkDeviceManagerCallbacks = 3100;
+int const_k_iClientMusicCallbacks = 3200;
+int const_k_iClientRemoteClientManagerCallbacks = 3300;
+int const_k_iClientUGCCallbacks = 3400;
+int const_k_iSteamStreamClientCallbacks = 3500;
+int const_k_IClientProductBuilderCallbacks = 3600;
+int const_k_iClientShortcutsCallbacks = 3700;
+int const_k_iClientRemoteControlManagerCallbacks = 3800;
+int const_k_iSteamAppListCallbacks = 3900;
+int const_k_iSteamMusicCallbacks = 4000;
+int const_k_iSteamMusicRemoteCallbacks = 4100;
+int const_k_iClientVRCallbacks = 4200;
+int const_k_iClientReservedCallbacks = 4300;
+int const_k_iSteamReservedCallbacks = 4400;
+int const_k_iSteamHTMLSurfaceCallbacks = 4500;
+int const_k_iClientVideoCallbacks = 4600;
+int const_k_iClientInventoryCallbacks = 4700;
+int const_k_iClientBluetoothManagerCallbacks = 4800;
+int const_k_cchPersonaNameMax = 128;
+int const_k_cwchPersonaNameMax = 32;
+int const_k_cchMaxRichPresenceKeys = 20;
+int const_k_cchMaxRichPresenceKeyLength = 64;
+int const_k_cchMaxRichPresenceValueLength = 256;
+int const_k_cchStatNameMax = 128;
+int const_k_cchLeaderboardNameMax = 128;
+int const_k_cLeaderboardDetailsMax = 64;
+unsigned long const_k_InvalidUnifiedMessageHandle = 0;
+unsigned long const_k_SteamItemInstanceIDInvalid = 0xffffffff;
+int const_k_SteamInventoryResultInvalid = -1;
+
+
+
+// OpenVR Enums
+// OpenVR Structs
+
+
+
 S_API HSteamPipe SteamAPI_ISteamClient_CreateSteamPipe(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamClient_BReleaseSteamPipe(intptr_t instancePtr, HSteamPipe hSteamPipe);
 S_API HSteamUser SteamAPI_ISteamClient_ConnectToGlobalUser(intptr_t instancePtr, HSteamPipe hSteamPipe);
@@ -359,6 +486,8 @@ S_API uint64 SteamAPI_ISteamApps_GetAppOwner(intptr_t instancePtr);
 S_API const char * SteamAPI_ISteamApps_GetLaunchQueryParam(intptr_t instancePtr, const char * pchKey);
 S_API bool SteamAPI_ISteamApps_GetDlcDownloadProgress(intptr_t instancePtr, AppId_t nAppID, uint64 * punBytesDownloaded, uint64 * punBytesTotal);
 S_API int SteamAPI_ISteamApps_GetAppBuildId(intptr_t instancePtr);
+S_API void SteamAPI_ISteamApps_RequestPublisherOwnedAppData(intptr_t instancePtr);
+S_API uint32 SteamAPI_ISteamApps_GetPublisherOwnedAppData(intptr_t instancePtr, unsigned char * pubBuffer, uint32 unMaxBytes);
 S_API bool SteamAPI_ISteamNetworking_SendP2PPacket(intptr_t instancePtr, class CSteamID steamIDRemote, const void * pubData, uint32 cubData, EP2PSend eP2PSendType, int nChannel);
 S_API bool SteamAPI_ISteamNetworking_IsP2PPacketAvailable(intptr_t instancePtr, uint32 * pcubMsgSize, int nChannel);
 S_API bool SteamAPI_ISteamNetworking_ReadP2PPacket(intptr_t instancePtr, void * pubDest, uint32 cubDest, uint32 * pcubMsgSize, class CSteamID * psteamIDRemote, int nChannel);
@@ -475,6 +604,7 @@ S_API struct ControllerAnalogActionData_t SteamAPI_ISteamController_GetAnalogAct
 S_API int SteamAPI_ISteamController_GetAnalogActionOrigins(intptr_t instancePtr, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, EControllerActionOrigin * originsOut);
 S_API void SteamAPI_ISteamController_StopAnalogActionMomentum(intptr_t instancePtr, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t eAction);
 S_API void SteamAPI_ISteamController_TriggerHapticPulse(intptr_t instancePtr, ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec);
+S_API void SteamAPI_ISteamController_TriggerRepeatedHapticPulse(intptr_t instancePtr, ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(intptr_t instancePtr, AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequest(intptr_t instancePtr, EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(intptr_t instancePtr, PublishedFileId_t * pvecPublishedFileID, uint32 unNumPublishedFileIDs);
@@ -573,7 +703,6 @@ S_API void SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(intptr_t instancePtr, H
 S_API void SteamAPI_ISteamHTMLSurface_SetBackgroundMode(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bBackgroundMode);
 S_API void SteamAPI_ISteamHTMLSurface_AllowStartRequest(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bAllowed);
 S_API void SteamAPI_ISteamHTMLSurface_JSDialogResponse(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bResult);
-S_API void SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, const char ** pchSelectedFiles);
 S_API EResult SteamAPI_ISteamInventory_GetResultStatus(intptr_t instancePtr, SteamInventoryResult_t resultHandle);
 S_API bool SteamAPI_ISteamInventory_GetResultItems(intptr_t instancePtr, SteamInventoryResult_t resultHandle, struct SteamItemDetails_t * pOutItemsArray, uint32 * punOutItemsArraySize);
 S_API uint32 SteamAPI_ISteamInventory_GetResultTimestamp(intptr_t instancePtr, SteamInventoryResult_t resultHandle);

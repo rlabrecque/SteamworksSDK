@@ -44,6 +44,10 @@ CSpaceWarLocalInventory::CSpaceWarLocalInventory()
 	GrantTestItems();
 #endif
 
+	// We could pass a variable to receive the result handle, for
+	// comparison to the handle in SteamInventoryResultReady_t,
+	// but this simple example does not bother to keep track of
+	// multiple in-flight API calls.
 	SteamInventory()->GetAllItems( NULL ); // this will fire off FullUpdate and then ResultReady
 }
 
@@ -58,7 +62,7 @@ void CSpaceWarLocalInventory::OnSteamInventoryFullUpdate( SteamInventoryFullUpda
 	bool bGotResult = false;
 	std::vector<SteamItemDetails_t> vecDetails;
 	uint32 count = 0;
-	if ( SteamInventory()->GetResultItems( callback->m_handle, nullptr, &count ) )
+	if ( SteamInventory()->GetResultItems( callback->m_handle, NULL, &count ) )
 	{
 		vecDetails.resize( count );
 		bGotResult = SteamInventory()->GetResultItems( callback->m_handle, vecDetails.data(), &count );
@@ -128,7 +132,7 @@ void CSpaceWarLocalInventory::OnSteamInventoryResult( SteamInventoryResultReady_
 		bool bGotResult = false;
 		std::vector<SteamItemDetails_t> vecDetails;
 		uint32 count = 0;
-		if ( SteamInventory()->GetResultItems( callback->m_handle, nullptr, &count ) )
+		if ( SteamInventory()->GetResultItems( callback->m_handle, NULL, &count ) )
 		{
 			vecDetails.resize( count );
 			bGotResult = SteamInventory()->GetResultItems( callback->m_handle, vecDetails.data(), &count );
@@ -215,7 +219,7 @@ void CSpaceWarLocalInventory::DoExchange()
 	const CSpaceWarItem *item101 = GetInstanceOf( k_SpaceWarItem_ShipDecoration2 );
 	const CSpaceWarItem *item102 = GetInstanceOf( k_SpaceWarItem_ShipDecoration3 );
 	const CSpaceWarItem *item103 = GetInstanceOf( k_SpaceWarItem_ShipDecoration4 );
-	if ( item100 != nullptr && item101 != nullptr && item102 != nullptr && item103 != nullptr )
+	if ( item100 && item101 && item102 && item103 )
 	{
 		SteamItemInstanceID_t inputItems[4];
 		uint32 inputQuantities[4];
@@ -240,7 +244,7 @@ void CSpaceWarLocalInventory::GrantTestItems()
 	std::vector<SteamItemDef_t> newItems;
 	newItems.push_back( k_SpaceWarItem_ShipDecoration1 );
 	newItems.push_back( k_SpaceWarItem_ShipDecoration2 );
-	SteamInventory()->GenerateItems( nullptr, newItems.data(), nullptr, (uint32) newItems.size() );
+	SteamInventory()->GenerateItems( NULL, newItems.data(), NULL, (uint32) newItems.size() );
 }
 
 const CSpaceWarItem * CSpaceWarLocalInventory::GetItem( SteamItemInstanceID_t nItemId ) const
@@ -251,7 +255,7 @@ const CSpaceWarItem * CSpaceWarLocalInventory::GetItem( SteamItemInstanceID_t nI
 		if ( (*iter)->GetItemId() == nItemId )
 			return (*iter);
 	}
-	return nullptr;
+	return NULL;
 }
 
 bool CSpaceWarLocalInventory::HasInstanceOf( SteamItemDef_t nDefinition ) const
@@ -273,14 +277,19 @@ const CSpaceWarItem *  CSpaceWarLocalInventory::GetInstanceOf( SteamItemDef_t nD
 		if ( ( *iter )->GetDefinition() == nDefinition )
 			return (*iter);
 	}
-	return nullptr;
+	return NULL;
 }
 
 void CSpaceWarLocalInventory::RefreshFromServer()
 {
 	// This will trigger the SteamInventoryResultReady_t callback,
-	// and possibly the SteamInventoryFullUpdate_t callback first
-	SteamInventory()->GetAllItems( nullptr );
+	// and possibly the SteamInventoryFullUpdate_t callback first.
+	
+	// We could pass a variable to receive the result handle, for
+	// comparison to the handle in SteamInventoryResultReady_t,
+	// but this simple example does not bother to keep track of
+	// multiple in-flight API calls.
+	SteamInventory()->GetAllItems( NULL );
 }
 
 

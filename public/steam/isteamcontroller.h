@@ -204,6 +204,8 @@ public:
 	
 	// Trigger a haptic pulse on a controller
 	virtual void TriggerHapticPulse( ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec ) = 0;
+
+	virtual void TriggerRepeatedHapticPulse( ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags ) = 0;
 };
 
 #define STEAMCONTROLLER_INTERFACE_VERSION "SteamController003"

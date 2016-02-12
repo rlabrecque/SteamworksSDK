@@ -1,6 +1,6 @@
 ================================================================
 
-Copyright © 1996-2014, Valve Corporation, All rights reserved.
+Copyright © 1996-2016, Valve Corporation, All rights reserved.
 
 ================================================================
 
@@ -9,22 +9,15 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 
+----------------------------------------------------------------
+v1.36 9th February 2016
+----------------------------------------------------------------
+
+ISteamController:
+* added new function TriggerRepeatedHapticPulse()
+
+
 Revision History:
-
-----------------------------------------------------------------
-v1.35a 15th January 2016
-----------------------------------------------------------------
-
-A new global function SteamAPI_ReleaseCurrentThreadMemory() has been added.
-
-Many Steamworks API functions use thread-local memory to copy their parameters and store their return value. The SteamAPI_RunCallbacks() function is documented to free this memory, but it does not frees memory which was allocated on other threads.
-
-With previous SDKs, applications could leak memory over time if they did not call SteamAPI_RunCallbacks() from every Steamworks API thread. However, calling SteamAPI_RunCallbacks() on multiple threads is undesirable, since it leads to excessively complicated callback code.
-
-Applications can now call SteamAPI_ReleaseCurrentThreadMemory() from any thread to immediately free memory related to that thread, without running any callbacks. Memory belonging to other threads is unaffected.
-
-Applications which only call Steamworks APIs from a single thread are unaffected, since SteamAPI_RunCallbacks() will continue to free all memory allocated on the same thread.
-
 
 ----------------------------------------------------------------
 v1.35 21st September 2015
