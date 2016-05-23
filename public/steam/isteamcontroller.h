@@ -156,8 +156,9 @@ public:
 	virtual bool Init() = 0;
 	virtual bool Shutdown() = 0;
 	
-	// Pump callback/callresult events
-	// Note: SteamAPI_RunCallbacks will do this for you, so you should never need to call this directly.
+	// Synchronize API state with the latest Steam Controller inputs available. This
+	// is performed automatically by SteamAPI_RunCallbacks, but for the absolute lowest
+	// possible latency, you call this directly before reading controller state.
 	virtual void RunFrame() = 0;
 
 	// Enumerate currently connected controllers

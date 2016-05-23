@@ -971,8 +971,8 @@ void	GLMDisplayDB::PopulateRenderers( void )
 					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPMaxSamples, &fields.m_maxSamples );			problems += (cgl_err != 0);
 					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPSampleModes, &fields.m_sampleModes );		problems += (cgl_err != 0);
 					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPSampleAlpha, &fields.m_sampleAlpha );		problems += (cgl_err != 0);
-					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPVideoMemory, &fields.m_vidMemory );			problems += (cgl_err != 0);
-					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPTextureMemory, &fields.m_texMemory );		problems += (cgl_err != 0);
+					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPVideoMemoryMegabytes, &fields.m_vidMemory );			problems += (cgl_err != 0);
+					cgl_err = CGLDescribeRenderer( cgl_rend, j,   kCGLRPTextureMemoryMegabytes, &fields.m_texMemory );		problems += (cgl_err != 0);
 
 					// decide if this renderer goes in the table.
 					// only insert renderers with at least one active display.

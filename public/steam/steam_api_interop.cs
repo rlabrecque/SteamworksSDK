@@ -55,8 +55,6 @@ internal static extern IntPtr SteamAPI_ISteamClient_GetISteamNetworking(IntPtr i
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamRemoteStorage(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamScreenshots")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamScreenshots(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_RunFrame")]
-internal static extern void SteamAPI_ISteamClient_RunFrame(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetIPCCallCount")]
 internal static extern uint SteamAPI_ISteamClient_GetIPCCallCount(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_SetWarningMessageHook")]
@@ -79,12 +77,6 @@ internal static extern IntPtr SteamAPI_ISteamClient_GetISteamMusic(IntPtr instan
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamMusicRemote(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamHTMLSurface")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamHTMLSurface(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_Set_SteamAPI_CPostAPIResultInProcess")]
-internal static extern void SteamAPI_ISteamClient_Set_SteamAPI_CPostAPIResultInProcess(IntPtr instancePtr, IntPtr func);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_Remove_SteamAPI_CPostAPIResultInProcess")]
-internal static extern void SteamAPI_ISteamClient_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr instancePtr, IntPtr func);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_Set_SteamAPI_CCheckCallbackRegisteredInProcess")]
-internal static extern void SteamAPI_ISteamClient_Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr instancePtr, IntPtr func);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamInventory")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamInventory(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamVideo")]
@@ -139,6 +131,10 @@ internal static extern int SteamAPI_ISteamUser_GetGameBadgeLevel(IntPtr instance
 internal static extern int SteamAPI_ISteamUser_GetPlayerSteamLevel(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_RequestStoreAuthURL")]
 internal static extern ulong SteamAPI_ISteamUser_RequestStoreAuthURL(IntPtr instancePtr, string pchRedirectURL);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_BIsPhoneVerified")]
+internal static extern bool SteamAPI_ISteamUser_BIsPhoneVerified(IntPtr instancePtr);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_BIsTwoFactorEnabled")]
+internal static extern bool SteamAPI_ISteamUser_BIsTwoFactorEnabled(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamFriends_GetPersonaName")]
 internal static extern IntPtr SteamAPI_ISteamFriends_GetPersonaName(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamFriends_SetPersonaName")]
@@ -307,8 +303,6 @@ internal static extern bool SteamAPI_ISteamUtils_IsAPICallCompleted(IntPtr insta
 internal static extern int SteamAPI_ISteamUtils_GetAPICallFailureReason(IntPtr instancePtr, ulong hSteamAPICall);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_GetAPICallResult")]
 internal static extern bool SteamAPI_ISteamUtils_GetAPICallResult(IntPtr instancePtr, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_RunFrame")]
-internal static extern void SteamAPI_ISteamUtils_RunFrame(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_GetIPCCallCount")]
 internal static extern uint SteamAPI_ISteamUtils_GetIPCCallCount(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_SetWarningMessageHook")]
@@ -331,6 +325,10 @@ internal static extern IntPtr SteamAPI_ISteamUtils_GetSteamUILanguage(IntPtr ins
 internal static extern bool SteamAPI_ISteamUtils_IsSteamRunningInVR(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_SetOverlayNotificationInset")]
 internal static extern void SteamAPI_ISteamUtils_SetOverlayNotificationInset(IntPtr instancePtr, int nHorizontalInset, int nVerticalInset);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_IsSteamInBigPictureMode")]
+internal static extern bool SteamAPI_ISteamUtils_IsSteamInBigPictureMode(IntPtr instancePtr);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_StartVRDashboard")]
+internal static extern void SteamAPI_ISteamUtils_StartVRDashboard(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamMatchmaking_GetFavoriteGameCount")]
 internal static extern int SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamMatchmaking_GetFavoriteGame")]
@@ -707,10 +705,8 @@ internal static extern IntPtr SteamAPI_ISteamApps_GetLaunchQueryParam(IntPtr ins
 internal static extern bool SteamAPI_ISteamApps_GetDlcDownloadProgress(IntPtr instancePtr, uint nAppID, ref ulong punBytesDownloaded, ref ulong punBytesTotal);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamApps_GetAppBuildId")]
 internal static extern int SteamAPI_ISteamApps_GetAppBuildId(IntPtr instancePtr);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamApps_RequestPublisherOwnedAppData")]
-internal static extern void SteamAPI_ISteamApps_RequestPublisherOwnedAppData(IntPtr instancePtr);
-[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamApps_GetPublisherOwnedAppData")]
-internal static extern uint SteamAPI_ISteamApps_GetPublisherOwnedAppData(IntPtr instancePtr, ref byte pubBuffer, uint unMaxBytes);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys")]
+internal static extern void SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_SendP2PPacket")]
 internal static extern bool SteamAPI_ISteamNetworking_SendP2PPacket(IntPtr instancePtr, ulong steamIDRemote, IntPtr pubData, uint cubData, uint eP2PSendType, int nChannel);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_IsP2PPacketAvailable")]
@@ -966,7 +962,7 @@ internal static extern bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(IntPtr insta
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews")]
 internal static extern uint SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(IntPtr instancePtr, ulong handle, uint index);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview")]
-internal static extern bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(IntPtr instancePtr, ulong handle, uint index, uint previewIndex, System.Text.StringBuilder pchURLOrVideoID, uint cchURLSize, ref bool pbIsImage);
+internal static extern bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(IntPtr instancePtr, ulong handle, uint index, uint previewIndex, System.Text.StringBuilder pchURLOrVideoID, uint cchURLSize, System.Text.StringBuilder pchOriginalFileName, uint cchOriginalFileNameSize, ref uint pPreviewType);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags")]
 internal static extern uint SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(IntPtr instancePtr, ulong handle, uint index);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag")]
@@ -1029,6 +1025,16 @@ internal static extern bool SteamAPI_ISteamUGC_SetItemPreview(IntPtr instancePtr
 internal static extern bool SteamAPI_ISteamUGC_RemoveItemKeyValueTags(IntPtr instancePtr, ulong handle, string pchKey);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddItemKeyValueTag")]
 internal static extern bool SteamAPI_ISteamUGC_AddItemKeyValueTag(IntPtr instancePtr, ulong handle, string pchKey, string pchValue);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddItemPreviewFile")]
+internal static extern bool SteamAPI_ISteamUGC_AddItemPreviewFile(IntPtr instancePtr, ulong handle, string pszPreviewFile, uint type);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddItemPreviewVideo")]
+internal static extern bool SteamAPI_ISteamUGC_AddItemPreviewVideo(IntPtr instancePtr, ulong handle, string pszVideoID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_UpdateItemPreviewFile")]
+internal static extern bool SteamAPI_ISteamUGC_UpdateItemPreviewFile(IntPtr instancePtr, ulong handle, uint index, string pszPreviewFile);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_UpdateItemPreviewVideo")]
+internal static extern bool SteamAPI_ISteamUGC_UpdateItemPreviewVideo(IntPtr instancePtr, ulong handle, uint index, string pszVideoID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_RemoveItemPreview")]
+internal static extern bool SteamAPI_ISteamUGC_RemoveItemPreview(IntPtr instancePtr, ulong handle, uint index);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_SubmitItemUpdate")]
 internal static extern ulong SteamAPI_ISteamUGC_SubmitItemUpdate(IntPtr instancePtr, ulong handle, string pchChangeNote);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetItemUpdateProgress")]
@@ -1297,11 +1303,6 @@ internal static extern bool SteamAPI_ISteamGameServerStats_SetUserAchievement(In
 internal static extern bool SteamAPI_ISteamGameServerStats_ClearUserAchievement(IntPtr instancePtr, ulong steamIDUser, string pchName);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServerStats_StoreUserStats")]
 internal static extern ulong SteamAPI_ISteamGameServerStats_StoreUserStats(IntPtr instancePtr, ulong steamIDUser);
-public delegate void SteamAPI_PublisherOwnedAppDataReady_t_Callback(PublisherOwnedAppDataReady_t pPublisherOwnedAppDataReady_t);
-[DllImportAttribute("Steam_api", EntryPoint = "CPublisherOwnedAppDataReady_t_SetCallback")]
-public static extern ulong CPublisherOwnedAppDataReady_t_SetCallback(SteamAPI_PublisherOwnedAppDataReady_t_Callback func);
-[DllImportAttribute("Steam_api", EntryPoint = "CPublisherOwnedAppDataReady_t_RemoveCallback")]
-public static extern ulong CPublisherOwnedAppDataReady_t_RemoveCallback(ulong handle);
 public delegate void SteamAPI_UserStatsReceived_t_Callback(UserStatsReceived_t pUserStatsReceived_t);
 [DllImportAttribute("Steam_api", EntryPoint = "CUserStatsReceived_t_SetCallback")]
 public static extern ulong CUserStatsReceived_t_SetCallback(SteamAPI_UserStatsReceived_t_Callback func);
@@ -1577,7 +1578,6 @@ namespace Valve.Steamworks
 		public abstract ISteamNetworking GetISteamNetworking(uint hSteamUser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamRemoteStorage GetISteamRemoteStorage(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamScreenshots GetISteamScreenshots(uint hSteamuser,uint hSteamPipe,string pchVersion);
-		public abstract void RunFrame();
 		public abstract uint GetIPCCallCount();
 		public abstract void SetWarningMessageHook(IntPtr pFunction);
 		public abstract bool BShutdownIfAllPipesClosed();
@@ -1589,9 +1589,6 @@ namespace Valve.Steamworks
 		public abstract ISteamMusic GetISteamMusic(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamMusicRemote GetISteamMusicRemote(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamHTMLSurface GetISteamHTMLSurface(uint hSteamuser,uint hSteamPipe,string pchVersion);
-		public abstract void Set_SteamAPI_CPostAPIResultInProcess(IntPtr func);
-		public abstract void Remove_SteamAPI_CPostAPIResultInProcess(IntPtr func);
-		public abstract void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr func);
 		public abstract ISteamInventory GetISteamInventory(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamVideo GetISteamVideo(uint hSteamuser,uint hSteamPipe,string pchVersion);
 	}
@@ -1625,6 +1622,8 @@ namespace Valve.Steamworks
 		public abstract int GetGameBadgeLevel(int nSeries,bool bFoil);
 		public abstract int GetPlayerSteamLevel();
 		public abstract ulong RequestStoreAuthURL(string pchRedirectURL);
+		public abstract bool BIsPhoneVerified();
+		public abstract bool BIsTwoFactorEnabled();
 	}
 
 
@@ -1721,7 +1720,6 @@ namespace Valve.Steamworks
 		public abstract bool IsAPICallCompleted(ulong hSteamAPICall,ref bool pbFailed);
 		public abstract int GetAPICallFailureReason(ulong hSteamAPICall);
 		public abstract bool GetAPICallResult(ulong hSteamAPICall,IntPtr pCallback,int cubCallback,int iCallbackExpected,ref bool pbFailed);
-		public abstract void RunFrame();
 		public abstract uint GetIPCCallCount();
 		public abstract void SetWarningMessageHook(IntPtr pFunction);
 		public abstract bool IsOverlayEnabled();
@@ -1733,6 +1731,8 @@ namespace Valve.Steamworks
 		public abstract string GetSteamUILanguage();
 		public abstract bool IsSteamRunningInVR();
 		public abstract void SetOverlayNotificationInset(int nHorizontalInset,int nVerticalInset);
+		public abstract bool IsSteamInBigPictureMode();
+		public abstract void StartVRDashboard();
 	}
 
 
@@ -1975,8 +1975,7 @@ namespace Valve.Steamworks
 		public abstract string GetLaunchQueryParam(string pchKey);
 		public abstract bool GetDlcDownloadProgress(uint nAppID,ref ulong punBytesDownloaded,ref ulong punBytesTotal);
 		public abstract int GetAppBuildId();
-		public abstract void RequestPublisherOwnedAppData();
-		public abstract uint GetPublisherOwnedAppData(ref byte pubBuffer,uint unMaxBytes);
+		public abstract void RequestAllProofOfPurchaseKeys();
 	}
 
 
@@ -2152,7 +2151,7 @@ namespace Valve.Steamworks
 		public abstract bool GetQueryUGCChildren(ulong handle,uint index,ref ulong pvecPublishedFileID,uint cMaxEntries);
 		public abstract bool GetQueryUGCStatistic(ulong handle,uint index,uint eStatType,ref uint pStatValue);
 		public abstract uint GetQueryUGCNumAdditionalPreviews(ulong handle,uint index);
-		public abstract bool GetQueryUGCAdditionalPreview(ulong handle,uint index,uint previewIndex,out string pchURLOrVideoID,ref bool pbIsImage);
+		public abstract bool GetQueryUGCAdditionalPreview(ulong handle,uint index,uint previewIndex,out string pchURLOrVideoID,out string pchOriginalFileName,uint cchOriginalFileNameSize,ref uint pPreviewType);
 		public abstract uint GetQueryUGCNumKeyValueTags(ulong handle,uint index);
 		public abstract bool GetQueryUGCKeyValueTag(ulong handle,uint index,uint keyValueTagIndex,out string pchKey,out string pchValue);
 		public abstract bool ReleaseQueryUGCRequest(ulong handle);
@@ -2184,6 +2183,11 @@ namespace Valve.Steamworks
 		public abstract bool SetItemPreview(ulong handle,string pszPreviewFile);
 		public abstract bool RemoveItemKeyValueTags(ulong handle,string pchKey);
 		public abstract bool AddItemKeyValueTag(ulong handle,string pchKey,string pchValue);
+		public abstract bool AddItemPreviewFile(ulong handle,string pszPreviewFile,uint type);
+		public abstract bool AddItemPreviewVideo(ulong handle,string pszVideoID);
+		public abstract bool UpdateItemPreviewFile(ulong handle,uint index,string pszPreviewFile);
+		public abstract bool UpdateItemPreviewVideo(ulong handle,uint index,string pszVideoID);
+		public abstract bool RemoveItemPreview(ulong handle,uint index);
 		public abstract ulong SubmitItemUpdate(ulong handle,string pchChangeNote);
 		public abstract uint GetItemUpdateProgress(ulong handle,ref ulong punBytesProcessed,ref ulong punBytesTotal);
 		public abstract ulong SetUserItemVote(ulong nPublishedFileID,bool bVoteUp);
@@ -2487,11 +2491,6 @@ public override ISteamScreenshots GetISteamScreenshots(uint hSteamuser,uint hSte
 	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamScreenshots(m_pSteamClient,hSteamuser,hSteamPipe,pchVersion);
 	return (ISteamScreenshots) Marshal.PtrToStructure(result, typeof(ISteamScreenshots));
 }
-public override void RunFrame()
-{
-	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamClient_RunFrame(m_pSteamClient);
-}
 public override uint GetIPCCallCount()
 {
 	CheckIfUsable();
@@ -2556,21 +2555,6 @@ public override ISteamHTMLSurface GetISteamHTMLSurface(uint hSteamuser,uint hSte
 	CheckIfUsable();
 	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamHTMLSurface(m_pSteamClient,hSteamuser,hSteamPipe,pchVersion);
 	return (ISteamHTMLSurface) Marshal.PtrToStructure(result, typeof(ISteamHTMLSurface));
-}
-public override void Set_SteamAPI_CPostAPIResultInProcess(IntPtr func)
-{
-	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamClient_Set_SteamAPI_CPostAPIResultInProcess(m_pSteamClient,func);
-}
-public override void Remove_SteamAPI_CPostAPIResultInProcess(IntPtr func)
-{
-	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamClient_Remove_SteamAPI_CPostAPIResultInProcess(m_pSteamClient,func);
-}
-public override void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr func)
-{
-	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamClient_Set_SteamAPI_CCheckCallbackRegisteredInProcess(m_pSteamClient,func);
 }
 public override ISteamInventory GetISteamInventory(uint hSteamuser,uint hSteamPipe,string pchVersion)
 {
@@ -2752,6 +2736,18 @@ public override ulong RequestStoreAuthURL(string pchRedirectURL)
 {
 	CheckIfUsable();
 	ulong result = NativeEntrypoints.SteamAPI_ISteamUser_RequestStoreAuthURL(m_pSteamUser,pchRedirectURL);
+	return result;
+}
+public override bool BIsPhoneVerified()
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUser_BIsPhoneVerified(m_pSteamUser);
+	return result;
+}
+public override bool BIsTwoFactorEnabled()
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUser_BIsTwoFactorEnabled(m_pSteamUser);
 	return result;
 }
 }
@@ -3302,11 +3298,6 @@ public override bool GetAPICallResult(ulong hSteamAPICall,IntPtr pCallback,int c
 	bool result = NativeEntrypoints.SteamAPI_ISteamUtils_GetAPICallResult(m_pSteamUtils,hSteamAPICall,pCallback,cubCallback,iCallbackExpected,ref pbFailed);
 	return result;
 }
-public override void RunFrame()
-{
-	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamUtils_RunFrame(m_pSteamUtils);
-}
 public override uint GetIPCCallCount()
 {
 	CheckIfUsable();
@@ -3370,6 +3361,17 @@ public override void SetOverlayNotificationInset(int nHorizontalInset,int nVerti
 {
 	CheckIfUsable();
 	NativeEntrypoints.SteamAPI_ISteamUtils_SetOverlayNotificationInset(m_pSteamUtils,nHorizontalInset,nVerticalInset);
+}
+public override bool IsSteamInBigPictureMode()
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUtils_IsSteamInBigPictureMode(m_pSteamUtils);
+	return result;
+}
+public override void StartVRDashboard()
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamUtils_StartVRDashboard(m_pSteamUtils);
 }
 }
 
@@ -4692,16 +4694,10 @@ public override int GetAppBuildId()
 	int result = NativeEntrypoints.SteamAPI_ISteamApps_GetAppBuildId(m_pSteamApps);
 	return result;
 }
-public override void RequestPublisherOwnedAppData()
+public override void RequestAllProofOfPurchaseKeys()
 {
 	CheckIfUsable();
-	NativeEntrypoints.SteamAPI_ISteamApps_RequestPublisherOwnedAppData(m_pSteamApps);
-}
-public override uint GetPublisherOwnedAppData(ref byte pubBuffer,uint unMaxBytes)
-{
-	CheckIfUsable();
-	uint result = NativeEntrypoints.SteamAPI_ISteamApps_GetPublisherOwnedAppData(m_pSteamApps,ref pubBuffer,unMaxBytes);
-	return result;
+	NativeEntrypoints.SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(m_pSteamApps);
 }
 }
 
@@ -5644,13 +5640,15 @@ public override uint GetQueryUGCNumAdditionalPreviews(ulong handle,uint index)
 	uint result = NativeEntrypoints.SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(m_pSteamUGC,handle,index);
 	return result;
 }
-public override bool GetQueryUGCAdditionalPreview(ulong handle,uint index,uint previewIndex,out string pchURLOrVideoID,ref bool pbIsImage)
+public override bool GetQueryUGCAdditionalPreview(ulong handle,uint index,uint previewIndex,out string pchURLOrVideoID,out string pchOriginalFileName,uint cchOriginalFileNameSize,ref uint pPreviewType)
 {
 	CheckIfUsable();
-	pbIsImage = false;
+	pPreviewType = 0;
 	System.Text.StringBuilder pStrBuffer1 = new System.Text.StringBuilder(2048);
-	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(m_pSteamUGC,handle,index,previewIndex,pStrBuffer1,2048,ref pbIsImage);
+	System.Text.StringBuilder pStrBuffer2 = new System.Text.StringBuilder(2048);
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(m_pSteamUGC,handle,index,previewIndex,pStrBuffer1,2048,pStrBuffer2,cchOriginalFileNameSize,ref pPreviewType);
 	pchURLOrVideoID  = pStrBuffer1.ToString();
+	pchOriginalFileName  = pStrBuffer2.ToString();
 	return result;
 }
 public override uint GetQueryUGCNumKeyValueTags(ulong handle,uint index)
@@ -5841,6 +5839,36 @@ public override bool AddItemKeyValueTag(ulong handle,string pchKey,string pchVal
 {
 	CheckIfUsable();
 	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_AddItemKeyValueTag(m_pSteamUGC,handle,pchKey,pchValue);
+	return result;
+}
+public override bool AddItemPreviewFile(ulong handle,string pszPreviewFile,uint type)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_AddItemPreviewFile(m_pSteamUGC,handle,pszPreviewFile,type);
+	return result;
+}
+public override bool AddItemPreviewVideo(ulong handle,string pszVideoID)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_AddItemPreviewVideo(m_pSteamUGC,handle,pszVideoID);
+	return result;
+}
+public override bool UpdateItemPreviewFile(ulong handle,uint index,string pszPreviewFile)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_UpdateItemPreviewFile(m_pSteamUGC,handle,index,pszPreviewFile);
+	return result;
+}
+public override bool UpdateItemPreviewVideo(ulong handle,uint index,string pszVideoID)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_UpdateItemPreviewVideo(m_pSteamUGC,handle,index,pszVideoID);
+	return result;
+}
+public override bool RemoveItemPreview(ulong handle,uint index)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_RemoveItemPreview(m_pSteamUGC,handle,index);
 	return result;
 }
 public override ulong SubmitItemUpdate(ulong handle,string pchChangeNote)
@@ -6748,26 +6776,6 @@ public override ulong StoreUserStats(ulong steamIDUser)
 }
 
 
-public class CPublisherOwnedAppDataReady_t_Callback
-{
-	public CPublisherOwnedAppDataReady_t_Callback() { }
-	~CPublisherOwnedAppDataReady_t_Callback()
-	{
-		if(m_Handle != 0)
-		{
-			Valve.Interop.NativeEntrypoints.CPublisherOwnedAppDataReady_t_RemoveCallback(m_Handle);
-       }
-	}
-	ulong m_Handle = 0;
-	public void Set(Valve.Interop.NativeEntrypoints.SteamAPI_PublisherOwnedAppDataReady_t_Callback func)
-	{
-		if (m_Handle != 0)
-		{
-			Valve.Interop.NativeEntrypoints.CPublisherOwnedAppDataReady_t_RemoveCallback(m_Handle);
-		}
-		m_Handle = Valve.Interop.NativeEntrypoints.CPublisherOwnedAppDataReady_t_SetCallback(func);
-  }
-}
 public class CUserStatsReceived_t_Callback
 {
 	public CUserStatsReceived_t_Callback() { }
@@ -7931,6 +7939,7 @@ public enum EResult
 	k_EResultGSLTDenied = 102,
 	k_EResultGSOwnerDenied = 103,
 	k_EResultInvalidItemType = 104,
+	k_EResultIPBanned = 105,
 }
 public enum EVoiceResult
 {
@@ -8035,6 +8044,7 @@ public enum EAppOwnershipFlags
 	k_EAppOwnershipFlags_AutoGrant = 16384,
 	k_EAppOwnershipFlags_PendingGift = 32768,
 	k_EAppOwnershipFlags_RentalNotActivated = 65536,
+	k_EAppOwnershipFlags_Rental = 131072,
 }
 public enum EAppType
 {
@@ -8078,8 +8088,6 @@ public enum EChatEntryType
 	k_EChatEntryTypeWasBanned = 9,
 	k_EChatEntryTypeDisconnected = 10,
 	k_EChatEntryTypeHistoricalChat = 11,
-	k_EChatEntryTypeReserved1 = 12,
-	k_EChatEntryTypeReserved2 = 13,
 	k_EChatEntryTypeLinkBlocked = 14,
 }
 public enum EChatRoomEnterResponse
@@ -8154,6 +8162,18 @@ public enum ELaunchOptionType
 	k_ELaunchOptionType_OtherVR = 13,
 	k_ELaunchOptionType_OpenVROverlay = 14,
 	k_ELaunchOptionType_Dialog = 1000,
+}
+public enum EVRHMDType
+{
+	k_eEVRHMDType_Unknown = 0,
+	k_eEVRHMDType_HTC_Dev = 1,
+	k_eEVRHMDType_HTC_VivePre = 2,
+	k_eEVRHMDType_HTC_Vive = 3,
+	k_eEVRHMDType_HTC_Unknown = 20,
+	k_eEVRHMDType_Oculus_DK1 = 21,
+	k_eEVRHMDType_Oculus_DK2 = 22,
+	k_eEVRHMDType_Oculus_Rift = 23,
+	k_eEVRHMDType_Oculus_Unknown = 40,
 }
 public enum EFailureType
 {
@@ -8457,6 +8477,7 @@ public enum EHTTPMethod
 	k_EHTTPMethodPUT = 4,
 	k_EHTTPMethodDELETE = 5,
 	k_EHTTPMethodOPTIONS = 6,
+	k_EHTTPMethodPATCH = 7,
 }
 public enum EHTTPStatusCode
 {
@@ -8666,6 +8687,15 @@ public enum EItemStatistic
 	k_EItemStatistic_NumUniqueFollowers = 5,
 	k_EItemStatistic_NumUniqueWebsiteViews = 6,
 	k_EItemStatistic_ReportScore = 7,
+}
+public enum EItemPreviewType
+{
+	k_EItemPreviewType_Image = 0,
+	k_EItemPreviewType_YouTubeVideo = 1,
+	k_EItemPreviewType_Sketchfab = 2,
+	k_EItemPreviewType_EnvironmentMap_HorizontalCross = 3,
+	k_EItemPreviewType_EnvironmentMap_LatLong = 4,
+	k_EItemPreviewType_ReservedMax = 255,
 }
 public enum EHTMLMouseButton
 {
@@ -8945,6 +8975,8 @@ public enum ESteamItemFlags
 [StructLayout(LayoutKind.Sequential)] public struct SteamAPICallCompleted_t
 {
 	public ulong m_hAsyncCall;
+	public int m_iCallback;
+	public uint m_cubParam;
 }
 [StructLayout(LayoutKind.Sequential)] public struct CheckFileSignature_t
 {
@@ -9291,7 +9323,7 @@ public enum ESteamItemFlags
 {
 	public ulong m_nPublishedFileId;
 	public uint m_nAppID;
-	public ulong m_hFile;
+	public ulong m_ulUnused;
 }
 [StructLayout(LayoutKind.Sequential)] public struct RemoteStorageFileWriteAsyncComplete_t
 {
@@ -9405,12 +9437,9 @@ public enum ESteamItemFlags
 {
 	public EResult m_eResult;
 	public uint m_nAppID;
-	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-	public string m_rgchKey; //char[64]
-}
-[StructLayout(LayoutKind.Sequential)] public struct PublisherOwnedAppDataReady_t
-{
-	public EResult m_eResult;
+	public uint m_cchKeyLength;
+	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 240)]
+	public string m_rgchKey; //char[240]
 }
 [StructLayout(LayoutKind.Sequential)] public struct P2PSessionState_t
 {
@@ -9444,33 +9473,33 @@ public enum ESteamItemFlags
 	public uint m_hLocal;
 	public EResult m_eResult;
 }
-[StructLayout(LayoutKind.Sequential)] public struct VolumeHasChanged_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public float m_flNewVolume;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerWantsShuffled_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	[MarshalAs(UnmanagedType.I1)]
 	public bool m_bShuffled;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerWantsLooped_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	[MarshalAs(UnmanagedType.I1)]
 	public bool m_bLooped;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerWantsVolume_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public float m_flNewVolume;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerSelectsQueueEntry_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public int nID;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerSelectsPlaylistEntry_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public int nID;
 }
-[StructLayout(LayoutKind.Sequential)] public struct MusicPlayerWantsPlayingRepeatStatus_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public int m_nPlayingRepeatStatus;
 }
@@ -9613,11 +9642,11 @@ public enum ESteamItemFlags
 	[MarshalAs(UnmanagedType.I1)]
 	public bool m_bVoteSkipped;
 }
-[StructLayout(LayoutKind.Sequential)] public struct SteamAppInstalled_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public uint m_nAppID;
 }
-[StructLayout(LayoutKind.Sequential)] public struct SteamAppUninstalled_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public uint m_nAppID;
 }
@@ -9791,35 +9820,20 @@ public enum ESteamItemFlags
 {
 	public int m_handle;
 }
-[StructLayout(LayoutKind.Sequential)] public struct BroadcastUploadStop_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public EBroadcastUploadResult m_eResult;
 }
-[StructLayout(LayoutKind.Sequential)] public struct GetVideoURLResult_t
+[StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
 	public EResult m_eResult;
 	public uint m_unVideoAppID;
 	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
 	public string m_rgchURL; //char[256]
 }
-[StructLayout(LayoutKind.Sequential)] public struct CCallbackBase
-{
-	public byte m_nCallbackFlags;
-	public int m_iCallback;
-}
-[StructLayout(LayoutKind.Sequential)] public struct CCallResult
-{
-	public ulong m_hAPICall;
-	public IntPtr m_pObj; // T *
-	public IntPtr m_Func;
-}
-[StructLayout(LayoutKind.Sequential)] public struct CCallback
-{
-	public IntPtr m_pObj; // T *
-	public IntPtr m_Func;
-}
 [StructLayout(LayoutKind.Sequential)] public struct CSteamAPIContext
 {
+	public IntPtr m_pSteamClient; // class ISteamClient *
 	public IntPtr m_pSteamUser; // class ISteamUser *
 	public IntPtr m_pSteamFriends; // class ISteamFriends *
 	public IntPtr m_pSteamUtils; // class ISteamUtils *
@@ -9840,6 +9854,22 @@ public enum ESteamItemFlags
 	public IntPtr m_pSteamHTMLSurface; // class ISteamHTMLSurface *
 	public IntPtr m_pSteamInventory; // class ISteamInventory *
 	public IntPtr m_pSteamVideo; // class ISteamVideo *
+}
+[StructLayout(LayoutKind.Sequential)] public struct CCallbackBase
+{
+	public byte m_nCallbackFlags;
+	public int m_iCallback;
+}
+[StructLayout(LayoutKind.Sequential)] public struct CCallResult
+{
+	public ulong m_hAPICall;
+	public IntPtr m_pObj; // T *
+	public IntPtr m_Func;
+}
+[StructLayout(LayoutKind.Sequential)] public struct CCallback
+{
+	public IntPtr m_pObj; // T *
+	public IntPtr m_Func;
 }
 [StructLayout(LayoutKind.Sequential)] public struct GSClientApprove_t
 {
@@ -9989,8 +10019,8 @@ public const int k_iSteamAppListCallbacks = 3900;
 public const int k_iSteamMusicCallbacks = 4000;
 public const int k_iSteamMusicRemoteCallbacks = 4100;
 public const int k_iClientVRCallbacks = 4200;
-public const int k_iClientReservedCallbacks = 4300;
-public const int k_iSteamReservedCallbacks = 4400;
+public const int k_iClientGameNotificationCallbacks = 4300;
+public const int k_iSteamGameNotificationCallbacks = 4400;
 public const int k_iSteamHTMLSurfaceCallbacks = 4500;
 public const int k_iClientVideoCallbacks = 4600;
 public const int k_iClientInventoryCallbacks = 4700;

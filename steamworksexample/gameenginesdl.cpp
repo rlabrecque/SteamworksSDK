@@ -10,6 +10,7 @@
 #include <map>
 #include <queue>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include <GL/glew.h>
 

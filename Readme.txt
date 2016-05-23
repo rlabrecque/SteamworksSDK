@@ -8,6 +8,32 @@ Copyright © 1996-2016, Valve Corporation, All rights reserved.
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
 
+----------------------------------------------------------------
+v1.37 23rd May 2016
+----------------------------------------------------------------
+
+Starting with this release, SDK forward-compatibility has been improved. All executables and libraries built using the official C++ headers from this SDK will continue to work even when paired with runtime DLLs from future SDKs. This will eventually allow for the mixing of dynamic libraries (such as third-party plug-ins) built with different versions of Steamworks.
+
+The VERSION_SAFE_STEAM_API_INTERFACES compile-time flag is no longer necessary for cross-version compatibility, and the SteamAPI_InitSafe and SteamGameServer_InitSafe functions have been removed. Applications which currently use these InitSafe functions should be changed to use the normal Init functions instead.
+
+
+ISteamRemoteStorage
+* Removed unsed UGCHandle_t m_hFile from RemoteStoragePublishedFileUpdated_t
+
+ISteamUGC
+* Added ability to add additional preview types to UGC such as standard images, YouTube videos, Sketchfab models, etc.
+
+ISteamUser
+* Added BIsPhoneVerified()
+* Added BIsTwoFactorEnabled()
+
+ISteamUtils
+* Added IsSteamInBigPictureMode()
+* Added StartVRDashboard(), which asks Steam to create and render the OpenVR Dashboard
+
+ISteamApps
+* Added RequestAllProofOfPurchaseKeys
+
 
 ----------------------------------------------------------------
 v1.36 9th February 2016

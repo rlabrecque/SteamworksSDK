@@ -14,11 +14,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CHTMLSurface::CHTMLSurface( IGameEngine *pGameEngine ) :
-	m_CloseBrowser( this, &CHTMLSurface::OnCloseBrowser ),
-	m_NeedsPaint( this, &CHTMLSurface::OnNeedsPaint ),
-	m_StartRequest( this, &CHTMLSurface::OnStartRequest ),
-	m_FinishedRequest( this, &CHTMLSurface::OnFinishedRequest )
+CHTMLSurface::CHTMLSurface( IGameEngine *pGameEngine )
 {
 	m_pGameEngine = pGameEngine;
 	m_unBrowserHandle = INVALID_HTMLBROWSER;
@@ -121,7 +117,7 @@ void CHTMLSurface::OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOF
 		return;
 
 	m_unBrowserHandle = pBrowserReady->unBrowserHandle;
-	SteamHTMLSurface()->SetSize( m_unBrowserHandle, m_unHTMLWide, m_unHTMLWide );
+	SteamHTMLSurface()->SetSize( m_unBrowserHandle, m_unHTMLWide, m_unHTMLTall );
 	SteamHTMLSurface()->LoadURL( m_unBrowserHandle, "http://steamcommunity.com/", NULL );
 }
 
@@ -149,7 +145,56 @@ void CHTMLSurface::OnNeedsPaint( HTML_NeedsPaint_t *pParam  )
 //-----------------------------------------------------------------------------
 void CHTMLSurface::OnStartRequest( HTML_StartRequest_t *pParam )
 {
+	// MUST call AllowStartRequest once for every OnStartRequest callback!
 	SteamHTMLSurface()->AllowStartRequest( m_unBrowserHandle, true );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: the page has requested a modal javascript message box
+//-----------------------------------------------------------------------------
+void CHTMLSurface::OnJSAlert( HTML_JSAlert_t *pParam )
+{
+	// MUST call JSDialogResponse once for every OnJSAlert callback!
+
+	// ShowModalMessageBox( pParam->pchMessage );
+	SteamHTMLSurface()->JSDialogResponse( m_unBrowserHandle, true );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: the page has requested a modal javascript yes/no dialog box
+//-----------------------------------------------------------------------------
+void CHTMLSurface::OnJSConfirm( HTML_JSConfirm_t *pParam )
+{
+	// MUST call JSDialogResponse once for every OnJSConfirm callback!
+
+	// if ( ShowModalYesNoDialogBox( pParam->pchMessage ) == BUTTON_NO );
+	//     SteamHTMLSurface()->JSDialogResponse( m_unBrowserHandle, false );
+	// else
+	SteamHTMLSurface()->JSDialogResponse( m_unBrowserHandle, true );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: the page has requested a local file upload dialog box.
+//-----------------------------------------------------------------------------
+void CHTMLSurface::OnUploadLocalFile( HTML_FileOpenDialog_t *pParam )
+{
+	// MUST call FileLoadDialogResponse once for every OnLocalFileBrowse callback!
+
+	// Most applications do NOT want to allow the web browser to upload local file
+	// content from the customer's hard drive to the remote web server! That would
+	// be a pretty big security hole, unless you carefully vetted every file path.
+	SteamHTMLSurface()->FileLoadDialogResponse( m_unBrowserHandle, NULL );
+	
+	// But if you did want to allow it, you would do something like this:
+	// ... show modal file selection dialog box ...
+	// ... verify that the selected files are safe to upload ...
+	// std::vector< const char * > vecUTF8FilenamesArray;
+	// ... populate vecUTF8FilenamesArray ...
+	// vecUTF8FilenamesArray.push_back( NULL );
+	// SteamHTMLSurface()->FileLoadDialogResponse( m_unBrowserHandle, &vecUTF8FilenamesArray[0] );
 }
 
 

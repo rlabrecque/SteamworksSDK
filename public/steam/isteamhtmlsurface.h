@@ -33,6 +33,13 @@ public:
 	// identify your client on web servers.
 	//   The userCSS string lets you apply a CSS style sheet to every displayed page, leave null if
 	// you do not require this functionality.
+	//
+	// YOU MUST HAVE IMPLEMENTED HANDLERS FOR HTML_BrowserReady_t, HTML_StartRequest_t,
+	// HTML_JSAlert_t, HTML_JSConfirm_t, and HTML_FileOpenDialog_t! See the CALLBACKS
+	// section of this interface (AllowStartRequest, etc) for more details. If you do
+	// not implement these callback handlers, the browser may appear to hang instead of
+	// navigating to new pages or triggering javascript popups.
+	//
 	CALL_RESULT( HTML_BrowserReady_t )
 	virtual SteamAPICall_t CreateBrowser( const char *pchUserAgent, const char *pchUserCSS ) = 0;
 

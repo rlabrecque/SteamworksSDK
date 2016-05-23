@@ -129,6 +129,7 @@ enum EResult
 	k_EResultGSLTDenied = 102,					// a game server login token owned by this token's owner has been banned
 	k_EResultGSOwnerDenied = 103,				// game server owner is denied for other reason (account lock, community ban, vac ban, missing phone)
 	k_EResultInvalidItemType = 104,				// the type of thing we were requested to act on is invalid
+	k_EResultIPBanned = 105,					// the ip address has been banned from taking this action
 };
 
 // Error codes for use with the voice functions
@@ -264,6 +265,7 @@ enum EAppOwnershipFlags
 	k_EAppOwnershipFlags_AutoGrant			= 0x4000,	// Ownership is based on any kind of autogrant license
 	k_EAppOwnershipFlags_PendingGift		= 0x8000,	// user has pending gift to redeem
 	k_EAppOwnershipFlags_RentalNotActivated	= 0x10000,	// Rental hasn't been activated yet
+	k_EAppOwnershipFlags_Rental				= 0x20000,	// Is a rental
 };
 
 
@@ -331,8 +333,8 @@ enum EChatEntryType
 	k_EChatEntryTypeWasBanned = 9,		// user was banned (data: 64-bit steamid of actor performing the ban)
 	k_EChatEntryTypeDisconnected = 10,	// user disconnected
 	k_EChatEntryTypeHistoricalChat = 11,	// a chat message from user's chat history or offilne message
-	k_EChatEntryTypeReserved1 = 12,
-	k_EChatEntryTypeReserved2 = 13,
+	//k_EChatEntryTypeReserved1 = 12, // No longer used
+	//k_EChatEntryTypeReserved2 = 13, // No longer used
 	k_EChatEntryTypeLinkBlocked = 14, // a link was removed by the chat filter.
 };
 
@@ -463,7 +465,56 @@ enum ELaunchOptionType
 };
 
 
-#pragma pack( push, 1 )		
+//-----------------------------------------------------------------------------
+// Purpose: true if this launch option is any of the vr launching types
+//-----------------------------------------------------------------------------
+static inline bool BIsVRLaunchOptionType( const ELaunchOptionType  eType )
+{
+	return eType == k_ELaunchOptionType_OpenVR || eType == k_ELaunchOptionType_OpenVROverlay || eType == k_ELaunchOptionType_OtherVR;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: code points for VR HMD vendors and models 
+// WARNING: DO NOT RENUMBER EXISTING VALUES - STORED IN A DATABASE
+//-----------------------------------------------------------------------------
+enum EVRHMDType
+{
+	k_eEVRHMDType_Unknown = 0, // unknown vendor and model
+
+	k_eEVRHMDType_HTC_Dev = 1,	// original HTC dev kits
+	k_eEVRHMDType_HTC_VivePre = 2,	// htc vive pre
+	k_eEVRHMDType_HTC_Vive = 3,	// htc vive consumer release
+
+	k_eEVRHMDType_HTC_Unknown = 20, // unknown htc hmd
+
+	k_eEVRHMDType_Oculus_DK1 = 21, // occulus DK1 
+	k_eEVRHMDType_Oculus_DK2 = 22, // occulus DK2
+	k_eEVRHMDType_Oculus_Rift = 23, // occulus rift
+
+	k_eEVRHMDType_Oculus_Unknown = 40, // // occulus unknown HMD
+};
+
+
+//-----------------------------------------------------------------------------
+// Purpose: true if this is from an Oculus HMD
+//-----------------------------------------------------------------------------
+static inline bool BIsOcculusHMD( EVRHMDType eType )
+{
+	return eType == k_eEVRHMDType_Oculus_DK1 || eType == k_eEVRHMDType_Oculus_DK2 || eType == k_eEVRHMDType_Oculus_Rift || eType == k_eEVRHMDType_Oculus_Unknown;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: true if this is from an Vive HMD
+//-----------------------------------------------------------------------------
+static inline bool BIsViveHMD( EVRHMDType eType )
+{
+	return eType == k_eEVRHMDType_HTC_Dev || eType == k_eEVRHMDType_HTC_VivePre || eType == k_eEVRHMDType_HTC_Vive || eType == k_eEVRHMDType_HTC_Unknown;
+}
+
+
+#pragma pack( push, 1 )
 
 #define CSTEAMID_DEFINED
 

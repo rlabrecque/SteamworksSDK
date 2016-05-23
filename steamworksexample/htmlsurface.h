@@ -29,11 +29,16 @@ public:
 	void Show();
 
 private:
-	STEAM_CALLBACK( CHTMLSurface, OnCloseBrowser, HTML_CloseBrowser_t, m_CloseBrowser );
-	STEAM_CALLBACK( CHTMLSurface, OnNeedsPaint, HTML_NeedsPaint_t, m_NeedsPaint );
-	STEAM_CALLBACK( CHTMLSurface, OnStartRequest, HTML_StartRequest_t, m_StartRequest );
-	STEAM_CALLBACK( CHTMLSurface, OnFinishedRequest, HTML_FinishedRequest_t, m_FinishedRequest );
-	
+	STEAM_CALLBACK( CHTMLSurface, OnStartRequest, HTML_StartRequest_t ); // REQUIRED
+	STEAM_CALLBACK( CHTMLSurface, OnJSAlert, HTML_JSAlert_t ); // REQUIRED
+	STEAM_CALLBACK( CHTMLSurface, OnJSConfirm, HTML_JSConfirm_t ); // REQUIRED
+	STEAM_CALLBACK( CHTMLSurface, OnUploadLocalFile, HTML_FileOpenDialog_t ); // REQUIRED
+
+	STEAM_CALLBACK( CHTMLSurface, OnNeedsPaint, HTML_NeedsPaint_t );
+	STEAM_CALLBACK( CHTMLSurface, OnCloseBrowser, HTML_CloseBrowser_t );
+	STEAM_CALLBACK( CHTMLSurface, OnFinishedRequest, HTML_FinishedRequest_t );
+
+
 	void OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOFailure );
 	CCallResult< CHTMLSurface, HTML_BrowserReady_t > m_SteamCallResultBrowserReady;
 

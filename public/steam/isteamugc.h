@@ -127,6 +127,23 @@ enum EItemStatistic
 	k_EItemStatistic_ReportScore			= 7,
 };
 
+enum EItemPreviewType
+{
+	k_EItemPreviewType_Image							= 0,	// standard image file expected (e.g. jpg, png, gif, etc.)
+	k_EItemPreviewType_YouTubeVideo						= 1,	// video id is stored
+	k_EItemPreviewType_Sketchfab						= 2,	// model id is stored
+	k_EItemPreviewType_EnvironmentMap_HorizontalCross	= 3,	// standard image file expected - cube map in the layout
+																// +---+---+-------+
+																// |   |Up |       |
+																// +---+---+---+---+
+																// | L | F | R | B |
+																// +---+---+---+---+
+																// |   |Dn |       |
+																// +---+---+---+---+
+	k_EItemPreviewType_EnvironmentMap_LatLong			= 4,	// standard image file expected
+	k_EItemPreviewType_ReservedMax						= 255,	// you can specify your own types above this value
+};
+
 const uint32 kNumUGCResultsPerPage = 50;
 const uint32 k_cchDeveloperMetadataMax = 5000;
 
@@ -191,7 +208,7 @@ public:
 	virtual bool GetQueryUGCChildren( UGCQueryHandle_t handle, uint32 index, PublishedFileId_t* pvecPublishedFileID, uint32 cMaxEntries ) = 0;
 	virtual bool GetQueryUGCStatistic( UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint32 *pStatValue ) = 0;
 	virtual uint32 GetQueryUGCNumAdditionalPreviews( UGCQueryHandle_t handle, uint32 index ) = 0;
-	virtual bool GetQueryUGCAdditionalPreview( UGCQueryHandle_t handle, uint32 index, uint32 previewIndex, OUT_STRING_COUNT(cchURLSize) char *pchURLOrVideoID, uint32 cchURLSize, bool *pbIsImage ) = 0;
+	virtual bool GetQueryUGCAdditionalPreview( UGCQueryHandle_t handle, uint32 index, uint32 previewIndex, OUT_STRING_COUNT(cchURLSize) char *pchURLOrVideoID, uint32 cchURLSize, OUT_STRING_COUNT(cchURLSize) char *pchOriginalFileName, uint32 cchOriginalFileNameSize, EItemPreviewType *pPreviewType ) = 0;
 	virtual uint32 GetQueryUGCNumKeyValueTags( UGCQueryHandle_t handle, uint32 index ) = 0;
 	virtual bool GetQueryUGCKeyValueTag( UGCQueryHandle_t handle, uint32 index, uint32 keyValueTagIndex, OUT_STRING_COUNT(cchKeySize) char *pchKey, uint32 cchKeySize, OUT_STRING_COUNT(cchValueSize) char *pchValue, uint32 cchValueSize ) = 0;
 
@@ -238,6 +255,11 @@ public:
 	virtual bool SetItemPreview( UGCUpdateHandle_t handle, const char *pszPreviewFile ) = 0; //  change preview image file for this item. pszPreviewFile points to local image file, which must be under 1MB in size
 	virtual bool RemoveItemKeyValueTags( UGCUpdateHandle_t handle, const char *pchKey ) = 0; // remove any existing key-value tags with the specified key
 	virtual bool AddItemKeyValueTag( UGCUpdateHandle_t handle, const char *pchKey, const char *pchValue ) = 0; // add new key-value tags for the item. Note that there can be multiple values for a tag.
+	virtual bool AddItemPreviewFile( UGCUpdateHandle_t handle, const char *pszPreviewFile, EItemPreviewType type ) = 0; //  add preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size
+	virtual bool AddItemPreviewVideo( UGCUpdateHandle_t handle, const char *pszVideoID ) = 0; //  add preview video for this item
+	virtual bool UpdateItemPreviewFile( UGCUpdateHandle_t handle, uint32 index, const char *pszPreviewFile ) = 0; //  updates an existing preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size
+	virtual bool UpdateItemPreviewVideo( UGCUpdateHandle_t handle, uint32 index, const char *pszVideoID ) = 0; //  updates an existing preview video for this item
+	virtual bool RemoveItemPreview( UGCUpdateHandle_t handle, uint32 index ) = 0; // remove a preview by index starting at 0 (previews are sorted)
 
 	CALL_RESULT( SubmitItemUpdateResult_t )
 	virtual SteamAPICall_t SubmitItemUpdate( UGCUpdateHandle_t handle, const char *pchChangeNote ) = 0; // commit update process started with StartItemUpdate()
@@ -282,7 +304,7 @@ public:
 	virtual void SuspendDownloads( bool bSuspend ) = 0;
 };
 
-#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION007"
+#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION008"
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for querying UGC

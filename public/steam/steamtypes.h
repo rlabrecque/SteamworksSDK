@@ -84,7 +84,7 @@ typedef unsigned int uintp;
 
 #endif // else _WIN32
 
-#ifdef __clang__
+#ifdef API_GEN
 # define CLANG_ATTR(ATTR) __attribute__((annotate( ATTR )))
 #else
 # define CLANG_ATTR(ATTR)

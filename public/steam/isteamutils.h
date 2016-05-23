@@ -151,9 +151,17 @@ public:
 	
 	// Sets the inset of the overlay notification from the corner specified by SetOverlayNotificationPosition.
 	virtual void SetOverlayNotificationInset( int nHorizontalInset, int nVerticalInset ) = 0;
+
+	// returns true if Steam & the Steam Overlay are running in Big Picture mode
+	// Games much be launched through the Steam client to enable the Big Picture overlay. During development,
+	// a game can be added as a non-steam game to the developers library to test this feature
+	virtual bool IsSteamInBigPictureMode() = 0;
+
+	// ask SteamUI to create and render its OpenVR dashboard
+	virtual void StartVRDashboard() = 0;
 };
 
-#define STEAMUTILS_INTERFACE_VERSION "SteamUtils007"
+#define STEAMUTILS_INTERFACE_VERSION "SteamUtils008"
 
 
 // callbacks
@@ -191,6 +199,8 @@ struct SteamAPICallCompleted_t
 {
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 3 };
 	SteamAPICall_t m_hAsyncCall;
+	int m_iCallback;
+	uint32 m_cubParam;
 };
 
 

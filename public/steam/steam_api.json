@@ -37,9 +37,7 @@
 ,{"typedef": "HSteamPipe","type": "int32"}
 ,{"typedef": "HSteamUser","type": "int32"}
 ,{"typedef": "SteamAPIWarningMessageHook_t","type": "void (*)(int, const char *) __attribute__((cdecl))"}
-,{"typedef": "SteamAPI_PostAPIResultInProcess_t","type": "void (*)(SteamAPICall_t, void *, uint32, int)"}
 ,{"typedef": "SteamAPI_CheckCallbackRegistered_t","type": "uint32 (*)(int)"}
-,{"typedef": "HSteamCall","type": "int32"}
 ,{"typedef": "FriendsGroupID_t","type": "int16"}
 ,{"typedef": "SteamAPIWarningMessageHook_t","type": "void (*)(int, const char *) __attribute__((cdecl))"}
 ,{"typedef": "HServerListRequest","type": "void *"}
@@ -54,6 +52,22 @@
 ,{"typedef": "SNetSocket_t","type": "uint32"}
 ,{"typedef": "SNetListenSocket_t","type": "uint32"}
 ,{"typedef": "ScreenshotHandle","type": "uint32"}
+,{"typedef": "PlaybackStatusHasChanged_t::SteamCallback_t","type": "struct PlaybackStatusHasChanged_t"}
+,{"typedef": "VolumeHasChanged_t::SteamCallback_t","type": "struct VolumeHasChanged_t"}
+,{"typedef": "MusicPlayerRemoteWillActivate_t::SteamCallback_t","type": "struct MusicPlayerRemoteWillActivate_t"}
+,{"typedef": "MusicPlayerRemoteWillDeactivate_t::SteamCallback_t","type": "struct MusicPlayerRemoteWillDeactivate_t"}
+,{"typedef": "MusicPlayerRemoteToFront_t::SteamCallback_t","type": "struct MusicPlayerRemoteToFront_t"}
+,{"typedef": "MusicPlayerWillQuit_t::SteamCallback_t","type": "struct MusicPlayerWillQuit_t"}
+,{"typedef": "MusicPlayerWantsPlay_t::SteamCallback_t","type": "struct MusicPlayerWantsPlay_t"}
+,{"typedef": "MusicPlayerWantsPause_t::SteamCallback_t","type": "struct MusicPlayerWantsPause_t"}
+,{"typedef": "MusicPlayerWantsPlayPrevious_t::SteamCallback_t","type": "struct MusicPlayerWantsPlayPrevious_t"}
+,{"typedef": "MusicPlayerWantsPlayNext_t::SteamCallback_t","type": "struct MusicPlayerWantsPlayNext_t"}
+,{"typedef": "MusicPlayerWantsShuffled_t::SteamCallback_t","type": "struct MusicPlayerWantsShuffled_t"}
+,{"typedef": "MusicPlayerWantsLooped_t::SteamCallback_t","type": "struct MusicPlayerWantsLooped_t"}
+,{"typedef": "MusicPlayerWantsVolume_t::SteamCallback_t","type": "struct MusicPlayerWantsVolume_t"}
+,{"typedef": "MusicPlayerSelectsQueueEntry_t::SteamCallback_t","type": "struct MusicPlayerSelectsQueueEntry_t"}
+,{"typedef": "MusicPlayerSelectsPlaylistEntry_t::SteamCallback_t","type": "struct MusicPlayerSelectsPlaylistEntry_t"}
+,{"typedef": "MusicPlayerWantsPlayingRepeatStatus_t::SteamCallback_t","type": "struct MusicPlayerWantsPlayingRepeatStatus_t"}
 ,{"typedef": "HTTPRequestHandle","type": "uint32"}
 ,{"typedef": "HTTPCookieContainerHandle","type": "uint32"}
 ,{"typedef": "ClientUnifiedMessageHandle","type": "uint64"}
@@ -63,10 +77,37 @@
 ,{"typedef": "ControllerAnalogActionHandle_t","type": "uint64"}
 ,{"typedef": "UGCQueryHandle_t","type": "uint64"}
 ,{"typedef": "UGCUpdateHandle_t","type": "uint64"}
+,{"typedef": "SteamAppInstalled_t::SteamCallback_t","type": "struct SteamAppInstalled_t"}
+,{"typedef": "SteamAppUninstalled_t::SteamCallback_t","type": "struct SteamAppUninstalled_t"}
 ,{"typedef": "HHTMLBrowser","type": "uint32"}
+,{"typedef": "HTML_BrowserReady_t::SteamCallback_t","type": "struct HTML_BrowserReady_t"}
+,{"typedef": "HTML_NeedsPaint_t::SteamCallback_t","type": "struct HTML_NeedsPaint_t"}
+,{"typedef": "HTML_StartRequest_t::SteamCallback_t","type": "struct HTML_StartRequest_t"}
+,{"typedef": "HTML_CloseBrowser_t::SteamCallback_t","type": "struct HTML_CloseBrowser_t"}
+,{"typedef": "HTML_URLChanged_t::SteamCallback_t","type": "struct HTML_URLChanged_t"}
+,{"typedef": "HTML_FinishedRequest_t::SteamCallback_t","type": "struct HTML_FinishedRequest_t"}
+,{"typedef": "HTML_OpenLinkInNewTab_t::SteamCallback_t","type": "struct HTML_OpenLinkInNewTab_t"}
+,{"typedef": "HTML_ChangedTitle_t::SteamCallback_t","type": "struct HTML_ChangedTitle_t"}
+,{"typedef": "HTML_SearchResults_t::SteamCallback_t","type": "struct HTML_SearchResults_t"}
+,{"typedef": "HTML_CanGoBackAndForward_t::SteamCallback_t","type": "struct HTML_CanGoBackAndForward_t"}
+,{"typedef": "HTML_HorizontalScroll_t::SteamCallback_t","type": "struct HTML_HorizontalScroll_t"}
+,{"typedef": "HTML_VerticalScroll_t::SteamCallback_t","type": "struct HTML_VerticalScroll_t"}
+,{"typedef": "HTML_LinkAtPosition_t::SteamCallback_t","type": "struct HTML_LinkAtPosition_t"}
+,{"typedef": "HTML_JSAlert_t::SteamCallback_t","type": "struct HTML_JSAlert_t"}
+,{"typedef": "HTML_JSConfirm_t::SteamCallback_t","type": "struct HTML_JSConfirm_t"}
+,{"typedef": "HTML_FileOpenDialog_t::SteamCallback_t","type": "struct HTML_FileOpenDialog_t"}
+,{"typedef": "HTML_NewWindow_t::SteamCallback_t","type": "struct HTML_NewWindow_t"}
+,{"typedef": "HTML_SetCursor_t::SteamCallback_t","type": "struct HTML_SetCursor_t"}
+,{"typedef": "HTML_StatusText_t::SteamCallback_t","type": "struct HTML_StatusText_t"}
+,{"typedef": "HTML_ShowToolTip_t::SteamCallback_t","type": "struct HTML_ShowToolTip_t"}
+,{"typedef": "HTML_UpdateToolTip_t::SteamCallback_t","type": "struct HTML_UpdateToolTip_t"}
+,{"typedef": "HTML_HideToolTip_t::SteamCallback_t","type": "struct HTML_HideToolTip_t"}
 ,{"typedef": "SteamItemInstanceID_t","type": "uint64"}
 ,{"typedef": "SteamItemDef_t","type": "int32"}
 ,{"typedef": "SteamInventoryResult_t","type": "int32"}
+,{"typedef": "BroadcastUploadStart_t::SteamCallback_t","type": "struct BroadcastUploadStart_t"}
+,{"typedef": "BroadcastUploadStop_t::SteamCallback_t","type": "struct BroadcastUploadStop_t"}
+,{"typedef": "GetVideoURLResult_t::SteamCallback_t","type": "struct GetVideoURLResult_t"}
 ,{"typedef": "CCallResult::func_t","type": "void (T::*)(P *, _Bool)"}
 ,{"typedef": "CCallback::func_t","type": "void (T::*)(P *)"}
 ],
@@ -183,6 +224,7 @@
 	,{"name": "k_EResultGSLTDenied","value": "102"}
 	,{"name": "k_EResultGSOwnerDenied","value": "103"}
 	,{"name": "k_EResultInvalidItemType","value": "104"}
+	,{"name": "k_EResultIPBanned","value": "105"}
 ]}
 ,	{"enumname": "EVoiceResult","values": [ 
 	{"name": "k_EVoiceResultOK","value": "0"}
@@ -279,6 +321,7 @@
 	,{"name": "k_EAppOwnershipFlags_AutoGrant","value": "16384"}
 	,{"name": "k_EAppOwnershipFlags_PendingGift","value": "32768"}
 	,{"name": "k_EAppOwnershipFlags_RentalNotActivated","value": "65536"}
+	,{"name": "k_EAppOwnershipFlags_Rental","value": "131072"}
 ]}
 ,	{"enumname": "EAppType","values": [ 
 	{"name": "k_EAppType_Invalid","value": "0"}
@@ -319,8 +362,6 @@
 	,{"name": "k_EChatEntryTypeWasBanned","value": "9"}
 	,{"name": "k_EChatEntryTypeDisconnected","value": "10"}
 	,{"name": "k_EChatEntryTypeHistoricalChat","value": "11"}
-	,{"name": "k_EChatEntryTypeReserved1","value": "12"}
-	,{"name": "k_EChatEntryTypeReserved2","value": "13"}
 	,{"name": "k_EChatEntryTypeLinkBlocked","value": "14"}
 ]}
 ,	{"enumname": "EChatRoomEnterResponse","values": [ 
@@ -389,6 +430,17 @@
 	,{"name": "k_ELaunchOptionType_OtherVR","value": "13"}
 	,{"name": "k_ELaunchOptionType_OpenVROverlay","value": "14"}
 	,{"name": "k_ELaunchOptionType_Dialog","value": "1000"}
+]}
+,	{"enumname": "EVRHMDType","values": [ 
+	{"name": "k_eEVRHMDType_Unknown","value": "0"}
+	,{"name": "k_eEVRHMDType_HTC_Dev","value": "1"}
+	,{"name": "k_eEVRHMDType_HTC_VivePre","value": "2"}
+	,{"name": "k_eEVRHMDType_HTC_Vive","value": "3"}
+	,{"name": "k_eEVRHMDType_HTC_Unknown","value": "20"}
+	,{"name": "k_eEVRHMDType_Oculus_DK1","value": "21"}
+	,{"name": "k_eEVRHMDType_Oculus_DK2","value": "22"}
+	,{"name": "k_eEVRHMDType_Oculus_Rift","value": "23"}
+	,{"name": "k_eEVRHMDType_Oculus_Unknown","value": "40"}
 ]}
 ,	{"enumname": "CGameID::EGameIDType","values": [ 
 	{"name": "k_EGameIDTypeApp","value": "0"}
@@ -662,6 +714,7 @@
 	,{"name": "k_EHTTPMethodPUT","value": "4"}
 	,{"name": "k_EHTTPMethodDELETE","value": "5"}
 	,{"name": "k_EHTTPMethodOPTIONS","value": "6"}
+	,{"name": "k_EHTTPMethodPATCH","value": "7"}
 ]}
 ,	{"enumname": "EHTTPStatusCode","values": [ 
 	{"name": "k_EHTTPStatusCodeInvalid","value": "0"}
@@ -860,6 +913,14 @@
 	,{"name": "k_EItemStatistic_NumUniqueWebsiteViews","value": "6"}
 	,{"name": "k_EItemStatistic_ReportScore","value": "7"}
 ]}
+,	{"enumname": "EItemPreviewType","values": [ 
+	{"name": "k_EItemPreviewType_Image","value": "0"}
+	,{"name": "k_EItemPreviewType_YouTubeVideo","value": "1"}
+	,{"name": "k_EItemPreviewType_Sketchfab","value": "2"}
+	,{"name": "k_EItemPreviewType_EnvironmentMap_HorizontalCross","value": "3"}
+	,{"name": "k_EItemPreviewType_EnvironmentMap_LatLong","value": "4"}
+	,{"name": "k_EItemPreviewType_ReservedMax","value": "255"}
+]}
 ,	{"enumname": "ISteamHTMLSurface::EHTMLMouseButton","values": [ 
 	{"name": "eHTMLMouseButton_Left","value": "0"}
 	,{"name": "eHTMLMouseButton_Right","value": "1"}
@@ -1006,9 +1067,9 @@
 ,{
 	"constname": "k_iClientVRCallbacks","consttype": "int", "constval": "4200"}
 ,{
-	"constname": "k_iClientReservedCallbacks","consttype": "int", "constval": "4300"}
+	"constname": "k_iClientGameNotificationCallbacks","consttype": "int", "constval": "4300"}
 ,{
-	"constname": "k_iSteamReservedCallbacks","consttype": "int", "constval": "4400"}
+	"constname": "k_iSteamGameNotificationCallbacks","consttype": "int", "constval": "4400"}
 ,{
 	"constname": "k_iSteamHTMLSurfaceCallbacks","consttype": "int", "constval": "4500"}
 ,{
@@ -1170,7 +1231,9 @@
 ,{"struct": "LowBatteryPower_t","fields": [
 { "fieldname": "m_nMinutesBatteryLeft", "fieldtype": "uint8"}]}
 ,{"struct": "SteamAPICallCompleted_t","fields": [
-{ "fieldname": "m_hAsyncCall", "fieldtype": "SteamAPICall_t"}]}
+{ "fieldname": "m_hAsyncCall", "fieldtype": "SteamAPICall_t"},
+{ "fieldname": "m_iCallback", "fieldtype": "int"},
+{ "fieldname": "m_cubParam", "fieldtype": "uint32"}]}
 ,{"struct": "CheckFileSignature_t","fields": [
 { "fieldname": "m_eCheckFileSignature", "fieldtype": "enum ECheckFileSignature"}]}
 ,{"struct": "GamepadTextInputDismissed_t","fields": [
@@ -1389,7 +1452,7 @@
 ,{"struct": "RemoteStoragePublishedFileUpdated_t","fields": [
 { "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
 { "fieldname": "m_nAppID", "fieldtype": "AppId_t"},
-{ "fieldname": "m_hFile", "fieldtype": "UGCHandle_t"}]}
+{ "fieldname": "m_ulUnused", "fieldtype": "uint64"}]}
 ,{"struct": "RemoteStorageFileWriteAsyncComplete_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"}]}
 ,{"struct": "RemoteStorageFileReadAsyncComplete_t","fields": [
@@ -1461,9 +1524,8 @@
 ,{"struct": "AppProofOfPurchaseKeyResponse_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
 { "fieldname": "m_nAppID", "fieldtype": "uint32"},
-{ "fieldname": "m_rgchKey", "fieldtype": "char [64]"}]}
-,{"struct": "PublisherOwnedAppDataReady_t","fields": [
-{ "fieldname": "m_eResult", "fieldtype": "enum EResult"}]}
+{ "fieldname": "m_cchKeyLength", "fieldtype": "uint32"},
+{ "fieldname": "m_rgchKey", "fieldtype": "char [240]"}]}
 ,{"struct": "P2PSessionState_t","fields": [
 { "fieldname": "m_bConnectionActive", "fieldtype": "uint8"},
 { "fieldname": "m_bConnecting", "fieldtype": "uint8"},
@@ -1709,17 +1771,8 @@
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
 { "fieldname": "m_unVideoAppID", "fieldtype": "AppId_t"},
 { "fieldname": "m_rgchURL", "fieldtype": "char [256]"}]}
-,{"struct": "CCallbackBase","fields": [
-{ "fieldname": "m_nCallbackFlags", "fieldtype": "uint8"},
-{ "fieldname": "m_iCallback", "fieldtype": "int"}]}
-,{"struct": "CCallResult","fields": [
-{ "fieldname": "m_hAPICall", "fieldtype": "SteamAPICall_t"},
-{ "fieldname": "m_pObj", "fieldtype": "T *"},
-{ "fieldname": "m_Func", "fieldtype": "func_t"}]}
-,{"struct": "CCallback","fields": [
-{ "fieldname": "m_pObj", "fieldtype": "T *"},
-{ "fieldname": "m_Func", "fieldtype": "func_t"}]}
 ,{"struct": "CSteamAPIContext","fields": [
+{ "fieldname": "m_pSteamClient", "fieldtype": "class ISteamClient *"},
 { "fieldname": "m_pSteamUser", "fieldtype": "class ISteamUser *"},
 { "fieldname": "m_pSteamFriends", "fieldtype": "class ISteamFriends *"},
 { "fieldname": "m_pSteamUtils", "fieldtype": "class ISteamUtils *"},
@@ -1740,6 +1793,16 @@
 { "fieldname": "m_pSteamHTMLSurface", "fieldtype": "class ISteamHTMLSurface *"},
 { "fieldname": "m_pSteamInventory", "fieldtype": "class ISteamInventory *"},
 { "fieldname": "m_pSteamVideo", "fieldtype": "class ISteamVideo *"}]}
+,{"struct": "CCallbackBase","fields": [
+{ "fieldname": "m_nCallbackFlags", "fieldtype": "uint8"},
+{ "fieldname": "m_iCallback", "fieldtype": "int"}]}
+,{"struct": "CCallResult","fields": [
+{ "fieldname": "m_hAPICall", "fieldtype": "SteamAPICall_t"},
+{ "fieldname": "m_pObj", "fieldtype": "T *"},
+{ "fieldname": "m_Func", "fieldtype": "func_t"}]}
+,{"struct": "CCallback","fields": [
+{ "fieldname": "m_pObj", "fieldtype": "T *"},
+{ "fieldname": "m_Func", "fieldtype": "func_t"}]}
 ,{"struct": "GSClientApprove_t","fields": [
 { "fieldname": "m_SteamID", "fieldtype": "class CSteamID"},
 { "fieldname": "m_OwnerSteamID", "fieldtype": "class CSteamID"}]}
@@ -1970,11 +2033,6 @@
 }
 ,{
 	"classname": "ISteamClient",
-	"methodname": "RunFrame",
-	"returntype": "void"
-}
-,{
-	"classname": "ISteamClient",
 	"methodname": "GetIPCCallCount",
 	"returntype": "uint32"
 }
@@ -2069,30 +2127,6 @@
 {	"paramname": "hSteamuser" ,"paramtype": "HSteamUser"},
 {	"paramname": "hSteamPipe" ,"paramtype": "HSteamPipe"},
 {	"paramname": "pchVersion" ,"paramtype": "const char *"}
-	 ]
-}
-,{
-	"classname": "ISteamClient",
-	"methodname": "Set_SteamAPI_CPostAPIResultInProcess",
-	"returntype": "void",
-	"params": [ 
-{	"paramname": "func" ,"paramtype": "SteamAPI_PostAPIResultInProcess_t"}
-	 ]
-}
-,{
-	"classname": "ISteamClient",
-	"methodname": "Remove_SteamAPI_CPostAPIResultInProcess",
-	"returntype": "void",
-	"params": [ 
-{	"paramname": "func" ,"paramtype": "SteamAPI_PostAPIResultInProcess_t"}
-	 ]
-}
-,{
-	"classname": "ISteamClient",
-	"methodname": "Set_SteamAPI_CCheckCallbackRegisteredInProcess",
-	"returntype": "void",
-	"params": [ 
-{	"paramname": "func" ,"paramtype": "SteamAPI_CheckCallbackRegistered_t"}
 	 ]
 }
 ,{
@@ -2325,6 +2359,16 @@
 	"params": [ 
 {	"paramname": "pchRedirectURL" ,"paramtype": "const char *"}
 	 ]
+}
+,{
+	"classname": "ISteamUser",
+	"methodname": "BIsPhoneVerified",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamUser",
+	"methodname": "BIsTwoFactorEnabled",
+	"returntype": "bool"
 }
 ,{
 	"classname": "ISteamFriends",
@@ -3002,11 +3046,6 @@
 }
 ,{
 	"classname": "ISteamUtils",
-	"methodname": "RunFrame",
-	"returntype": "void"
-}
-,{
-	"classname": "ISteamUtils",
 	"methodname": "GetIPCCallCount",
 	"returntype": "uint32"
 }
@@ -3080,6 +3119,16 @@
 {	"paramname": "nHorizontalInset" ,"paramtype": "int"},
 {	"paramname": "nVerticalInset" ,"paramtype": "int"}
 	 ]
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "IsSteamInBigPictureMode",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "StartVRDashboard",
+	"returntype": "void"
 }
 ,{
 	"classname": "ISteamMatchmaking",
@@ -4717,17 +4766,8 @@
 }
 ,{
 	"classname": "ISteamApps",
-	"methodname": "RequestPublisherOwnedAppData", "callback": "PublisherOwnedAppDataReady_t",
+	"methodname": "RequestAllProofOfPurchaseKeys",
 	"returntype": "void"
-}
-,{
-	"classname": "ISteamApps",
-	"methodname": "GetPublisherOwnedAppData",
-	"returntype": "uint32",
-	"params": [ 
-{	"paramname": "pubBuffer" ,"paramtype": "unsigned char *"},
-{	"paramname": "unMaxBytes" ,"paramtype": "uint32"}
-	 ]
 }
 ,{
 	"classname": "ISteamNetworking",
@@ -5829,7 +5869,9 @@
 {	"paramname": "previewIndex" ,"paramtype": "uint32"},
 {	"paramname": "pchURLOrVideoID" ,"out_string_count": "cchURLSize" ,"paramtype": "char *"},
 {	"paramname": "cchURLSize" ,"paramtype": "uint32"},
-{	"paramname": "pbIsImage" ,"paramtype": "bool *"}
+{	"paramname": "pchOriginalFileName" ,"out_string_count": "cchURLSize" ,"paramtype": "char *"},
+{	"paramname": "cchOriginalFileNameSize" ,"paramtype": "uint32"},
+{	"paramname": "pPreviewType" ,"paramtype": "EItemPreviewType *"}
 	 ]
 }
 ,{
@@ -6115,6 +6157,54 @@
 {	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
 {	"paramname": "pchKey" ,"paramtype": "const char *"},
 {	"paramname": "pchValue" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "AddItemPreviewFile",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
+{	"paramname": "pszPreviewFile" ,"paramtype": "const char *"},
+{	"paramname": "type" ,"paramtype": "EItemPreviewType"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "AddItemPreviewVideo",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
+{	"paramname": "pszVideoID" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "UpdateItemPreviewFile",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
+{	"paramname": "index" ,"paramtype": "uint32"},
+{	"paramname": "pszPreviewFile" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "UpdateItemPreviewVideo",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
+{	"paramname": "index" ,"paramtype": "uint32"},
+{	"paramname": "pszVideoID" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "RemoveItemPreview",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
+{	"paramname": "index" ,"paramtype": "uint32"}
 	 ]
 }
 ,{
