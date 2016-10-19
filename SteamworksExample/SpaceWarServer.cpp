@@ -12,10 +12,6 @@
 #include "time.h"
 #include <math.h>
 
-#ifdef _PS3
-// From main.cpp
-extern SteamPS3Params_t g_SteamPS3Params;
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor -- note the syntax for setting up Steam API callback handlers
@@ -41,11 +37,7 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 
 	// !FIXME! We need a way to pass the dedicated server flag here!
 
-#ifdef _PS3
-	if ( !SteamGameServer_Init( &g_SteamPS3Params, unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
-#else
 	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
-#endif
 	{
 		OutputDebugString( "SteamGameServer_Init call failed\n" );
 	}

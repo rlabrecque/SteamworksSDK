@@ -306,9 +306,12 @@ public:
 	// on the current Steam language settings (see ISteamApps::GetCurrentGameLanguage).
 	// Property names are always composed of ASCII letters, numbers, and/or underscores.
 	// Pass a NULL pointer for pchPropertyName to get a comma - separated list of available
-	// property names. 
+	// property names. If pchValueBuffer is NULL, *punValueBufferSize will contain the 
+	// suggested buffer size. Otherwise it will be the number of bytes actually copied
+	// to pchValueBuffer. If the results do not fit in the given buffer, partial 
+	// results may be copied.
 	virtual bool GetItemDefinitionProperty( SteamItemDef_t iDefinition, const char *pchPropertyName,
-		OUT_STRING_COUNT(punValueBufferSize) char *pchValueBuffer, uint32 *punValueBufferSize ) = 0;
+		OUT_STRING_COUNT(punValueBufferSizeOut) char *pchValueBuffer, uint32 *punValueBufferSizeOut ) = 0;
 };
 
 #define STEAMINVENTORY_INTERFACE_VERSION "STEAMINVENTORY_INTERFACE_V001"

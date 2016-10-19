@@ -9,6 +9,35 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.38 14th October 2016
+----------------------------------------------------------------
+
+ISteamUGC
+* Added ability to track the playtime of Workshop items. Call StartPlaytimeTracking() and StopPlaytimeTracking() when appropriate. On application shutdown all playtime tracking will stop, but StopPlaytimeTrackingForAllItems() can also be used.
+* Added ability to query Workshop items by total playtime in a given period, total lifetime playtime, average playtime in a given period, lifetime average playtime, number of play sessions in a given period, and number of lifetime play sessions.
+* Added ability to retrieve item statistics for number of seconds played, number of play sessions, and number of comments.
+* Added SetReturnOnlyIDs() for queries.  This is useful for retrieving the list of items a user has subscribed to or favorited without having to get all the details for those items.
+* Modified GetQueryUGCStatistic() to take in a uint64 instead of a uint32 to support larger values
+
+ISteamUser
+* Added BIsPhoneIdentifying()
+* Added BIsPhoneRequiringVerification()
+
+ISteamScreenshots
+* Added IsScreenshotsHooked() if the application has hooked the screenshot
+* Added ability to add a VR screenshot that was saved to disk to the user's library
+
+ISteamRemoteStorage
+* Modified GetQuota() to take in uint64 from int32, since Steam Cloud can now support quotas above 2GB
+* Removed RemoteStorageConflictResolution_t callback
+
+ISteamApps
+* Added GetFileDetails() which will return FileDetailsResult_t through a call result. The FileDetailsResult_t struct contains information on the original file's size, SHA1, etc.
+
+ISteamFriends
+* Deprecated k_EFriendRelationshipSuggested relationship type that was originally used by Facebook linking feature
+
+----------------------------------------------------------------
 v1.37 23rd May 2016
 ----------------------------------------------------------------
 

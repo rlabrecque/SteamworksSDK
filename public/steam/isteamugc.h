@@ -92,6 +92,12 @@ enum EUGCQuery
 	k_EUGCQuery_RankedByVotesUp								  = 10,
 	k_EUGCQuery_RankedByTextSearch							  = 11,
 	k_EUGCQuery_RankedByTotalUniqueSubscriptions			  = 12,
+	k_EUGCQuery_RankedByPlaytimeTrend						  = 13,
+	k_EUGCQuery_RankedByTotalPlaytime						  = 14,
+	k_EUGCQuery_RankedByAveragePlaytimeTrend				  = 15,
+	k_EUGCQuery_RankedByLifetimeAveragePlaytime				  = 16,
+	k_EUGCQuery_RankedByPlaytimeSessionsTrend				  = 17,
+	k_EUGCQuery_RankedByLifetimePlaytimeSessions			  = 18,
 };
 
 enum EItemUpdateStatus
@@ -125,6 +131,9 @@ enum EItemStatistic
 	k_EItemStatistic_NumUniqueFollowers		= 5,
 	k_EItemStatistic_NumUniqueWebsiteViews	= 6,
 	k_EItemStatistic_ReportScore			= 7,
+	k_EItemStatistic_NumSecondsPlayed		= 8,
+	k_EItemStatistic_NumPlaytimeSessions	= 9,
+	k_EItemStatistic_NumComments			= 10,
 };
 
 enum EItemPreviewType
@@ -206,7 +215,7 @@ public:
 	virtual bool GetQueryUGCPreviewURL( UGCQueryHandle_t handle, uint32 index, OUT_STRING_COUNT(cchURLSize) char *pchURL, uint32 cchURLSize ) = 0;
 	virtual bool GetQueryUGCMetadata( UGCQueryHandle_t handle, uint32 index, OUT_STRING_COUNT(cchMetadatasize) char *pchMetadata, uint32 cchMetadatasize ) = 0;
 	virtual bool GetQueryUGCChildren( UGCQueryHandle_t handle, uint32 index, PublishedFileId_t* pvecPublishedFileID, uint32 cMaxEntries ) = 0;
-	virtual bool GetQueryUGCStatistic( UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint32 *pStatValue ) = 0;
+	virtual bool GetQueryUGCStatistic( UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint64 *pStatValue ) = 0;
 	virtual uint32 GetQueryUGCNumAdditionalPreviews( UGCQueryHandle_t handle, uint32 index ) = 0;
 	virtual bool GetQueryUGCAdditionalPreview( UGCQueryHandle_t handle, uint32 index, uint32 previewIndex, OUT_STRING_COUNT(cchURLSize) char *pchURLOrVideoID, uint32 cchURLSize, OUT_STRING_COUNT(cchURLSize) char *pchOriginalFileName, uint32 cchOriginalFileNameSize, EItemPreviewType *pPreviewType ) = 0;
 	virtual uint32 GetQueryUGCNumKeyValueTags( UGCQueryHandle_t handle, uint32 index ) = 0;
@@ -218,6 +227,7 @@ public:
 	// Options to set for querying UGC
 	virtual bool AddRequiredTag( UGCQueryHandle_t handle, const char *pTagName ) = 0;
 	virtual bool AddExcludedTag( UGCQueryHandle_t handle, const char *pTagName ) = 0;
+	virtual bool SetReturnOnlyIDs( UGCQueryHandle_t handle, bool bReturnOnlyIDs ) = 0;
 	virtual bool SetReturnKeyValueTags( UGCQueryHandle_t handle, bool bReturnKeyValueTags ) = 0;
 	virtual bool SetReturnLongDescription( UGCQueryHandle_t handle, bool bReturnLongDescription ) = 0;
 	virtual bool SetReturnMetadata( UGCQueryHandle_t handle, bool bReturnMetadata ) = 0;
@@ -302,9 +312,17 @@ public:
 
 	// SuspendDownloads( true ) will suspend all workshop downloads until SuspendDownloads( false ) is called or the game ends
 	virtual void SuspendDownloads( bool bSuspend ) = 0;
+
+	// usage tracking
+	CALL_RESULT( StartPlaytimeTrackingResult_t );
+	virtual SteamAPICall_t StartPlaytimeTracking( PublishedFileId_t *pvecPublishedFileID, uint32 unNumPublishedFileIDs ) = 0;
+	CALL_RESULT( StopPlaytimeTrackingResult_t );
+	virtual SteamAPICall_t StopPlaytimeTracking( PublishedFileId_t *pvecPublishedFileID, uint32 unNumPublishedFileIDs ) = 0;
+	CALL_RESULT( StopPlaytimeTrackingResult_t );
+	virtual SteamAPICall_t StopPlaytimeTrackingForAllItems() = 0;
 };
 
-#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION008"
+#define STEAMUGC_INTERFACE_VERSION "STEAMUGC_INTERFACE_VERSION009"
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for querying UGC
@@ -410,6 +428,25 @@ struct GetUserItemVoteResult_t
 	bool m_bVotedDown;
 	bool m_bVoteSkipped;
 };
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of a call to StartPlaytimeTracking()
+//-----------------------------------------------------------------------------
+struct StartPlaytimeTrackingResult_t
+{
+	enum { k_iCallback = k_iClientUGCCallbacks + 10 };
+	EResult m_eResult;
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: The result of a call to StopPlaytimeTracking()
+//-----------------------------------------------------------------------------
+struct StopPlaytimeTrackingResult_t
+{
+	enum { k_iCallback = k_iClientUGCCallbacks + 11 };
+	EResult m_eResult;
+};
+
 
 #pragma pack( pop )
 

@@ -80,10 +80,6 @@ void CRemoteStorageSyncMenu::ShowConflict()
 	// Description
 	AddMenuItem( CRemoteStorageSyncMenu::MenuItem_t( "There is a conflict between the local & server versions of your files:", k_EMenuCommandNone ) );
 
-	// options
-	AddMenuItem( CRemoteStorageSyncMenu::MenuItem_t( "- Keep the local client versions", k_EMenuCommandKeepClient ) );
-	AddMenuItem( CRemoteStorageSyncMenu::MenuItem_t( "- Keep the remote server versions", k_EMenuCommandKeepServer ) );
-
 	PopSelectedItem();
 }
 
@@ -96,8 +92,7 @@ CRemoteStorageSync::CRemoteStorageSync( IGameEngine *pGameEngine ) :
 	m_menu( pGameEngine ),
 	m_callbackAppSyncClientComplete( this, &CRemoteStorageSync::OnAppSyncClientComplete ),
 	m_callbackAppSyncServerComplete( this, &CRemoteStorageSync::OnAppSyncServerComplete ),
-	m_callbackAppSyncProgress( this, &CRemoteStorageSync::OnAppSyncProgress ),
-	m_callbackConflictResolution( this, &CRemoteStorageSync::OnConflictResolution )
+	m_callbackAppSyncProgress( this, &CRemoteStorageSync::OnAppSyncProgress )
 {
 }
 
@@ -218,20 +213,6 @@ void CRemoteStorageSync::OnAppSyncServerComplete( RemoteStorageAppSyncedServer_t
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Called by Steam when a conflict resolution has completed
-//-----------------------------------------------------------------------------
-void CRemoteStorageSync::OnConflictResolution( RemoteStorageConflictResolution_t *pParam )
-{
-	// make sure the update is for us
-	if ( pParam->m_nAppID != SteamUtils()->GetAppID() )
-		return;
-
-	// check for errors
-	m_menu.ShowSyncComplete( m_eSyncOperation, pParam->m_eResult == k_EResultOK );
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: A sync menu item has been selected
 //-----------------------------------------------------------------------------
 void CRemoteStorageSync::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
@@ -240,16 +221,6 @@ void CRemoteStorageSync::OnMenuSelection( ERemoteStorageSyncMenuCommand selectio
 	{
 	case k_EMenuCommandSyncComplete:
 		m_eSyncOperation = k_ESyncOperationIdle;
-		break;
-
-	case k_EMenuCommandKeepClient:
-		m_menu.ShowSyncProgress( m_eSyncOperation, 0.0 );
-		//SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepClient );		
-		break;
-
-	case k_EMenuCommandKeepServer:
-		m_menu.ShowSyncProgress( m_eSyncOperation, 0.0 );
-		//SteamRemoteStorage()->ResolveSyncConflict( k_EResolveConflictKeepServer );
 		break;
 	}
 }

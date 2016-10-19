@@ -204,10 +204,10 @@ void CRemoteStorageScreen::LoadMessage()
 //-----------------------------------------------------------------------------
 void CRemoteStorageScreen::GetFileStats()
 {
-	m_nBytesQuota = 0;
-	m_nAvailableBytes = 0;
+	m_ulBytesQuota = 0;
+	m_ulAvailableBytes = 0;
 	m_nNumFilesInCloud = m_pSteamRemoteStorage->GetFileCount();
-	m_pSteamRemoteStorage->GetQuota( &m_nBytesQuota, &m_nAvailableBytes );
+	m_pSteamRemoteStorage->GetQuota( &m_ulBytesQuota, &m_ulAvailableBytes );
 }
 
 
@@ -234,7 +234,7 @@ void CRemoteStorageScreen::Render()
 
 	DWORD dwVKDown = 0;
 
-	bool bQuotaExceeded = nGreetingNextLength > m_nBytesQuota;
+	bool bQuotaExceeded = nGreetingNextLength > m_ulBytesQuota;
 
 	while ( m_pGameEngine->BGetFirstKeyDown( &dwVKDown ) )
 	{
@@ -323,7 +323,7 @@ void CRemoteStorageScreen::Render()
 		rect.right = rect.left + CLOUDDISP_COLUMN_WIDTH;
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
-		sprintf_safe( rgchBuffer, "Quota: %d bytes, %d bytes remaining", m_nBytesQuota, m_nAvailableBytes );
+		sprintf_safe( rgchBuffer, "Quota: %llu bytes, %llu bytes remaining", m_ulBytesQuota, m_ulAvailableBytes );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		rect.top = pxVertOffset;

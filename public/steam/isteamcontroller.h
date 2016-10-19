@@ -60,7 +60,9 @@ enum EControllerSourceMode
 	k_EControllerSourceMode_Trigger,
 	k_EControllerSourceMode_TouchMenu,
 	k_EControllerSourceMode_MouseJoystick,
-	k_EControllerSourceMode_MouseRegion
+	k_EControllerSourceMode_MouseRegion,
+	k_EControllerSourceMode_RadialMenu,
+	k_EControllerSourceMode_Switches
 };
 
 enum EControllerActionOrigin
@@ -142,6 +144,25 @@ struct ControllerDigitalActionData_t
 	bool bActive;
 };
 
+struct ControllerMotionData_t
+{
+	// Sensor-fused absolute rotation; will drift in heading
+	float rotQuatX;
+	float rotQuatY;
+	float rotQuatZ;
+	float rotQuatW;
+	
+	// Positional acceleration
+	float posAccelX;
+	float posAccelY;
+	float posAccelZ;
+
+	// Angular velocity
+	float rotVelX;
+	float rotVelY;
+	float rotVelZ;
+};
+
 #pragma pack( pop )
 
 
@@ -206,9 +227,25 @@ public:
 	// Trigger a haptic pulse on a controller
 	virtual void TriggerHapticPulse( ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec ) = 0;
 
+	// Trigger a pulse with a duty cycle of usDurationMicroSec / usOffMicroSec, unRepeat times.
+	// nFlags is currently unused and reserved for future use.
 	virtual void TriggerRepeatedHapticPulse( ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags ) = 0;
+	
+	// Returns the associated gamepad index for the specified controller, if emulating a gamepad
+	virtual int GetGamepadIndexForController( ControllerHandle_t ulControllerHandle ) = 0;
+	
+	// Returns the associated controller handle for the specified emulated gamepad
+	virtual ControllerHandle_t GetControllerForGamepadIndex( int nIndex ) = 0;
+	
+	// Returns raw motion data from the specified controller
+	virtual ControllerMotionData_t GetMotionData( ControllerHandle_t controllerHandle ) = 0;
+	
+	// Attempt to display origins of given action in the controller HUD, for the currently active action set
+	// Returns false is overlay is disabled / unavailable, or the user is not in Big Picture mode
+	virtual bool ShowDigitalActionOrigins( ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle, float flScale, float flXPosition, float flYPosition ) = 0;
+	virtual bool ShowAnalogActionOrigins( ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition ) = 0;
 };
 
-#define STEAMCONTROLLER_INTERFACE_VERSION "SteamController003"
+#define STEAMCONTROLLER_INTERFACE_VERSION "SteamController004"
 
 #endif // ISTEAMCONTROLLER_H

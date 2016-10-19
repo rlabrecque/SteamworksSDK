@@ -199,6 +199,8 @@ S_API int SteamAPI_ISteamUser_GetPlayerSteamLevel(intptr_t instancePtr);
 S_API SteamAPICall_t SteamAPI_ISteamUser_RequestStoreAuthURL(intptr_t instancePtr, const char * pchRedirectURL);
 S_API bool SteamAPI_ISteamUser_BIsPhoneVerified(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamUser_BIsTwoFactorEnabled(intptr_t instancePtr);
+S_API bool SteamAPI_ISteamUser_BIsPhoneIdentifying(intptr_t instancePtr);
+S_API bool SteamAPI_ISteamUser_BIsPhoneRequiringVerification(intptr_t instancePtr);
 S_API const char * SteamAPI_ISteamFriends_GetPersonaName(intptr_t instancePtr);
 S_API SteamAPICall_t SteamAPI_ISteamFriends_SetPersonaName(intptr_t instancePtr, const char * pchPersonaName);
 S_API EPersonaState SteamAPI_ISteamFriends_GetPersonaState(intptr_t instancePtr);
@@ -382,7 +384,7 @@ S_API int64 SteamAPI_ISteamRemoteStorage_GetFileTimestamp(intptr_t instancePtr, 
 S_API ERemoteStoragePlatform SteamAPI_ISteamRemoteStorage_GetSyncPlatforms(intptr_t instancePtr, const char * pchFile);
 S_API int32 SteamAPI_ISteamRemoteStorage_GetFileCount(intptr_t instancePtr);
 S_API const char * SteamAPI_ISteamRemoteStorage_GetFileNameAndSize(intptr_t instancePtr, int iFile, int32 * pnFileSizeInBytes);
-S_API bool SteamAPI_ISteamRemoteStorage_GetQuota(intptr_t instancePtr, int32 * pnTotalBytes, int32 * puAvailableBytes);
+S_API bool SteamAPI_ISteamRemoteStorage_GetQuota(intptr_t instancePtr, uint64 * pnTotalBytes, uint64 * puAvailableBytes);
 S_API bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp(intptr_t instancePtr);
 S_API void SteamAPI_ISteamRemoteStorage_SetCloudEnabledForApp(intptr_t instancePtr, bool bEnabled);
@@ -485,6 +487,7 @@ S_API const char * SteamAPI_ISteamApps_GetLaunchQueryParam(intptr_t instancePtr,
 S_API bool SteamAPI_ISteamApps_GetDlcDownloadProgress(intptr_t instancePtr, AppId_t nAppID, uint64 * punBytesDownloaded, uint64 * punBytesTotal);
 S_API int SteamAPI_ISteamApps_GetAppBuildId(intptr_t instancePtr);
 S_API void SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(intptr_t instancePtr);
+S_API SteamAPICall_t SteamAPI_ISteamApps_GetFileDetails(intptr_t instancePtr, const char * pszFileName);
 S_API bool SteamAPI_ISteamNetworking_SendP2PPacket(intptr_t instancePtr, class CSteamID steamIDRemote, const void * pubData, uint32 cubData, EP2PSend eP2PSendType, int nChannel);
 S_API bool SteamAPI_ISteamNetworking_IsP2PPacketAvailable(intptr_t instancePtr, uint32 * pcubMsgSize, int nChannel);
 S_API bool SteamAPI_ISteamNetworking_ReadP2PPacket(intptr_t instancePtr, void * pubDest, uint32 cubDest, uint32 * pcubMsgSize, class CSteamID * psteamIDRemote, int nChannel);
@@ -514,6 +517,8 @@ S_API void SteamAPI_ISteamScreenshots_HookScreenshots(intptr_t instancePtr, bool
 S_API bool SteamAPI_ISteamScreenshots_SetLocation(intptr_t instancePtr, ScreenshotHandle hScreenshot, const char * pchLocation);
 S_API bool SteamAPI_ISteamScreenshots_TagUser(intptr_t instancePtr, ScreenshotHandle hScreenshot, class CSteamID steamID);
 S_API bool SteamAPI_ISteamScreenshots_TagPublishedFile(intptr_t instancePtr, ScreenshotHandle hScreenshot, PublishedFileId_t unPublishedFileID);
+S_API bool SteamAPI_ISteamScreenshots_IsScreenshotsHooked(intptr_t instancePtr);
+S_API ScreenshotHandle SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(intptr_t instancePtr, EVRScreenshotType eType, const char * pchFilename, const char * pchVRFilename);
 S_API bool SteamAPI_ISteamMusic_BIsEnabled(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamMusic_BIsPlaying(intptr_t instancePtr);
 S_API AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus(intptr_t instancePtr);
@@ -602,6 +607,11 @@ S_API int SteamAPI_ISteamController_GetAnalogActionOrigins(intptr_t instancePtr,
 S_API void SteamAPI_ISteamController_StopAnalogActionMomentum(intptr_t instancePtr, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t eAction);
 S_API void SteamAPI_ISteamController_TriggerHapticPulse(intptr_t instancePtr, ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec);
 S_API void SteamAPI_ISteamController_TriggerRepeatedHapticPulse(intptr_t instancePtr, ControllerHandle_t controllerHandle, ESteamControllerPad eTargetPad, unsigned short usDurationMicroSec, unsigned short usOffMicroSec, unsigned short unRepeat, unsigned int nFlags);
+S_API int SteamAPI_ISteamController_GetGamepadIndexForController(intptr_t instancePtr, ControllerHandle_t ulControllerHandle);
+S_API ControllerHandle_t SteamAPI_ISteamController_GetControllerForGamepadIndex(intptr_t instancePtr, int nIndex);
+S_API struct ControllerMotionData_t SteamAPI_ISteamController_GetMotionData(intptr_t instancePtr, ControllerHandle_t controllerHandle);
+S_API bool SteamAPI_ISteamController_ShowDigitalActionOrigins(intptr_t instancePtr, ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle, float flScale, float flXPosition, float flYPosition);
+S_API bool SteamAPI_ISteamController_ShowAnalogActionOrigins(intptr_t instancePtr, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(intptr_t instancePtr, AccountID_t unAccountID, EUserUGCList eListType, EUGCMatchingUGCType eMatchingUGCType, EUserUGCListSortOrder eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequest(intptr_t instancePtr, EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint32 unPage);
 S_API UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(intptr_t instancePtr, PublishedFileId_t * pvecPublishedFileID, uint32 unNumPublishedFileIDs);
@@ -610,7 +620,7 @@ S_API bool SteamAPI_ISteamUGC_GetQueryUGCResult(intptr_t instancePtr, UGCQueryHa
 S_API bool SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, char * pchURL, uint32 cchURLSize);
 S_API bool SteamAPI_ISteamUGC_GetQueryUGCMetadata(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, char * pchMetadata, uint32 cchMetadatasize);
 S_API bool SteamAPI_ISteamUGC_GetQueryUGCChildren(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, PublishedFileId_t * pvecPublishedFileID, uint32 cMaxEntries);
-S_API bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint32 * pStatValue);
+S_API bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, EItemStatistic eStatType, uint64 * pStatValue);
 S_API uint32 SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index);
 S_API bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index, uint32 previewIndex, char * pchURLOrVideoID, uint32 cchURLSize, char * pchOriginalFileName, uint32 cchOriginalFileNameSize, EItemPreviewType * pPreviewType);
 S_API uint32 SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(intptr_t instancePtr, UGCQueryHandle_t handle, uint32 index);
@@ -618,6 +628,7 @@ S_API bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(intptr_t instancePtr, UGCQu
 S_API bool SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(intptr_t instancePtr, UGCQueryHandle_t handle);
 S_API bool SteamAPI_ISteamUGC_AddRequiredTag(intptr_t instancePtr, UGCQueryHandle_t handle, const char * pTagName);
 S_API bool SteamAPI_ISteamUGC_AddExcludedTag(intptr_t instancePtr, UGCQueryHandle_t handle, const char * pTagName);
+S_API bool SteamAPI_ISteamUGC_SetReturnOnlyIDs(intptr_t instancePtr, UGCQueryHandle_t handle, bool bReturnOnlyIDs);
 S_API bool SteamAPI_ISteamUGC_SetReturnKeyValueTags(intptr_t instancePtr, UGCQueryHandle_t handle, bool bReturnKeyValueTags);
 S_API bool SteamAPI_ISteamUGC_SetReturnLongDescription(intptr_t instancePtr, UGCQueryHandle_t handle, bool bReturnLongDescription);
 S_API bool SteamAPI_ISteamUGC_SetReturnMetadata(intptr_t instancePtr, UGCQueryHandle_t handle, bool bReturnMetadata);
@@ -665,6 +676,9 @@ S_API bool SteamAPI_ISteamUGC_GetItemDownloadInfo(intptr_t instancePtr, Publishe
 S_API bool SteamAPI_ISteamUGC_DownloadItem(intptr_t instancePtr, PublishedFileId_t nPublishedFileID, bool bHighPriority);
 S_API bool SteamAPI_ISteamUGC_BInitWorkshopForGameServer(intptr_t instancePtr, DepotId_t unWorkshopDepotID, const char * pszFolder);
 S_API void SteamAPI_ISteamUGC_SuspendDownloads(intptr_t instancePtr, bool bSuspend);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_StartPlaytimeTracking(intptr_t instancePtr, PublishedFileId_t * pvecPublishedFileID, uint32 unNumPublishedFileIDs);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_StopPlaytimeTracking(intptr_t instancePtr, PublishedFileId_t * pvecPublishedFileID, uint32 unNumPublishedFileIDs);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(intptr_t instancePtr);
 S_API uint32 SteamAPI_ISteamAppList_GetNumInstalledApps(intptr_t instancePtr);
 S_API uint32 SteamAPI_ISteamAppList_GetInstalledApps(intptr_t instancePtr, AppId_t * pvecAppID, uint32 unMaxAppIDs);
 S_API int SteamAPI_ISteamAppList_GetAppName(intptr_t instancePtr, AppId_t nAppID, char * pchName, int cchNameMax);
@@ -726,7 +740,7 @@ S_API bool SteamAPI_ISteamInventory_TriggerItemDrop(intptr_t instancePtr, SteamI
 S_API bool SteamAPI_ISteamInventory_TradeItems(intptr_t instancePtr, SteamInventoryResult_t * pResultHandle, class CSteamID steamIDTradePartner, const SteamItemInstanceID_t * pArrayGive, const uint32 * pArrayGiveQuantity, uint32 nArrayGiveLength, const SteamItemInstanceID_t * pArrayGet, const uint32 * pArrayGetQuantity, uint32 nArrayGetLength);
 S_API bool SteamAPI_ISteamInventory_LoadItemDefinitions(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamInventory_GetItemDefinitionIDs(intptr_t instancePtr, SteamItemDef_t * pItemDefIDs, uint32 * punItemDefIDsArraySize);
-S_API bool SteamAPI_ISteamInventory_GetItemDefinitionProperty(intptr_t instancePtr, SteamItemDef_t iDefinition, const char * pchPropertyName, char * pchValueBuffer, uint32 * punValueBufferSize);
+S_API bool SteamAPI_ISteamInventory_GetItemDefinitionProperty(intptr_t instancePtr, SteamItemDef_t iDefinition, const char * pchPropertyName, char * pchValueBuffer, uint32 * punValueBufferSizeOut);
 S_API void SteamAPI_ISteamVideo_GetVideoURL(intptr_t instancePtr, AppId_t unVideoAppID);
 S_API bool SteamAPI_ISteamVideo_IsBroadcasting(intptr_t instancePtr, int * pnNumViewers);
 S_API bool SteamAPI_ISteamGameServer_InitGameServer(intptr_t instancePtr, uint32 unIP, uint16 usGamePort, uint16 usQueryPort, uint32 unFlags, AppId_t nGameAppId, const char * pchVersionString);

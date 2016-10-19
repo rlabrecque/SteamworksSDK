@@ -61,7 +61,7 @@ public:
 	// the universe this client is connecting to
 	virtual EUniverse GetConnectedUniverse() = 0;
 
-	// Steam server time - in PST, number of seconds since January 1, 1970 (i.e unix time)
+	// Steam server time.  Number of seconds since January 1, 1970, GMT (i.e unix time)
 	virtual uint32 GetServerRealTime() = 0;
 
 	// returns the 2 digit ISO 3166-1-alpha-2 format country code this client is running in (as looked up via an IP-to-location database)

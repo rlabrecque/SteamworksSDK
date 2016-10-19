@@ -21,8 +21,6 @@ enum ERemoteStorageSyncMenuCommand
 	k_EMenuCommandNone = 0,
 	k_EMenuCommandProgress = 1,
 	k_EMenuCommandSyncComplete = 2,
-	k_EMenuCommandKeepClient = 3,
-	k_EMenuCommandKeepServer = 4
 };
 
 //-----------------------------------------------------------------------------
@@ -103,8 +101,8 @@ private:
 	bool m_bFinished;
 
 	int32 m_nNumFilesInCloud;
-	int32 m_nBytesQuota;
-	int32 m_nAvailableBytes;
+	uint64 m_ulBytesQuota;
+	uint64 m_ulAvailableBytes;
 };
 
 

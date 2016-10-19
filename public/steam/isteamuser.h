@@ -184,6 +184,12 @@ public:
 	// gets whether the user has two factor enabled on their account
 	virtual bool BIsTwoFactorEnabled() = 0;
 
+	// gets whether the users phone number is identifying
+	virtual bool BIsPhoneIdentifying() = 0;
+
+	// gets whether the users phone number is awaiting (re)verification
+	virtual bool BIsPhoneRequiringVerification() = 0;
+
 };
 
 #define STEAMUSER_INTERFACE_VERSION "SteamUser019"
