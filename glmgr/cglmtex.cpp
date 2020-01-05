@@ -413,11 +413,11 @@ GLMTexLayout *CGLMTexLayoutTable::NewLayoutRef( GLMTexLayoutKey *key )
 	// if not, generate a completed layout based on the key, add to map, set refcount to 1, return that
 	
 	const GLMTexFormatDesc	*formatDesc = GetFormatDesc( key->m_texFormat );
-	bool					compression = (formatDesc->m_chunkSize > 1);
 	if (!formatDesc)
 	{
 		GLMStop();	// bad news
 	}
+	bool					compression = (formatDesc->m_chunkSize > 1);
 	
 	GLMTexLayoutKeyMap::iterator p = m_layoutMap.find( *key );
 	if (p != m_layoutMap.end())

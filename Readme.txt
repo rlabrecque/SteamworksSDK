@@ -1,12 +1,40 @@
 ================================================================
 
-Copyright © 1996-2016, Valve Corporation, All rights reserved.
+Copyright © 1996-2017, Valve Corporation, All rights reserved.
 
 ================================================================
 
 
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
+
+----------------------------------------------------------------
+v1.40 25th April 2017
+----------------------------------------------------------------
+
+ISteamInventory
+* Update API documentation 
+* GetResultItemProperty - Retrieve dynamic properties for a given item returned in the result set.
+
+ISteamUtils
+* IsVRHeadsetStreamingEnabled - Returns true if the HMD content will be streamed via Steam In-Home Streaming
+* SetVRHeadsetStreamingEnabled - Set whether the HMD content will be streamed via Steam In-Home Streaming
+
+ISteamUser
+* GetAvailableVoice and GetVoice - Some parameters have become deprecated and now have default values.
+
+ISteamUGC 
+* SetReturnPlaytimeStats - Set the number of days of playtime stats to return for a piece of UGC.
+* AddDependency and RemoveDependency - Useful for parent-child relationship or dependency management
+
+ISteamVideo
+* Added GetOPFSettings and GetOPFStringForApp for retrieving Open Projection Format data used in Steam 360 Video playback. 
+* GetOPFSettings - Handle the GetOPFSettingsResult_t callback which is called when the OPF related data for the passed in AppID is ready for retrieval. 
+* GetOPFStringForApp - Using the AppID returned in GetOPFSettingsResult_t pass in an allocated string buffer to get the OPF data.
+
+SteamPipe GUI Tool
+* A simple GUI wrapper for Steamcmd/SteamPipe has been added to the SDK in the tools\ContentBuilder folder. More details can be found here: http://steamcommunity.com/groups/steamworks/discussions/0/412449508292646864
+
 
 ----------------------------------------------------------------
 v1.39 6th January 2017

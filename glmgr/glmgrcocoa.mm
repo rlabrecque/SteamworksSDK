@@ -373,66 +373,43 @@ void	GLMDisplayInfo::PopulateModes( void )
 	Assert( !m_modes );
 	m_modes = new std::vector< GLMDisplayMode* >;
 	
-	CFArrayRef		modeList;
-//	CGDisplayErr	cgderr;
-	CFDictionaryRef cgvidmode;
-	CFNumberRef		number;
-	CFBooleanRef	boolean;
-	
-	modeList = CGDisplayAvailableModes( m_info.m_cgDisplayID );
-	if ( modeList != NULL )
+	if ( CFArrayRef	modeList = CGDisplayCopyAllDisplayModes( m_info.m_cgDisplayID, nullptr ) )
 	{
 		//  examine each mode
 		CFIndex count = CFArrayGetCount( modeList );
 		
 		for (CFIndex i = 0; i < count; i++) 
 		{
-			long modeHeight = 0, modeWidth = 0;
 			long depth = 0;
-			long refreshrate = 0;
 			Boolean usable, stretched = false;
+
+			CGDisplayModeRef mode= (CGDisplayModeRef)CFArrayGetValueAtIndex (modeList, i);
 			
-			// grab the mode dictionary
-			cgvidmode = (CFDictionaryRef)CFArrayGetValueAtIndex( modeList, i);
+			CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);
+			if(CFStringCompare(pixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+				depth = 32;
+			else if(CFStringCompare(pixEnc, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+				depth = 16;
+			else if(CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+				depth = 8;
 			
-			// grab mode params we need
-			number = (CFNumberRef)CFDictionaryGetValue(cgvidmode, kCGDisplayBitsPerPixel);
-			CFNumberGetValue(number, kCFNumberLongType, &depth);
-			
-			boolean = (CFBooleanRef)CFDictionaryGetValue(cgvidmode, kCGDisplayModeUsableForDesktopGUI) ;
-			usable = CFBooleanGetValue(boolean);
-			
-			boolean = (CFBooleanRef)CFDictionaryGetValue(cgvidmode, kCGDisplayModeIsStretched);
-			if (NULL != boolean) 
-			{
-				stretched = CFBooleanGetValue(boolean);
-			}
+			usable = CGDisplayModeIsUsableForDesktopGUI( mode );
+			uint32_t ioFlags = CGDisplayModeGetIOFlags(mode);
+			stretched = ioFlags & kDisplayModeStretchedFlag ? true : false;
 			
 			if ( usable && (!stretched) && (depth==32) )
 			{
-				// we're going to log this mode to the mode table.
-				
-				// get height of mode
-				number = (CFNumberRef)CFDictionaryGetValue( cgvidmode, kCGDisplayHeight );
-				CFNumberGetValue(number, kCFNumberLongType, &modeHeight);
-				
-				// get width of mode
-				number = (CFNumberRef)CFDictionaryGetValue( cgvidmode, kCGDisplayWidth );
-				CFNumberGetValue(number, kCFNumberLongType, &modeWidth);
-				
-				// get refresh rate of mode
-				number = (CFNumberRef)CFDictionaryGetValue( cgvidmode, kCGDisplayRefreshRate ); 
-				double flrefreshrate = 0.0f;
-				CFNumberGetValue( number, kCFNumberDoubleType, &flrefreshrate );
-				refreshrate = (int)flrefreshrate;
+				long modeHeight = CGDisplayModeGetHeight( mode );
+				long modeWidth = CGDisplayModeGetWidth( mode );
+				long refreshrate = CGDisplayModeGetRefreshRate( mode );
 
-				// exclude silly small modes
 				if ( (modeHeight >= 384) && (modeWidth >= 512) )
 				{
 					GLMDisplayMode *newmode = new GLMDisplayMode( modeWidth, modeHeight, refreshrate );
 					m_modes->push_back( newmode );
 				}
 			}
+			CGDisplayModeRelease( mode );
 		}
 	}
 	
@@ -1496,30 +1473,15 @@ bool	GLMDisplayDB::GetModeInfo( int rendererIndex, int displayIndex, int modeInd
 		GLMDisplayInfo		*dispinfo = (*rendInfo ->m_displays)[displayIndex];	
 		CGDirectDisplayID	cgid = dispinfo->m_info.m_cgDisplayID;
 		
-		CFDictionaryRef		curModeDict = CGDisplayCurrentMode( cgid );
-		CFNumberRef			number;
-		CFBooleanRef		boolean;
-		CFArrayRef			modeList;
-		CGDisplayErr		cgderr;
-		
-		// get the mode number from the mode dict (using system mode numbering, not our sorted numbering)
-		if (curModeDict)
-		{
-			int modeIndex=0;
-			number = (CFNumberRef)CFDictionaryGetValue(curModeDict, kCGDisplayMode);
-			CFNumberGetValue(number, kCFNumberLongType, &modeIndex);
+		CGDisplayModeRef		mode = CGDisplayCopyDisplayMode( cgid );
 
+		// get the mode number from the mode dict (using system mode numbering, not our sorted numbering)
+		if (mode)
+		{
 			// grab the width and height, I am unclear on whether this is the displayed FB width or the display device width.
-			int screenWidth=0;
-			int screenHeight=0;
-			int refreshHz=0;
-			
-			number = (CFNumberRef)CFDictionaryGetValue(curModeDict, kCGDisplayWidth);
-			CFNumberGetValue(number, kCFNumberLongType, &screenWidth);
-			number = (CFNumberRef)CFDictionaryGetValue(curModeDict, kCGDisplayHeight);
-			CFNumberGetValue(number, kCFNumberLongType, &screenHeight);
-			number = (CFNumberRef)CFDictionaryGetValue(curModeDict, kCGDisplayRefreshRate);
-			CFNumberGetValue(number, kCFNumberLongType, &refreshHz);
+			int screenWidth=CGDisplayModeGetWidth( mode );
+			int screenHeight=CGDisplayModeGetHeight( mode );
+			int refreshHz=CGDisplayModeGetRefreshRate( mode );
 			
 			GLMPRINTF(( "-D- GLMDisplayDB::GetModeInfo sees mode-index=%d, width=%d, height=%d on CGID %08x (display index %d on rendererindex %d)", 
 				modeIndex,
