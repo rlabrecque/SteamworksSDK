@@ -23,51 +23,6 @@
 // Allocate static member
 std::map<HWND, CGameEngineWin32* > CGameEngineWin32::m_MapEngineInstances;
 
-// These are human-readable names for each of the origin enumerations. It is preferred to 
-// show the supplied icons in-game, but for a simple application these strings can be useful.
-const char *CGameEngineWin32::pOriginStrings[k_EControllerActionOrigin_Count] =
-{
-	"None",
-	"A Button",
-	"B Button",
-	"X Button",
-	"Y Button",
-	"Left Bumper",
-	"Right Bumper",
-	"Left Grip",
-	"Right Grip",
-	"Start Button",
-	"Back Button",
-	"Left Pad Touch",
-	"Left Pad Swipe",
-	"Left Pad Click",
-	"Left Pad D-Pad Up",
-	"Left Pad D-Pad Down",
-	"Left Pad D-Pad West",
-	"Left Pad D-Pad East",
-	"Right Pad Touch",
-	"Right Pad Swipe",
-	"Right Pad Click",
-	"Right Pad D-Pad Up",
-	"Right Pad D-Pad Down",
-	"Right Pad D-Pad West",
-	"Right Pad D-Pad East",
-	"Left Trigger Pull",
-	"Left Trigger Click",
-	"Right Trigger Pull",
-	"Right Trigger Click",
-	"Left Stick Move",
-	"Left Stick Click",
-	"Left Pad D-Pad Up",
-	"Left Pad D-Pad Down",
-	"Left Pad D-Pad Left",
-	"Left Pad D-Pad Right",
-	"Gyro Move",
-	"Gyro Pitch",
-	"Gyro Roll",
-	"Gyro Yaw"
-};
-
 //-----------------------------------------------------------------------------
 // Purpose: WndProc
 //-----------------------------------------------------------------------------
@@ -1998,6 +1953,9 @@ void CGameEngineWin32::FindActiveSteamController()
 }
 
 
+// These are human-readable names for each of the origin enumerations. It is preferred to 
+// show the supplied icons in-game, but for a simple application these strings can be useful.
+
 //--------------------------------------------------------------------------------------------------------------
 // Purpose: For a given in-game action in a given action set, return a human-reaadable string to use as a prompt.
 //--------------------------------------------------------------------------------------------------------------
@@ -2010,10 +1968,9 @@ const char *CGameEngineWin32::GetTextStringForControllerOriginDigital( ECONTROLL
 	{
 		// We should handle the case where this action is bound to multiple buttons, but
 		// here we just grab the first.
-		return pOriginStrings[origins[0]];
+		return SteamController()->GetStringForActionOrigin( origins[0] );
 	}
-
-	return pOriginStrings[0]; // Return "None"
+	return SteamController()->GetStringForActionOrigin( k_EControllerActionOrigin_None ); // Return "None"
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -2028,10 +1985,10 @@ const char *CGameEngineWin32::GetTextStringForControllerOriginAnalog( ECONTROLLE
 	{
 		// We should handle the case where this action is bound to multiple buttons, but
 		// here we just grab the first.
-		return pOriginStrings[origins[0]];
+		return SteamController()->GetStringForActionOrigin( origins[0] );
 	}
 
-	return pOriginStrings[0]; // Return "None"
+	return SteamController()->GetStringForActionOrigin( k_EControllerActionOrigin_None ); // Return "None"
 }
 
 //-----------------------------------------------------------------------------
@@ -2043,6 +2000,30 @@ void CGameEngineWin32::PollSteamController()
 	// Each frame check our active controller handle
 	FindActiveSteamController();
 
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the LED color on the controller, if supported by controller
+//-----------------------------------------------------------------------------
+void CGameEngineWin32::SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags )
+{
+	SteamController()->SetLEDColor( m_ActiveControllerHandle, nColorR, nColorG, nColorB, nFlags );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Trigger vibration on the controller, if supported by controller
+//-----------------------------------------------------------------------------
+void CGameEngineWin32::TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed )
+{
+	SteamController()->TriggerVibration( m_ActiveControllerHandle, nLeftSpeed, nRightSpeed );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Trigger haptics on the controller, if supported by controller
+//-----------------------------------------------------------------------------
+void CGameEngineWin32::TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat )
+{
+	SteamController()->TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
 }
 
 //-----------------------------------------------------------------------------

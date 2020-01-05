@@ -152,6 +152,7 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	m_nShipWeapon = 0;
 	m_hTextureWhite = 0;
 	m_nShipShieldStrength = 0;
+	m_ulExplosionTickCount = 0;
 
 	memset( &m_SpaceWarClientUpdateData, 0, sizeof( m_SpaceWarClientUpdateData ) );
 
@@ -163,6 +164,9 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	BuildGeometry();
 
 	SetPosition( xPos, yPos );
+
+	// Set Controller color to ship color
+	m_pGameEngine->SetControllerColor( m_dwShipColor >> 16 & 255, m_dwShipColor >> 8 & 255, m_dwShipColor & 255, k_ESteamControllerLEDFlag_SetColor );
 }
 #pragma warning( pop )
 
@@ -224,6 +228,9 @@ CShip::~CShip()
 		}
 		m_ListDebris.clear();
 	}
+
+	// Restore Controller Color
+	m_pGameEngine->SetControllerColor( 0, 0, 0, k_ESteamControllerLEDFlag_RestoreUserDefault );
 }
 
 //-----------------------------------------------------------------------------
@@ -457,6 +464,7 @@ void CShip::RunFrame()
 			m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_ForwardThrust ) )
 		{
 			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
+			//m_pGameEngine->SetControllerColor( 100, 255, 0, k_ESteamControllerLEDFlag_SetColor );
 		}
 
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKReverseThrusters ) ||
@@ -464,6 +472,7 @@ void CShip::RunFrame()
 		{
 			m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
 		}
+
 
 		// The Steam Controller can also map an anlog axis to thrust and steer
 		float fThrusterLevel, fUnused;
@@ -473,13 +482,13 @@ void CShip::RunFrame()
 		{
 			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
 			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
+
 		}
 		else if ( fThrusterLevel < 0.0f )
 		{
 			m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
 			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
 		}
-
 
 		// Hardcoded keys to choose various outfits and weapon powerups which require inventory. Note that this is not
 		// a "secure" multiplayer model - clients can lie about what they own. A more robust solution, if your items
@@ -554,7 +563,10 @@ void CShip::RunFrame()
 			}
 
 			if ( m_ulLastThrustStartedTickCount == 0 )
+			{
 				m_ulLastThrustStartedTickCount = ulCurrentTickCount;
+				m_pGameEngine->TriggerControllerHaptics( k_ESteamControllerPad_Left, 2900, 1200, 4 );
+			}
 
 			// You have to hold the key for a second to reach maximum thrust
 			float factor = MIN( ((float)(ulCurrentTickCount - m_ulLastThrustStartedTickCount) / 500.0f) + 0.2f, 1.0f );
@@ -625,6 +637,7 @@ void CShip::RunFrame()
 					yPos = GetYPos() + cosvalue2*-12.0f;
 
 					m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+					m_pGameEngine->TriggerControllerHaptics( k_ESteamControllerPad_Right, 1000, 1500, 2 );
 				}
 			}
 			else
@@ -642,6 +655,7 @@ void CShip::RunFrame()
 				float yPos = GetYPos() + cosvalue*-12.0f;
 
 				m_rgPhotonBeams[nNextAvailablePhotonBeamSlot] = new CPhotonBeam( m_pGameEngine, xPos, yPos, m_dwShipColor, GetAccumulatedRotation(), xVelocity, yVelocity );
+				m_pGameEngine->TriggerControllerHaptics( k_ESteamControllerPad_Right, 1200, 2500, 3 );
 			}
 		}
 	}
@@ -760,6 +774,23 @@ void CShip::Render()
 	CSpaceWarEntity::Render(actualColor);
 }
 
+void CShip::UpdateVibrationEffects()
+{
+	if ( m_ulExplosionTickCount > 0 )
+	{
+		float flVibration = MIN( ((float)(m_pGameEngine->GetGameTickCount() - m_ulExplosionTickCount) / 1000.0f), 1.0f );
+		if ( flVibration == 1.0f )
+		{
+			m_pGameEngine->TriggerControllerVibration( 0, 0 );
+			m_ulExplosionTickCount = 0;
+		}
+		else
+		{
+			m_pGameEngine->TriggerControllerVibration( (unsigned short)( ( 1.0f - flVibration ) * 48000.0f), (unsigned short)( ( 1.0f - flVibration ) * 24000.0f) );
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Set whether the ship is exploding
 //-----------------------------------------------------------------------------
@@ -767,8 +798,11 @@ void CShip::SetExploding( bool bExploding )
 {
 	// If we are already in the specified state, no need to do the below work
 	if ( m_bExploding == bExploding )
+	{
+		UpdateVibrationEffects();
 		return;
-
+	}
+	
 	Steamworks_TestSecret();
 
 	// Track that we are exploding, and disable collision detection
@@ -777,6 +811,8 @@ void CShip::SetExploding( bool bExploding )
 
 	if ( bExploding )
 	{
+		m_ulExplosionTickCount = m_pGameEngine->GetGameTickCount();
+
 		for( int i = 0; i < SHIP_DEBRIS_PIECES; ++i )
 		{
 			CShipDebris * pDebris = new CShipDebris( m_pGameEngine, GetXPos(), GetYPos(), m_dwShipColor );
@@ -785,11 +821,15 @@ void CShip::SetExploding( bool bExploding )
 	}
 	else
 	{
+		m_ulExplosionTickCount = 0;
+
 		std::list<CShipDebris *>::iterator iter;
 		for( iter = m_ListDebris.begin(); iter != m_ListDebris.end(); ++iter )
 			delete *iter;
 		m_ListDebris.clear();
 	}
+
+	UpdateVibrationEffects();
 }
 
 

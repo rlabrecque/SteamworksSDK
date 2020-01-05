@@ -9,6 +9,29 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.39 6th January 2017
+----------------------------------------------------------------
+
+ISteamController
+
+The two new Origin helper functions in this interface allow you to query a description and a glyph for types of controllers and inputs that are in the current SDK header, but also any type of controller that might be supported by the Steam client in the future. To achieve this, pass origin values directly returned from Get*ActionOrigin() functions into GetStringForActionOrigin() and GetGlyphForActionOrigin() and display the results programmatically without checking against the range of the Origin enumerations.
+
+* TriggerVibration - Trigger a vibration event on supported controllers
+* SetLEDColor - Set the controller LED color on supported controllers
+* GetStringForActionOrigin - Returns a localized string (from Steam's language setting) for the specified origin
+* GetGlyphForActionOrigin - Get a local path to art for on-screen glyph for a particular origin
+* Updated Spacewar example to include example usage
+
+ISteamFriends
+* Removed k_EFriendFlagSuggested, since it was unused
+
+ISteamInventory
+* Updated and corrected documentation in the API
+* RequestEligiblePromoItemDefinitionsIDs - Request the list of "eligible" promo items that can be manually granted to the given user.  These are promo items of type "manual" that won't be granted automatically. An example usage of this is an item that becomes available every week.
+* GetEligiblePromoItemDefinitionIDs - After handling a SteamInventoryEligiblePromoItemDefIDs_t call result, use this function to pull out the list of item definition ids that the user can be manually granted via the AddPromoItems() call.
+
+
+----------------------------------------------------------------
 v1.38 14th October 2016
 ----------------------------------------------------------------
 

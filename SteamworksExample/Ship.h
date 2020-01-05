@@ -141,6 +141,9 @@ public:
 	int GetShieldStrength() { return m_nShipShieldStrength;  }
 	void SetShieldStrength( int strength ) { m_nShipShieldStrength = strength; }
 
+	// Update the vibration effects for the ship
+	void UpdateVibrationEffects();
+
 private:
 
 	// Last time we sent an update on our local data to the server
@@ -151,6 +154,9 @@ private:
 
 	// Last time we fired a photon
 	uint64 m_ulLastPhotonTickCount;
+
+	// When we exploded
+	uint64 m_ulExplosionTickCount;
 
 	// is this ship our local ship, or a remote player?
 	bool m_bIsLocalPlayer;

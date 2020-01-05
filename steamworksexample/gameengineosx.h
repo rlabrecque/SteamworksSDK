@@ -201,6 +201,15 @@ public:
 	const char *GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction );
 	const char *GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction );
 
+	// Set the controller LED Color, if available
+	void SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags );
+
+	// Trigger a vibration on the controller, if available
+	void TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed );
+
+	// Trigger haptics on the specified pad of the controller, if available
+	void TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat );
+
 	// Initialize the Steam Controller interfaces
 	void InitSteamController( );
 
@@ -498,8 +507,6 @@ public:
 	// ie 'jump' is currently bound to the 'A' button.
 	EControllerActionOrigin m_ControllerDigitalActionOrigins[eControllerDigitalAction_NumActions];
 	EControllerActionOrigin m_ControllerAnalogActionOrigins[eControllerDigitalAction_NumActions];
-
-	static const char *pOriginStrings[k_EControllerActionOrigin_Count];
 
 };
 
