@@ -42,7 +42,7 @@ public:
 		uint32 unSessionCount = SteamRemotePlay()->GetSessionCount();
 		for ( uint32 iIndex = 0; iIndex < unSessionCount; iIndex++ )
 		{
-			uint32 unSessionID = SteamRemotePlay()->GetSessionID( iIndex );
+			RemotePlaySessionID_t unSessionID = SteamRemotePlay()->GetSessionID( iIndex );
 			if ( !unSessionID )
 			{
 				continue;

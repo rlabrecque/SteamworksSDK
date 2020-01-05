@@ -8,8 +8,8 @@ if [ "$UNAME" == "Linux" ]; then
 	PLATFORM=linux32
 	export LD_LIBRARY_PATH="$STEAMROOT/$PLATFORM:$LD_LIBRARY_PATH"
 else # if [ "$UNAME" == "Darwin" ]; then
-	PLATFORM=osx32
-    export DYLD_LIBRARY_PATH="$STEAMROOT/$PLATFORM:$DYLD_LIBRARY_PATH"
+	PLATFORM=osx
+	export DYLD_LIBRARY_PATH="$STEAMROOT/$PLATFORM:$DYLD_LIBRARY_PATH"
 fi
 
 ulimit -n 2048

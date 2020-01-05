@@ -143,6 +143,9 @@ public:
 	// Run a game frame
 	void RunFrame();
 
+	// Service calls that need to happen less frequently than every frame (e.g. every second)
+	void RunOccasionally();
+
 	// Checks for any incoming network data, then dispatches it
 	void ReceiveNetworkData();
 
@@ -452,6 +455,20 @@ private:
 
 	// callback when new Workshop item was installed
 	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t);
+
+	// Steam China support. duration control callback can be posted asynchronously, but we also
+	// call it directly.
+	STEAM_CALLBACK( CSpaceWarClient, OnDurationControl, DurationControl_t );
+
+	// callresult callback, handles io failure
+	void OnDurationControlCallResult( DurationControl_t *pParam, bool bIOFailure )
+	{
+		if ( !bIOFailure )
+		{
+			OnDurationControl( pParam );
+		}
+	}
+	CCallResult<CSpaceWarClient, DurationControl_t> m_SteamCallResultDurationControl;
 
 	// callback when we ask the Inventory Service for prices
 	void OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure );

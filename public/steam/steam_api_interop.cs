@@ -32,7 +32,7 @@ internal static extern IntPtr SteamAPI_ISteamClient_GetISteamUser(IntPtr instanc
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamGameServer")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamGameServer(IntPtr instancePtr, uint hSteamUser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_SetLocalIPBinding")]
-internal static extern void SteamAPI_ISteamClient_SetLocalIPBinding(IntPtr instancePtr, uint unIP, char usPort);
+internal static extern void SteamAPI_ISteamClient_SetLocalIPBinding(IntPtr instancePtr, IntPtr unIP, char usPort);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamFriends")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamFriends(IntPtr instancePtr, uint hSteamUser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamUtils")]
@@ -361,6 +361,8 @@ internal static extern bool SteamAPI_ISteamUtils_IsSteamChinaLauncher(IntPtr ins
 internal static extern bool SteamAPI_ISteamUtils_InitFilterText(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_FilterText")]
 internal static extern int SteamAPI_ISteamUtils_FilterText(IntPtr instancePtr, string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUtils_GetIPv6ConnectivityState")]
+internal static extern uint SteamAPI_ISteamUtils_GetIPv6ConnectivityState(IntPtr instancePtr, uint eProtocol);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamMatchmaking_GetFavoriteGameCount")]
 internal static extern int SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamMatchmaking_GetFavoriteGame")]
@@ -814,11 +816,11 @@ internal static extern bool SteamAPI_ISteamNetworking_GetP2PSessionState(IntPtr 
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_AllowP2PPacketRelay")]
 internal static extern bool SteamAPI_ISteamNetworking_AllowP2PPacketRelay(IntPtr instancePtr, bool bAllow);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_CreateListenSocket")]
-internal static extern uint SteamAPI_ISteamNetworking_CreateListenSocket(IntPtr instancePtr, int nVirtualP2PPort, uint nIP, char nPort, bool bAllowUseOfPacketRelay);
+internal static extern uint SteamAPI_ISteamNetworking_CreateListenSocket(IntPtr instancePtr, int nVirtualP2PPort, SteamIPAddress_t nIP, char nPort, bool bAllowUseOfPacketRelay);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_CreateP2PConnectionSocket")]
 internal static extern uint SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(IntPtr instancePtr, ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_CreateConnectionSocket")]
-internal static extern uint SteamAPI_ISteamNetworking_CreateConnectionSocket(IntPtr instancePtr, uint nIP, char nPort, int nTimeoutSec);
+internal static extern uint SteamAPI_ISteamNetworking_CreateConnectionSocket(IntPtr instancePtr, SteamIPAddress_t nIP, char nPort, int nTimeoutSec);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_DestroySocket")]
 internal static extern bool SteamAPI_ISteamNetworking_DestroySocket(IntPtr instancePtr, uint hSocket, bool bNotifyRemoteEnd);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_DestroyListenSocket")]
@@ -834,9 +836,9 @@ internal static extern bool SteamAPI_ISteamNetworking_IsDataAvailable(IntPtr ins
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_RetrieveData")]
 internal static extern bool SteamAPI_ISteamNetworking_RetrieveData(IntPtr instancePtr, uint hListenSocket, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref uint phSocket);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_GetSocketInfo")]
-internal static extern bool SteamAPI_ISteamNetworking_GetSocketInfo(IntPtr instancePtr, uint hSocket, ref CSteamID pSteamIDRemote, ref int peSocketStatus, ref uint punIPRemote, ref char punPortRemote);
+internal static extern bool SteamAPI_ISteamNetworking_GetSocketInfo(IntPtr instancePtr, uint hSocket, ref CSteamID pSteamIDRemote, ref int peSocketStatus, ref SteamIPAddress_t punIPRemote, ref char punPortRemote);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_GetListenSocketInfo")]
-internal static extern bool SteamAPI_ISteamNetworking_GetListenSocketInfo(IntPtr instancePtr, uint hListenSocket, ref uint pnIP, ref char pnPort);
+internal static extern bool SteamAPI_ISteamNetworking_GetListenSocketInfo(IntPtr instancePtr, uint hListenSocket, ref SteamIPAddress_t pnIP, ref char pnPort);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_GetSocketConnectionType")]
 internal static extern uint SteamAPI_ISteamNetworking_GetSocketConnectionType(IntPtr instancePtr, uint hSocket);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamNetworking_GetMaxPacketSize")]
@@ -1163,6 +1165,8 @@ internal static extern bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag0(IntPtr in
 internal static extern bool SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(IntPtr instancePtr, ulong handle);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddRequiredTag")]
 internal static extern bool SteamAPI_ISteamUGC_AddRequiredTag(IntPtr instancePtr, ulong handle, string pTagName);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddRequiredTagGroup")]
+internal static extern bool SteamAPI_ISteamUGC_AddRequiredTagGroup(IntPtr instancePtr, ulong handle, ref SteamParamStringArray_t pTagGroups);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddExcludedTag")]
 internal static extern bool SteamAPI_ISteamUGC_AddExcludedTag(IntPtr instancePtr, ulong handle, string pTagName);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_SetReturnOnlyIDs")]
@@ -1489,6 +1493,8 @@ internal static extern IntPtr SteamAPI_ISteamRemotePlay_GetSessionClientName(Int
 internal static extern uint SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(IntPtr instancePtr, uint unSessionID);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_BGetSessionClientResolution")]
 internal static extern bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(IntPtr instancePtr, uint unSessionID, ref int pnResolutionX, ref int pnResolutionY);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite")]
+internal static extern bool SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(IntPtr instancePtr, ulong steamIDFriend);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_InitGameServer")]
 internal static extern bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr instancePtr, uint unIP, char usGamePort, char usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_SetProduct")]
@@ -1562,7 +1568,7 @@ internal static extern void SteamAPI_ISteamGameServer_GetGameplayStats(IntPtr in
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_GetServerReputation")]
 internal static extern ulong SteamAPI_ISteamGameServer_GetServerReputation(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_GetPublicIP")]
-internal static extern uint SteamAPI_ISteamGameServer_GetPublicIP(IntPtr instancePtr);
+internal static extern SteamIPAddress_t SteamAPI_ISteamGameServer_GetPublicIP(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_HandleIncomingPacket")]
 internal static extern bool SteamAPI_ISteamGameServer_HandleIncomingPacket(IntPtr instancePtr, IntPtr pData, int cbData, uint srcIP, char srcPort);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_GetNextOutgoingPacket")]
@@ -1955,7 +1961,7 @@ namespace Valve.Steamworks
 		public abstract void ReleaseUser(uint hSteamPipe,uint hUser);
 		public abstract ISteamUser GetISteamUser(uint hSteamUser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamGameServer GetISteamGameServer(uint hSteamUser,uint hSteamPipe,string pchVersion);
-		public abstract void SetLocalIPBinding(uint unIP,char usPort);
+		public abstract void SetLocalIPBinding(IntPtr unIP,char usPort);
 		public abstract ISteamFriends GetISteamFriends(uint hSteamUser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamUtils GetISteamUtils(uint hSteamPipe,string pchVersion);
 		public abstract ISteamMatchmaking GetISteamMatchmaking(uint hSteamUser,uint hSteamPipe,string pchVersion);
@@ -2138,6 +2144,7 @@ namespace Valve.Steamworks
 		public abstract bool IsSteamChinaLauncher();
 		public abstract bool InitFilterText();
 		public abstract int FilterText(string pchOutFilteredText,uint nByteSizeOutFilteredText,string pchInputMessage,bool bLegalOnly);
+		public abstract uint GetIPv6ConnectivityState(uint eProtocol);
 	}
 
 
@@ -2436,9 +2443,9 @@ namespace Valve.Steamworks
 		public abstract bool CloseP2PChannelWithUser(ulong steamIDRemote,int nChannel);
 		public abstract bool GetP2PSessionState(ulong steamIDRemote,ref P2PSessionState_t pConnectionState);
 		public abstract bool AllowP2PPacketRelay(bool bAllow);
-		public abstract uint CreateListenSocket(int nVirtualP2PPort,uint nIP,char nPort,bool bAllowUseOfPacketRelay);
+		public abstract uint CreateListenSocket(int nVirtualP2PPort,SteamIPAddress_t nIP,char nPort,bool bAllowUseOfPacketRelay);
 		public abstract uint CreateP2PConnectionSocket(ulong steamIDTarget,int nVirtualPort,int nTimeoutSec,bool bAllowUseOfPacketRelay);
-		public abstract uint CreateConnectionSocket(uint nIP,char nPort,int nTimeoutSec);
+		public abstract uint CreateConnectionSocket(SteamIPAddress_t nIP,char nPort,int nTimeoutSec);
 		public abstract bool DestroySocket(uint hSocket,bool bNotifyRemoteEnd);
 		public abstract bool DestroyListenSocket(uint hSocket,bool bNotifyRemoteEnd);
 		public abstract bool SendDataOnSocket(uint hSocket,IntPtr pubData,uint cubData,bool bReliable);
@@ -2446,8 +2453,8 @@ namespace Valve.Steamworks
 		public abstract bool RetrieveDataFromSocket(uint hSocket,IntPtr pubDest,uint cubDest,ref uint pcubMsgSize);
 		public abstract bool IsDataAvailable(uint hListenSocket,ref uint pcubMsgSize,ref uint phSocket);
 		public abstract bool RetrieveData(uint hListenSocket,IntPtr pubDest,uint cubDest,ref uint pcubMsgSize,ref uint phSocket);
-		public abstract bool GetSocketInfo(uint hSocket,ref CSteamID pSteamIDRemote,ref int peSocketStatus,ref uint punIPRemote,ref char punPortRemote);
-		public abstract bool GetListenSocketInfo(uint hListenSocket,ref uint pnIP,ref char pnPort);
+		public abstract bool GetSocketInfo(uint hSocket,ref CSteamID pSteamIDRemote,ref int peSocketStatus,ref SteamIPAddress_t punIPRemote,ref char punPortRemote);
+		public abstract bool GetListenSocketInfo(uint hListenSocket,ref SteamIPAddress_t pnIP,ref char pnPort);
 		public abstract uint GetSocketConnectionType(uint hSocket);
 		public abstract int GetMaxPacketSize(uint hSocket);
 	}
@@ -2653,6 +2660,7 @@ namespace Valve.Steamworks
 		public abstract bool GetQueryUGCKeyValueTag0(ulong handle,uint index,string pchKey,out string pchValue);
 		public abstract bool ReleaseQueryUGCRequest(ulong handle);
 		public abstract bool AddRequiredTag(ulong handle,string pTagName);
+		public abstract bool AddRequiredTagGroup(ulong handle,ref SteamParamStringArray_t pTagGroups);
 		public abstract bool AddExcludedTag(ulong handle,string pTagName);
 		public abstract bool SetReturnOnlyIDs(ulong handle,bool bReturnOnlyIDs);
 		public abstract bool SetReturnKeyValueTags(ulong handle,bool bReturnKeyValueTags);
@@ -2858,6 +2866,7 @@ namespace Valve.Steamworks
 		public abstract string GetSessionClientName(uint unSessionID);
 		public abstract uint GetSessionClientFormFactor(uint unSessionID);
 		public abstract bool BGetSessionClientResolution(uint unSessionID,ref int pnResolutionX,ref int pnResolutionY);
+		public abstract bool BSendRemotePlayTogetherInvite(ulong steamIDFriend);
 	}
 
 
@@ -2900,7 +2909,7 @@ namespace Valve.Steamworks
 		public abstract bool RequestUserGroupStatus(ulong steamIDUser,ulong steamIDGroup);
 		public abstract void GetGameplayStats();
 		public abstract ulong GetServerReputation();
-		public abstract uint GetPublicIP();
+		public abstract SteamIPAddress_t GetPublicIP();
 		public abstract bool HandleIncomingPacket(IntPtr pData,int cbData,uint srcIP,char srcPort);
 		public abstract int GetNextOutgoingPacket(IntPtr pOut,int cbMaxOut,ref uint pNetAdr,ref char pPort);
 		public abstract void EnableHeartbeats(bool bActive);
@@ -2986,7 +2995,7 @@ public override ISteamGameServer GetISteamGameServer(uint hSteamUser,uint hSteam
 	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamGameServer(m_pSteamClient,hSteamUser,hSteamPipe,pchVersion);
 	return (ISteamGameServer) Marshal.PtrToStructure(result, typeof(ISteamGameServer));
 }
-public override void SetLocalIPBinding(uint unIP,char usPort)
+public override void SetLocalIPBinding(IntPtr unIP,char usPort)
 {
 	CheckIfUsable();
 	NativeEntrypoints.SteamAPI_ISteamClient_SetLocalIPBinding(m_pSteamClient,unIP,usPort);
@@ -4032,6 +4041,12 @@ public override int FilterText(string pchOutFilteredText,uint nByteSizeOutFilter
 {
 	CheckIfUsable();
 	int result = NativeEntrypoints.SteamAPI_ISteamUtils_FilterText(m_pSteamUtils,pchOutFilteredText,nByteSizeOutFilteredText,pchInputMessage,bLegalOnly);
+	return result;
+}
+public override uint GetIPv6ConnectivityState(uint eProtocol)
+{
+	CheckIfUsable();
+	uint result = NativeEntrypoints.SteamAPI_ISteamUtils_GetIPv6ConnectivityState(m_pSteamUtils,eProtocol);
 	return result;
 }
 }
@@ -5652,7 +5667,7 @@ public override bool AllowP2PPacketRelay(bool bAllow)
 	bool result = NativeEntrypoints.SteamAPI_ISteamNetworking_AllowP2PPacketRelay(m_pSteamNetworking,bAllow);
 	return result;
 }
-public override uint CreateListenSocket(int nVirtualP2PPort,uint nIP,char nPort,bool bAllowUseOfPacketRelay)
+public override uint CreateListenSocket(int nVirtualP2PPort,SteamIPAddress_t nIP,char nPort,bool bAllowUseOfPacketRelay)
 {
 	CheckIfUsable();
 	uint result = NativeEntrypoints.SteamAPI_ISteamNetworking_CreateListenSocket(m_pSteamNetworking,nVirtualP2PPort,nIP,nPort,bAllowUseOfPacketRelay);
@@ -5664,7 +5679,7 @@ public override uint CreateP2PConnectionSocket(ulong steamIDTarget,int nVirtualP
 	uint result = NativeEntrypoints.SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(m_pSteamNetworking,steamIDTarget,nVirtualPort,nTimeoutSec,bAllowUseOfPacketRelay);
 	return result;
 }
-public override uint CreateConnectionSocket(uint nIP,char nPort,int nTimeoutSec)
+public override uint CreateConnectionSocket(SteamIPAddress_t nIP,char nPort,int nTimeoutSec)
 {
 	CheckIfUsable();
 	uint result = NativeEntrypoints.SteamAPI_ISteamNetworking_CreateConnectionSocket(m_pSteamNetworking,nIP,nPort,nTimeoutSec);
@@ -5718,19 +5733,17 @@ public override bool RetrieveData(uint hListenSocket,IntPtr pubDest,uint cubDest
 	bool result = NativeEntrypoints.SteamAPI_ISteamNetworking_RetrieveData(m_pSteamNetworking,hListenSocket,pubDest,cubDest,ref pcubMsgSize,ref phSocket);
 	return result;
 }
-public override bool GetSocketInfo(uint hSocket,ref CSteamID pSteamIDRemote,ref int peSocketStatus,ref uint punIPRemote,ref char punPortRemote)
+public override bool GetSocketInfo(uint hSocket,ref CSteamID pSteamIDRemote,ref int peSocketStatus,ref SteamIPAddress_t punIPRemote,ref char punPortRemote)
 {
 	CheckIfUsable();
 	peSocketStatus = 0;
-	punIPRemote = 0;
 	punPortRemote = (char) 0;
 	bool result = NativeEntrypoints.SteamAPI_ISteamNetworking_GetSocketInfo(m_pSteamNetworking,hSocket,ref pSteamIDRemote,ref peSocketStatus,ref punIPRemote,ref punPortRemote);
 	return result;
 }
-public override bool GetListenSocketInfo(uint hListenSocket,ref uint pnIP,ref char pnPort)
+public override bool GetListenSocketInfo(uint hListenSocket,ref SteamIPAddress_t pnIP,ref char pnPort)
 {
 	CheckIfUsable();
-	pnIP = 0;
 	pnPort = (char) 0;
 	bool result = NativeEntrypoints.SteamAPI_ISteamNetworking_GetListenSocketInfo(m_pSteamNetworking,hListenSocket,ref pnIP,ref pnPort);
 	return result;
@@ -6878,6 +6891,12 @@ public override bool AddRequiredTag(ulong handle,string pTagName)
 	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_AddRequiredTag(m_pSteamUGC,handle,pTagName);
 	return result;
 }
+public override bool AddRequiredTagGroup(ulong handle,ref SteamParamStringArray_t pTagGroups)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamUGC_AddRequiredTagGroup(m_pSteamUGC,handle,ref pTagGroups);
+	return result;
+}
 public override bool AddExcludedTag(ulong handle,string pTagName)
 {
 	CheckIfUsable();
@@ -8009,6 +8028,12 @@ public override bool BGetSessionClientResolution(uint unSessionID,ref int pnReso
 	bool result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(m_pSteamRemotePlay,unSessionID,ref pnResolutionX,ref pnResolutionY);
 	return result;
 }
+public override bool BSendRemotePlayTogetherInvite(ulong steamIDFriend)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(m_pSteamRemotePlay,steamIDFriend);
+	return result;
+}
 }
 
 
@@ -8223,10 +8248,10 @@ public override ulong GetServerReputation()
 	ulong result = NativeEntrypoints.SteamAPI_ISteamGameServer_GetServerReputation(m_pSteamGameServer);
 	return result;
 }
-public override uint GetPublicIP()
+public override SteamIPAddress_t GetPublicIP()
 {
 	CheckIfUsable();
-	uint result = NativeEntrypoints.SteamAPI_ISteamGameServer_GetPublicIP(m_pSteamGameServer);
+	SteamIPAddress_t result = NativeEntrypoints.SteamAPI_ISteamGameServer_GetPublicIP(m_pSteamGameServer);
 	return result;
 }
 public override bool HandleIncomingPacket(IntPtr pData,int cbData,uint srcIP,char srcPort)
@@ -9795,6 +9820,11 @@ internal static extern IntPtr SteamGameServerStats();
 }
 
 
+public enum ESteamIPType
+{
+	k_ESteamIPTypeIPv4 = 0,
+	k_ESteamIPTypeIPv6 = 1,
+}
 public enum EUniverse
 {
 	k_EUniverseInvalid = 0,
@@ -9806,6 +9836,7 @@ public enum EUniverse
 }
 public enum EResult
 {
+	k_EResultNone = 0,
 	k_EResultOK = 1,
 	k_EResultFail = 2,
 	k_EResultNoConnection = 3,
@@ -10024,6 +10055,8 @@ public enum EAppOwnershipFlags
 	k_EAppOwnershipFlags_RentalNotActivated = 65536,
 	k_EAppOwnershipFlags_Rental = 131072,
 	k_EAppOwnershipFlags_SiteLicense = 262144,
+	k_EAppOwnershipFlags_LegacyFreeSub = 524288,
+	k_EAppOwnershipFlags_InvalidOSType = 1048576,
 }
 public enum EAppType
 {
@@ -10041,9 +10074,9 @@ public enum EAppType
 	k_EAppType_Franchise = 1024,
 	k_EAppType_Video = 2048,
 	k_EAppType_Plugin = 4096,
-	k_EAppType_Music = 8192,
+	k_EAppType_MusicAlbum = 8192,
 	k_EAppType_Series = 16384,
-	k_EAppType_Comic = 32768,
+	k_EAppType_Comic_UNUSED = 32768,
 	k_EAppType_Beta = 65536,
 	k_EAppType_Shortcut = 1073741824,
 	k_EAppType_DepotOnly = -2147483648,
@@ -10181,6 +10214,7 @@ public enum EVRHMDType
 	k_eEVRHMDType_Lenovo_Explorer = 71,
 	k_eEVRHMDType_HP_Unknown = 80,
 	k_eEVRHMDType_HP_WindowsMR = 81,
+	k_eEVRHMDType_HP_Reverb = 82,
 	k_eEVRHMDType_Samsung_Unknown = 90,
 	k_eEVRHMDType_Samsung_Odyssey = 91,
 	k_eEVRHMDType_Unannounced_Unknown = 100,
@@ -10217,6 +10251,9 @@ public enum EDurationControlProgress
 	k_EDurationControlProgress_Full = 0,
 	k_EDurationControlProgress_Half = 1,
 	k_EDurationControlProgress_None = 2,
+	k_EDurationControl_ExitSoon_3h = 3,
+	k_EDurationControl_ExitSoon_5h = 4,
+	k_EDurationControl_ExitSoon_Night = 5,
 }
 public enum EDurationControlNotification
 {
@@ -10225,6 +10262,9 @@ public enum EDurationControlNotification
 	k_EDurationControlNotification_3Hours = 2,
 	k_EDurationControlNotification_HalfProgress = 3,
 	k_EDurationControlNotification_NoProgress = 4,
+	k_EDurationControlNotification_ExitSoon_3h = 5,
+	k_EDurationControlNotification_ExitSoon_5h = 6,
+	k_EDurationControlNotification_ExitSoon_Night = 7,
 }
 public enum EGameSearchErrorCode_t
 {
@@ -10245,6 +10285,18 @@ public enum EPlayerResult_t
 	k_EPlayerResultKicked = 3,
 	k_EPlayerResultIncomplete = 4,
 	k_EPlayerResultCompleted = 5,
+}
+public enum ESteamIPv6ConnectivityProtocol
+{
+	k_ESteamIPv6ConnectivityProtocol_Invalid = 0,
+	k_ESteamIPv6ConnectivityProtocol_HTTP = 1,
+	k_ESteamIPv6ConnectivityProtocol_UDP = 2,
+}
+public enum ESteamIPv6ConnectivityState
+{
+	k_ESteamIPv6ConnectivityState_Unknown = 0,
+	k_ESteamIPv6ConnectivityState_Good = 1,
+	k_ESteamIPv6ConnectivityState_Bad = 2,
 }
 public enum EFailureType
 {
@@ -10415,7 +10467,7 @@ public enum ERemoteStoragePlatform
 	k_ERemoteStoragePlatformOSX = 2,
 	k_ERemoteStoragePlatformPS3 = 4,
 	k_ERemoteStoragePlatformLinux = 8,
-	k_ERemoteStoragePlatformReserved2 = 16,
+	k_ERemoteStoragePlatformSwitch = 16,
 	k_ERemoteStoragePlatformAndroid = 32,
 	k_ERemoteStoragePlatformIOS = 64,
 	k_ERemoteStoragePlatformAll = -1,
@@ -11485,6 +11537,10 @@ public enum ESteamDeviceFormFactor
 	k_ESteamDeviceFormFactorComputer = 3,
 	k_ESteamDeviceFormFactorTV = 4,
 }
+[StructLayout(LayoutKind.Sequential)] public struct SteamIPAddress_t
+{
+	public ESteamIPType m_eType;
+}
 [StructLayout(LayoutKind.Sequential)] public struct CSteamID
 {
 	public SteamID_t m_steamid;
@@ -11643,6 +11699,8 @@ public enum ESteamDeviceFormFactor
 	public int m_csecsLast5h;
 	public EDurationControlProgress m_progress;
 	public EDurationControlNotification m_notification;
+	public int m_csecsToday;
+	public int m_csecsRemaining;
 }
 [StructLayout(LayoutKind.Sequential)] public struct FriendGameInfo_t
 {

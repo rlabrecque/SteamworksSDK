@@ -73,9 +73,14 @@
 ,{"typedef": "SteamItemDef_t","type": "int32"}
 ,{"typedef": "SteamInventoryResult_t","type": "int32"}
 ,{"typedef": "SteamInventoryUpdateHandle_t","type": "uint64"}
+,{"typedef": "RemotePlaySessionID_t","type": "uint32"}
 ],
 "enums":[
-	{"enumname": "EUniverse","values": [ 
+	{"enumname": "ESteamIPType","values": [ 
+	{"name": "k_ESteamIPTypeIPv4","value": "0"}
+	,{"name": "k_ESteamIPTypeIPv6","value": "1"}
+]}
+,	{"enumname": "EUniverse","values": [ 
 	{"name": "k_EUniverseInvalid","value": "0"}
 	,{"name": "k_EUniversePublic","value": "1"}
 	,{"name": "k_EUniverseBeta","value": "2"}
@@ -84,7 +89,8 @@
 	,{"name": "k_EUniverseMax","value": "5"}
 ]}
 ,	{"enumname": "EResult","values": [ 
-	{"name": "k_EResultOK","value": "1"}
+	{"name": "k_EResultNone","value": "0"}
+	,{"name": "k_EResultOK","value": "1"}
 	,{"name": "k_EResultFail","value": "2"}
 	,{"name": "k_EResultNoConnection","value": "3"}
 	,{"name": "k_EResultInvalidPassword","value": "5"}
@@ -294,6 +300,8 @@
 	,{"name": "k_EAppOwnershipFlags_RentalNotActivated","value": "65536"}
 	,{"name": "k_EAppOwnershipFlags_Rental","value": "131072"}
 	,{"name": "k_EAppOwnershipFlags_SiteLicense","value": "262144"}
+	,{"name": "k_EAppOwnershipFlags_LegacyFreeSub","value": "524288"}
+	,{"name": "k_EAppOwnershipFlags_InvalidOSType","value": "1048576"}
 ]}
 ,	{"enumname": "EAppType","values": [ 
 	{"name": "k_EAppType_Invalid","value": "0"}
@@ -310,9 +318,9 @@
 	,{"name": "k_EAppType_Franchise","value": "1024"}
 	,{"name": "k_EAppType_Video","value": "2048"}
 	,{"name": "k_EAppType_Plugin","value": "4096"}
-	,{"name": "k_EAppType_Music","value": "8192"}
+	,{"name": "k_EAppType_MusicAlbum","value": "8192"}
 	,{"name": "k_EAppType_Series","value": "16384"}
-	,{"name": "k_EAppType_Comic","value": "32768"}
+	,{"name": "k_EAppType_Comic_UNUSED","value": "32768"}
 	,{"name": "k_EAppType_Beta","value": "65536"}
 	,{"name": "k_EAppType_Shortcut","value": "1073741824"}
 	,{"name": "k_EAppType_DepotOnly","value": "-2147483648"}
@@ -441,6 +449,7 @@
 	,{"name": "k_eEVRHMDType_Lenovo_Explorer","value": "71"}
 	,{"name": "k_eEVRHMDType_HP_Unknown","value": "80"}
 	,{"name": "k_eEVRHMDType_HP_WindowsMR","value": "81"}
+	,{"name": "k_eEVRHMDType_HP_Reverb","value": "82"}
 	,{"name": "k_eEVRHMDType_Samsung_Unknown","value": "90"}
 	,{"name": "k_eEVRHMDType_Samsung_Odyssey","value": "91"}
 	,{"name": "k_eEVRHMDType_Unannounced_Unknown","value": "100"}
@@ -475,6 +484,9 @@
 	{"name": "k_EDurationControlProgress_Full","value": "0"}
 	,{"name": "k_EDurationControlProgress_Half","value": "1"}
 	,{"name": "k_EDurationControlProgress_None","value": "2"}
+	,{"name": "k_EDurationControl_ExitSoon_3h","value": "3"}
+	,{"name": "k_EDurationControl_ExitSoon_5h","value": "4"}
+	,{"name": "k_EDurationControl_ExitSoon_Night","value": "5"}
 ]}
 ,	{"enumname": "EDurationControlNotification","values": [ 
 	{"name": "k_EDurationControlNotification_None","value": "0"}
@@ -482,6 +494,9 @@
 	,{"name": "k_EDurationControlNotification_3Hours","value": "2"}
 	,{"name": "k_EDurationControlNotification_HalfProgress","value": "3"}
 	,{"name": "k_EDurationControlNotification_NoProgress","value": "4"}
+	,{"name": "k_EDurationControlNotification_ExitSoon_3h","value": "5"}
+	,{"name": "k_EDurationControlNotification_ExitSoon_5h","value": "6"}
+	,{"name": "k_EDurationControlNotification_ExitSoon_Night","value": "7"}
 ]}
 ,	{"enumname": "CGameID::EGameIDType","values": [ 
 	{"name": "k_EGameIDTypeApp","value": "0"}
@@ -506,6 +521,16 @@
 	,{"name": "k_EPlayerResultKicked","value": "3"}
 	,{"name": "k_EPlayerResultIncomplete","value": "4"}
 	,{"name": "k_EPlayerResultCompleted","value": "5"}
+]}
+,	{"enumname": "ESteamIPv6ConnectivityProtocol","values": [ 
+	{"name": "k_ESteamIPv6ConnectivityProtocol_Invalid","value": "0"}
+	,{"name": "k_ESteamIPv6ConnectivityProtocol_HTTP","value": "1"}
+	,{"name": "k_ESteamIPv6ConnectivityProtocol_UDP","value": "2"}
+]}
+,	{"enumname": "ESteamIPv6ConnectivityState","values": [ 
+	{"name": "k_ESteamIPv6ConnectivityState_Unknown","value": "0"}
+	,{"name": "k_ESteamIPv6ConnectivityState_Good","value": "1"}
+	,{"name": "k_ESteamIPv6ConnectivityState_Bad","value": "2"}
 ]}
 ,	{"enumname": "IPCFailure_t::EFailureType","values": [ 
 	{"name": "k_EFailureFlushedCallbackQueue","value": "0"}
@@ -661,7 +686,7 @@
 	,{"name": "k_ERemoteStoragePlatformOSX","value": "2"}
 	,{"name": "k_ERemoteStoragePlatformPS3","value": "4"}
 	,{"name": "k_ERemoteStoragePlatformLinux","value": "8"}
-	,{"name": "k_ERemoteStoragePlatformReserved2","value": "16"}
+	,{"name": "k_ERemoteStoragePlatformSwitch","value": "16"}
 	,{"name": "k_ERemoteStoragePlatformAndroid","value": "32"}
 	,{"name": "k_ERemoteStoragePlatformIOS","value": "64"}
 	,{"name": "k_ERemoteStoragePlatformAll","value": "-1"}
@@ -1829,7 +1854,13 @@
 ,{
 	"constname": "k_cchBroadcastGameDataMax","consttype": "int", "constval": "8192"}
 ],
-"structs":[{"struct": "CSteamID","fields": [
+"structs":[{"struct": "SteamIPAddress_t","fields": [
+{ "fieldname": "m_eType", "fieldtype": "enum ESteamIPType"}]}
+,{"struct": "SteamIPAddress_t::(anonymous)","fields": [
+{ "fieldname": "m_unIPv4", "fieldtype": "uint32"},
+{ "fieldname": "m_rgubIPv6", "fieldtype": "uint8 [16]"},
+{ "fieldname": "m_ipv6Qword", "fieldtype": "uint64 [2]"}]}
+,{"struct": "CSteamID","fields": [
 { "fieldname": "m_steamid", "fieldtype": "union SteamID_t"}]}
 ,{"struct": "CSteamID::SteamID_t","fields": [
 { "fieldname": "m_comp", "fieldtype": "struct SteamIDComponent_t"},
@@ -1941,7 +1972,9 @@
 { "fieldname": "m_bApplicable", "fieldtype": "_Bool"},
 { "fieldname": "m_csecsLast5h", "fieldtype": "int32"},
 { "fieldname": "m_progress", "fieldtype": "enum EDurationControlProgress"},
-{ "fieldname": "m_notification", "fieldtype": "enum EDurationControlNotification"}]}
+{ "fieldname": "m_notification", "fieldtype": "enum EDurationControlNotification"},
+{ "fieldname": "m_csecsToday", "fieldtype": "int32"},
+{ "fieldname": "m_csecsRemaining", "fieldtype": "int32"}]}
 ,{"struct": "FriendGameInfo_t","fields": [
 { "fieldname": "m_gameID", "fieldtype": "class CGameID"},
 { "fieldname": "m_unGameIP", "fieldtype": "uint32"},
@@ -2658,9 +2691,9 @@
 ,{"struct": "BroadcastUploadStop_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EBroadcastUploadResult"}]}
 ,{"struct": "SteamRemotePlaySessionConnected_t","fields": [
-{ "fieldname": "m_unSessionID", "fieldtype": "uint32"}]}
+{ "fieldname": "m_unSessionID", "fieldtype": "RemotePlaySessionID_t"}]}
 ,{"struct": "SteamRemotePlaySessionDisconnected_t","fields": [
-{ "fieldname": "m_unSessionID", "fieldtype": "uint32"}]}
+{ "fieldname": "m_unSessionID", "fieldtype": "RemotePlaySessionID_t"}]}
 ,{"struct": "GSClientApprove_t","fields": [
 { "fieldname": "m_SteamID", "fieldtype": "class CSteamID"},
 { "fieldname": "m_OwnerSteamID", "fieldtype": "class CSteamID"}]}
@@ -2776,7 +2809,7 @@
 	"methodname": "SetLocalIPBinding",
 	"returntype": "void",
 	"params": [ 
-{	"paramname": "unIP" ,"paramtype": "uint32"},
+{	"paramname": "unIP" ,"paramtype": "const struct SteamIPAddress_t &"},
 {	"paramname": "usPort" ,"paramtype": "uint16"}
 	 ]
 }
@@ -4102,6 +4135,14 @@
 {	"paramname": "nByteSizeOutFilteredText" ,"paramtype": "uint32"},
 {	"paramname": "pchInputMessage" ,"paramtype": "const char *"},
 {	"paramname": "bLegalOnly" ,"paramtype": "bool"}
+	 ]
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "GetIPv6ConnectivityState",
+	"returntype": "ESteamIPv6ConnectivityState",
+	"params": [ 
+{	"paramname": "eProtocol" ,"paramtype": "ESteamIPv6ConnectivityProtocol"}
 	 ]
 }
 ,{
@@ -6065,7 +6106,7 @@
 	"returntype": "SNetListenSocket_t",
 	"params": [ 
 {	"paramname": "nVirtualP2PPort" ,"paramtype": "int"},
-{	"paramname": "nIP" ,"paramtype": "uint32"},
+{	"paramname": "nIP" ,"paramtype": "struct SteamIPAddress_t"},
 {	"paramname": "nPort" ,"paramtype": "uint16"},
 {	"paramname": "bAllowUseOfPacketRelay" ,"paramtype": "bool"}
 	 ]
@@ -6086,7 +6127,7 @@
 	"methodname": "CreateConnectionSocket",
 	"returntype": "SNetSocket_t",
 	"params": [ 
-{	"paramname": "nIP" ,"paramtype": "uint32"},
+{	"paramname": "nIP" ,"paramtype": "struct SteamIPAddress_t"},
 {	"paramname": "nPort" ,"paramtype": "uint16"},
 {	"paramname": "nTimeoutSec" ,"paramtype": "int"}
 	 ]
@@ -6170,7 +6211,7 @@
 {	"paramname": "hSocket" ,"paramtype": "SNetSocket_t"},
 {	"paramname": "pSteamIDRemote" ,"paramtype": "class CSteamID *"},
 {	"paramname": "peSocketStatus" ,"paramtype": "int *"},
-{	"paramname": "punIPRemote" ,"paramtype": "uint32 *"},
+{	"paramname": "punIPRemote" ,"paramtype": "struct SteamIPAddress_t *"},
 {	"paramname": "punPortRemote" ,"paramtype": "uint16 *"}
 	 ]
 }
@@ -6180,7 +6221,7 @@
 	"returntype": "bool",
 	"params": [ 
 {	"paramname": "hListenSocket" ,"paramtype": "SNetListenSocket_t"},
-{	"paramname": "pnIP" ,"paramtype": "uint32 *"},
+{	"paramname": "pnIP" ,"paramtype": "struct SteamIPAddress_t *"},
 {	"paramname": "pnPort" ,"paramtype": "uint16 *"}
 	 ]
 }
@@ -7566,6 +7607,15 @@
 	"params": [ 
 {	"paramname": "handle" ,"paramtype": "UGCQueryHandle_t"},
 {	"paramname": "pTagName" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "AddRequiredTagGroup",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCQueryHandle_t"},
+{	"paramname": "pTagGroups" ,"paramtype": "const struct SteamParamStringArray_t *"}
 	 ]
 }
 ,{
@@ -8975,7 +9025,7 @@
 ,{
 	"classname": "ISteamRemotePlay",
 	"methodname": "GetSessionID",
-	"returntype": "uint32",
+	"returntype": "RemotePlaySessionID_t",
 	"params": [ 
 {	"paramname": "iSessionIndex" ,"paramtype": "int"}
 	 ]
@@ -8985,7 +9035,7 @@
 	"methodname": "GetSessionSteamID",
 	"returntype": "class CSteamID",
 	"params": [ 
-{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+{	"paramname": "unSessionID" ,"paramtype": "RemotePlaySessionID_t"}
 	 ]
 }
 ,{
@@ -8993,7 +9043,7 @@
 	"methodname": "GetSessionClientName",
 	"returntype": "const char *",
 	"params": [ 
-{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+{	"paramname": "unSessionID" ,"paramtype": "RemotePlaySessionID_t"}
 	 ]
 }
 ,{
@@ -9001,7 +9051,7 @@
 	"methodname": "GetSessionClientFormFactor",
 	"returntype": "ESteamDeviceFormFactor",
 	"params": [ 
-{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+{	"paramname": "unSessionID" ,"paramtype": "RemotePlaySessionID_t"}
 	 ]
 }
 ,{
@@ -9009,9 +9059,17 @@
 	"methodname": "BGetSessionClientResolution",
 	"returntype": "bool",
 	"params": [ 
-{	"paramname": "unSessionID" ,"paramtype": "uint32"},
+{	"paramname": "unSessionID" ,"paramtype": "RemotePlaySessionID_t"},
 {	"paramname": "pnResolutionX" ,"paramtype": "int *"},
 {	"paramname": "pnResolutionY" ,"paramtype": "int *"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "BSendRemotePlayTogetherInvite",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "steamIDFriend" ,"paramtype": "class CSteamID"}
 	 ]
 }
 ,{
@@ -9292,7 +9350,7 @@
 ,{
 	"classname": "ISteamGameServer",
 	"methodname": "GetPublicIP",
-	"returntype": "uint32"
+	"returntype": "struct SteamIPAddress_t"
 }
 ,{
 	"classname": "ISteamGameServer",

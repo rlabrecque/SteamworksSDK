@@ -40,7 +40,7 @@ public:
 	// Constructor
 	CStatsAndAchievements( IGameEngine *pGameEngine );
 
-	// Run a frame
+	// Run a frame. Does not need to run at full frame rate.
 	void RunFrame();
 
 	// Display the stats and achievements

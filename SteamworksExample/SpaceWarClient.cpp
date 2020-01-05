@@ -1286,6 +1286,26 @@ void CSpaceWarClient::OnSteamServerConnectFailure( SteamServerConnectFailure_t *
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Do work that doesn't need to happen every frame
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::RunOccasionally()
+{
+	if ( SteamUtils()->IsSteamChinaLauncher() )
+	{
+		SteamAPICall_t hCallHandle = SteamUser()->GetDurationControl();
+		if ( hCallHandle != k_uAPICallInvalid )
+		{
+			m_SteamCallResultDurationControl.Set( hCallHandle, this, &CSpaceWarClient::OnDurationControlCallResult );
+		}
+
+	}
+
+	// Service stats and achievements
+	m_pStatsAndAchievements->RunFrame();
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Main frame function, updates the state of the world and performs rendering
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::RunFrame()
@@ -1317,8 +1337,14 @@ void CSpaceWarClient::RunFrame()
 	// Run Steam client callbacks
 	SteamAPI_RunCallbacks();
 
-	// For now, run stats/achievements every frame
-	m_pStatsAndAchievements->RunFrame();
+	// Do work that runs infrequently. we do this every second.
+	static time_t tLastCheck = 0;
+	time_t tNow = time( nullptr );
+	if ( tNow != tLastCheck )
+	{
+		tLastCheck = tNow;
+		RunOccasionally();
+	}
 
 	// if we just transitioned state, perform on change handlers
 	if ( m_bTransitionedGameState )
@@ -2432,6 +2458,7 @@ void CSpaceWarClient::LoadItemsWithPrices()
 	m_SteamCallResultRequestPrices.Set( hSteamAPICall, this, &CSpaceWarClient::OnRequestPricesResult );
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: new Workshop was installed, load it instantly
 //-----------------------------------------------------------------------------
@@ -2440,6 +2467,49 @@ void CSpaceWarClient::OnWorkshopItemInstalled( ItemInstalled_t *pParam )
 	if ( pParam->m_unAppID == SteamUtils()->GetAppID() )
 		LoadWorkshopItem( pParam->m_nPublishedFileId );
 }
+
+
+//-----------------------------------------------------------------------------
+// Purpose: duration control / anti indulgence callback notification for Steam China
+// (this can run from an API call, or from an asynchronous callback. see OnDurationControlCallResult)
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnDurationControl( DurationControl_t *pParam )
+{
+	const char *szExitPrompt = nullptr;
+
+	switch ( pParam->m_progress )
+	{
+		default:
+			break;
+			
+		case k_EDurationControl_ExitSoon_3h:
+			szExitPrompt = "3h playtime since last 5h break";
+			break;
+		case k_EDurationControl_ExitSoon_5h:
+			szExitPrompt = "5h playtime today";
+			break;
+		case k_EDurationControl_ExitSoon_Night:
+			szExitPrompt = "10PM-8AM";
+			break;
+	}
+
+	if ( szExitPrompt != nullptr )
+	{
+		char rgch[ 256 ];
+		sprintf_safe( rgch, "Duration control: %s (remaining time: %d)\n",
+			szExitPrompt, pParam->m_csecsRemaining );
+		OutputDebugString( rgch );
+
+		// perform a clean exit
+		OnMenuSelection( k_EClientGameExiting );
+	}
+	else if ( pParam->m_csecsRemaining < 30 )
+	{
+		// Player doesn't have much playtime left, warn them
+		OutputDebugString( "Duration control: Playtime remaining is short - exit soon!\n" );
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Request prices from the Steam Inventory Service

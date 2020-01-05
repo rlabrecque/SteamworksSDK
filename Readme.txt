@@ -9,6 +9,22 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.47 3rd December 2019
+----------------------------------------------------------------
+
+macOS
+* Updated steamcmd binaries to be 64-bit
+
+ISteamNetworkingSockets
+* Added API to set configuration options atomically, at time of creation of the listen socket or connection
+* Added API to send multiple messages efficiently, without copying the message payload
+* Added API for relayed P2P connections where signaling/rendezvous goes through your own custom backend instead of the Steam servers
+
+ISteamRemotePlay
+* Added a function to invite friends to play via Remote Play Together
+
+
+----------------------------------------------------------------
 v1.46 26th July 2019
 ----------------------------------------------------------------
 
