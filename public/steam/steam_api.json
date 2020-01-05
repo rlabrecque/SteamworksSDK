@@ -426,6 +426,7 @@
 	,{"name": "k_eEVRHMDType_HTC_VivePre","value": "2"}
 	,{"name": "k_eEVRHMDType_HTC_Vive","value": "3"}
 	,{"name": "k_eEVRHMDType_HTC_VivePro","value": "4"}
+	,{"name": "k_eEVRHMDType_HTC_ViveCosmos","value": "5"}
 	,{"name": "k_eEVRHMDType_HTC_Unknown","value": "20"}
 	,{"name": "k_eEVRHMDType_Oculus_DK1","value": "21"}
 	,{"name": "k_eEVRHMDType_Oculus_DK2","value": "22"}
@@ -1677,6 +1678,13 @@
 	,{"name": "k_EFeatureTest","value": "12"}
 	,{"name": "k_EFeatureMax","value": "13"}
 ]}
+,	{"enumname": "ESteamDeviceFormFactor","values": [ 
+	{"name": "k_ESteamDeviceFormFactorUnknown","value": "0"}
+	,{"name": "k_ESteamDeviceFormFactorPhone","value": "1"}
+	,{"name": "k_ESteamDeviceFormFactorTablet","value": "2"}
+	,{"name": "k_ESteamDeviceFormFactorComputer","value": "3"}
+	,{"name": "k_ESteamDeviceFormFactorTV","value": "4"}
+]}
 ],
 "consts":[{
 	"constname": "k_iSteamUserCallbacks","consttype": "int", "constval": "100"}
@@ -1796,6 +1804,8 @@
 	"constname": "k_iSteamSTARCallbacks","consttype": "int", "constval": "5500"}
 ,{
 	"constname": "k_iClientSTARCallbacks","consttype": "int", "constval": "5600"}
+,{
+	"constname": "k_iSteamRemotePlayCallbacks","consttype": "int", "constval": "5700"}
 ,{
 	"constname": "k_cchPersonaNameMax","consttype": "int", "constval": "128"}
 ,{
@@ -2647,6 +2657,10 @@
 { "fieldname": "m_bIsRTMP", "fieldtype": "_Bool"}]}
 ,{"struct": "BroadcastUploadStop_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EBroadcastUploadResult"}]}
+,{"struct": "SteamRemotePlaySessionConnected_t","fields": [
+{ "fieldname": "m_unSessionID", "fieldtype": "uint32"}]}
+,{"struct": "SteamRemotePlaySessionDisconnected_t","fields": [
+{ "fieldname": "m_unSessionID", "fieldtype": "uint32"}]}
 ,{"struct": "GSClientApprove_t","fields": [
 { "fieldname": "m_SteamID", "fieldtype": "class CSteamID"},
 { "fieldname": "m_OwnerSteamID", "fieldtype": "class CSteamID"}]}
@@ -3017,6 +3031,16 @@
 	"classname": "ISteamClient",
 	"methodname": "GetISteamParties",
 	"returntype": "class ISteamParties *",
+	"params": [ 
+{	"paramname": "hSteamUser" ,"paramtype": "HSteamUser"},
+{	"paramname": "hSteamPipe" ,"paramtype": "HSteamPipe"},
+{	"paramname": "pchVersion" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamClient",
+	"methodname": "GetISteamRemotePlay",
+	"returntype": "class ISteamRemotePlay *",
 	"params": [ 
 {	"paramname": "hSteamUser" ,"paramtype": "HSteamUser"},
 {	"paramname": "hSteamPipe" ,"paramtype": "HSteamPipe"},
@@ -7059,6 +7083,14 @@
 	 ]
 }
 ,{
+	"classname": "ISteamInput",
+	"methodname": "GetRemotePlaySessionID",
+	"returntype": "uint32",
+	"params": [ 
+{	"paramname": "inputHandle" ,"paramtype": "InputHandle_t"}
+	 ]
+}
+,{
 	"classname": "ISteamController",
 	"methodname": "Init",
 	"returntype": "bool"
@@ -8933,6 +8965,53 @@
 	"returntype": "bool",
 	"params": [ 
 {	"paramname": "eFeature" ,"paramtype": "EParentalFeature"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "GetSessionCount",
+	"returntype": "uint32"
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "GetSessionID",
+	"returntype": "uint32",
+	"params": [ 
+{	"paramname": "iSessionIndex" ,"paramtype": "int"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "GetSessionSteamID",
+	"returntype": "class CSteamID",
+	"params": [ 
+{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "GetSessionClientName",
+	"returntype": "const char *",
+	"params": [ 
+{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "GetSessionClientFormFactor",
+	"returntype": "ESteamDeviceFormFactor",
+	"params": [ 
+{	"paramname": "unSessionID" ,"paramtype": "uint32"}
+	 ]
+}
+,{
+	"classname": "ISteamRemotePlay",
+	"methodname": "BGetSessionClientResolution",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "unSessionID" ,"paramtype": "uint32"},
+{	"paramname": "pnResolutionX" ,"paramtype": "int *"},
+{	"paramname": "pnResolutionY" ,"paramtype": "int *"}
 	 ]
 }
 ,{

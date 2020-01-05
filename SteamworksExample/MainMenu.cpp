@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CMainMenu::CMainMenu( IGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine ), m_callbackParentalSettingsChanged( this, &CMainMenu::OnParentalSettingsChanged )
+CMainMenu::CMainMenu( IGameEngine *pGameEngine ) : CBaseMenu<EClientGameState>( pGameEngine )
 {
 	SetupMenu();
 }
@@ -43,6 +43,7 @@ void CMainMenu::SetupMenu()
 		AddMenuItem( MenuItem_t( "Friends List", k_EClientFriendsList ) );
 		AddMenuItem( MenuItem_t( "Group chat room", k_EClientClanChatRoom ) );
 	}
+	AddMenuItem( MenuItem_t( "Remote Play", k_EClientRemotePlay ) );
 	AddMenuItem( MenuItem_t( "Remote Storage", k_EClientRemoteStorage ) );
 	AddMenuItem( MenuItem_t( "Write Minidump", k_EClientMinidump ) );
 

@@ -138,6 +138,7 @@ int const_k_iSteamPartiesCallbacks = 5300;
 int const_k_iClientPartiesCallbacks = 5400;
 int const_k_iSteamSTARCallbacks = 5500;
 int const_k_iClientSTARCallbacks = 5600;
+int const_k_iSteamRemotePlayCallbacks = 5700;
 int const_k_cchPersonaNameMax = 128;
 int const_k_cwchPersonaNameMax = 32;
 int const_k_cchMaxRichPresenceKeys = 30;
@@ -192,6 +193,7 @@ S_API class ISteamVideo * SteamAPI_ISteamClient_GetISteamVideo(intptr_t instance
 S_API class ISteamParentalSettings * SteamAPI_ISteamClient_GetISteamParentalSettings(intptr_t instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API class ISteamInput * SteamAPI_ISteamClient_GetISteamInput(intptr_t instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API class ISteamParties * SteamAPI_ISteamClient_GetISteamParties(intptr_t instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char * pchVersion);
+S_API class ISteamRemotePlay * SteamAPI_ISteamClient_GetISteamRemotePlay(intptr_t instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API HSteamUser SteamAPI_ISteamUser_GetHSteamUser(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamUser_BLoggedOn(intptr_t instancePtr);
 S_API uint64 SteamAPI_ISteamUser_GetSteamID(intptr_t instancePtr);
@@ -677,6 +679,7 @@ S_API const char * SteamAPI_ISteamInput_GetGlyphForXboxOrigin(intptr_t instanceP
 S_API EInputActionOrigin SteamAPI_ISteamInput_GetActionOriginFromXboxOrigin(intptr_t instancePtr, InputHandle_t inputHandle, EXboxOrigin eOrigin);
 S_API EInputActionOrigin SteamAPI_ISteamInput_TranslateActionOrigin(intptr_t instancePtr, ESteamInputType eDestinationInputType, EInputActionOrigin eSourceOrigin);
 S_API bool SteamAPI_ISteamInput_GetDeviceBindingRevision(intptr_t instancePtr, InputHandle_t inputHandle, int * pMajor, int * pMinor);
+S_API uint32 SteamAPI_ISteamInput_GetRemotePlaySessionID(intptr_t instancePtr, InputHandle_t inputHandle);
 S_API bool SteamAPI_ISteamController_Init(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamController_Shutdown(intptr_t instancePtr);
 S_API void SteamAPI_ISteamController_RunFrame(intptr_t instancePtr);
@@ -885,6 +888,12 @@ S_API bool SteamAPI_ISteamParentalSettings_BIsAppBlocked(intptr_t instancePtr, A
 S_API bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(intptr_t instancePtr, AppId_t nAppID);
 S_API bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(intptr_t instancePtr, EParentalFeature eFeature);
 S_API bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(intptr_t instancePtr, EParentalFeature eFeature);
+S_API uint32 SteamAPI_ISteamRemotePlay_GetSessionCount(intptr_t instancePtr);
+S_API uint32 SteamAPI_ISteamRemotePlay_GetSessionID(intptr_t instancePtr, int iSessionIndex);
+S_API uint64 SteamAPI_ISteamRemotePlay_GetSessionSteamID(intptr_t instancePtr, uint32 unSessionID);
+S_API const char * SteamAPI_ISteamRemotePlay_GetSessionClientName(intptr_t instancePtr, uint32 unSessionID);
+S_API ESteamDeviceFormFactor SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(intptr_t instancePtr, uint32 unSessionID);
+S_API bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(intptr_t instancePtr, uint32 unSessionID, int * pnResolutionX, int * pnResolutionY);
 S_API bool SteamAPI_ISteamGameServer_InitGameServer(intptr_t instancePtr, uint32 unIP, uint16 usGamePort, uint16 usQueryPort, uint32 unFlags, AppId_t nGameAppId, const char * pchVersionString);
 S_API void SteamAPI_ISteamGameServer_SetProduct(intptr_t instancePtr, const char * pszProduct);
 S_API void SteamAPI_ISteamGameServer_SetGameDescription(intptr_t instancePtr, const char * pszGameDescription);

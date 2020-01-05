@@ -87,6 +87,8 @@ internal static extern IntPtr SteamAPI_ISteamClient_GetISteamParentalSettings(In
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamInput(IntPtr instancePtr, uint hSteamUser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamParties")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamParties(IntPtr instancePtr, uint hSteamUser, uint hSteamPipe, string pchVersion);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamRemotePlay")]
+internal static extern IntPtr SteamAPI_ISteamClient_GetISteamRemotePlay(IntPtr instancePtr, uint hSteamUser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_GetHSteamUser")]
 internal static extern uint SteamAPI_ISteamUser_GetHSteamUser(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_BLoggedOn")]
@@ -1057,6 +1059,8 @@ internal static extern uint SteamAPI_ISteamInput_GetActionOriginFromXboxOrigin(I
 internal static extern uint SteamAPI_ISteamInput_TranslateActionOrigin(IntPtr instancePtr, uint eDestinationInputType, uint eSourceOrigin);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamInput_GetDeviceBindingRevision")]
 internal static extern bool SteamAPI_ISteamInput_GetDeviceBindingRevision(IntPtr instancePtr, ulong inputHandle, ref int pMajor, ref int pMinor);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamInput_GetRemotePlaySessionID")]
+internal static extern uint SteamAPI_ISteamInput_GetRemotePlaySessionID(IntPtr instancePtr, ulong inputHandle);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_Init")]
 internal static extern bool SteamAPI_ISteamController_Init(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamController_Shutdown")]
@@ -1473,6 +1477,18 @@ internal static extern bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(In
 internal static extern bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(IntPtr instancePtr, uint eFeature);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList")]
 internal static extern bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(IntPtr instancePtr, uint eFeature);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_GetSessionCount")]
+internal static extern uint SteamAPI_ISteamRemotePlay_GetSessionCount(IntPtr instancePtr);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_GetSessionID")]
+internal static extern uint SteamAPI_ISteamRemotePlay_GetSessionID(IntPtr instancePtr, int iSessionIndex);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_GetSessionSteamID")]
+internal static extern ulong SteamAPI_ISteamRemotePlay_GetSessionSteamID(IntPtr instancePtr, uint unSessionID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_GetSessionClientName")]
+internal static extern IntPtr SteamAPI_ISteamRemotePlay_GetSessionClientName(IntPtr instancePtr, uint unSessionID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor")]
+internal static extern uint SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(IntPtr instancePtr, uint unSessionID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamRemotePlay_BGetSessionClientResolution")]
+internal static extern bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(IntPtr instancePtr, uint unSessionID, ref int pnResolutionX, ref int pnResolutionY);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_InitGameServer")]
 internal static extern bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr instancePtr, uint unIP, char usGamePort, char usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_SetProduct")]
@@ -1967,6 +1983,7 @@ namespace Valve.Steamworks
 		public abstract ISteamParentalSettings GetISteamParentalSettings(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamInput GetISteamInput(uint hSteamUser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamParties GetISteamParties(uint hSteamUser,uint hSteamPipe,string pchVersion);
+		public abstract ISteamRemotePlay GetISteamRemotePlay(uint hSteamUser,uint hSteamPipe,string pchVersion);
 	}
 
 
@@ -2572,6 +2589,7 @@ namespace Valve.Steamworks
 		public abstract uint GetActionOriginFromXboxOrigin(ulong inputHandle,uint eOrigin);
 		public abstract uint TranslateActionOrigin(uint eDestinationInputType,uint eSourceOrigin);
 		public abstract bool GetDeviceBindingRevision(ulong inputHandle,ref int pMajor,ref int pMinor);
+		public abstract uint GetRemotePlaySessionID(ulong inputHandle);
 	}
 
 
@@ -2828,6 +2846,18 @@ namespace Valve.Steamworks
 		public abstract bool BIsAppInBlockList(uint nAppID);
 		public abstract bool BIsFeatureBlocked(uint eFeature);
 		public abstract bool BIsFeatureInBlockList(uint eFeature);
+	}
+
+
+	public abstract class ISteamRemotePlay
+	{
+		public abstract IntPtr GetIntPtr();
+		public abstract uint GetSessionCount();
+		public abstract uint GetSessionID(int iSessionIndex);
+		public abstract ulong GetSessionSteamID(uint unSessionID);
+		public abstract string GetSessionClientName(uint unSessionID);
+		public abstract uint GetSessionClientFormFactor(uint unSessionID);
+		public abstract bool BGetSessionClientResolution(uint unSessionID,ref int pnResolutionX,ref int pnResolutionY);
 	}
 
 
@@ -3121,6 +3151,12 @@ public override ISteamParties GetISteamParties(uint hSteamUser,uint hSteamPipe,s
 	CheckIfUsable();
 	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamParties(m_pSteamClient,hSteamUser,hSteamPipe,pchVersion);
 	return (ISteamParties) Marshal.PtrToStructure(result, typeof(ISteamParties));
+}
+public override ISteamRemotePlay GetISteamRemotePlay(uint hSteamUser,uint hSteamPipe,string pchVersion)
+{
+	CheckIfUsable();
+	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamRemotePlay(m_pSteamClient,hSteamUser,hSteamPipe,pchVersion);
+	return (ISteamRemotePlay) Marshal.PtrToStructure(result, typeof(ISteamRemotePlay));
 }
 }
 
@@ -6468,6 +6504,12 @@ public override bool GetDeviceBindingRevision(ulong inputHandle,ref int pMajor,r
 	bool result = NativeEntrypoints.SteamAPI_ISteamInput_GetDeviceBindingRevision(m_pSteamInput,inputHandle,ref pMajor,ref pMinor);
 	return result;
 }
+public override uint GetRemotePlaySessionID(ulong inputHandle)
+{
+	CheckIfUsable();
+	uint result = NativeEntrypoints.SteamAPI_ISteamInput_GetRemotePlaySessionID(m_pSteamInput,inputHandle);
+	return result;
+}
 }
 
 
@@ -7907,6 +7949,64 @@ public override bool BIsFeatureInBlockList(uint eFeature)
 {
 	CheckIfUsable();
 	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(m_pSteamParentalSettings,eFeature);
+	return result;
+}
+}
+
+
+public class CSteamRemotePlay : ISteamRemotePlay
+{
+public CSteamRemotePlay(IntPtr SteamRemotePlay)
+{
+	m_pSteamRemotePlay = SteamRemotePlay;
+}
+IntPtr m_pSteamRemotePlay;
+
+public override IntPtr GetIntPtr() { return m_pSteamRemotePlay; }
+
+private void CheckIfUsable()
+{
+	if (m_pSteamRemotePlay == IntPtr.Zero)
+	{
+		throw new Exception("Steam Pointer not configured");
+	}
+}
+public override uint GetSessionCount()
+{
+	CheckIfUsable();
+	uint result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_GetSessionCount(m_pSteamRemotePlay);
+	return result;
+}
+public override uint GetSessionID(int iSessionIndex)
+{
+	CheckIfUsable();
+	uint result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_GetSessionID(m_pSteamRemotePlay,iSessionIndex);
+	return result;
+}
+public override ulong GetSessionSteamID(uint unSessionID)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_GetSessionSteamID(m_pSteamRemotePlay,unSessionID);
+	return result;
+}
+public override string GetSessionClientName(uint unSessionID)
+{
+	CheckIfUsable();
+	IntPtr result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_GetSessionClientName(m_pSteamRemotePlay,unSessionID);
+	return Marshal.PtrToStringAnsi(result);
+}
+public override uint GetSessionClientFormFactor(uint unSessionID)
+{
+	CheckIfUsable();
+	uint result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(m_pSteamRemotePlay,unSessionID);
+	return result;
+}
+public override bool BGetSessionClientResolution(uint unSessionID,ref int pnResolutionX,ref int pnResolutionY)
+{
+	CheckIfUsable();
+	pnResolutionX = 0;
+	pnResolutionY = 0;
+	bool result = NativeEntrypoints.SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(m_pSteamRemotePlay,unSessionID,ref pnResolutionX,ref pnResolutionY);
 	return result;
 }
 }
@@ -9686,6 +9786,8 @@ internal static extern IntPtr SteamVideo();
 internal static extern IntPtr SteamTV();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamParentalSettings")]
 internal static extern IntPtr SteamParentalSettings();
+[DllImportAttribute("Steam_api", EntryPoint = "SteamRemotePlay")]
+internal static extern IntPtr SteamRemotePlay();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamGameServer")]
 internal static extern IntPtr SteamGameServer();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamGameServerStats")]
@@ -10064,6 +10166,7 @@ public enum EVRHMDType
 	k_eEVRHMDType_HTC_VivePre = 2,
 	k_eEVRHMDType_HTC_Vive = 3,
 	k_eEVRHMDType_HTC_VivePro = 4,
+	k_eEVRHMDType_HTC_ViveCosmos = 5,
 	k_eEVRHMDType_HTC_Unknown = 20,
 	k_eEVRHMDType_Oculus_DK1 = 21,
 	k_eEVRHMDType_Oculus_DK2 = 22,
@@ -11374,6 +11477,14 @@ public enum EParentalFeature
 	k_EFeatureTest = 12,
 	k_EFeatureMax = 13,
 }
+public enum ESteamDeviceFormFactor
+{
+	k_ESteamDeviceFormFactorUnknown = 0,
+	k_ESteamDeviceFormFactorPhone = 1,
+	k_ESteamDeviceFormFactorTablet = 2,
+	k_ESteamDeviceFormFactorComputer = 3,
+	k_ESteamDeviceFormFactorTV = 4,
+}
 [StructLayout(LayoutKind.Sequential)] public struct CSteamID
 {
 	public SteamID_t m_steamid;
@@ -12671,6 +12782,14 @@ public enum EParentalFeature
 {
 	public EBroadcastUploadResult m_eResult;
 }
+[StructLayout(LayoutKind.Sequential)] public struct SteamRemotePlaySessionConnected_t
+{
+	public uint m_unSessionID;
+}
+[StructLayout(LayoutKind.Sequential)] public struct SteamRemotePlaySessionDisconnected_t
+{
+	public uint m_unSessionID;
+}
 [StructLayout(LayoutKind.Sequential)] public struct GSClientApprove_t
 {
 	public ulong m_SteamID;
@@ -12836,6 +12955,7 @@ public const int k_iSteamPartiesCallbacks = 5300;
 public const int k_iClientPartiesCallbacks = 5400;
 public const int k_iSteamSTARCallbacks = 5500;
 public const int k_iClientSTARCallbacks = 5600;
+public const int k_iSteamRemotePlayCallbacks = 5700;
 public const int k_cchPersonaNameMax = 128;
 public const int k_cwchPersonaNameMax = 32;
 public const int k_cchMaxRichPresenceKeys = 30;
@@ -12990,6 +13110,11 @@ return new CSteamTV(SteamAPIInterop.SteamTV());
 public static ISteamParentalSettings SteamParentalSettings()
 {
 return new CSteamParentalSettings(SteamAPIInterop.SteamParentalSettings());
+}
+
+public static ISteamRemotePlay SteamRemotePlay()
+{
+return new CSteamRemotePlay(SteamAPIInterop.SteamRemotePlay());
 }
 
 public static ISteamGameServer SteamGameServer()

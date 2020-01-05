@@ -24,6 +24,7 @@
 #include "htmlsurface.h"
 #include "Inventory.h"
 #include "steam/steamencryptedappticket.h"
+#include "RemotePlay.h"
 #ifdef WIN32
 #include <direct.h>
 #else
@@ -147,6 +148,9 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	m_pFriendsList = new CFriendsList( pGameEngine );
 	m_pMusicPlayer = new CMusicPlayer( pGameEngine );
 	m_pClanChatRoom = new CClanChatRoom( pGameEngine );
+
+	// Remote Play session list
+	m_pRemotePlayList = new CRemotePlayList( pGameEngine );
 
 	// Remote Storage page
 	m_pRemoteStorage = new CRemoteStorage( pGameEngine );
@@ -960,6 +964,15 @@ void CSpaceWarClient::OnMenuSelection( FriendsListMenuItem_t selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing the Remote Play session list
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( RemotePlayListMenuItem_t selection )
+{
+	m_pRemotePlayList->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: Handles menu actions when viewing the remote storage sync screen
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
@@ -1124,6 +1137,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 
 		pchSteamRichPresenceDisplay = SetInGameRichPresence();
 		bDisplayScoreInRichPresence = true;
+	}
+	else if ( m_eGameState == k_EClientRemotePlay )
+	{
+		// we've switched to the remote play menu
+		m_pRemotePlayList->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing remote play sessions" );
 	}
 	else if ( m_eGameState == k_EClientRemoteStorage )
 	{
@@ -1495,6 +1514,14 @@ void CSpaceWarClient::RunFrame()
 	case k_EClientClanChatRoom:
 		m_pStarField->Render();
 		m_pClanChatRoom->RunFrame();		
+
+		if ( bEscapePressed )
+			SetGameState( k_EClientGameMenu );
+		break;
+
+	case k_EClientRemotePlay:
+		m_pStarField->Render();
+		m_pRemotePlayList->RunFrame();
 
 		if ( bEscapePressed )
 			SetGameState( k_EClientGameMenu );

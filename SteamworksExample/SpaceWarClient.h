@@ -34,6 +34,7 @@ class CP2PAuthPlayer;
 class CP2PAuthedGame;
 class CVoiceChat;
 class CHTMLSurface;
+class CRemotePlayList;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -91,6 +92,12 @@ struct LeaderboardMenuItem_t
 struct FriendsListMenuItem_t
 {
 	CSteamID m_steamIDFriend;
+};
+
+// a Remote Play session list item
+struct RemotePlayListMenuItem_t
+{
+	uint32 m_unSessionID;
 };
 
 #define MAX_WORKSHOP_ITEMS 16
@@ -178,6 +185,7 @@ public:
 	void OnMenuSelection( LobbyMenuItem_t selection );
 	void OnMenuSelection( LeaderboardMenuItem_t selection );
 	void OnMenuSelection( FriendsListMenuItem_t selection );
+	void OnMenuSelection( RemotePlayListMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
 
 	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
@@ -412,8 +420,9 @@ private:
 	CMusicPlayer *m_pMusicPlayer;
 	CClanChatRoom *m_pClanChatRoom;
 	CServerBrowser *m_pServerBrowser;
-
+	CRemotePlayList *m_pRemotePlayList;
 	CRemoteStorage *m_pRemoteStorage;
+
 
 	// lobby handling
 	// the name of the lobby we're connected to

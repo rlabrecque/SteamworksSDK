@@ -197,6 +197,7 @@ class ISteamGameSearch;
 class ISteamInput;
 class ISteamParties;
 class ISteamTV;
+class ISteamRemotePlay;
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -261,6 +262,7 @@ enum { k_iSteamPartiesCallbacks = 5300 };
 enum { k_iClientPartiesCallbacks = 5400 };
 enum { k_iSteamSTARCallbacks = 5500 };
 enum { k_iClientSTARCallbacks = 5600 };
+enum { k_iSteamRemotePlayCallbacks = 5700 };
 
 // Macro used to define a type-safe accessor that will always return the version
 // of the interface of the *header file* you are compiling with!  We also bounce

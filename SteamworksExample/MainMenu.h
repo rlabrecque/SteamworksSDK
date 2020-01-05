@@ -24,7 +24,7 @@ public:
 	void SetupMenu();
 
 private:
-	STEAM_CALLBACK( CMainMenu, OnParentalSettingsChanged, SteamParentalSettingsChanged_t, m_callbackParentalSettingsChanged );
+	STEAM_CALLBACK( CMainMenu, OnParentalSettingsChanged, SteamParentalSettingsChanged_t );
 };
 
 #endif // MAINMENU_H

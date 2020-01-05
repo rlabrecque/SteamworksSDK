@@ -42,6 +42,7 @@
 #include "isteamvideo.h"
 #include "isteamparentalsettings.h"
 #include "isteaminput.h"
+#include "isteamremoteplay.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//

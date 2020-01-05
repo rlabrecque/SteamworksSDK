@@ -190,6 +190,7 @@ enum EClientGameState
 	k_EClientWorkshop,
 	k_EClientHTMLSurface,
 	k_EClientInGameStore,
+	k_EClientRemotePlay,
 };
 
 

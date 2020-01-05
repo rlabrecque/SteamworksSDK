@@ -516,6 +516,7 @@ enum EVRHMDType
 	k_eEVRHMDType_HTC_VivePre = 2,	// htc vive pre
 	k_eEVRHMDType_HTC_Vive = 3,	// htc vive consumer release
 	k_eEVRHMDType_HTC_VivePro = 4,	// htc vive pro release
+	k_eEVRHMDType_HTC_ViveCosmos = 5,	// HTC Vive Cosmos
 
 	k_eEVRHMDType_HTC_Unknown = 20, // unknown htc hmd
 

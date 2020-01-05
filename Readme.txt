@@ -9,6 +9,17 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.46 26th July 2019
+----------------------------------------------------------------
+
+ISteamRemotePlay
+* Added a new interface to get information about Steam Remote Play sessions
+
+ISteamInput
+* Added the GetRemotePlaySessionID function to find out whether a controller is associated with a Steam Remote Play session
+
+
+----------------------------------------------------------------
 v1.45 25th June 2019
 ----------------------------------------------------------------
 
