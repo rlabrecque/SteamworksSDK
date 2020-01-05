@@ -121,6 +121,8 @@ int const_k_iSteamHTMLSurfaceCallbacks = 4500;
 int const_k_iClientVideoCallbacks = 4600;
 int const_k_iClientInventoryCallbacks = 4700;
 int const_k_iClientBluetoothManagerCallbacks = 4800;
+int const_k_iClientSharedConnectionCallbacks = 4900;
+int const_k_ISteamParentalSettingsCallbacks = 5000;
 int const_k_cchPersonaNameMax = 128;
 int const_k_cwchPersonaNameMax = 32;
 int const_k_cchMaxRichPresenceKeys = 20;
@@ -172,6 +174,7 @@ S_API class ISteamMusicRemote * SteamAPI_ISteamClient_GetISteamMusicRemote(intpt
 S_API class ISteamHTMLSurface * SteamAPI_ISteamClient_GetISteamHTMLSurface(intptr_t instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API class ISteamInventory * SteamAPI_ISteamClient_GetISteamInventory(intptr_t instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API class ISteamVideo * SteamAPI_ISteamClient_GetISteamVideo(intptr_t instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char * pchVersion);
+S_API class ISteamParentalSettings * SteamAPI_ISteamClient_GetISteamParentalSettings(intptr_t instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char * pchVersion);
 S_API HSteamUser SteamAPI_ISteamUser_GetHSteamUser(intptr_t instancePtr);
 S_API bool SteamAPI_ISteamUser_BLoggedOn(intptr_t instancePtr);
 S_API uint64 SteamAPI_ISteamUser_GetSteamID(intptr_t instancePtr);
@@ -688,6 +691,10 @@ S_API SteamAPICall_t SteamAPI_ISteamUGC_StopPlaytimeTracking(intptr_t instancePt
 S_API SteamAPICall_t SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(intptr_t instancePtr);
 S_API SteamAPICall_t SteamAPI_ISteamUGC_AddDependency(intptr_t instancePtr, PublishedFileId_t nParentPublishedFileID, PublishedFileId_t nChildPublishedFileID);
 S_API SteamAPICall_t SteamAPI_ISteamUGC_RemoveDependency(intptr_t instancePtr, PublishedFileId_t nParentPublishedFileID, PublishedFileId_t nChildPublishedFileID);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_AddAppDependency(intptr_t instancePtr, PublishedFileId_t nPublishedFileID, AppId_t nAppID);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_RemoveAppDependency(intptr_t instancePtr, PublishedFileId_t nPublishedFileID, AppId_t nAppID);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_GetAppDependencies(intptr_t instancePtr, PublishedFileId_t nPublishedFileID);
+S_API SteamAPICall_t SteamAPI_ISteamUGC_DeleteItem(intptr_t instancePtr, PublishedFileId_t nPublishedFileID);
 S_API uint32 SteamAPI_ISteamAppList_GetNumInstalledApps(intptr_t instancePtr);
 S_API uint32 SteamAPI_ISteamAppList_GetInstalledApps(intptr_t instancePtr, AppId_t * pvecAppID, uint32 unMaxAppIDs);
 S_API int SteamAPI_ISteamAppList_GetAppName(intptr_t instancePtr, AppId_t nAppID, char * pchName, int cchNameMax);
@@ -726,6 +733,7 @@ S_API void SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(intptr_t instancePtr, HH
 S_API void SteamAPI_ISteamHTMLSurface_SetCookie(intptr_t instancePtr, const char * pchHostname, const char * pchKey, const char * pchValue, const char * pchPath, RTime32 nExpires, bool bSecure, bool bHTTPOnly);
 S_API void SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, float flZoom, int nPointX, int nPointY);
 S_API void SteamAPI_ISteamHTMLSurface_SetBackgroundMode(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bBackgroundMode);
+S_API void SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, float flDPIScaling);
 S_API void SteamAPI_ISteamHTMLSurface_AllowStartRequest(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bAllowed);
 S_API void SteamAPI_ISteamHTMLSurface_JSDialogResponse(intptr_t instancePtr, HHTMLBrowser unBrowserHandle, bool bResult);
 S_API EResult SteamAPI_ISteamInventory_GetResultStatus(intptr_t instancePtr, SteamInventoryResult_t resultHandle);
@@ -757,6 +765,12 @@ S_API void SteamAPI_ISteamVideo_GetVideoURL(intptr_t instancePtr, AppId_t unVide
 S_API bool SteamAPI_ISteamVideo_IsBroadcasting(intptr_t instancePtr, int * pnNumViewers);
 S_API void SteamAPI_ISteamVideo_GetOPFSettings(intptr_t instancePtr, AppId_t unVideoAppID);
 S_API bool SteamAPI_ISteamVideo_GetOPFStringForApp(intptr_t instancePtr, AppId_t unVideoAppID, char * pchBuffer, int32 * pnBufferSize);
+S_API bool SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(intptr_t instancePtr);
+S_API bool SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(intptr_t instancePtr);
+S_API bool SteamAPI_ISteamParentalSettings_BIsAppBlocked(intptr_t instancePtr, AppId_t nAppID);
+S_API bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(intptr_t instancePtr, AppId_t nAppID);
+S_API bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(intptr_t instancePtr, EParentalFeature eFeature);
+S_API bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(intptr_t instancePtr, EParentalFeature eFeature);
 S_API bool SteamAPI_ISteamGameServer_InitGameServer(intptr_t instancePtr, uint32 unIP, uint16 usGamePort, uint16 usQueryPort, uint32 unFlags, AppId_t nGameAppId, const char * pchVersionString);
 S_API void SteamAPI_ISteamGameServer_SetProduct(intptr_t instancePtr, const char * pszProduct);
 S_API void SteamAPI_ISteamGameServer_SetGameDescription(intptr_t instancePtr, const char * pszGameDescription);

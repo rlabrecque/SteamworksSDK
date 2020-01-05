@@ -30,6 +30,7 @@
 #include "isteamhtmlsurface.h"
 #include "isteaminventory.h"
 #include "isteamvideo.h"
+#include "isteamparentalsettings.h"
 
 
 // Steam API export macro
@@ -123,6 +124,7 @@ inline ISteamMusicRemote *SteamMusicRemote();
 inline ISteamHTMLSurface *SteamHTMLSurface();
 inline ISteamInventory *SteamInventory();
 inline ISteamVideo *SteamVideo();
+inline ISteamParentalSettings *SteamParentalSettings();
 #endif // VERSION_SAFE_STEAM_API_INTERFACES
 
 
@@ -156,6 +158,7 @@ public:
 	ISteamHTMLSurface*	SteamHTMLSurface() const			{ return m_pSteamHTMLSurface; }
 	ISteamInventory*	SteamInventory() const				{ return m_pSteamInventory; }
 	ISteamVideo*		SteamVideo() const					{ return m_pSteamVideo; }
+	ISteamParentalSettings* SteamParentalSettings() const	{ return m_pSteamParentalSettings; }
 	// DEPRECATED - there is no benefit to using this over the global accessors
 private:
 	ISteamClient		*m_pSteamClient;
@@ -179,6 +182,7 @@ private:
 	ISteamHTMLSurface	*m_pSteamHTMLSurface;
 	ISteamInventory		*m_pSteamInventory;
 	ISteamVideo			*m_pSteamVideo;
+	ISteamParentalSettings *m_pSteamParentalSettings;
 };
 
 

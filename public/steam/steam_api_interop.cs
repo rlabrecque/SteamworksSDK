@@ -81,6 +81,8 @@ internal static extern IntPtr SteamAPI_ISteamClient_GetISteamHTMLSurface(IntPtr 
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamInventory(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamVideo")]
 internal static extern IntPtr SteamAPI_ISteamClient_GetISteamVideo(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamClient_GetISteamParentalSettings")]
+internal static extern IntPtr SteamAPI_ISteamClient_GetISteamParentalSettings(IntPtr instancePtr, uint hSteamuser, uint hSteamPipe, string pchVersion);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_GetHSteamUser")]
 internal static extern uint SteamAPI_ISteamUser_GetHSteamUser(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUser_BLoggedOn")]
@@ -1113,6 +1115,14 @@ internal static extern ulong SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(
 internal static extern ulong SteamAPI_ISteamUGC_AddDependency(IntPtr instancePtr, ulong nParentPublishedFileID, ulong nChildPublishedFileID);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_RemoveDependency")]
 internal static extern ulong SteamAPI_ISteamUGC_RemoveDependency(IntPtr instancePtr, ulong nParentPublishedFileID, ulong nChildPublishedFileID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_AddAppDependency")]
+internal static extern ulong SteamAPI_ISteamUGC_AddAppDependency(IntPtr instancePtr, ulong nPublishedFileID, uint nAppID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_RemoveAppDependency")]
+internal static extern ulong SteamAPI_ISteamUGC_RemoveAppDependency(IntPtr instancePtr, ulong nPublishedFileID, uint nAppID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_GetAppDependencies")]
+internal static extern ulong SteamAPI_ISteamUGC_GetAppDependencies(IntPtr instancePtr, ulong nPublishedFileID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamUGC_DeleteItem")]
+internal static extern ulong SteamAPI_ISteamUGC_DeleteItem(IntPtr instancePtr, ulong nPublishedFileID);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamAppList_GetNumInstalledApps")]
 internal static extern uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr instancePtr);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamAppList_GetInstalledApps")]
@@ -1189,6 +1199,8 @@ internal static extern void SteamAPI_ISteamHTMLSurface_SetCookie(IntPtr instance
 internal static extern void SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(IntPtr instancePtr, uint unBrowserHandle, float flZoom, int nPointX, int nPointY);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_SetBackgroundMode")]
 internal static extern void SteamAPI_ISteamHTMLSurface_SetBackgroundMode(IntPtr instancePtr, uint unBrowserHandle, bool bBackgroundMode);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor")]
+internal static extern void SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(IntPtr instancePtr, uint unBrowserHandle, float flDPIScaling);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_AllowStartRequest")]
 internal static extern void SteamAPI_ISteamHTMLSurface_AllowStartRequest(IntPtr instancePtr, uint unBrowserHandle, bool bAllowed);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamHTMLSurface_JSDialogResponse")]
@@ -1251,6 +1263,18 @@ internal static extern bool SteamAPI_ISteamVideo_IsBroadcasting(IntPtr instanceP
 internal static extern void SteamAPI_ISteamVideo_GetOPFSettings(IntPtr instancePtr, uint unVideoAppID);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamVideo_GetOPFStringForApp")]
 internal static extern bool SteamAPI_ISteamVideo_GetOPFStringForApp(IntPtr instancePtr, uint unVideoAppID, string pchBuffer, ref int pnBufferSize);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(IntPtr instancePtr);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsParentalLockLocked")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(IntPtr instancePtr);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsAppBlocked")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsAppBlocked(IntPtr instancePtr, uint nAppID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsAppInBlockList")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(IntPtr instancePtr, uint nAppID);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsFeatureBlocked")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(IntPtr instancePtr, uint eFeature);
+[DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList")]
+internal static extern bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(IntPtr instancePtr, uint eFeature);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_InitGameServer")]
 internal static extern bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr instancePtr, uint unIP, char usGamePort, char usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString);
 [DllImportAttribute("Steam_api", EntryPoint = "SteamAPI_ISteamGameServer_SetProduct")]
@@ -1504,6 +1528,11 @@ public delegate void SteamAPI_CreateItemResult_t_CallResult(CreateItemResult_t p
 public static extern ulong CCreateItemResult_t_SetCallResult(ulong hAPICall, SteamAPI_CreateItemResult_t_CallResult func);
 [DllImportAttribute("Steam_api", EntryPoint = "CCreateItemResult_t_RemoveCallResult")]
 public static extern ulong CCreateItemResult_t_RemoveCallResult(ulong handle);
+public delegate void SteamAPI_DeleteItemResult_t_CallResult(DeleteItemResult_t pDeleteItemResult_t, bool bIOFailure);
+[DllImportAttribute("Steam_api", EntryPoint = "CDeleteItemResult_t_SetCallResult")]
+public static extern ulong CDeleteItemResult_t_SetCallResult(ulong hAPICall, SteamAPI_DeleteItemResult_t_CallResult func);
+[DllImportAttribute("Steam_api", EntryPoint = "CDeleteItemResult_t_RemoveCallResult")]
+public static extern ulong CDeleteItemResult_t_RemoveCallResult(ulong handle);
 public delegate void SteamAPI_SetUserItemVoteResult_t_CallResult(SetUserItemVoteResult_t pSetUserItemVoteResult_t, bool bIOFailure);
 [DllImportAttribute("Steam_api", EntryPoint = "CSetUserItemVoteResult_t_SetCallResult")]
 public static extern ulong CSetUserItemVoteResult_t_SetCallResult(ulong hAPICall, SteamAPI_SetUserItemVoteResult_t_CallResult func);
@@ -1564,6 +1593,11 @@ public delegate void SteamAPI_UserFavoriteItemsListChanged_t_CallResult(UserFavo
 public static extern ulong CUserFavoriteItemsListChanged_t_SetCallResult(ulong hAPICall, SteamAPI_UserFavoriteItemsListChanged_t_CallResult func);
 [DllImportAttribute("Steam_api", EntryPoint = "CUserFavoriteItemsListChanged_t_RemoveCallResult")]
 public static extern ulong CUserFavoriteItemsListChanged_t_RemoveCallResult(ulong handle);
+public delegate void SteamAPI_AddAppDependencyResult_t_CallResult(AddAppDependencyResult_t pAddAppDependencyResult_t, bool bIOFailure);
+[DllImportAttribute("Steam_api", EntryPoint = "CAddAppDependencyResult_t_SetCallResult")]
+public static extern ulong CAddAppDependencyResult_t_SetCallResult(ulong hAPICall, SteamAPI_AddAppDependencyResult_t_CallResult func);
+[DllImportAttribute("Steam_api", EntryPoint = "CAddAppDependencyResult_t_RemoveCallResult")]
+public static extern ulong CAddAppDependencyResult_t_RemoveCallResult(ulong handle);
 public delegate void SteamAPI_EncryptedAppTicketResponse_t_CallResult(EncryptedAppTicketResponse_t pEncryptedAppTicketResponse_t, bool bIOFailure);
 [DllImportAttribute("Steam_api", EntryPoint = "CEncryptedAppTicketResponse_t_SetCallResult")]
 public static extern ulong CEncryptedAppTicketResponse_t_SetCallResult(ulong hAPICall, SteamAPI_EncryptedAppTicketResponse_t_CallResult func);
@@ -1614,6 +1648,11 @@ public delegate void SteamAPI_CheckFileSignature_t_CallResult(CheckFileSignature
 public static extern ulong CCheckFileSignature_t_SetCallResult(ulong hAPICall, SteamAPI_CheckFileSignature_t_CallResult func);
 [DllImportAttribute("Steam_api", EntryPoint = "CCheckFileSignature_t_RemoveCallResult")]
 public static extern ulong CCheckFileSignature_t_RemoveCallResult(ulong handle);
+public delegate void SteamAPI_GetAppDependenciesResult_t_CallResult(GetAppDependenciesResult_t pGetAppDependenciesResult_t, bool bIOFailure);
+[DllImportAttribute("Steam_api", EntryPoint = "CGetAppDependenciesResult_t_SetCallResult")]
+public static extern ulong CGetAppDependenciesResult_t_SetCallResult(ulong hAPICall, SteamAPI_GetAppDependenciesResult_t_CallResult func);
+[DllImportAttribute("Steam_api", EntryPoint = "CGetAppDependenciesResult_t_RemoveCallResult")]
+public static extern ulong CGetAppDependenciesResult_t_RemoveCallResult(ulong handle);
 public delegate void SteamAPI_RemoteStorageUnsubscribePublishedFileResult_t_CallResult(RemoteStorageUnsubscribePublishedFileResult_t pRemoteStorageUnsubscribePublishedFileResult_t, bool bIOFailure);
 [DllImportAttribute("Steam_api", EntryPoint = "CRemoteStorageUnsubscribePublishedFileResult_t_SetCallResult")]
 public static extern ulong CRemoteStorageUnsubscribePublishedFileResult_t_SetCallResult(ulong hAPICall, SteamAPI_RemoteStorageUnsubscribePublishedFileResult_t_CallResult func);
@@ -1624,6 +1663,11 @@ public delegate void SteamAPI_SetPersonaNameResponse_t_CallResult(SetPersonaName
 public static extern ulong CSetPersonaNameResponse_t_SetCallResult(ulong hAPICall, SteamAPI_SetPersonaNameResponse_t_CallResult func);
 [DllImportAttribute("Steam_api", EntryPoint = "CSetPersonaNameResponse_t_RemoveCallResult")]
 public static extern ulong CSetPersonaNameResponse_t_RemoveCallResult(ulong handle);
+public delegate void SteamAPI_RemoveAppDependencyResult_t_CallResult(RemoveAppDependencyResult_t pRemoveAppDependencyResult_t, bool bIOFailure);
+[DllImportAttribute("Steam_api", EntryPoint = "CRemoveAppDependencyResult_t_SetCallResult")]
+public static extern ulong CRemoveAppDependencyResult_t_SetCallResult(ulong hAPICall, SteamAPI_RemoveAppDependencyResult_t_CallResult func);
+[DllImportAttribute("Steam_api", EntryPoint = "CRemoveAppDependencyResult_t_RemoveCallResult")]
+public static extern ulong CRemoveAppDependencyResult_t_RemoveCallResult(ulong handle);
 public delegate void SteamAPI_UserStatsReceived_t_CallResult(UserStatsReceived_t pUserStatsReceived_t, bool bIOFailure);
 [DllImportAttribute("Steam_api", EntryPoint = "CUserStatsReceived_t_SetCallResult")]
 public static extern ulong CUserStatsReceived_t_SetCallResult(ulong hAPICall, SteamAPI_UserStatsReceived_t_CallResult func);
@@ -1687,6 +1731,7 @@ namespace Valve.Steamworks
 		public abstract ISteamHTMLSurface GetISteamHTMLSurface(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamInventory GetISteamInventory(uint hSteamuser,uint hSteamPipe,string pchVersion);
 		public abstract ISteamVideo GetISteamVideo(uint hSteamuser,uint hSteamPipe,string pchVersion);
+		public abstract ISteamParentalSettings GetISteamParentalSettings(uint hSteamuser,uint hSteamPipe,string pchVersion);
 	}
 
 
@@ -2323,6 +2368,10 @@ namespace Valve.Steamworks
 		public abstract ulong StopPlaytimeTrackingForAllItems();
 		public abstract ulong AddDependency(ulong nParentPublishedFileID,ulong nChildPublishedFileID);
 		public abstract ulong RemoveDependency(ulong nParentPublishedFileID,ulong nChildPublishedFileID);
+		public abstract ulong AddAppDependency(ulong nPublishedFileID,uint nAppID);
+		public abstract ulong RemoveAppDependency(ulong nPublishedFileID,uint nAppID);
+		public abstract ulong GetAppDependencies(ulong nPublishedFileID);
+		public abstract ulong DeleteItem(ulong nPublishedFileID);
 	}
 
 
@@ -2373,6 +2422,7 @@ namespace Valve.Steamworks
 		public abstract void SetCookie(string pchHostname,string pchKey,string pchValue,string pchPath,ulong nExpires,bool bSecure,bool bHTTPOnly);
 		public abstract void SetPageScaleFactor(uint unBrowserHandle,float flZoom,int nPointX,int nPointY);
 		public abstract void SetBackgroundMode(uint unBrowserHandle,bool bBackgroundMode);
+		public abstract void SetDPIScalingFactor(uint unBrowserHandle,float flDPIScaling);
 		public abstract void AllowStartRequest(uint unBrowserHandle,bool bAllowed);
 		public abstract void JSDialogResponse(uint unBrowserHandle,bool bResult);
 	}
@@ -2416,6 +2466,18 @@ namespace Valve.Steamworks
 		public abstract bool IsBroadcasting(ref int pnNumViewers);
 		public abstract void GetOPFSettings(uint unVideoAppID);
 		public abstract bool GetOPFStringForApp(uint unVideoAppID,string pchBuffer,ref int pnBufferSize);
+	}
+
+
+	public abstract class ISteamParentalSettings
+	{
+		public abstract IntPtr GetIntPtr();
+		public abstract bool BIsParentalLockEnabled();
+		public abstract bool BIsParentalLockLocked();
+		public abstract bool BIsAppBlocked(uint nAppID);
+		public abstract bool BIsAppInBlockList(uint nAppID);
+		public abstract bool BIsFeatureBlocked(uint eFeature);
+		public abstract bool BIsFeatureInBlockList(uint eFeature);
 	}
 
 
@@ -2691,6 +2753,12 @@ public override ISteamVideo GetISteamVideo(uint hSteamuser,uint hSteamPipe,strin
 	CheckIfUsable();
 	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamVideo(m_pSteamClient,hSteamuser,hSteamPipe,pchVersion);
 	return (ISteamVideo) Marshal.PtrToStructure(result, typeof(ISteamVideo));
+}
+public override ISteamParentalSettings GetISteamParentalSettings(uint hSteamuser,uint hSteamPipe,string pchVersion)
+{
+	CheckIfUsable();
+	IntPtr result = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamParentalSettings(m_pSteamClient,hSteamuser,hSteamPipe,pchVersion);
+	return (ISteamParentalSettings) Marshal.PtrToStructure(result, typeof(ISteamParentalSettings));
 }
 }
 
@@ -6236,6 +6304,30 @@ public override ulong RemoveDependency(ulong nParentPublishedFileID,ulong nChild
 	ulong result = NativeEntrypoints.SteamAPI_ISteamUGC_RemoveDependency(m_pSteamUGC,nParentPublishedFileID,nChildPublishedFileID);
 	return result;
 }
+public override ulong AddAppDependency(ulong nPublishedFileID,uint nAppID)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamUGC_AddAppDependency(m_pSteamUGC,nPublishedFileID,nAppID);
+	return result;
+}
+public override ulong RemoveAppDependency(ulong nPublishedFileID,uint nAppID)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamUGC_RemoveAppDependency(m_pSteamUGC,nPublishedFileID,nAppID);
+	return result;
+}
+public override ulong GetAppDependencies(ulong nPublishedFileID)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamUGC_GetAppDependencies(m_pSteamUGC,nPublishedFileID);
+	return result;
+}
+public override ulong DeleteItem(ulong nPublishedFileID)
+{
+	CheckIfUsable();
+	ulong result = NativeEntrypoints.SteamAPI_ISteamUGC_DeleteItem(m_pSteamUGC,nPublishedFileID);
+	return result;
+}
 }
 
 
@@ -6474,6 +6566,11 @@ public override void SetBackgroundMode(uint unBrowserHandle,bool bBackgroundMode
 {
 	CheckIfUsable();
 	NativeEntrypoints.SteamAPI_ISteamHTMLSurface_SetBackgroundMode(m_pSteamHTMLSurface,unBrowserHandle,bBackgroundMode);
+}
+public override void SetDPIScalingFactor(uint unBrowserHandle,float flDPIScaling)
+{
+	CheckIfUsable();
+	NativeEntrypoints.SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(m_pSteamHTMLSurface,unBrowserHandle,flDPIScaling);
 }
 public override void AllowStartRequest(uint unBrowserHandle,bool bAllowed)
 {
@@ -6725,6 +6822,62 @@ public override bool GetOPFStringForApp(uint unVideoAppID,string pchBuffer,ref i
 	CheckIfUsable();
 	pnBufferSize = 0;
 	bool result = NativeEntrypoints.SteamAPI_ISteamVideo_GetOPFStringForApp(m_pSteamVideo,unVideoAppID,pchBuffer,ref pnBufferSize);
+	return result;
+}
+}
+
+
+public class CSteamParentalSettings : ISteamParentalSettings
+{
+public CSteamParentalSettings(IntPtr SteamParentalSettings)
+{
+	m_pSteamParentalSettings = SteamParentalSettings;
+}
+IntPtr m_pSteamParentalSettings;
+
+public override IntPtr GetIntPtr() { return m_pSteamParentalSettings; }
+
+private void CheckIfUsable()
+{
+	if (m_pSteamParentalSettings == IntPtr.Zero)
+	{
+		throw new Exception("Steam Pointer not configured");
+	}
+}
+public override bool BIsParentalLockEnabled()
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(m_pSteamParentalSettings);
+	return result;
+}
+public override bool BIsParentalLockLocked()
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(m_pSteamParentalSettings);
+	return result;
+}
+public override bool BIsAppBlocked(uint nAppID)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsAppBlocked(m_pSteamParentalSettings,nAppID);
+	return result;
+}
+public override bool BIsAppInBlockList(uint nAppID)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsAppInBlockList(m_pSteamParentalSettings,nAppID);
+	return result;
+}
+public override bool BIsFeatureBlocked(uint eFeature)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(m_pSteamParentalSettings,eFeature);
+	return result;
+}
+public override bool BIsFeatureInBlockList(uint eFeature)
+{
+	CheckIfUsable();
+	bool result = NativeEntrypoints.SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(m_pSteamParentalSettings,eFeature);
 	return result;
 }
 }
@@ -7654,6 +7807,26 @@ public class CCreateItemResult_t_CallResult
 		m_Handle = Valve.Interop.NativeEntrypoints.CCreateItemResult_t_SetCallResult(hAPICall, func);
   }
 }
+public class CDeleteItemResult_t_CallResult
+{
+	public CDeleteItemResult_t_CallResult() { }
+	~CDeleteItemResult_t_CallResult()
+	{
+		if(m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CDeleteItemResult_t_RemoveCallResult(m_Handle);
+       }
+	}
+	ulong m_Handle = 0;
+	public void Set(ulong hAPICall, Valve.Interop.NativeEntrypoints.SteamAPI_DeleteItemResult_t_CallResult func)
+	{
+		if (m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CDeleteItemResult_t_RemoveCallResult(m_Handle);
+		}
+		m_Handle = Valve.Interop.NativeEntrypoints.CDeleteItemResult_t_SetCallResult(hAPICall, func);
+  }
+}
 public class CSetUserItemVoteResult_t_CallResult
 {
 	public CSetUserItemVoteResult_t_CallResult() { }
@@ -7894,6 +8067,26 @@ public class CUserFavoriteItemsListChanged_t_CallResult
 		m_Handle = Valve.Interop.NativeEntrypoints.CUserFavoriteItemsListChanged_t_SetCallResult(hAPICall, func);
   }
 }
+public class CAddAppDependencyResult_t_CallResult
+{
+	public CAddAppDependencyResult_t_CallResult() { }
+	~CAddAppDependencyResult_t_CallResult()
+	{
+		if(m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CAddAppDependencyResult_t_RemoveCallResult(m_Handle);
+       }
+	}
+	ulong m_Handle = 0;
+	public void Set(ulong hAPICall, Valve.Interop.NativeEntrypoints.SteamAPI_AddAppDependencyResult_t_CallResult func)
+	{
+		if (m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CAddAppDependencyResult_t_RemoveCallResult(m_Handle);
+		}
+		m_Handle = Valve.Interop.NativeEntrypoints.CAddAppDependencyResult_t_SetCallResult(hAPICall, func);
+  }
+}
 public class CEncryptedAppTicketResponse_t_CallResult
 {
 	public CEncryptedAppTicketResponse_t_CallResult() { }
@@ -8094,6 +8287,26 @@ public class CCheckFileSignature_t_CallResult
 		m_Handle = Valve.Interop.NativeEntrypoints.CCheckFileSignature_t_SetCallResult(hAPICall, func);
   }
 }
+public class CGetAppDependenciesResult_t_CallResult
+{
+	public CGetAppDependenciesResult_t_CallResult() { }
+	~CGetAppDependenciesResult_t_CallResult()
+	{
+		if(m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CGetAppDependenciesResult_t_RemoveCallResult(m_Handle);
+       }
+	}
+	ulong m_Handle = 0;
+	public void Set(ulong hAPICall, Valve.Interop.NativeEntrypoints.SteamAPI_GetAppDependenciesResult_t_CallResult func)
+	{
+		if (m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CGetAppDependenciesResult_t_RemoveCallResult(m_Handle);
+		}
+		m_Handle = Valve.Interop.NativeEntrypoints.CGetAppDependenciesResult_t_SetCallResult(hAPICall, func);
+  }
+}
 public class CRemoteStorageUnsubscribePublishedFileResult_t_CallResult
 {
 	public CRemoteStorageUnsubscribePublishedFileResult_t_CallResult() { }
@@ -8132,6 +8345,26 @@ public class CSetPersonaNameResponse_t_CallResult
 			Valve.Interop.NativeEntrypoints.CSetPersonaNameResponse_t_RemoveCallResult(m_Handle);
 		}
 		m_Handle = Valve.Interop.NativeEntrypoints.CSetPersonaNameResponse_t_SetCallResult(hAPICall, func);
+  }
+}
+public class CRemoveAppDependencyResult_t_CallResult
+{
+	public CRemoveAppDependencyResult_t_CallResult() { }
+	~CRemoveAppDependencyResult_t_CallResult()
+	{
+		if(m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CRemoveAppDependencyResult_t_RemoveCallResult(m_Handle);
+       }
+	}
+	ulong m_Handle = 0;
+	public void Set(ulong hAPICall, Valve.Interop.NativeEntrypoints.SteamAPI_RemoveAppDependencyResult_t_CallResult func)
+	{
+		if (m_Handle != 0)
+		{
+			Valve.Interop.NativeEntrypoints.CRemoveAppDependencyResult_t_RemoveCallResult(m_Handle);
+		}
+		m_Handle = Valve.Interop.NativeEntrypoints.CRemoveAppDependencyResult_t_SetCallResult(hAPICall, func);
   }
 }
 public class CUserStatsReceived_t_CallResult
@@ -8276,6 +8509,8 @@ internal static extern IntPtr SteamHTMLSurface();
 internal static extern IntPtr SteamInventory();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamVideo")]
 internal static extern IntPtr SteamVideo();
+[DllImportAttribute("Steam_api", EntryPoint = "SteamParentalSettings")]
+internal static extern IntPtr SteamParentalSettings();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamGameServer")]
 internal static extern IntPtr SteamGameServer();
 [DllImportAttribute("Steam_api", EntryPoint = "SteamGameServerStats")]
@@ -8401,6 +8636,8 @@ public enum EResult
 	k_EResultGSLTExpired = 106,
 	k_EResultInsufficientFunds = 107,
 	k_EResultTooManyPending = 108,
+	k_EResultNoSiteLicensesFound = 109,
+	k_EResultWGNetworkSendExceeded = 110,
 }
 public enum EVoiceResult
 {
@@ -8526,6 +8763,7 @@ public enum EAppType
 	k_EAppType_Plugin = 4096,
 	k_EAppType_Music = 8192,
 	k_EAppType_Series = 16384,
+	k_EAppType_Comic = 32768,
 	k_EAppType_Shortcut = 1073741824,
 	k_EAppType_DepotOnly = -2147483648,
 }
@@ -8567,6 +8805,7 @@ public enum EChatRoomEnterResponse
 	k_EChatRoomEnterResponseCommunityBan = 9,
 	k_EChatRoomEnterResponseMemberBlockedYou = 10,
 	k_EChatRoomEnterResponseYouBlockedMember = 11,
+	k_EChatRoomEnterResponseRatelimitExceeded = 15,
 }
 public enum EChatSteamIDInstanceFlags
 {
@@ -9409,6 +9648,23 @@ public enum ESteamItemFlags
 	k_ESteamItemNoTrade = 1,
 	k_ESteamItemRemoved = 256,
 	k_ESteamItemConsumed = 512,
+}
+public enum EParentalFeature
+{
+	k_EFeatureInvalid = 0,
+	k_EFeatureStore = 1,
+	k_EFeatureCommunity = 2,
+	k_EFeatureProfile = 3,
+	k_EFeatureFriends = 4,
+	k_EFeatureNews = 5,
+	k_EFeatureTrading = 6,
+	k_EFeatureSettings = 7,
+	k_EFeatureConsole = 8,
+	k_EFeatureBrowser = 9,
+	k_EFeatureParentalSetup = 10,
+	k_EFeatureLibrary = 11,
+	k_EFeatureTest = 12,
+	k_EFeatureMax = 13,
 }
 [StructLayout(LayoutKind.Sequential)] public struct CSteamID
 {
@@ -10275,6 +10531,7 @@ public enum ESteamItemFlags
 	public EResult m_eResult;
 	[MarshalAs(UnmanagedType.I1)]
 	public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
+	public ulong m_nPublishedFileId;
 }
 [StructLayout(LayoutKind.Sequential)] public struct DownloadItemResult_t
 {
@@ -10326,6 +10583,32 @@ public enum ESteamItemFlags
 	public EResult m_eResult;
 	public ulong m_nPublishedFileId;
 	public ulong m_nChildPublishedFileId;
+}
+[StructLayout(LayoutKind.Sequential)] public struct AddAppDependencyResult_t
+{
+	public EResult m_eResult;
+	public ulong m_nPublishedFileId;
+	public uint m_nAppID;
+}
+[StructLayout(LayoutKind.Sequential)] public struct RemoveAppDependencyResult_t
+{
+	public EResult m_eResult;
+	public ulong m_nPublishedFileId;
+	public uint m_nAppID;
+}
+[StructLayout(LayoutKind.Sequential)] public struct GetAppDependenciesResult_t
+{
+	public EResult m_eResult;
+	public ulong m_nPublishedFileId;
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32, ArraySubType = UnmanagedType.U4)]
+	public uint[] m_rgAppIDs; //uint[32]
+	public uint m_nNumAppDependencies;
+	public uint m_nTotalNumAppDependencies;
+}
+[StructLayout(LayoutKind.Sequential)] public struct DeleteItemResult_t
+{
+	public EResult m_eResult;
+	public ulong m_nPublishedFileId;
 }
 [StructLayout(LayoutKind.Sequential)] public struct SteamCallback_t
 {
@@ -10552,6 +10835,7 @@ public enum ESteamItemFlags
 	public IntPtr m_pSteamHTMLSurface; // class ISteamHTMLSurface *
 	public IntPtr m_pSteamInventory; // class ISteamInventory *
 	public IntPtr m_pSteamVideo; // class ISteamVideo *
+	public IntPtr m_pSteamParentalSettings; // class ISteamParentalSettings *
 }
 [StructLayout(LayoutKind.Sequential)] public struct CCallbackBase
 {
@@ -10723,6 +11007,8 @@ public const int k_iSteamHTMLSurfaceCallbacks = 4500;
 public const int k_iClientVideoCallbacks = 4600;
 public const int k_iClientInventoryCallbacks = 4700;
 public const int k_iClientBluetoothManagerCallbacks = 4800;
+public const int k_iClientSharedConnectionCallbacks = 4900;
+public const int k_ISteamParentalSettingsCallbacks = 5000;
 public const int k_cchPersonaNameMax = 128;
 public const int k_cwchPersonaNameMax = 32;
 public const int k_cchMaxRichPresenceKeys = 20;
@@ -10857,6 +11143,11 @@ return new CSteamInventory(SteamAPIInterop.SteamInventory());
 public static ISteamVideo SteamVideo()
 {
 return new CSteamVideo(SteamAPIInterop.SteamVideo());
+}
+
+public static ISteamParentalSettings SteamParentalSettings()
+{
+return new CSteamParentalSettings(SteamAPIInterop.SteamParentalSettings());
 }
 
 public static ISteamGameServer SteamGameServer()

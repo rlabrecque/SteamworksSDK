@@ -20,6 +20,11 @@ class CMainMenu : public CBaseMenu<EClientGameState>
 public:
 	// Constructor
 	CMainMenu( IGameEngine *pGameEngine );
+
+	void SetupMenu();
+
+private:
+	STEAM_CALLBACK( CMainMenu, OnParentalSettingsChanged, SteamParentalSettingsChanged_t, m_callbackParentalSettingsChanged );
 };
 
 #endif // MAINMENU_H

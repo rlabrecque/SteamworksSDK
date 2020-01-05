@@ -71,7 +71,7 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 	{
 		// place to set a breakpoint for catching API errors
 		int x = 3;
-		x = x;
+		(void)x;
 	}
 }
 

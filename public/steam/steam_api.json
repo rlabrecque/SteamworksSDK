@@ -229,6 +229,8 @@
 	,{"name": "k_EResultGSLTExpired","value": "106"}
 	,{"name": "k_EResultInsufficientFunds","value": "107"}
 	,{"name": "k_EResultTooManyPending","value": "108"}
+	,{"name": "k_EResultNoSiteLicensesFound","value": "109"}
+	,{"name": "k_EResultWGNetworkSendExceeded","value": "110"}
 ]}
 ,	{"enumname": "EVoiceResult","values": [ 
 	{"name": "k_EVoiceResultOK","value": "0"}
@@ -345,6 +347,7 @@
 	,{"name": "k_EAppType_Plugin","value": "4096"}
 	,{"name": "k_EAppType_Music","value": "8192"}
 	,{"name": "k_EAppType_Series","value": "16384"}
+	,{"name": "k_EAppType_Comic","value": "32768"}
 	,{"name": "k_EAppType_Shortcut","value": "1073741824"}
 	,{"name": "k_EAppType_DepotOnly","value": "-2147483648"}
 ]}
@@ -383,6 +386,7 @@
 	,{"name": "k_EChatRoomEnterResponseCommunityBan","value": "9"}
 	,{"name": "k_EChatRoomEnterResponseMemberBlockedYou","value": "10"}
 	,{"name": "k_EChatRoomEnterResponseYouBlockedMember","value": "11"}
+	,{"name": "k_EChatRoomEnterResponseRatelimitExceeded","value": "15"}
 ]}
 ,	{"enumname": "EChatSteamIDInstanceFlags","values": [ 
 	{"name": "k_EChatAccountInstanceMask","value": "4095"}
@@ -1172,6 +1176,22 @@
 	,{"name": "k_ESteamItemRemoved","value": "256"}
 	,{"name": "k_ESteamItemConsumed","value": "512"}
 ]}
+,	{"enumname": "EParentalFeature","values": [ 
+	{"name": "k_EFeatureInvalid","value": "0"}
+	,{"name": "k_EFeatureStore","value": "1"}
+	,{"name": "k_EFeatureCommunity","value": "2"}
+	,{"name": "k_EFeatureProfile","value": "3"}
+	,{"name": "k_EFeatureFriends","value": "4"}
+	,{"name": "k_EFeatureNews","value": "5"}
+	,{"name": "k_EFeatureTrading","value": "6"}
+	,{"name": "k_EFeatureSettings","value": "7"}
+	,{"name": "k_EFeatureConsole","value": "8"}
+	,{"name": "k_EFeatureBrowser","value": "9"}
+	,{"name": "k_EFeatureParentalSetup","value": "10"}
+	,{"name": "k_EFeatureLibrary","value": "11"}
+	,{"name": "k_EFeatureTest","value": "12"}
+	,{"name": "k_EFeatureMax","value": "13"}
+]}
 ],
 "consts":[{
 	"constname": "k_iSteamUserCallbacks","consttype": "int", "constval": "100"}
@@ -1269,6 +1289,10 @@
 	"constname": "k_iClientInventoryCallbacks","consttype": "int", "constval": "4700"}
 ,{
 	"constname": "k_iClientBluetoothManagerCallbacks","consttype": "int", "constval": "4800"}
+,{
+	"constname": "k_iClientSharedConnectionCallbacks","consttype": "int", "constval": "4900"}
+,{
+	"constname": "k_ISteamParentalSettingsCallbacks","consttype": "int", "constval": "5000"}
 ,{
 	"constname": "k_cchPersonaNameMax","consttype": "int", "constval": "128"}
 ,{
@@ -1835,7 +1859,8 @@
 { "fieldname": "m_bUserNeedsToAcceptWorkshopLegalAgreement", "fieldtype": "_Bool"}]}
 ,{"struct": "SubmitItemUpdateResult_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
-{ "fieldname": "m_bUserNeedsToAcceptWorkshopLegalAgreement", "fieldtype": "_Bool"}]}
+{ "fieldname": "m_bUserNeedsToAcceptWorkshopLegalAgreement", "fieldtype": "_Bool"},
+{ "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"}]}
 ,{"struct": "DownloadItemResult_t","fields": [
 { "fieldname": "m_unAppID", "fieldtype": "AppId_t"},
 { "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
@@ -1866,6 +1891,23 @@
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
 { "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
 { "fieldname": "m_nChildPublishedFileId", "fieldtype": "PublishedFileId_t"}]}
+,{"struct": "AddAppDependencyResult_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EResult"},
+{ "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
+{ "fieldname": "m_nAppID", "fieldtype": "AppId_t"}]}
+,{"struct": "RemoveAppDependencyResult_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EResult"},
+{ "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
+{ "fieldname": "m_nAppID", "fieldtype": "AppId_t"}]}
+,{"struct": "GetAppDependenciesResult_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EResult"},
+{ "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"},
+{ "fieldname": "m_rgAppIDs", "fieldtype": "AppId_t [32]"},
+{ "fieldname": "m_nNumAppDependencies", "fieldtype": "uint32"},
+{ "fieldname": "m_nTotalNumAppDependencies", "fieldtype": "uint32"}]}
+,{"struct": "DeleteItemResult_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EResult"},
+{ "fieldname": "m_nPublishedFileId", "fieldtype": "PublishedFileId_t"}]}
 ,{"struct": "SteamAppInstalled_t","fields": [
 { "fieldname": "m_nAppID", "fieldtype": "AppId_t"}]}
 ,{"struct": "SteamAppUninstalled_t","fields": [
@@ -2016,7 +2058,8 @@
 { "fieldname": "m_pSteamMusicRemote", "fieldtype": "class ISteamMusicRemote *"},
 { "fieldname": "m_pSteamHTMLSurface", "fieldtype": "class ISteamHTMLSurface *"},
 { "fieldname": "m_pSteamInventory", "fieldtype": "class ISteamInventory *"},
-{ "fieldname": "m_pSteamVideo", "fieldtype": "class ISteamVideo *"}]}
+{ "fieldname": "m_pSteamVideo", "fieldtype": "class ISteamVideo *"},
+{ "fieldname": "m_pSteamParentalSettings", "fieldtype": "class ISteamParentalSettings *"}]}
 ,{"struct": "CCallbackBase","fields": [
 { "fieldname": "m_nCallbackFlags", "fieldtype": "uint8"},
 { "fieldname": "m_iCallback", "fieldtype": "int"}]}
@@ -2367,6 +2410,16 @@
 	"classname": "ISteamClient",
 	"methodname": "GetISteamVideo",
 	"returntype": "class ISteamVideo *",
+	"params": [ 
+{	"paramname": "hSteamuser" ,"paramtype": "HSteamUser"},
+{	"paramname": "hSteamPipe" ,"paramtype": "HSteamPipe"},
+{	"paramname": "pchVersion" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamClient",
+	"methodname": "GetISteamParentalSettings",
+	"returntype": "class ISteamParentalSettings *",
 	"params": [ 
 {	"paramname": "hSteamuser" ,"paramtype": "HSteamUser"},
 {	"paramname": "hSteamPipe" ,"paramtype": "HSteamPipe"},
@@ -6763,6 +6816,40 @@
 	 ]
 }
 ,{
+	"classname": "ISteamUGC",
+	"methodname": "AddAppDependency", "callresult": "AddAppDependencyResult_t",
+	"returntype": "SteamAPICall_t",
+	"params": [ 
+{	"paramname": "nPublishedFileID" ,"paramtype": "PublishedFileId_t"},
+{	"paramname": "nAppID" ,"paramtype": "AppId_t"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "RemoveAppDependency", "callresult": "RemoveAppDependencyResult_t",
+	"returntype": "SteamAPICall_t",
+	"params": [ 
+{	"paramname": "nPublishedFileID" ,"paramtype": "PublishedFileId_t"},
+{	"paramname": "nAppID" ,"paramtype": "AppId_t"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "GetAppDependencies", "callresult": "GetAppDependenciesResult_t",
+	"returntype": "SteamAPICall_t",
+	"params": [ 
+{	"paramname": "nPublishedFileID" ,"paramtype": "PublishedFileId_t"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "DeleteItem", "callresult": "DeleteItemResult_t",
+	"returntype": "SteamAPICall_t",
+	"params": [ 
+{	"paramname": "nPublishedFileID" ,"paramtype": "PublishedFileId_t"}
+	 ]
+}
+,{
 	"classname": "ISteamAppList",
 	"methodname": "GetNumInstalledApps",
 	"returntype": "uint32"
@@ -7099,6 +7186,15 @@
 }
 ,{
 	"classname": "ISteamHTMLSurface",
+	"methodname": "SetDPIScalingFactor",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "unBrowserHandle" ,"paramtype": "HHTMLBrowser"},
+{	"paramname": "flDPIScaling" ,"paramtype": "float"}
+	 ]
+}
+,{
+	"classname": "ISteamHTMLSurface",
 	"methodname": "AllowStartRequest",
 	"returntype": "void",
 	"params": [ 
@@ -7386,6 +7482,48 @@
 {	"paramname": "unVideoAppID" ,"paramtype": "AppId_t"},
 {	"paramname": "pchBuffer" ,"paramtype": "char *"},
 {	"paramname": "pnBufferSize" ,"paramtype": "int32 *"}
+	 ]
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsParentalLockEnabled",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsParentalLockLocked",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsAppBlocked",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "nAppID" ,"paramtype": "AppId_t"}
+	 ]
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsAppInBlockList",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "nAppID" ,"paramtype": "AppId_t"}
+	 ]
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsFeatureBlocked",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "eFeature" ,"paramtype": "EParentalFeature"}
+	 ]
+}
+,{
+	"classname": "ISteamParentalSettings",
+	"methodname": "BIsFeatureInBlockList",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "eFeature" ,"paramtype": "EParentalFeature"}
 	 ]
 }
 ,{

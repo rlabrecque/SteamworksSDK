@@ -9,6 +9,22 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.41 13th July 2017
+----------------------------------------------------------------
+
+ISteamClient
+* Exposed ISteamParentalSettings interface. You can use this to determine if the user has parental settings turned on and for what high-level Steam features. 
+
+* ISteamHTMLSurface
+* Added SetDPIScalingFactor - Scale the output display space by this factor, this is useful when displaying content on high dpi devices.
+
+ISteamUGC
+* Added ability to mark a piece of UGC as requiring a set of DLC (AppID). These relationships are managed via new AddAppDependency, RemoveAppDependency, and GetAppDependencies calls.
+* Ported over ability to delete UGC from ISteamRemoteStorage and called it DeleteItem. Note that this does *not* prompt the user in any way.
+* Added m_nPublishedFileId to SubmitItemUpdateResult_t so that it is easier to keep track of what item was updated.
+
+
+----------------------------------------------------------------
 v1.40 25th April 2017
 ----------------------------------------------------------------
 

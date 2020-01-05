@@ -118,6 +118,7 @@ void CHTMLSurface::OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOF
 
 	m_unBrowserHandle = pBrowserReady->unBrowserHandle;
 	SteamHTMLSurface()->SetSize( m_unBrowserHandle, m_unHTMLWide, m_unHTMLTall );
+	SteamHTMLSurface()->SetDPIScalingFactor( m_unBrowserHandle, 2.0f );
 	SteamHTMLSurface()->LoadURL( m_unBrowserHandle, "http://steamcommunity.com/", NULL );
 }
 
