@@ -269,6 +269,20 @@ bool CSpaceWarLocalInventory::HasInstanceOf( SteamItemDef_t nDefinition ) const
 	return false;
 }
 
+uint32 CSpaceWarLocalInventory::GetNumOf( SteamItemDef_t nDefinition ) const
+{
+	uint32 unQuantity = 0;
+	std::list<CSpaceWarItem *>::const_iterator iter;
+	for ( iter = m_listPlayerItems.begin(); iter != m_listPlayerItems.end(); ++iter )
+	{
+		if ( ( *iter )->GetDefinition() == nDefinition )
+		{
+			unQuantity += (*iter)->GetQuantity();
+		}
+	}
+	return unQuantity;
+}
+
 const CSpaceWarItem *  CSpaceWarLocalInventory::GetInstanceOf( SteamItemDef_t nDefinition ) const
 {
 	std::list<CSpaceWarItem *>::const_iterator iter;

@@ -114,7 +114,11 @@ public:
 	CCallResult<CWorkshopItem, SteamUGCRequestUGCDetailsResult_t> m_SteamCallResultUGCDetails;
 };
 
-
+struct PurchaseableItem_t
+{
+	SteamItemDef_t m_nItemDefID;
+	uint64 m_ulPrice;
+};
 
 
 class CSpaceWarClient 
@@ -258,6 +262,12 @@ private:
 	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
 	CWorkshopItem *LoadWorkshopItemFromFile( const char *pszFileName );
 
+	// ask the inventory service for things to purchase
+	void LoadItemsWithPrices();
+
+	// draw the in-game store
+	void DrawInGameStore();
+
 	// Server we are connected to
 	CSpaceWarServer *m_pServer;
 
@@ -290,6 +300,9 @@ private:
 
 	// Font handle for drawing the instructions text
 	HGAMEFONT m_hInstructionsFont;
+
+	// Font handle for drawing the in-game store
+	HGAMEFONT m_hInGameStoreFont;
 
 	// Time the last state transition occurred (so we can count-down round restarts)
 	uint64 m_ulStateTransitionTime;
@@ -425,6 +438,12 @@ private:
 
 	// callback when new Workshop item was installed
 	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t);
+
+	// callback when we ask the Inventory Service for prices
+	void OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure );
+	CCallResult<CSpaceWarClient, SteamInventoryRequestPricesResult_t> m_SteamCallResultRequestPrices;
+	char m_rgchCurrency[4];
+	std::vector<PurchaseableItem_t> m_vecPurchaseableItems;
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

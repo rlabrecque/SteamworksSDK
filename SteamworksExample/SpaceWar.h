@@ -189,6 +189,7 @@ enum EClientGameState
 	k_EClientMusic,
 	k_EClientWorkshop,
 	k_EClientHTMLSurface,
+	k_EClientInGameStore,
 };
 
 

@@ -37,6 +37,7 @@ private:
 	STEAM_CALLBACK( CHTMLSurface, OnNeedsPaint, HTML_NeedsPaint_t );
 	STEAM_CALLBACK( CHTMLSurface, OnCloseBrowser, HTML_CloseBrowser_t );
 	STEAM_CALLBACK( CHTMLSurface, OnFinishedRequest, HTML_FinishedRequest_t );
+	STEAM_CALLBACK( CHTMLSurface, OnBrowserRestarted, HTML_BrowserRestarted_t );
 
 
 	void OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOFailure );

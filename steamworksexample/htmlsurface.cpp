@@ -142,6 +142,21 @@ void CHTMLSurface::OnNeedsPaint( HTML_NeedsPaint_t *pParam  )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: the underlying browser object restarted, update our handle if needed
+//-----------------------------------------------------------------------------
+void CHTMLSurface::OnBrowserRestarted( HTML_BrowserRestarted_t *pParam )
+{
+	if ( pParam->unOldBrowserHandle == m_unBrowserHandle )
+	{
+		HTML_BrowserReady_t ready;
+		ready.unBrowserHandle = pParam->unBrowserHandle;;
+		OnBrowserReady( &ready, false );
+	}
+}
+
+
+
+//-----------------------------------------------------------------------------
 // Purpose: the page requested that a URL be loaded, should we allow it?
 //-----------------------------------------------------------------------------
 void CHTMLSurface::OnStartRequest( HTML_StartRequest_t *pParam )

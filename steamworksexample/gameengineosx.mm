@@ -333,7 +333,6 @@ bool CGameEngineGL::BInitializeGraphics()
 	[[m_view openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 
 	[m_window setContentView:m_view];
-	[m_view release];
 	
 	[m_window makeKeyAndOrderFront:nil];
 	// [m_view setPostsFrameChangedNotifications:YES];

@@ -102,8 +102,12 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 		OutputDebugString( "HUD font was not created properly, text won't draw\n" );
 
 	m_hInstructionsFont = pGameEngine->HCreateFont( INSTRUCTIONS_FONT_HEIGHT, FW_BOLD, false, "Arial" );
-	if ( !m_hHUDFont )
-		OutputDebugString( "HUD font was not created properly, text won't draw\n" );
+	if ( !m_hInstructionsFont )
+		OutputDebugString( "instruction font was not created properly, text won't draw\n" );
+
+	m_hInGameStoreFont = pGameEngine->HCreateFont( INSTRUCTIONS_FONT_HEIGHT, FW_BOLD, false, "Courier New" );
+	if ( !m_hInGameStoreFont )
+		OutputDebugString( "in-game store font was not created properly, text won't draw\n" );
 
 	// Initialize starfield
 	m_pStarField = new CStarField( pGameEngine );
@@ -152,6 +156,8 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	m_pHTMLSurface = new CHTMLSurface(pGameEngine);
 
 	LoadWorkshopItems();
+
+	LoadItemsWithPrices();
 }
 
 
@@ -1499,6 +1505,15 @@ void CSpaceWarClient::RunFrame()
 			SetGameState( k_EClientGameMenu );
 		}
 		break;
+
+	case k_EClientInGameStore:
+		m_pStarField->Render();
+		DrawInGameStore();
+
+		if (bEscapePressed)
+			SetGameState(k_EClientGameMenu);
+		break;
+		
 	default:
 		OutputDebugString( "Unhandled game state in CSpaceWar::RunFrame\n" );
 	}
@@ -2260,12 +2275,52 @@ void CSpaceWarClient::LoadWorkshopItems()
 
 
 //-----------------------------------------------------------------------------
+// Purpose: load all all purchaseable items
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::LoadItemsWithPrices()
+{
+	m_vecPurchaseableItems.clear();
+
+	SteamAPICall_t hSteamAPICall = SteamInventory()->RequestPrices();
+	m_SteamCallResultRequestPrices.Set( hSteamAPICall, this, &CSpaceWarClient::OnRequestPricesResult );
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: new Workshop was installed, load it instantly
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnWorkshopItemInstalled( ItemInstalled_t *pParam )
 {
 	if ( pParam->m_unAppID == SteamUtils()->GetAppID() )
 		LoadWorkshopItem( pParam->m_nPublishedFileId );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Request prices from the Steam Inventory Service
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure )
+{
+	if ( pParam->m_result == k_EResultOK )
+	{
+		strncpy( m_rgchCurrency, pParam->m_rgchCurrency, sizeof( m_rgchCurrency ) );
+
+		uint32 unItems = SteamInventory()->GetNumItemsWithPrices();
+		std::vector<SteamItemDef_t> vecItemDefs;
+		vecItemDefs.resize( unItems );
+		std::vector<uint64> vecPrices;
+		vecPrices.resize( unItems );
+
+		if ( SteamInventory()->GetItemsWithPrices( vecItemDefs.data(), vecPrices.data(), unItems ) )
+		{
+			m_vecPurchaseableItems.reserve( unItems );
+			for ( uint32 i = 0; i < unItems; ++i )
+			{
+				PurchaseableItem_t t;
+				t.m_nItemDefID = vecItemDefs[i];
+				t.m_ulPrice = vecPrices[i];
+				m_vecPurchaseableItems.push_back( t );
+			}
+		}
+	}
 }
 
 
@@ -2304,6 +2359,62 @@ void CSpaceWarClient::DrawWorkshopItems()
 			pItem->m_ItemDetails.m_rgchTitle, pItem->m_ItemDetails.m_nPublishedFileId, pItem->m_ItemDetails.m_rgchDescription );
 
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_LEFT |TEXTPOS_VCENTER, rgchBuffer);
+	}
+	
+	rect.left = 0;
+	rect.right = width;
+	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
+	rect.bottom = m_pGameEngine->GetViewportHeight();
+
+	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
+	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
+}
+
+
+void CSpaceWarClient::DrawInGameStore()
+{
+	const int32 width = m_pGameEngine->GetViewportWidth();
+
+	RECT rect;
+	rect.top = 0;
+	rect.bottom = 64;
+	rect.left = 0;
+	rect.right = width;
+
+	char rgchBuffer[1024];
+	sprintf_safe(rgchBuffer, "In-Game Store");
+	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER |TEXTPOS_VCENTER, rgchBuffer);
+
+	rect.left = 32;
+	rect.top = 64;
+	rect.bottom = 96;
+
+	for ( uint32 i = 0; i < m_vecPurchaseableItems.size(); ++i )
+	{
+		const auto &t = m_vecPurchaseableItems[i];
+		
+		char buf[512];
+		uint32 bufSize = sizeof(buf);
+		if ( !SteamInventory()->GetItemDefinitionProperty( t.m_nItemDefID, "name", buf, &bufSize ) && bufSize <= sizeof(buf) )
+		{
+			continue;
+		}
+		uint32 unQuantity = SpaceWarLocalInventory()->GetNumOf( t.m_nItemDefID );
+
+		rect.top += 32;
+		rect.bottom += 32;
+
+		sprintf_safe( rgchBuffer, "%u. Purchase %-25s    %s %0.2f    (own %u)", i+1, buf, m_rgchCurrency, float(t.m_ulPrice)/100, unQuantity );
+
+		m_pGameEngine->BDrawString( m_hInGameStoreFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_LEFT |TEXTPOS_VCENTER, rgchBuffer);
+
+		// if the user presses a key, let them purchase the item
+		uint32 key = 0x30 + i + 1;
+		if ( m_pGameEngine->BIsKeyDown( key ) )
+		{
+			uint32 rgQuantity[1] = {1};
+			SteamInventory()->StartPurchase( &t.m_nItemDefID, rgQuantity, 1 );
+		}
 	}
 	
 	rect.left = 0;

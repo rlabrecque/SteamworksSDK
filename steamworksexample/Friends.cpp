@@ -56,6 +56,8 @@ public:
 				continue;
 
 			const char *pszFriendsGroupName = SteamFriends()->GetFriendsGroupName( friendsGroupID );
+			if ( pszFriendsGroupName == NULL )
+				pszFriendsGroupName = "";
 			AddMenuItem( CFriendsListMenu::MenuItem_t( "", k_menuItemEmpty ) );
 			AddMenuItem( CFriendsListMenu::MenuItem_t( pszFriendsGroupName, k_menuItemEmpty ) );
 

@@ -41,7 +41,8 @@ public:
 	const std::list<CSpaceWarItem *>& GetItemList() const { return m_listPlayerItems; }
 	const CSpaceWarItem * GetItem( SteamItemInstanceID_t nItemId ) const;
 	const CSpaceWarItem *  GetInstanceOf( SteamItemDef_t nDefinition ) const;
-	bool HasInstanceOf( SteamItemDef_t nItemId ) const;
+	bool HasInstanceOf( SteamItemDef_t nDefinition ) const;
+	uint32 GetNumOf( SteamItemDef_t nDefinition ) const;
 
 	bool IsWaitingForDropResults() const { return m_hPlaytimeRequestResult != k_SteamInventoryResultInvalid; }
 	const CSpaceWarItem * GetLastDroppedItem() const { return GetItem( m_LastDropInstanceID ); }
