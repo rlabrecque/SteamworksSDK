@@ -183,10 +183,10 @@ public:
 	bool BGetFirstKeyDown( DWORD *pdwVK );
 
 	// Return true if there is an active Steam Controller
-	bool BIsSteamControllerActive( );
+	bool BIsSteamInputDeviceActive( );
 
 	// Find an active Steam controller
-	void FindActiveSteamController( );
+	void FindActiveSteamInputDevice( );
 
 	// Get the current state of a controller action
 	bool BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction );
@@ -197,6 +197,13 @@ public:
 	// Set the current Steam Controller Action set
 	void SetSteamControllerActionSet( ECONTROLLERACTIONSET dwActionSet );
 
+	// Set an Action Set Layer for Steam Input
+	virtual void ActivateSteamControllerActionSetLayer( ECONTROLLERACTIONSET dwActionSet );
+	virtual void DeactivateSteamControllerActionSetLayer( ECONTROLLERACTIONSET dwActionSet );
+
+	// Returns whether a given action set layer is active
+	virtual bool BIsActionSetLayerActive( ECONTROLLERACTIONSET dwActionSetLayer );
+	
 	// These calls return a string describing which controller button the action is currently bound to
 	const char *GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction );
 	const char *GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction );
@@ -211,10 +218,10 @@ public:
 	void TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat );
 
 	// Initialize the Steam Controller interfaces
-	void InitSteamController( );
+	void InitSteamInput( );
 
 	// Called each frame to update the Steam Controller interface
-	void PollSteamController();
+	void PollSteamInput();
 
 	// Get current tick count for the game engine
 	uint64 GetGameTickCount() { return m_ulGameTickCount; }
@@ -438,21 +445,21 @@ private:
 	uint32 m_unVoiceChannelCount;
 
 	// An array of handles to Steam Controller events that player can bind to controls
-	ControllerDigitalActionHandle_t m_ControllerDigitalActionHandles[eControllerDigitalAction_NumActions];
+	InputDigitalActionHandle_t m_ControllerDigitalActionHandles[eControllerDigitalAction_NumActions];
 
 	// An array of handles to Steam Controller events that player can bind to controls
-	ControllerAnalogActionHandle_t m_ControllerAnalogActionHandles[eControllerAnalogAction_NumActions];
+	InputAnalogActionHandle_t m_ControllerAnalogActionHandles[eControllerAnalogAction_NumActions];
 
 	// An array of handles to different Steam Controller action set configurations
-	ControllerActionSetHandle_t m_ControllerActionSetHandles[eControllerActionSet_NumSets];
+	InputActionSetHandle_t m_ControllerActionSetHandles[eControllerActionSet_NumSets];
 
 	// A handle to the currently active Steam Controller. 
-	ControllerHandle_t m_ActiveControllerHandle;
+	InputHandle_t m_ActiveControllerHandle;
 
-	// Origins for all the Steam Controller actions. The 'origin' is where the action is currently bound to,
-	// ie 'jump' is currently bound to the 'A' button.
-	EControllerActionOrigin m_ControllerDigitalActionOrigins[eControllerDigitalAction_NumActions];
-	EControllerActionOrigin m_ControllerAnalogActionOrigins[eControllerDigitalAction_NumActions];
+	// Origins for all the Steam Input actions. The 'origin' is where the action is currently bound to,
+	// ie 'jump' is currently bound to the Steam Controller 'A' button.
+	EInputActionOrigin m_ControllerDigitalActionOrigins[eControllerDigitalAction_NumActions];
+	EInputActionOrigin m_ControllerAnalogActionOrigins[eControllerDigitalAction_NumActions];
 };
 
 #endif // GAMEENGINEWIN32_H

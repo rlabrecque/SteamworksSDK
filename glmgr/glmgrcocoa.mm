@@ -962,6 +962,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 
 						SInt32 vMajor = 0;	SInt32 vMinor = 0;	SInt32 vMinorMinor = 0;
 						
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_10
 						OSStatus gestalt_err = 0;
 						gestalt_err = Gestalt(gestaltSystemVersionMajor, &vMajor);
 						Assert(!gestalt_err);
@@ -971,7 +972,12 @@ void	GLMDisplayDB::PopulateRenderers( void )
 
 						gestalt_err = Gestalt(gestaltSystemVersionBugFix, &vMinorMinor);
 						Assert(!gestalt_err);
-
+#else
+						NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
+						vMajor = osVersion.majorVersion;
+						vMinor = osVersion.minorVersion;
+						vMinorMinor = osVersion.patchVersion;
+#endif
 						//encode into one quantity - 10.6.3 becomes 0x000A0603
 						fields.m_osComboVersion = (vMajor << 16) | (vMinor << 8) | (vMinorMinor);
 
@@ -1051,14 +1057,13 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						
 						{
 							io_iterator_t	ioIterator		= (io_iterator_t)0;
-							io_service_t	ioAccelerator;
 							kern_return_t	ioResult		= 0;
 							bool			ioDone			= false;
 														
 							ioResult = IOServiceGetMatchingServices( kIOMasterPortDefault, IOServiceMatching("IOAccelerator"), &ioIterator );
 							if( ioResult == KERN_SUCCESS )
 							{
-								ioAccelerator = 0;
+								io_service_t	ioAccelerator = (io_service_t)0;
 
 								while( ( !ioDone ) && ( ioAccelerator = IOIteratorNext( ioIterator ) )  )
 								{
@@ -1125,9 +1130,10 @@ void	GLMDisplayDB::PopulateRenderers( void )
 										}
 									}
 								}
+
+								IOObjectRelease(ioAccelerator);
 							}
 
-							IOObjectRelease(ioAccelerator);
 							IOObjectRelease(ioIterator);
 						}
 

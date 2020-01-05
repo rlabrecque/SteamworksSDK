@@ -790,8 +790,8 @@ class	GLMContext
 		friend class CGLMBuffer;
 		friend class GLMTester;			// tester class needs access back into GLMContext
 		
-		friend class IDirect3D9;
-		friend class IDirect3DDevice9;
+		friend struct IDirect3D9;
+		friend struct IDirect3DDevice9;
 		
 		// methods------------------------------------------
 		

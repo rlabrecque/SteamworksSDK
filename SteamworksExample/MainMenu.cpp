@@ -61,9 +61,10 @@ void CMainMenu::SetupMenu()
 	{
 		AddMenuItem( MenuItem_t( "HTML Page", k_EClientHTMLSurface ) );
 	}
-	AddMenuItem( MenuItem_t( "Exit Game", k_EClientGameExiting ) );
 
 	AddMenuItem( MenuItem_t( "In-game Store", k_EClientInGameStore ) );
+
+	AddMenuItem( MenuItem_t( "Exit Game", k_EClientGameExiting ) );
 }
 
 

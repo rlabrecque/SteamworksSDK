@@ -296,7 +296,7 @@ GLMContext *GLMgr::GetCurrentContext( void )
 	
 	if ( glm_context_link )
 	{
-		return (GLMContext*) glm_context_link;
+		return (GLMContext*)(uintptr_t)glm_context_link;
 	}
 	else
 	{
@@ -2382,17 +2382,23 @@ GLMContext::GLMContext( GLMDisplayParams *params )
 		// this is the old 10.5.x two-context path.... ugh
 		success = NewNSGLContext( (unsigned long*)selAttribs, shareNsCtx, &m_nsctx, &m_ctx );
 	}
-	
+
+	// If we're compiling for 64-bit with a 32-bit GLint we should only allow the conversion
+	// between 'this' and GLint if it can fit in the GLint, otherwise consider this to be failure
+	if ( sizeof(this) > sizeof(GLint) )
+    	success = ( (uintptr_t)this & 0xFFFFFFFF00000000 ) == 0;
+
 	if (success)
 	{
 		//write a cookie into the CGL context leading back to the GLM context object
 		GLint	glm_context_link = (GLint)((uintptr_t)this);
 		CGLSetParameter( m_ctx, kCGLCPClientStorage, &glm_context_link );
-		
-		// save off the pixel format attributes we used		
+
+		// save off the pixel format attributes we used
 		memcpy(m_pixelFormatAttribs, selAttribs, selBytes );
 	}
-	else
+
+	if ( !success )
 	{
 		Debugger(); //FIXME #PMB# bad news, maybe exit to shell if this happens
 	}
@@ -3104,7 +3110,7 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 						glEnableVertexAttribArray( index );							// enable attribute, set pointer.
 						GLMCheckError();
 
-						glVertexAttribPointer( index, setdesc->m_datasize, setdesc->m_datatype, setdesc->m_normalized, setdesc->m_stride, (	const GLvoid *)setdesc->m_offset );
+						glVertexAttribPointer( index, setdesc->m_datasize, setdesc->m_datatype, setdesc->m_normalized, setdesc->m_stride, (const GLvoid *)(uintptr_t)setdesc->m_offset );
 						GLMCheckError();
 						//GLMPRINTF(("--- GLMContext::SetVertexAttributes attr %d set to offset/stride %d/%d in buffer %d (normalized=%s)", index, setdesc->m_offset, setdesc->m_stride, setdesc->m_buffer->m_name, setdesc->m_normalized?"true":"false" ));
 					}
@@ -3402,7 +3408,7 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 								loopCurrentBuf = buf;
 							}
 
-							glVertexAttribPointer( index, newDesc->m_datasize, newDesc->m_datatype, newDesc->m_normalized, newDesc->m_stride, (	const GLvoid *)newDesc->m_offset );
+							glVertexAttribPointer( index, newDesc->m_datasize, newDesc->m_datatype, newDesc->m_normalized, newDesc->m_stride, (const GLvoid *)(uintptr_t)newDesc->m_offset );
 							GLMCheckError();
 						}
 						
@@ -3532,6 +3538,9 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 					}
 				}
 			}
+			break;
+				
+    		default:
 			break;
 		}
 	}
@@ -4228,6 +4237,9 @@ void	GLMContext::DebugDump( GLMDebugHookInfo *info, uint options, uint vertDumpM
 						// fix W ?  do we care ?  check shaders to see what they do...
 						translabel = "post-skin3bone-viewproj";
 					}
+					break;
+
+					default:
 					break;
 				}
 				if(translabel)

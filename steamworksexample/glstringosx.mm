@@ -112,7 +112,8 @@
 }
 
 
-- (void) genTexture; // generates the texture without drawing texture to current context
+// generates the texture without drawing texture to current context
+- (void) genTexture
 {
 	NSImage * image;
 	NSBitmapImageRep * bitmap;

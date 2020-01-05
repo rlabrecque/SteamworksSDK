@@ -63,8 +63,8 @@ protected:
 	friend class GLMTester;
 	friend class CGLMTex;
 	
-	friend class IDirect3D9;
-	friend class IDirect3DDevice9;
+	friend struct IDirect3D9;
+	friend struct IDirect3DDevice9;
 		
 			CGLMFBO( GLMContext *ctx );
 			~CGLMFBO( );	

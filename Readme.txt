@@ -1,12 +1,52 @@
 ================================================================
 
-Copyright © 1996-2018, Valve Corporation, All rights reserved.
+Copyright © 1996-2019, Valve Corporation, All rights reserved.
 
 ================================================================
 
 
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
+
+----------------------------------------------------------------
+v1.43 20th February 2019
+----------------------------------------------------------------
+
+ISteamParties 
+* This API can be used to selectively advertise your multiplayer game session in a Steam chat room group. Tell Steam the number of player spots that are available for your party, and a join-game string, and it will show a beacon in the selected group and allow that many users to “follow” the beacon to your party. Adjust the number of open slots if other players join through alternate matchmaking methods.  
+
+ISteamController
+* This interface will be deprecated and replaced with ISteamInput. For ease in upgrading the SDK ISteamController currently has feature parity with ISteamInput, but future features may not be ported back. Please use ISteamInput for new projects.
+* Added GetActionOriginFromXboxOrigin, GetStringForXboxOrigin and GetGlyphForXboxOrigin to allow Xinput games to easily query glyphs for devices coming in through Steam Input’s Xinput emulation, ex: “A button”->”Cross button” on a PS4 controller. This is a simple translation of the button and does not take user remapping into account – the full action based API is required for that.
+* Added TranslateActionOrigin which allows Steam Input API games to which are using look up tables to translate action origins from an recognized device released after the game was last built into origins they recognize.
+* Added count and max_possible fields to current enums to make using lookup tables easier
+
+ISteamInput
+* This new interface replaces ISteamController to better reflect the fact this API supports not just the Steam Controller but every controller connected to Steam – including Xbox Controllers, Playstation Controllers and Nintendo Switch controllers. ISteamController currently has feature parity with the new features added in ISteamInput but new feature may not be ported back. Please use this interface instead of ISteamController for any new projects.
+* Migrating to ISteamInput from ISteamController should mostly be a search-replace operation but any action origin look up tables will need to be adjusted as some of the enum orders have changed.
+* Added GetActionOriginFromXboxOrigin, GetStringForXboxOrigin and GetGlyphForXboxOrigin to allow Xinput games to easily query glyphs for devices coming in through Steam Input’s Xinput emulation, ex: “A button”->”Cross button” on a PS4 controller. This is a simple translation of the button and does not take user remapping into account – the full action based API is required for that.
+* Added TranslateActionOrigin which allows Steam Input API games to which are using look up tables to translate action origins from an recognized device released after the game was last built into origins they recognize.
+* Added count and max_possible fields to current enums to make using lookup tables easier
+
+ISteamFriends
+* ActivateGameOverlayToWebPage – Added a new parameter to control how the created web browser window is displayed within the Steam Overlay. The default mode will create a new browser tab next to all other overlay windows that the user already has open. The new modal mode will create a new browser window and activate the Steam Overlay, showing only that window. When the browser window is closed, the Steam Overlay is automatically closed as well.
+
+ISteamInventory
+* GetItemsWithPrices and GetItemPrice - Added the ability to get the “base price” for a set of items, which you can use to markup in your own UI that items are “on sale” 
+
+ISteamUGC
+* SetAllowLegacyUpload - Call to force the use of Steam Cloud for back-end storage (instead of Steam Pipe), which is faster and more efficient for uploading and downloading small files (less than 100MB).
+* CreateQueryAllUGCRequest - Added ability to page through query results using a “cursor” instead of a page number.  This is more efficient and supports “deep paging” beyond page 1000.  The old version of CreateQueryAllUGCRequest() that takes a page parameter is deprecated and cannot query beyond page 1000.  Note that you will need to keep track of the “previous” cursor in order to go to a previous page.
+
+ISteamApps
+* GetLaunchCommandLine - Get command line if game was launched via Steam URL, e.g. steam://run/<appid>//<command line>/. If you get NewUrlLaunchParameters_t callback while running, call again to get new command line
+* BIsSubscribedFromFamilySharing - Check if subscribed app is temporarily borrowed via Steam Family Sharing
+
+Steam API
+* Refactored headers to minimize the number of headers that need to be included to use a single ISteam interface.
+* Renamed some macros with STEAM_ prefix to minimize conflicts in the global namespace
+
+
 
 ----------------------------------------------------------------
 v1.42 3rd January 2018

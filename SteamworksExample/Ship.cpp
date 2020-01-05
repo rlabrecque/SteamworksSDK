@@ -460,10 +460,12 @@ void CShip::RunFrame()
 		m_SpaceWarClientUpdateData.SetReverseThrustersPressed( false );
 		m_SpaceWarClientUpdateData.SetForwardThrustersPressed( false );
 		
+		bool bForwardThrustActive = false;
 		if ( m_pGameEngine->BIsKeyDown( m_dwVKForwardThrusters ) ||
 			m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_ForwardThrust ) )
 		{
 			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
+			bForwardThrustActive = true;
 			//m_pGameEngine->SetControllerColor( 100, 255, 0, k_ESteamControllerLEDFlag_SetColor );
 		}
 
@@ -474,7 +476,7 @@ void CShip::RunFrame()
 		}
 
 
-		// The Steam Controller can also map an anlog axis to thrust and steer
+		// The Steam Controller can also map an analog axis to thrust and steer
 		float fThrusterLevel, fUnused;
 		m_pGameEngine->GetControllerAnalogAction( eControllerAnalogAction_AnalogControls, &fUnused, &fThrusterLevel );
 
@@ -482,12 +484,23 @@ void CShip::RunFrame()
 		{
 			m_SpaceWarClientUpdateData.SetForwardThrustersPressed( true );
 			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
-
+			bForwardThrustActive = true;
 		}
 		else if ( fThrusterLevel < 0.0f )
 		{
 			m_SpaceWarClientUpdateData.SetReverseThrustersPressed( true );
 			m_SpaceWarClientUpdateData.SetThrustersLevel( fThrusterLevel );
+		}
+
+		// We can activate action set layers based upon our state.  
+		// This allows action bindings or settings to be changed on an existing action set for contextual usage
+		if ( bForwardThrustActive )
+		{
+			m_pGameEngine->ActivateSteamControllerActionSetLayer( eControllerActionSet_Layer_Thrust );
+		}
+		else if ( m_pGameEngine->BIsActionSetLayerActive( eControllerActionSet_Layer_Thrust ) )
+		{
+			m_pGameEngine->DeactivateSteamControllerActionSetLayer( eControllerActionSet_Layer_Thrust );
 		}
 
 		// Hardcoded keys to choose various outfits and weapon powerups which require inventory. Note that this is not

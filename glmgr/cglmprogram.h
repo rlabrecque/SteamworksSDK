@@ -95,8 +95,8 @@ public:
 	friend class CGLMShaderPair;
 	friend class GLMContext;			// only GLMContext can make CGLMProgram objects
 	friend class GLMTester;	
-	friend class IDirect3D9;
-	friend class IDirect3DDevice9;
+	friend struct IDirect3D9;
+	friend struct IDirect3DDevice9;
 		
 	//===============================
 	

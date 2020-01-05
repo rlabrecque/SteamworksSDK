@@ -40,8 +40,8 @@ class CGLMQuery
 	// leave everything public til it's running
 public:
 	friend class GLMContext;			// only GLMContext can make CGLMTex objects
-	friend class IDirect3DDevice9;
-	friend class IDirect3DQuery9;
+	friend struct IDirect3DDevice9;
+	friend struct IDirect3DQuery9;
 
 	GLMContext		*m_ctx;				// link back to parent context
 	GLMQueryParams	m_params;			// params created with

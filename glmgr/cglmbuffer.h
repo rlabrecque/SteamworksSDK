@@ -51,8 +51,8 @@ public:
 //protected:
 	friend class GLMContext;			// only GLMContext can make CGLMBuffer objects
 	friend class GLMTester;	
-	friend class IDirect3D9;
-	friend class IDirect3DDevice9;
+	friend struct IDirect3D9;
+	friend struct IDirect3DDevice9;
 		
 	CGLMBuffer					( GLMContext *ctx, EGLMBufferType type, uint size, uint options );
 	~CGLMBuffer					( );	

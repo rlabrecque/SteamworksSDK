@@ -75,6 +75,7 @@ CGLMQuery::CGLMQuery( GLMContext *ctx, GLMQueryParams *params )
 		break;
 
 		case EFence:
+		{
 			//make a fence - no aux fence needed
 			glGenFencesAPPLE(1, &m_name );
 			GLMPRINTF(("-A-      CGLMQuery(fence) created name %d", m_name));
@@ -86,7 +87,11 @@ CGLMQuery::CGLMQuery( GLMContext *ctx, GLMQueryParams *params )
 				printf( "\nCGLMQuery::CGLMQuery (fence) saw %s error (%d) from glGenFencesAPPLE", decodedStr, errorcode  );
 				m_name = 0;
 			}
+		}
 		break;
+
+		default:
+			break;
 	}
 	
 }
@@ -131,6 +136,9 @@ CGLMQuery::~CGLMQuery()
 			}
 		}
 		break;
+
+		default:
+			break;
 	}
 	
 	m_name = 0;
@@ -180,6 +188,7 @@ void	CGLMQuery::Start( void )		// "start counting"
 		break;
 
 		case EFence:
+		{
 			glSetFenceAPPLE( m_name );
 
 			GLenum errorcode = GetQueryError();
@@ -190,7 +199,11 @@ void	CGLMQuery::Start( void )		// "start counting"
 			}
 			
 			m_stopped = true;	// caller should not call Stop on a fence, it self-stops
+		}
 		break;
+
+		default:
+			break;
 	}
 	
 	m_started = true;
@@ -227,8 +240,13 @@ void	CGLMQuery::Stop( void )			// "stop counting"
 		break;
 
 		case EFence:
+		{
 			// nop - you don't "end" a fence, you just test it and/or finish it out in Complete
+		}
 		break;
+
+		default:
+			break;
 	}
 	
 	m_stopped = true;
@@ -296,6 +314,9 @@ bool	CGLMQuery::IsDone( void )
 				}
 			}
 			break;
+
+			default:
+				break;
 		}
 	}
 	
@@ -385,6 +406,9 @@ void	CGLMQuery::Complete( uint *result )
 			}
 		}
 		break;
+
+		default:
+			break;
 	}
 
 	Assert( m_done );

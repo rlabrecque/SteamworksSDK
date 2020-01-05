@@ -1707,6 +1707,9 @@ HRESULT IDirect3DQuery9::Issue(DWORD dwIssueFlags)
 				// http://msdn.microsoft.com/en-us/library/ee422167(VS.85).aspx
 				m_query->Start();	// drop "set fence" into stream
 			break;
+
+			default:
+			break;
 		}
 	}
 	return S_OK;
@@ -1790,6 +1793,9 @@ HRESULT IDirect3DQuery9::GetData(void* pData,DWORD dwSize,DWORD dwGetDataFlags)
 					result = S_FALSE;
 				}
 			}
+			break;
+
+			default:
 			break;
 		}
 	}
@@ -5292,6 +5298,9 @@ HRESULT IDirect3DDevice9::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT Star
 		case D3DPT_TRIANGLESTRIP:
 			m_ctx->DrawArrays( (GLenum)GL_TRIANGLE_STRIP, StartVertex, (GLsizei)PrimitiveCount+2 );
 		break;
+
+		default:
+		break;
 	}
 	
 	return S_OK;
@@ -5350,6 +5359,9 @@ HRESULT IDirect3DDevice9::DrawIndexedPrimitive( D3DPRIMITIVETYPE Type,INT BaseVe
 		case D3DPT_TRIANGLESTRIP:
 			// enabled... Debugger();
 			m_ctx->DrawRangeElements(GL_TRIANGLE_STRIP, (GLuint)MinVertexIndex, (GLuint)(MinVertexIndex + NumVertices), (GLsizei)(2+primCount), (GLenum)GL_UNSIGNED_SHORT, (const GLvoid *)(startIndex * sizeof(short)) );
+		break;
+
+		default:
 		break;
 	}
 	

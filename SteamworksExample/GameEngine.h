@@ -77,6 +77,7 @@ enum ECONTROLLERACTIONSET
 {
 	eControllerActionSet_ShipControls,
 	eControllerActionSet_MenuControls,
+	eControllerActionSet_Layer_Thrust,
 
 	eControllerActionSet_NumSets
 };
@@ -164,19 +165,26 @@ public:
 	virtual bool BGetFirstKeyDown( DWORD *pdwVK ) = 0;
 
 	// Return true if there is an active Steam Controller
-	virtual bool BIsSteamControllerActive() = 0;
+	virtual bool BIsSteamInputDeviceActive() = 0;
 		
 	// Get the current state of a controller action
 	virtual bool BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction ) = 0;
 
 	// Find an active Steam controller
-	virtual void FindActiveSteamController() = 0;
+	virtual void FindActiveSteamInputDevice() = 0;
 
 	// Get the current state of a controller analog action
 	virtual void GetControllerAnalogAction( ECONTROLLERANALOGACTION dwAction, float *x, float *y ) = 0;
 
 	// Set the current Steam Controller Action set
 	virtual void SetSteamControllerActionSet( ECONTROLLERACTIONSET dwActionSet ) = 0;
+
+	// Set an Action Set Layer for Steam Input
+	virtual void ActivateSteamControllerActionSetLayer( ECONTROLLERACTIONSET dwActionSet ) = 0;
+	virtual void DeactivateSteamControllerActionSetLayer( ECONTROLLERACTIONSET dwActionSet ) = 0;
+
+	// Returns whether a given action set layer is active
+	virtual bool BIsActionSetLayerActive( ECONTROLLERACTIONSET dwActionSetLayer ) = 0;
 
 	// These calls return a string describing which controller button the action is currently bound to
 	virtual const char *GetTextStringForControllerOriginDigital( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERDIGITALACTION dwDigitalAction ) = 0;

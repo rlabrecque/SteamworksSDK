@@ -24,7 +24,7 @@ class	CGLMTexLayoutTable;
 class	CGLMTex;
 class	CGLMFBO;
 
-class	IDirect3DSurface9;
+struct	IDirect3DSurface9;
 
 //===============================================================================
 
@@ -233,12 +233,12 @@ protected:
 	friend class GLMTester;
 	friend class CGLMFBO;
 
-	friend class IDirect3DDevice9;
-	friend class IDirect3DBaseTexture9;
-	friend class IDirect3DTexture9;
-	friend class IDirect3DSurface9;
-	friend class IDirect3DCubeTexture9;
-	friend class IDirect3DVolumeTexture9;
+	friend struct IDirect3DDevice9;
+	friend struct IDirect3DBaseTexture9;
+	friend struct IDirect3DTexture9;
+	friend struct IDirect3DSurface9;
+	friend struct IDirect3DCubeTexture9;
+	friend struct IDirect3DVolumeTexture9;
 	
 			CGLMTex( GLMContext *ctx, GLMTexLayout *layout, GLMTexSamplingParams *sampling, const char *debugLabel = NULL );
 			~CGLMTex( );

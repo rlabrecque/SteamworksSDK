@@ -3203,7 +3203,7 @@ void GLMPrintText( const char *str, EGLMDebugFlavor flavor, uint options )
 	while(mark < end)
 	{
 		// starting at mark, see if there is a newline between there and end
-		char *next = strchr( mark, '\n' );
+		char *next = (char *)strchr( mark, '\n' );
 		const char *printfrom = mark;
 		if (next)
 		{

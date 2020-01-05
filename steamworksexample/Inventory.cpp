@@ -213,6 +213,21 @@ void CSpaceWarLocalInventory::CheckForItemDrops()
 	SteamInventory()->TriggerItemDrop( &m_hPlaytimeRequestResult, k_SpaceWarItem_TimedDropList );
 }
 
+void CSpaceWarLocalInventory::ModifyItemProperties()
+{
+	const CSpaceWarItem *item100 = GetInstanceOf( k_SpaceWarItem_ShipDecoration1 );
+	if ( item100 )
+	{
+		auto updateHandle = SteamInventory()->StartUpdateProperties();
+		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "string_value", "blah" );
+		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "bool_value", true );
+		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "int64_value", (int64)55 );		
+		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "float_value", 123.456f );
+		SteamInventoryResult_t resultHandle;
+		SteamInventory()->SubmitUpdateProperties( updateHandle, &resultHandle );
+	}
+}
+
 void CSpaceWarLocalInventory::DoExchange()
 {
 	const CSpaceWarItem *item100 = GetInstanceOf( k_SpaceWarItem_ShipDecoration1 );

@@ -1184,6 +1184,9 @@ void CGLMTex::WriteTexels( GLMTexLockDesc *desc, bool writeWholeSlice, bool noDa
 			m_texClientStorage = false;
 		}
 		break;
+
+		default:
+		break;
 	}
 	
 	if (writeWholeSlice)

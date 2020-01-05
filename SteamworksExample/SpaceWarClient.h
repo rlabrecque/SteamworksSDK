@@ -258,6 +258,10 @@ private:
 	// load subscribed workshop items
 	void LoadWorkshopItems();
 
+	// Set appropriate rich presence keys for a player who is currently in-game and
+	// return the value that should go in steam_display
+	const char *SetInGameRichPresence() const;
+
 	// load a workshop item from file
 	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
 	CWorkshopItem *LoadWorkshopItemFromFile( const char *pszFileName );
@@ -426,6 +430,7 @@ private:
 	STEAM_CALLBACK( CSpaceWarClient, OnLobbyGameCreated, LobbyGameCreated_t );
 	STEAM_CALLBACK( CSpaceWarClient, OnGameJoinRequested, GameRichPresenceJoinRequested_t );
 	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t );
+	STEAM_CALLBACK( CSpaceWarClient, OnNewUrlLaunchParameters, NewUrlLaunchParameters_t );
 
 	// callbacks for Steam connection state
 	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t );

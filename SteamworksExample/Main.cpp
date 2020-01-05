@@ -79,30 +79,32 @@ extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDeb
 //-----------------------------------------------------------------------------
 // Purpose: Extracts some feature from the command line
 //-----------------------------------------------------------------------------
-void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID )
+bool ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID )
 {
 	// Look for the +connect ipaddress:port parameter in the command line,
 	// Steam will pass this when a user has used the Steam Server browser to find
 	// a server for our game and is trying to join it. 
-	const char *pchConnectParam = "+connect";
+	const char *pchConnectParam = "+connect ";
 	const char *pchConnect = strstr( pchCmdLine, pchConnectParam );
 	*ppchServerAddress = NULL;
-	if ( pchConnect && strlen( pchCmdLine ) > (pchConnect - pchCmdLine) + strlen( pchConnectParam ) + 1 )
+	if ( pchConnect && strlen( pchCmdLine ) > (pchConnect - pchCmdLine) + strlen( pchConnectParam ) )
 	{
-		// Address should be right after the +connect, +1 on the end to skip the space
-		*ppchServerAddress = pchCmdLine + ( pchConnect - pchCmdLine ) + strlen( pchConnectParam ) + 1;
+		// Address should be right after the +connect
+		*ppchServerAddress = pchCmdLine + ( pchConnect - pchCmdLine ) + strlen( pchConnectParam );
 	}
 
 	// look for +connect_lobby lobbyid paramter on the command line
 	// Steam will pass this in if a user taken up an invite to a lobby
-	const char *pchConnectLobbyParam = "+connect_lobby";
-	const char *pchConnectLobby = strstr( pchCmdLine, pchConnectParam );
+	const char *pchConnectLobbyParam = "+connect_lobby ";
+	const char *pchConnectLobby = strstr( pchCmdLine, pchConnectLobbyParam );
 	*ppchLobbyID = NULL;
-	if ( pchConnectLobby && strlen( pchCmdLine ) > (pchConnectLobby - pchCmdLine) + strlen( pchConnectLobbyParam ) + 1 )
+	if ( pchConnectLobby && strlen( pchCmdLine ) > (pchConnectLobby - pchCmdLine) + strlen( pchConnectLobbyParam ) )
 	{
-		// Address should be right after the +connect, +1 on the end to skip the space
-		*ppchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam ) + 1;
+		// lobby ID should be right after the +connect_lobby
+		*ppchLobbyID = pchCmdLine + ( pchConnectLobby - pchCmdLine ) + strlen( pchConnectLobbyParam );
 	}
+
+	return *ppchServerAddress || *ppchLobbyID;
 
 }
 
@@ -216,7 +218,10 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// have native Steam controller implementations
 
 	char rgchCWD[1024];
-	_getcwd( rgchCWD, sizeof( rgchCWD ) );
+	if ( !_getcwd( rgchCWD, sizeof( rgchCWD ) ) )
+    {
+        strcpy( rgchCWD, "." );
+    }
 
 	char rgchFullPath[1024];
 #if defined(_WIN32)
@@ -230,7 +235,19 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #endif
 
 	const char *pchServerAddress, *pchLobbyID;
-	ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID );
+	if ( !ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID ) )
+	{
+		// no connect string on process command line. If app was launched via a Steam URL, the extra command line parameters in that URL
+		// get be retrieved with GetLaunchCommandLine. This way an attacker can't put malicious parameters in the process command line
+		// which might allow much more functionality then indented.
+		
+		char szCommandLine[1024] = {};
+
+		if ( SteamApps()->GetLaunchCommandLine( szCommandLine, sizeof( szCommandLine ) ) > 0 )
+		{
+			ParseCommandLine( szCommandLine, &pchServerAddress, &pchLobbyID );
+		}
+	}
 
 	// do a DRM self check
 	Steamworks_SelfCheck();
@@ -248,13 +265,13 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #error	Need CreateGameEngine()
 #endif
 
-	if ( !SteamController()->Init() )
+	if ( !SteamInput()->Init() )
 	{
-		OutputDebugString( "SteamController()->Init failed.\n" );
-		Alert( "Fatal Error", "SteamController()->Init failed.\n" );
+		OutputDebugString( "SteamInput()->Init failed.\n" );
+		Alert( "Fatal Error", "SteamInput()->Init failed.\n" );
 		return EXIT_FAILURE;
 	}
-    
+
 	// This call will block and run until the game exits
 	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );
 

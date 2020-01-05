@@ -36,6 +36,8 @@
 CSpaceWarClient *g_pSpaceWarClient = NULL;
 CSpaceWarClient* SpaceWarClient() { return g_pSpaceWarClient; }
 
+extern bool ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID );
+
 #if defined(WIN32)
 #define atoll _atoi64
 #endif
@@ -786,12 +788,34 @@ void CSpaceWarClient::OnGameJoinRequested( GameRichPresenceJoinRequested_t *pCal
 {
 	// parse out the connect 
 	const char *pchServerAddress, *pchLobbyID;
-	extern void ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, const char **ppchLobbyID );
-	ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID );
-
-	// exec
-	ExecCommandLineConnect( pchServerAddress, pchLobbyID );
+	
+	if ( ParseCommandLine( pCallback->m_rgchConnect, &pchServerAddress, &pchLobbyID ) )
+	{
+		// exec
+		ExecCommandLineConnect( pchServerAddress, pchLobbyID );
+	}
 }
+
+
+//-----------------------------------------------------------------------------
+// Purpose: a Steam URL to launch this app was executed while the game is already running, eg steam://run/480//+connect%20127.0.0.1
+//      	Anybody can build random Steam URLs	and these extra parameters must be carefully parsed to avoid unintended side-effects
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnNewUrlLaunchParameters( NewUrlLaunchParameters_t *pCallback )
+{
+	const char *pchServerAddress, *pchLobbyID;
+	char szCommandLine[1024] = {};
+
+	if ( SteamApps()->GetLaunchCommandLine( szCommandLine, sizeof(szCommandLine) ) > 0 )
+	{
+		if ( ParseCommandLine( szCommandLine, &pchServerAddress, &pchLobbyID ) )
+		{
+			// exec
+			ExecCommandLineConnect( pchServerAddress, pchLobbyID );
+		}
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Finishes up entering a lobby of our own creation
@@ -945,20 +969,78 @@ void CSpaceWarClient::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: For a player in game, set the appropriate rich presence keys for display
+// in the Steam friends list and return the value for steam_display
+//-----------------------------------------------------------------------------
+const char *CSpaceWarClient::SetInGameRichPresence() const
+{
+	const char *pchStatus;
+
+	bool bWinning = false;
+	uint32 cWinners = 0;
+	uint32 uHighScore = m_rguPlayerScores[0];
+	uint32 uMyScore = 0;
+	for ( uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i )
+	{
+		if ( m_rguPlayerScores[i] > uHighScore )
+		{
+			uHighScore = m_rguPlayerScores[i];
+			cWinners = 0;
+			bWinning = false;
+		}
+
+		if ( m_rguPlayerScores[i] == uHighScore )
+		{
+			cWinners++;
+			bWinning = bWinning || (m_rgSteamIDPlayers[i] == m_SteamIDLocalUser);
+		}
+
+		if ( m_rgSteamIDPlayers[i] == m_SteamIDLocalUser )
+		{
+			uMyScore = m_rguPlayerScores[i];
+		}
+	}
+
+	if ( bWinning && cWinners > 1 )
+	{
+		pchStatus = "Tied";
+	}
+	else if ( bWinning )
+	{
+		pchStatus = "Winning";
+	}
+	else
+	{
+		pchStatus = "Losing";
+	}
+
+	char rgchBuffer[32];
+	sprintf_safe( rgchBuffer, "%2u", uMyScore );
+	SteamFriends()->SetRichPresence( "score", rgchBuffer );
+
+	return pchStatus;
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: does work on transitioning from one game state to another
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 {
+	const char *pchSteamRichPresenceDisplay = "AtMainMenu";
+	bool bDisplayScoreInRichPresence = false;
 	if ( m_eGameState == k_EClientFindInternetServers )
 	{
 		// If we are just opening the find servers screen, then start a refresh
 		m_pServerBrowser->RefreshInternetServers();
 		SteamFriends()->SetRichPresence( "status", "Finding an internet game" );
+		pchSteamRichPresenceDisplay = "WaitingForMatch";
 	}
 	else if ( m_eGameState == k_EClientFindLANServers )
 	{
 		m_pServerBrowser->RefreshLANServers();
 		SteamFriends()->SetRichPresence( "status", "Finding a LAN game" );
+		pchSteamRichPresenceDisplay = "WaitingForMatch";
 	}
 	else if ( m_eGameState == k_EClientCreatingLobby )
 	{
@@ -971,11 +1053,17 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 			m_SteamCallResultLobbyCreated.Set( hSteamAPICall, this, &CSpaceWarClient::OnLobbyCreated );
 		}
 		SteamFriends()->SetRichPresence( "status", "Creating a lobby" );
+		pchSteamRichPresenceDisplay = "WaitingForMatch";
+	}
+	else if ( m_eGameState == k_EClientInLobby )
+	{
+		pchSteamRichPresenceDisplay = "WaitingForMatch";
 	}
 	else if ( m_eGameState == k_EClientFindLobby )
 	{
 		m_pLobbyBrowser->Refresh();
 		SteamFriends()->SetRichPresence( "status", "Main menu: finding lobbies" );
+		pchSteamRichPresenceDisplay = "WaitingForMatch";
 	}
 	else if ( m_eGameState == k_EClientGameMenu )
 	{
@@ -1003,6 +1091,9 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 
 		// Check if the user is due for an item drop
 		SpaceWarLocalInventory()->CheckForItemDrops();
+
+		pchSteamRichPresenceDisplay = SetInGameRichPresence();
+		bDisplayScoreInRichPresence = true;
 	}
 	else if ( m_eGameState == k_EClientLeaderboards )
 	{
@@ -1030,6 +1121,9 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		// start voice chat 
 		m_pVoiceChat->StartVoiceChat();
 		SteamFriends()->SetRichPresence( "status", "In match" );
+
+		pchSteamRichPresenceDisplay = SetInGameRichPresence();
+		bDisplayScoreInRichPresence = true;
 	}
 	else if ( m_eGameState == k_EClientRemoteStorage )
 	{
@@ -1049,6 +1143,26 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		m_pHTMLSurface->Show();
 		SteamFriends()->SetRichPresence("status", "Using the web");
 	}
+
+	if ( pchSteamRichPresenceDisplay != NULL )
+	{
+		SteamFriends()->SetRichPresence( "steam_display", bDisplayScoreInRichPresence ? "#StatusWithScore" : "#StatusWithoutScore" );
+		SteamFriends()->SetRichPresence( "gamestatus", pchSteamRichPresenceDisplay );
+	}
+
+	// steam_player_group defines who the user is playing with.  Set it to the steam ID
+	// of the server if we are connected, otherwise blank.
+	if ( m_steamIDGameServer.IsValid() )
+	{
+		char rgchBuffer[32];
+		sprintf_safe( rgchBuffer, "%llu", m_steamIDGameServer.ConvertToUint64() );
+		SteamFriends()->SetRichPresence( "steam_player_group", rgchBuffer );
+	}
+	else
+	{
+		SteamFriends()->SetRichPresence( "steam_player_group", "" );
+	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1357,6 +1471,10 @@ void CSpaceWarClient::RunFrame()
 		{
 			SpaceWarLocalInventory()->DoExchange();
 		}
+		else if ( m_pGameEngine->BIsKeyDown( 0x32 ) )
+		{
+			SpaceWarLocalInventory()->ModifyItemProperties();
+		}
 		break;
 	case k_EClientLeaderboards:
 		m_pStarField->Render();
@@ -1485,7 +1603,10 @@ void CSpaceWarClient::RunFrame()
 			m_bSentWebOpen = true;
 #ifndef _PS3
 			char szCurDir[MAX_PATH];
-			_getcwd( szCurDir, sizeof(szCurDir) );
+			if ( !_getcwd( szCurDir, sizeof(szCurDir) ) )
+            {
+                strcpy( szCurDir, "." );
+            }
 			char szURL[MAX_PATH];
 			sprintf_safe( szURL, "file:///%s/test.html", szCurDir );
 			// load the test html page, it just has a steam://gamewebcallback link in it
@@ -1740,8 +1861,8 @@ void CSpaceWarClient::DrawHUDText()
 		}
 	}
 
-	// Draw a Steam Controller tooltip
-	if ( m_pGameEngine->BIsSteamControllerActive( ) )
+	// Draw a Steam Input tooltip
+	if ( m_pGameEngine->BIsSteamInputDeviceActive( ) )
 	{
 		char rgchHint[128];
 		const char *rgchFireOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_ShipControls, eControllerDigitalAction_FireLasers );
@@ -2164,9 +2285,8 @@ CWorkshopItem *CSpaceWarClient::LoadWorkshopItemFromFile( const char *pszFileNam
 			{
 				float xPos0, yPos0, xPos1, yPos1;
 				DWORD dwColor;
-				fgets(szLine, sizeof(szLine), file);
-
-				if (sscanf(szLine, "%f %f %f %f %x", &xPos0, &yPos0, &xPos1, &yPos1, &dwColor) >= 5)
+				if ( fgets(szLine, sizeof(szLine), file) &&
+                     sscanf(szLine, "%f %f %f %f %x", &xPos0, &yPos0, &xPos1, &yPos1, &dwColor) >= 5 )
 				{
 					// Add a line to the entity
 					pItem->AddLine(xPos0, yPos0, xPos1, yPos1, dwColor);
@@ -2309,7 +2429,7 @@ void CSpaceWarClient::OnRequestPricesResult( SteamInventoryRequestPricesResult_t
 		std::vector<uint64> vecPrices;
 		vecPrices.resize( unItems );
 
-		if ( SteamInventory()->GetItemsWithPrices( vecItemDefs.data(), vecPrices.data(), unItems ) )
+		if ( SteamInventory()->GetItemsWithPrices( vecItemDefs.data(), vecPrices.data(), NULL, unItems ) )
 		{
 			m_vecPurchaseableItems.reserve( unItems );
 			for ( uint32 i = 0; i < unItems; ++i )

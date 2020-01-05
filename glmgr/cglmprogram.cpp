@@ -247,7 +247,10 @@ void	CGLMProgram::SetProgramText( char *text )
 					
 					default: Assert(!"Mismatched section marker seen in SetProgramText (VP)"); break;
 				}
-			break;			
+			break;
+
+			default:
+			break;
 		}
 	}
 }
@@ -401,6 +404,9 @@ bool	CGLMProgram::Compile( EGLMProgramLang lang )
 
 			result = glslDesc->m_valid;
 		}
+		break;
+
+		default:
 		break;
 	}
 	return result;
@@ -667,6 +673,9 @@ bool CGLMProgram::CheckValidity( EGLMProgramLang lang )
 
 			return glslDesc->m_valid;
 		}
+		break;
+
+		default:
 		break;
 	}
 	

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 #include "dxabstract.h"
-#include "DX9AsmToGL2.h"
+#include "dx9asmtogl2.h"
 
 
 void Error( const char *fmt, ... )

@@ -37,6 +37,7 @@ public:
 	void GrantTestItems();
 	void CheckForItemDrops();
 	void DoExchange();
+	void ModifyItemProperties();
 
 	const std::list<CSpaceWarItem *>& GetItemList() const { return m_listPlayerItems; }
 	const CSpaceWarItem * GetItem( SteamItemInstanceID_t nItemId ) const;

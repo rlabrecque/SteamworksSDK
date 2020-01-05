@@ -316,7 +316,7 @@ inline void GLMDebugger( void )
 	if (GLMDebugChannelMask() & (1<<eGLProfiler))
 	{
 		// we call an obscure GL function which we know has been breakpointed in the OGLP function list
-		static short nada[] = {0xFFFF,0xFFFF,0xFFFF,0xFFFF};
+        static short nada[] = { -1, -1, -1, -1 };
 		glColor4sv( nada );
 	}
 }

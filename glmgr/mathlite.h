@@ -17,7 +17,7 @@
 #define FLOAT32_NAN          BitsToFloat( FLOAT32_NAN_BITS )
 #define VEC_T_NAN FLOAT32_NAN
 
-#define FastSqrt(x) sqrt(x)
+//#define FastSqrt(x) sqrt(x)
 
 #ifndef Assert
 #define Assert(x)
@@ -69,7 +69,7 @@ inline unsigned long& FloatBits( vec_t& f )
 }
 
 
-inline unsigned long const FloatBits( const vec_t &f )
+inline unsigned long FloatBits( const vec_t &f )
 {
 	union Convertor_t
 	{
@@ -125,11 +125,13 @@ inline void SinCos( float radians, float *sine, float *cosine )
 //-----------------------------------------------------------------------------
 // The following are not declared as macros because they are often used in limiting situations,
 // and sometimes the compiler simply refuses to inline them for some reason
+#ifndef FastSqrt
 inline float FastSqrt( float x )
 {
 	__m128 root = _mm_sqrt_ss( _mm_load_ss( &x ) );
 	return *( reinterpret_cast<float *>( &root ) );
 }
+#endif
 
 inline float FastRSqrtFast( float x )
 {
