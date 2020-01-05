@@ -196,6 +196,7 @@ class ISteamParentalSettings;
 class ISteamGameSearch;
 class ISteamInput;
 class ISteamParties;
+class ISteamTV;
 
 //-----------------------------------------------------------------------------
 // Purpose: Base values for callback identifiers, each callback must
@@ -215,6 +216,7 @@ enum { k_iSteamUserStatsCallbacks = 1100 };
 enum { k_iSteamNetworkingCallbacks = 1200 };
 enum { k_iSteamNetworkingSocketsCallbacks = 1220 };
 enum { k_iSteamNetworkingMessagesCallbacks = 1250 };
+enum { k_iSteamNetworkingUtilsCallbacks = 1280 };
 enum { k_iClientRemoteStorageCallbacks = 1300 };
 enum { k_iClientDepotBuilderCallbacks = 1400 };
 enum { k_iSteamGameServerItemsCallbacks = 1500 };
@@ -257,6 +259,8 @@ enum { k_iClientShaderCallbacks = 5100 };
 enum { k_iSteamGameSearchCallbacks = 5200 };
 enum { k_iSteamPartiesCallbacks = 5300 };
 enum { k_iClientPartiesCallbacks = 5400 };
+enum { k_iSteamSTARCallbacks = 5500 };
+enum { k_iClientSTARCallbacks = 5600 };
 
 // Macro used to define a type-safe accessor that will always return the version
 // of the interface of the *header file* you are compiling with!  We also bounce
@@ -325,6 +329,7 @@ public:
 	ISteamHTMLSurface*	SteamHTMLSurface() const			{ return m_pSteamHTMLSurface; }
 	ISteamInventory*	SteamInventory() const				{ return m_pSteamInventory; }
 	ISteamVideo*		SteamVideo() const					{ return m_pSteamVideo; }
+	ISteamTV*			SteamTV() const						{ return m_pSteamTV; }
 	ISteamParentalSettings* SteamParentalSettings() const	{ return m_pSteamParentalSettings; }
 	ISteamInput*		SteamInput() const					{ return m_pSteamInput; }
 private:
@@ -349,6 +354,7 @@ private:
 	ISteamHTMLSurface	*m_pSteamHTMLSurface;
 	ISteamInventory		*m_pSteamInventory;
 	ISteamVideo			*m_pSteamVideo;
+	ISteamTV			*m_pSteamTV;
 	ISteamParentalSettings *m_pSteamParentalSettings;
 	ISteamInput			*m_pSteamInput;
 };

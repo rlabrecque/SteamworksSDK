@@ -27,7 +27,8 @@ public:
 
 		if ( !steamIDLobby.IsValid() )
 		{
-			PopSelectedItem();
+			LobbyMenuItem_t menuItem = { CSteamID(), LobbyMenuItem_t::k_ELobbyMenuItemLeaveLobby };
+			AddMenuItem( CLobbyMenu::MenuItem_t( "Lobby Disconnected - Return to main menu", menuItem ) );
 			return;
 		}
 
@@ -181,6 +182,17 @@ void CLobby::OnLobbyChatUpdate( LobbyChatUpdate_t *pCallback )
 	// callbacks are broadcast to all listeners, so we'll get this for every lobby we're requesting
 	if ( m_steamIDLobby != pCallback->m_ulSteamIDLobby )
 		return;
+
+	if ( pCallback->m_ulSteamIDUserChanged == SteamUser()->GetSteamID().ConvertToUint64() && 
+		( pCallback->m_rgfChatMemberStateChange &
+			( k_EChatMemberStateChangeLeft|
+				k_EChatMemberStateChangeDisconnected|
+				k_EChatMemberStateChangeKicked|
+				k_EChatMemberStateChangeBanned ) ) )
+	{
+		// we've left the lobby, so it is now invalid
+		m_steamIDLobby = CSteamID();
+	}
 
 	// rebuild the menu
 	m_pMenu->Rebuild( m_steamIDLobby );

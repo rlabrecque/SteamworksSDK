@@ -375,7 +375,7 @@ void CSpaceWarServer::AddPlayerShip( uint32 uShipPosition )
 	float flXOffset = flWidth*0.12f;
 	float flYOffset = flHeight*0.12f;
 
-	float flAngle = atan( flHeight/flWidth ) + PI_VALUE/2.0f;
+	float flAngle = (float)atan( flHeight/flWidth ) + PI_VALUE/2.0f;
 	switch( uShipPosition )
 	{
 	case 0:

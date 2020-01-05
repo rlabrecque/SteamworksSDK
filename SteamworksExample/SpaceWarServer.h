@@ -8,6 +8,8 @@
 #ifndef SPACEWARSERVER_H
 #define SPACEWARSERVER_H
 
+#include <string>
+
 #include "GameEngine.h"
 #include "SpaceWar.h"
 #include "Ship.h"

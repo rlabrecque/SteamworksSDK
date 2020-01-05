@@ -313,6 +313,7 @@
 	,{"name": "k_EAppType_Music","value": "8192"}
 	,{"name": "k_EAppType_Series","value": "16384"}
 	,{"name": "k_EAppType_Comic","value": "32768"}
+	,{"name": "k_EAppType_Beta","value": "65536"}
 	,{"name": "k_EAppType_Shortcut","value": "1073741824"}
 	,{"name": "k_EAppType_DepotOnly","value": "-2147483648"}
 ]}
@@ -429,6 +430,7 @@
 	,{"name": "k_eEVRHMDType_Oculus_DK1","value": "21"}
 	,{"name": "k_eEVRHMDType_Oculus_DK2","value": "22"}
 	,{"name": "k_eEVRHMDType_Oculus_Rift","value": "23"}
+	,{"name": "k_eEVRHMDType_Oculus_RiftS","value": "24"}
 	,{"name": "k_eEVRHMDType_Oculus_Unknown","value": "40"}
 	,{"name": "k_eEVRHMDType_Acer_Unknown","value": "50"}
 	,{"name": "k_eEVRHMDType_Acer_WindowsMR","value": "51"}
@@ -445,7 +447,9 @@
 	,{"name": "k_eEVRHMDType_vridge","value": "110"}
 	,{"name": "k_eEVRHMDType_Huawei_Unknown","value": "120"}
 	,{"name": "k_eEVRHMDType_Huawei_VR2","value": "121"}
-	,{"name": "k_eEVRHMDType_Huawei_Unannounced","value": "129"}
+	,{"name": "k_eEVRHMDType_Huawei_EndOfRange","value": "129"}
+	,{"name": "k_eEVRHmdType_Valve_Unknown","value": "130"}
+	,{"name": "k_eEVRHmdType_Valve_Index","value": "131"}
 ]}
 ,	{"enumname": "EMarketNotAllowedReasonFlags","values": [ 
 	{"name": "k_EMarketNotAllowedReason_None","value": "0"}
@@ -465,6 +469,18 @@
 	,{"name": "k_EMarketNotAllowedReason_NewPaymentMethodCannotBeVerified","value": "8192"}
 	,{"name": "k_EMarketNotAllowedReason_NoRecentPurchases","value": "16384"}
 	,{"name": "k_EMarketNotAllowedReason_AcceptedWalletGift","value": "32768"}
+]}
+,	{"enumname": "EDurationControlProgress","values": [ 
+	{"name": "k_EDurationControlProgress_Full","value": "0"}
+	,{"name": "k_EDurationControlProgress_Half","value": "1"}
+	,{"name": "k_EDurationControlProgress_None","value": "2"}
+]}
+,	{"enumname": "EDurationControlNotification","values": [ 
+	{"name": "k_EDurationControlNotification_None","value": "0"}
+	,{"name": "k_EDurationControlNotification_1Hour","value": "1"}
+	,{"name": "k_EDurationControlNotification_3Hours","value": "2"}
+	,{"name": "k_EDurationControlNotification_HalfProgress","value": "3"}
+	,{"name": "k_EDurationControlNotification_NoProgress","value": "4"}
 ]}
 ,	{"enumname": "CGameID::EGameIDType","values": [ 
 	{"name": "k_EGameIDTypeApp","value": "0"}
@@ -598,6 +614,7 @@
 	,{"name": "k_ELobbyTypeFriendsOnly","value": "1"}
 	,{"name": "k_ELobbyTypePublic","value": "2"}
 	,{"name": "k_ELobbyTypeInvisible","value": "3"}
+	,{"name": "k_ELobbyTypePrivateUnique","value": "4"}
 ]}
 ,	{"enumname": "ELobbyComparison","values": [ 
 	{"name": "k_ELobbyComparisonEqualToOrLessThan","value": "-2"}
@@ -645,6 +662,7 @@
 	,{"name": "k_ERemoteStoragePlatformLinux","value": "8"}
 	,{"name": "k_ERemoteStoragePlatformReserved2","value": "16"}
 	,{"name": "k_ERemoteStoragePlatformAndroid","value": "32"}
+	,{"name": "k_ERemoteStoragePlatformIOS","value": "64"}
 	,{"name": "k_ERemoteStoragePlatformAll","value": "-1"}
 ]}
 ,	{"enumname": "ERemoteStoragePublishedFileVisibility","values": [ 
@@ -974,7 +992,7 @@
 	,{"name": "k_EInputActionOrigin_PS4_Gyro_Pitch","value": "100"}
 	,{"name": "k_EInputActionOrigin_PS4_Gyro_Yaw","value": "101"}
 	,{"name": "k_EInputActionOrigin_PS4_Gyro_Roll","value": "102"}
-	,{"name": "k_EInputActionOrigin_PS4_Reserved0","value": "103"}
+	,{"name": "k_EInputActionOrigin_PS4_DPad_Move","value": "103"}
 	,{"name": "k_EInputActionOrigin_PS4_Reserved1","value": "104"}
 	,{"name": "k_EInputActionOrigin_PS4_Reserved2","value": "105"}
 	,{"name": "k_EInputActionOrigin_PS4_Reserved3","value": "106"}
@@ -1013,7 +1031,7 @@
 	,{"name": "k_EInputActionOrigin_XBoxOne_DPad_South","value": "139"}
 	,{"name": "k_EInputActionOrigin_XBoxOne_DPad_West","value": "140"}
 	,{"name": "k_EInputActionOrigin_XBoxOne_DPad_East","value": "141"}
-	,{"name": "k_EInputActionOrigin_XBoxOne_Reserved0","value": "142"}
+	,{"name": "k_EInputActionOrigin_XBoxOne_DPad_Move","value": "142"}
 	,{"name": "k_EInputActionOrigin_XBoxOne_Reserved1","value": "143"}
 	,{"name": "k_EInputActionOrigin_XBoxOne_Reserved2","value": "144"}
 	,{"name": "k_EInputActionOrigin_XBoxOne_Reserved3","value": "145"}
@@ -1052,7 +1070,7 @@
 	,{"name": "k_EInputActionOrigin_XBox360_DPad_South","value": "178"}
 	,{"name": "k_EInputActionOrigin_XBox360_DPad_West","value": "179"}
 	,{"name": "k_EInputActionOrigin_XBox360_DPad_East","value": "180"}
-	,{"name": "k_EInputActionOrigin_XBox360_Reserved0","value": "181"}
+	,{"name": "k_EInputActionOrigin_XBox360_DPad_Move","value": "181"}
 	,{"name": "k_EInputActionOrigin_XBox360_Reserved1","value": "182"}
 	,{"name": "k_EInputActionOrigin_XBox360_Reserved2","value": "183"}
 	,{"name": "k_EInputActionOrigin_XBox360_Reserved3","value": "184"}
@@ -1096,7 +1114,7 @@
 	,{"name": "k_EInputActionOrigin_Switch_ProGyro_Pitch","value": "222"}
 	,{"name": "k_EInputActionOrigin_Switch_ProGyro_Yaw","value": "223"}
 	,{"name": "k_EInputActionOrigin_Switch_ProGyro_Roll","value": "224"}
-	,{"name": "k_EInputActionOrigin_Switch_Reserved0","value": "225"}
+	,{"name": "k_EInputActionOrigin_Switch_DPad_Move","value": "225"}
 	,{"name": "k_EInputActionOrigin_Switch_Reserved1","value": "226"}
 	,{"name": "k_EInputActionOrigin_Switch_Reserved2","value": "227"}
 	,{"name": "k_EInputActionOrigin_Switch_Reserved3","value": "228"}
@@ -1469,7 +1487,11 @@
 	,{"name": "k_EControllerActionOrigin_Switch_LeftGrip_Upper","value": "238"}
 	,{"name": "k_EControllerActionOrigin_Switch_RightGrip_Lower","value": "239"}
 	,{"name": "k_EControllerActionOrigin_Switch_RightGrip_Upper","value": "240"}
-	,{"name": "k_EControllerActionOrigin_Count","value": "241"}
+	,{"name": "k_EControllerActionOrigin_PS4_DPad_Move","value": "241"}
+	,{"name": "k_EControllerActionOrigin_XBoxOne_DPad_Move","value": "242"}
+	,{"name": "k_EControllerActionOrigin_XBox360_DPad_Move","value": "243"}
+	,{"name": "k_EControllerActionOrigin_Switch_DPad_Move","value": "244"}
+	,{"name": "k_EControllerActionOrigin_Count","value": "245"}
 	,{"name": "k_EControllerActionOrigin_MaximumPossibleValue","value": "32767"}
 ]}
 ,	{"enumname": "ESteamControllerLEDFlag","values": [ 
@@ -1633,6 +1655,12 @@
 	,{"name": "k_ESteamItemRemoved","value": "256"}
 	,{"name": "k_ESteamItemConsumed","value": "512"}
 ]}
+,	{"enumname": "ESteamTVRegionBehavior","values": [ 
+	{"name": "k_ESteamVideoRegionBehaviorInvalid","value": "-1"}
+	,{"name": "k_ESteamVideoRegionBehaviorHover","value": "0"}
+	,{"name": "k_ESteamVideoRegionBehaviorClickPopup","value": "1"}
+	,{"name": "k_ESteamVideoRegionBehaviorClickSurroundingRegion","value": "2"}
+]}
 ,	{"enumname": "EParentalFeature","values": [ 
 	{"name": "k_EFeatureInvalid","value": "0"}
 	,{"name": "k_EFeatureStore","value": "1"}
@@ -1678,6 +1706,8 @@
 	"constname": "k_iSteamNetworkingSocketsCallbacks","consttype": "int", "constval": "1220"}
 ,{
 	"constname": "k_iSteamNetworkingMessagesCallbacks","consttype": "int", "constval": "1250"}
+,{
+	"constname": "k_iSteamNetworkingUtilsCallbacks","consttype": "int", "constval": "1280"}
 ,{
 	"constname": "k_iClientRemoteStorageCallbacks","consttype": "int", "constval": "1300"}
 ,{
@@ -1763,6 +1793,10 @@
 ,{
 	"constname": "k_iClientPartiesCallbacks","consttype": "int", "constval": "5400"}
 ,{
+	"constname": "k_iSteamSTARCallbacks","consttype": "int", "constval": "5500"}
+,{
+	"constname": "k_iClientSTARCallbacks","consttype": "int", "constval": "5600"}
+,{
 	"constname": "k_cchPersonaNameMax","consttype": "int", "constval": "128"}
 ,{
 	"constname": "k_cwchPersonaNameMax","consttype": "int", "constval": "32"}
@@ -1782,6 +1816,8 @@
 	"constname": "k_SteamItemInstanceIDInvalid","consttype": "const SteamItemInstanceID_t", "constval": "18446744073709551615"}
 ,{
 	"constname": "k_SteamInventoryResultInvalid","consttype": "const SteamInventoryResult_t", "constval": "-1"}
+,{
+	"constname": "k_cchBroadcastGameDataMax","consttype": "int", "constval": "8192"}
 ],
 "structs":[{"struct": "CSteamID","fields": [
 { "fieldname": "m_steamid", "fieldtype": "union SteamID_t"}]}
@@ -1837,6 +1873,7 @@
 { "fieldname": "m_pSteamHTMLSurface", "fieldtype": "class ISteamHTMLSurface *"},
 { "fieldname": "m_pSteamInventory", "fieldtype": "class ISteamInventory *"},
 { "fieldname": "m_pSteamVideo", "fieldtype": "class ISteamVideo *"},
+{ "fieldname": "m_pSteamTV", "fieldtype": "class ISteamTV *"},
 { "fieldname": "m_pSteamParentalSettings", "fieldtype": "class ISteamParentalSettings *"},
 { "fieldname": "m_pSteamInput", "fieldtype": "class ISteamInput *"}]}
 ,{"struct": "CSteamGameServerAPIContext","fields": [
@@ -1888,6 +1925,13 @@
 { "fieldname": "m_rtAllowedAtTime", "fieldtype": "RTime32"},
 { "fieldname": "m_cdaySteamGuardRequiredDays", "fieldtype": "int"},
 { "fieldname": "m_cdayNewDeviceCooldown", "fieldtype": "int"}]}
+,{"struct": "DurationControl_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EResult"},
+{ "fieldname": "m_appid", "fieldtype": "AppId_t"},
+{ "fieldname": "m_bApplicable", "fieldtype": "_Bool"},
+{ "fieldname": "m_csecsLast5h", "fieldtype": "int32"},
+{ "fieldname": "m_progress", "fieldtype": "enum EDurationControlProgress"},
+{ "fieldname": "m_notification", "fieldtype": "enum EDurationControlNotification"}]}
 ,{"struct": "FriendGameInfo_t","fields": [
 { "fieldname": "m_gameID", "fieldtype": "class CGameID"},
 { "fieldname": "m_unGameIP", "fieldtype": "uint32"},
@@ -2587,8 +2631,6 @@
 ,{"struct": "SteamInventoryRequestPricesResult_t","fields": [
 { "fieldname": "m_result", "fieldtype": "enum EResult"},
 { "fieldname": "m_rgchCurrency", "fieldtype": "char [4]"}]}
-,{"struct": "BroadcastUploadStop_t","fields": [
-{ "fieldname": "m_eResult", "fieldtype": "enum EBroadcastUploadResult"}]}
 ,{"struct": "GetVideoURLResult_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
 { "fieldname": "m_unVideoAppID", "fieldtype": "AppId_t"},
@@ -2596,6 +2638,15 @@
 ,{"struct": "GetOPFSettingsResult_t","fields": [
 { "fieldname": "m_eResult", "fieldtype": "enum EResult"},
 { "fieldname": "m_unVideoAppID", "fieldtype": "AppId_t"}]}
+,{"struct": "SteamTVRegion_t","fields": [
+{ "fieldname": "unMinX", "fieldtype": "uint32"},
+{ "fieldname": "unMinY", "fieldtype": "uint32"},
+{ "fieldname": "unMaxX", "fieldtype": "uint32"},
+{ "fieldname": "unMaxY", "fieldtype": "uint32"}]}
+,{"struct": "BroadcastUploadStart_t","fields": [
+{ "fieldname": "m_bIsRTMP", "fieldtype": "_Bool"}]}
+,{"struct": "BroadcastUploadStop_t","fields": [
+{ "fieldname": "m_eResult", "fieldtype": "enum EBroadcastUploadResult"}]}
 ,{"struct": "GSClientApprove_t","fields": [
 { "fieldname": "m_SteamID", "fieldtype": "class CSteamID"},
 { "fieldname": "m_OwnerSteamID", "fieldtype": "class CSteamID"}]}
@@ -3206,6 +3257,11 @@
 ,{
 	"classname": "ISteamUser",
 	"methodname": "GetMarketEligibility", "callresult": "MarketEligibilityResponse_t",
+	"returntype": "SteamAPICall_t"
+}
+,{
+	"classname": "ISteamUser",
+	"methodname": "GetDurationControl", "callresult": "DurationControl_t",
 	"returntype": "SteamAPICall_t"
 }
 ,{
@@ -4001,6 +4057,27 @@
 	"returntype": "void",
 	"params": [ 
 {	"paramname": "bEnabled" ,"paramtype": "bool"}
+	 ]
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "IsSteamChinaLauncher",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "InitFilterText",
+	"returntype": "bool"
+}
+,{
+	"classname": "ISteamUtils",
+	"methodname": "FilterText",
+	"returntype": "int",
+	"params": [ 
+{	"paramname": "pchOutFilteredText" ,"paramtype": "char *"},
+{	"paramname": "nByteSizeOutFilteredText" ,"paramtype": "uint32"},
+{	"paramname": "pchInputMessage" ,"paramtype": "const char *"},
+{	"paramname": "bLegalOnly" ,"paramtype": "bool"}
 	 ]
 }
 ,{
@@ -6708,7 +6785,7 @@
 	"methodname": "GetConnectedControllers",
 	"returntype": "int",
 	"params": [ 
-{	"paramname": "handlesOut" ,"paramtype": "InputHandle_t *"}
+{	"paramname": "handlesOut" ,"out_array_count": "STEAM_INPUT_MAX_COUNT" ,"desc": "Receives list of connected controllers" ,"paramtype": "InputHandle_t *"}
 	 ]
 }
 ,{
@@ -6768,7 +6845,7 @@
 	"returntype": "int",
 	"params": [ 
 {	"paramname": "inputHandle" ,"paramtype": "InputHandle_t"},
-{	"paramname": "handlesOut" ,"paramtype": "InputActionSetHandle_t *"}
+{	"paramname": "handlesOut" ,"out_array_count": "STEAM_INPUT_MAX_ACTIVE_LAYERS" ,"desc": "Receives list of active layers" ,"paramtype": "InputActionSetHandle_t *"}
 	 ]
 }
 ,{
@@ -6796,7 +6873,7 @@
 {	"paramname": "inputHandle" ,"paramtype": "InputHandle_t"},
 {	"paramname": "actionSetHandle" ,"paramtype": "InputActionSetHandle_t"},
 {	"paramname": "digitalActionHandle" ,"paramtype": "InputDigitalActionHandle_t"},
-{	"paramname": "originsOut" ,"paramtype": "EInputActionOrigin *"}
+{	"paramname": "originsOut" ,"out_array_count": "STEAM_INPUT_MAX_ORIGINS" ,"desc": "Receives list of action origins" ,"paramtype": "EInputActionOrigin *"}
 	 ]
 }
 ,{
@@ -6824,7 +6901,7 @@
 {	"paramname": "inputHandle" ,"paramtype": "InputHandle_t"},
 {	"paramname": "actionSetHandle" ,"paramtype": "InputActionSetHandle_t"},
 {	"paramname": "analogActionHandle" ,"paramtype": "InputAnalogActionHandle_t"},
-{	"paramname": "originsOut" ,"paramtype": "EInputActionOrigin *"}
+{	"paramname": "originsOut" ,"out_array_count": "STEAM_INPUT_MAX_ORIGINS" ,"desc": "Receives list of action origins" ,"paramtype": "EInputActionOrigin *"}
 	 ]
 }
 ,{
@@ -6972,6 +7049,16 @@
 	 ]
 }
 ,{
+	"classname": "ISteamInput",
+	"methodname": "GetDeviceBindingRevision",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "inputHandle" ,"paramtype": "InputHandle_t"},
+{	"paramname": "pMajor" ,"paramtype": "int *"},
+{	"paramname": "pMinor" ,"paramtype": "int *"}
+	 ]
+}
+,{
 	"classname": "ISteamController",
 	"methodname": "Init",
 	"returntype": "bool"
@@ -6991,7 +7078,7 @@
 	"methodname": "GetConnectedControllers",
 	"returntype": "int",
 	"params": [ 
-{	"paramname": "handlesOut" ,"paramtype": "ControllerHandle_t *"}
+{	"paramname": "handlesOut" ,"out_array_count": "STEAM_CONTROLLER_MAX_COUNT" ,"desc": "Receives list of connected controllers" ,"paramtype": "ControllerHandle_t *"}
 	 ]
 }
 ,{
@@ -7051,7 +7138,7 @@
 	"returntype": "int",
 	"params": [ 
 {	"paramname": "controllerHandle" ,"paramtype": "ControllerHandle_t"},
-{	"paramname": "handlesOut" ,"paramtype": "ControllerActionSetHandle_t *"}
+{	"paramname": "handlesOut" ,"out_array_count": "STEAM_CONTROLLER_MAX_ACTIVE_LAYERS" ,"desc": "Receives list of active layers" ,"paramtype": "ControllerActionSetHandle_t *"}
 	 ]
 }
 ,{
@@ -7079,7 +7166,7 @@
 {	"paramname": "controllerHandle" ,"paramtype": "ControllerHandle_t"},
 {	"paramname": "actionSetHandle" ,"paramtype": "ControllerActionSetHandle_t"},
 {	"paramname": "digitalActionHandle" ,"paramtype": "ControllerDigitalActionHandle_t"},
-{	"paramname": "originsOut" ,"paramtype": "EControllerActionOrigin *"}
+{	"paramname": "originsOut" ,"out_array_count": "STEAM_CONTROLLER_MAX_ORIGINS" ,"desc": "Receives list of aciton origins" ,"paramtype": "EControllerActionOrigin *"}
 	 ]
 }
 ,{
@@ -7107,7 +7194,7 @@
 {	"paramname": "controllerHandle" ,"paramtype": "ControllerHandle_t"},
 {	"paramname": "actionSetHandle" ,"paramtype": "ControllerActionSetHandle_t"},
 {	"paramname": "analogActionHandle" ,"paramtype": "ControllerAnalogActionHandle_t"},
-{	"paramname": "originsOut" ,"paramtype": "EControllerActionOrigin *"}
+{	"paramname": "originsOut" ,"out_array_count": "STEAM_CONTROLLER_MAX_ORIGINS" ,"desc": "Receives list of action origins" ,"paramtype": "EControllerActionOrigin *"}
 	 ]
 }
 ,{
@@ -7252,6 +7339,16 @@
 	"params": [ 
 {	"paramname": "eDestinationInputType" ,"paramtype": "ESteamInputType"},
 {	"paramname": "eSourceOrigin" ,"paramtype": "EControllerActionOrigin"}
+	 ]
+}
+,{
+	"classname": "ISteamController",
+	"methodname": "GetControllerBindingRevision",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "controllerHandle" ,"paramtype": "ControllerHandle_t"},
+{	"paramname": "pMajor" ,"paramtype": "int *"},
+{	"paramname": "pMinor" ,"paramtype": "int *"}
 	 ]
 }
 ,{
@@ -7406,6 +7503,18 @@
 {	"paramname": "keyValueTagIndex" ,"paramtype": "uint32"},
 {	"paramname": "pchKey" ,"out_string_count": "cchKeySize" ,"paramtype": "char *"},
 {	"paramname": "cchKeySize" ,"paramtype": "uint32"},
+{	"paramname": "pchValue" ,"out_string_count": "cchValueSize" ,"paramtype": "char *"},
+{	"paramname": "cchValueSize" ,"paramtype": "uint32"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "GetQueryUGCKeyValueTag",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCQueryHandle_t"},
+{	"paramname": "index" ,"paramtype": "uint32"},
+{	"paramname": "pchKey" ,"paramtype": "const char *"},
 {	"paramname": "pchValue" ,"out_string_count": "cchValueSize" ,"paramtype": "char *"},
 {	"paramname": "cchValueSize" ,"paramtype": "uint32"}
 	 ]
@@ -7678,6 +7787,14 @@
 	"params": [ 
 {	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"},
 {	"paramname": "bAllowLegacyUpload" ,"paramtype": "bool"}
+	 ]
+}
+,{
+	"classname": "ISteamUGC",
+	"methodname": "RemoveAllItemKeyValueTags",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "handle" ,"paramtype": "UGCUpdateHandle_t"}
 	 ]
 }
 ,{
@@ -8713,6 +8830,67 @@
 {	"paramname": "unVideoAppID" ,"paramtype": "AppId_t"},
 {	"paramname": "pchBuffer" ,"paramtype": "char *"},
 {	"paramname": "pnBufferSize" ,"paramtype": "int32 *"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "IsBroadcasting",
+	"returntype": "bool",
+	"params": [ 
+{	"paramname": "pnNumViewers" ,"paramtype": "int *"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "AddBroadcastGameData",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "pchKey" ,"paramtype": "const char *"},
+{	"paramname": "pchValue" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "RemoveBroadcastGameData",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "pchKey" ,"paramtype": "const char *"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "AddTimelineMarker",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "pchTemplateName" ,"paramtype": "const char *"},
+{	"paramname": "bPersistent" ,"paramtype": "bool"},
+{	"paramname": "nColorR" ,"paramtype": "uint8"},
+{	"paramname": "nColorG" ,"paramtype": "uint8"},
+{	"paramname": "nColorB" ,"paramtype": "uint8"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "RemoveTimelineMarker",
+	"returntype": "void"
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "AddRegion",
+	"returntype": "uint32",
+	"params": [ 
+{	"paramname": "pchElementName" ,"paramtype": "const char *"},
+{	"paramname": "pchTimelineDataSection" ,"paramtype": "const char *"},
+{	"paramname": "pSteamTVRegion" ,"paramtype": "const struct SteamTVRegion_t *"},
+{	"paramname": "eSteamTVRegionBehavior" ,"paramtype": "ESteamTVRegionBehavior"}
+	 ]
+}
+,{
+	"classname": "ISteamTV",
+	"methodname": "RemoveRegion",
+	"returntype": "void",
+	"params": [ 
+{	"paramname": "unRegionHandle" ,"paramtype": "uint32"}
 	 ]
 }
 ,{

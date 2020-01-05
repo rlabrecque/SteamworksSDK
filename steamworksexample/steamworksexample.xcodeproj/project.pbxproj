@@ -126,7 +126,7 @@
 		503C6D0E1268F49F00B66E3B /* voicechat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voicechat.h; sourceTree = "<group>"; };
 		503C6DAA1268FE1000B66E3B /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		503C6DAB1268FE1000B66E3B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		503C6DB31269002800B66E3B /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = ../redistributable_bin/osx32/libsteam_api.dylib; sourceTree = "<absolute>"; };
+		503C6DB31269002800B66E3B /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = ../redistributable_bin/osx/libsteam_api.dylib; sourceTree = "<absolute>"; };
 		504EDCB4126900D600F96D63 /* steamworksexample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "steamworksexample-Info.plist"; path = "osx/steamworksexample-Info.plist"; sourceTree = "<group>"; };
 		504EDCC01269025A00F96D63 /* steam_appid.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = steam_appid.txt; path = osx/steam_appid.txt; sourceTree = "<group>"; };
 		50D642851461EF3200A5739B /* clanchatroom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clanchatroom.cpp; sourceTree = "<group>"; };
@@ -488,6 +488,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_LINK_OBJC_RUNTIME = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -499,7 +500,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					../lib/osx32/release,
 					"\"$(SRCROOT)/../lib/osx32/release\"",
-					../redistributable_bin/osx32/,
+					../lib/osx/release,
+					"\"$(SRCROOT)/../lib/osx/release\"",
+					../redistributable_bin/osx/,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = steamworksexample;
@@ -513,6 +516,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_LINK_OBJC_RUNTIME = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -525,7 +529,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					../lib/osx32/debug,
 					"\"$(SRCROOT)/../lib/osx32/release\"",
-					../redistributable_bin/osx32/,
+					../lib/osx/debug,
+					"\"$(SRCROOT)/../lib/osx/release\"",
+					../redistributable_bin/osx/,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = steamworksexample;

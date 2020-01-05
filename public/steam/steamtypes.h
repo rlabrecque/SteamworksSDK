@@ -130,7 +130,6 @@ const JobID_t k_JobIDNil = 0xffffffffffffffffull;
 // this is baked into client messages and interfaces as an int, 
 // make sure we never break this.
 typedef uint32 PackageId_t;
-const PackageId_t k_uPackageIdFreeSub = 0x0;
 const PackageId_t k_uPackageIdInvalid = 0xFFFFFFFF;
 
 typedef uint32 BundleId_t;

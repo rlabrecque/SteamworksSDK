@@ -14,6 +14,7 @@
 
 #include "steamnetworkingtypes.h"
 struct SteamDatagramRelayAuthTicket;
+struct SteamRelayNetworkStatus_t;
 
 //-----------------------------------------------------------------------------
 /// Misc networking utilities for checking the local networking environment
@@ -24,7 +25,7 @@ public:
 #ifdef STEAMNETWORKINGSOCKETS_ENABLE_SDR
 
 	//
-	// Initialization
+	// Initialization and status check
 	//
 
 	/// If you know that you are going to be using the relay network, call
@@ -33,16 +34,25 @@ public:
 	/// happen the first time you use a feature that requires access to the
 	/// relay network, and that use will be delayed.
 	///
-	/// Returns true if initialization has completed successfully.
-	/// (It will probably return false on the first call.)
-	///
+	/// Use GetRelayNetworkStatus or listen for SteamRelayNetworkStatus_t
+	/// callbacks to know when initialization has completed.
 	/// Typically initialization completes in a few seconds.
 	///
-	/// Note: dedicated servers hosted with Valve do *not* need to call
-	/// this, since they do not make routing decisions.  However, if the
-	/// dedicated server will be using P2P functionality, it will act as
+	/// Note: dedicated servers hosted in known data centers do *not* need
+	/// to call this, since they do not make routing decisions.  However, if
+	/// the dedicated server will be using P2P functionality, it will act as
 	/// a "client" and this should be called.
-	inline bool InitializeRelayNetworkAccess();
+	inline void InitRelayNetworkAccess();
+
+	/// Fetch current status of the relay network.
+	///
+	/// SteamRelayNetworkStatus_t is also a callback.  It will be triggered on
+	/// both the user and gameserver interfaces any time the status changes, or
+	/// ping measurement starts or stops.
+	///
+	/// SteamRelayNetworkStatus_t::m_eAvail is returned.  If you want
+	/// more details, you can pass a non-NULL value.
+	virtual ESteamNetworkingAvailability GetRelayNetworkStatus( SteamRelayNetworkStatus_t *pDetails ) = 0;
 
 	//
 	// "Ping location" functions
@@ -59,14 +69,14 @@ public:
 	// This is extremely useful to select peers for matchmaking!
 	//
 	// The markers can also be converted to a string, so they can be transmitted.
-	// We have a separate library you can use on your backend to manipulate
-	// these objects.  (See steamdatagram_ticketgen.h)
+	// We have a separate library you can use on your app's matchmaking/coordinating
+	// server to manipulate these objects.  (See steamdatagram_gamecoordinator.h)
 
 	/// Return location info for the current host.  Returns the approximate
 	/// age of the data, in seconds, or -1 if no data is available.
 	///
 	/// It takes a few seconds to initialize access to the relay network.  If
-	/// you call this very soon after calling InitializeRelayNetworkAccess,
+	/// you call this very soon after calling InitRelayNetworkAccess,
 	/// the data may not be available yet.
 	///
 	/// This always return the most up-to-date information we have available
@@ -117,10 +127,6 @@ public:
 	/// the string.
 	virtual bool ParsePingLocationString( const char *pszString, SteamNetworkPingLocation_t &result ) = 0;
 
-	//
-	// Initialization / ping measurement status
-	//
-
 	/// Check if the ping data of sufficient recency is available, and if
 	/// it's too old, start refreshing it.
 	///
@@ -136,12 +142,10 @@ public:
 	/// Returns false if sufficiently recent data is not available.  In this
 	/// case, ping measurement is initiated, if it is not already active.
 	/// (You cannot restart a measurement already in progress.)
+	///
+	/// You can use GetRelayNetworkStatus or listen for SteamRelayNetworkStatus_t
+	/// to know when ping measurement completes.
 	virtual bool CheckPingDataUpToDate( float flMaxAgeSeconds ) = 0;
-
-	/// Return true if we are taking ping measurements to update our ping
-	/// location or select optimal routing.  Ping measurement typically takes
-	/// a few seconds, perhaps up to 10 seconds.
-	virtual bool IsPingMeasurementInProgress() = 0;
 
 	//
 	// List of Valve data centers, and ping times to them.  This might
@@ -261,7 +265,7 @@ public:
 protected:
 	~ISteamNetworkingUtils(); // Silence some warnings
 };
-#define STEAMNETWORKINGUTILS_INTERFACE_VERSION "SteamNetworkingUtils001"
+#define STEAMNETWORKINGUTILS_INTERFACE_VERSION "SteamNetworkingUtils002"
 
 // Global accessor.
 #ifdef STEAMNETWORKINGSOCKETS_STANDALONELIB
@@ -277,12 +281,48 @@ protected:
 	STEAM_DEFINE_INTERFACE_ACCESSOR( ISteamNetworkingUtils *, SteamNetworkingUtils, SteamInternal_FindOrCreateUserInterface( 0, STEAMNETWORKINGUTILS_INTERFACE_VERSION ) );
 #endif
 
+/// A struct used to describe our readiness to use the relay network.
+/// To do this we first need to fetch the network configuration,
+/// which describes what POPs are available.
+struct SteamRelayNetworkStatus_t
+{ 
+	enum { k_iCallback = k_iSteamNetworkingUtilsCallbacks + 1 };
+
+	/// Summary status.  When this is "current", initialization has
+	/// completed.  Anything else means you are not ready yet, or
+	/// there is a significant problem.
+	ESteamNetworkingAvailability m_eAvail;
+
+	/// Nonzero if latency measurement is in progress (or pending,
+	/// awaiting a prerequisite).
+	int m_bPingMeasurementInProgress;
+
+	/// Status obtaining the network config.  This is a prerequisite
+	/// for relay network access.
+	///
+	/// Failure to obtain the network config almost always indicates
+	/// a problem with the local internet connection.
+	ESteamNetworkingAvailability m_eAvailNetworkConfig;
+
+	/// Current ability to communicate with ANY relay.  Note that
+	/// the complete failure to communicate with any relays almost
+	/// always indicates a problem with the local Internet connection.
+	/// (However, just because you can reach a single relay doesn't
+	/// mean that the local connection is in perfect health.)
+	ESteamNetworkingAvailability m_eAvailAnyRelay;
+
+	/// Non-localized English language status.  For diagnostic/debugging
+	/// purposes only.
+	char m_debugMsg[ 256 ];
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Internal stuff
 
 #ifdef STEAMNETWORKINGSOCKETS_ENABLE_SDR
-inline bool ISteamNetworkingUtils::InitializeRelayNetworkAccess() { return CheckPingDataUpToDate( 1e10f ); }
+inline void ISteamNetworkingUtils::InitRelayNetworkAccess() { CheckPingDataUpToDate( 1e10f ); }
 #endif
 
 inline bool ISteamNetworkingUtils::SetGlobalConfigValueInt32( ESteamNetworkingConfigValue eValue, int32 val ) { return SetConfigValue( eValue, k_ESteamNetworkingConfig_Global, 0, k_ESteamNetworkingConfig_Int32, &val ); }
@@ -292,7 +332,7 @@ inline bool ISteamNetworkingUtils::SetConnectionConfigValueInt32( HSteamNetConne
 inline bool ISteamNetworkingUtils::SetConnectionConfigValueFloat( HSteamNetConnection hConn, ESteamNetworkingConfigValue eValue, float val ) { return SetConfigValue( eValue, k_ESteamNetworkingConfig_Connection, hConn, k_ESteamNetworkingConfig_Float, &val ); }
 inline bool ISteamNetworkingUtils::SetConnectionConfigValueString( HSteamNetConnection hConn, ESteamNetworkingConfigValue eValue, const char *val ) { return SetConfigValue( eValue, k_ESteamNetworkingConfig_Connection, hConn, k_ESteamNetworkingConfig_String, val ); }
 
-#if !defined( STEAMNETWORKINGSOCKETS_STATIC_LINK ) && defined( STEAMNETWORKINGSOCKETS_STEAM )
+#if !defined( STEAMNETWORKINGSOCKETS_STATIC_LINK ) && defined( STEAMNETWORKINGSOCKETS_STEAMCLIENT )
 inline void SteamNetworkingIPAddr::ToString( char *buf, size_t cbBuf, bool bWithPort ) const { SteamNetworkingUtils()->SteamNetworkingIPAddr_ToString( *this, buf, cbBuf, bWithPort ); }
 inline bool SteamNetworkingIPAddr::ParseString( const char *pszStr ) { return SteamNetworkingUtils()->SteamNetworkingIPAddr_ParseString( this, pszStr ); }
 inline void SteamNetworkingIdentity::ToString( char *buf, size_t cbBuf ) const { SteamNetworkingUtils()->SteamNetworkingIdentity_ToString( *this, buf, cbBuf ); }

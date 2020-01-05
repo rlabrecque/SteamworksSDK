@@ -11,6 +11,7 @@
 #include "SpaceWar.h"
 #include "GameEngine.h"
 #include <list>
+#include <string>
 
 class CSpaceWarItem;
 

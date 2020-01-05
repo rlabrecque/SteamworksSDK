@@ -134,7 +134,7 @@ void CVectorEntity::RunFrame()
 
 	// Make sure velocity does not exceed maximum allowed
 
-	float flVelocity = sqrt( m_flXVelocity*m_flXVelocity + m_flYVelocity*m_flYVelocity );
+	float flVelocity = (float)sqrt( m_flXVelocity*m_flXVelocity + m_flYVelocity*m_flYVelocity );
 
 	if ( flVelocity > m_flMaximumVelocity )
 	{

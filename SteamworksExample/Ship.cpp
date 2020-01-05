@@ -764,10 +764,10 @@ void CShip::Render()
 		float rotationClockwise = (m_pGameEngine->GetGameTickCount() / 500.0f);
 		float rotationCounter = -(m_pGameEngine->GetGameTickCount() / 500.0f);
 
-		float x1 = 28.0f * cos( rotationClockwise );
-		float y1 = 28.0f * sin( rotationClockwise );
-		float x2 = 28.0f * cos( rotationCounter );
-		float y2 = 28.0f * sin( rotationCounter );
+		float x1 = 28.0f * (float)cos( rotationClockwise );
+		float y1 = 28.0f * (float)sin( rotationClockwise );
+		float x2 = 28.0f * (float)cos( rotationCounter );
+		float y2 = 28.0f * (float)sin( rotationCounter );
 
 		m_pGameEngine->BDrawTexturedQuad(
 			this->GetXPos() - x1, this->GetYPos() - y1, this->GetXPos() + y1, this->GetYPos() - x1,

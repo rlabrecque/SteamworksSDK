@@ -9,6 +9,29 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.45 25th June 2019
+----------------------------------------------------------------
+
+Steam Input and Steam Controller Interfaces
+* Added the GetDeviceBindingRevision function which allows developers of Steam Input API games to detect out of date user configurations. Configurations w/ out of date major revisions should be automatically updated by Steam to the latest official configuration, but configurations w/ out of date minor revisions will be left in-place.
+
+ISteamUser
+* Add duration control APIs to support anti-indulgence regulations in some territories. This includes callbacks when gameplay time thresholds have been passed, and an API to fetch the same data on the fly.
+
+ISteamUtils
+* Add basic text filtering API.
+
+----------------------------------------------------------------
+v1.44 13th March 2019
+----------------------------------------------------------------
+
+ISteamNetworkingSockets
+* Socket-style API that relays traffic on the Valve network
+
+ISteamNetworkingUtils
+* Tools for instantly estimating ping time between two network hosts
+
+----------------------------------------------------------------
 v1.43 20th February 2019
 ----------------------------------------------------------------
 
