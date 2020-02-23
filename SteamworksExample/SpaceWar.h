@@ -94,7 +94,7 @@ inline T DWordSwap( T dw )
 {
 	uint32 temp;
 
-	temp  =   *((uint32 *)&dw) 				>> 24;
+	temp  =   *((uint32 *)&dw)               >> 24;
 	temp |= ((*((uint32 *)&dw) & 0x00FF0000) >> 8);
 	temp |= ((*((uint32 *)&dw) & 0x0000FF00) << 8);
 	temp |= ((*((uint32 *)&dw) & 0x000000FF) << 24);
@@ -107,7 +107,7 @@ inline T QWordSwap( T dw )
 {
 	uint64 temp;
 
-	temp  =   *((uint64 *)&dw) 				         >> 56;
+	temp  =   *((uint64 *)&dw)                          >> 56;
 	temp |= ((*((uint64 *)&dw) & 0x00FF000000000000ull) >> 40);
 	temp |= ((*((uint64 *)&dw) & 0x0000FF0000000000ull) >> 24);
 	temp |= ((*((uint64 *)&dw) & 0x000000FF00000000ull) >> 8);
@@ -396,7 +396,7 @@ private:
 // This is the data that gets sent from each client to the server for each update
 struct ClientSpaceWarUpdateData_t
 {
-	void SetPlayerName( const char *pchName ) { strncpy( m_rgchPlayerName, pchName, sizeof( m_rgchPlayerName ) ); }
+	void SetPlayerName( const char *pchName ) { strncpy_safe( m_rgchPlayerName, pchName, sizeof( m_rgchPlayerName ) ); }
 	const char *GetPlayerName() { return m_rgchPlayerName; }
 
 	void SetFirePressed( bool bIsPressed ) { m_bFirePressed = bIsPressed; }

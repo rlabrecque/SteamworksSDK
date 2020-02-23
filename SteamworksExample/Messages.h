@@ -61,7 +61,7 @@ struct MsgServerSendInfo_t
 	void SetSecure( bool bSecure ) { m_bIsVACSecure = bSecure; }
 	bool GetSecure() { return m_bIsVACSecure; }
 
-	void SetServerName( const char *pchName ) { strncpy( m_rgchServerName, pchName, sizeof( m_rgchServerName ) ); }
+	void SetServerName( const char *pchName ) { strncpy_safe( m_rgchServerName, pchName, sizeof( m_rgchServerName ) ); }
 	const char *GetServerName() { return m_rgchServerName; }
 
 private:

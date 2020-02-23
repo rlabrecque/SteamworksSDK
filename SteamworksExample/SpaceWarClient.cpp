@@ -2204,10 +2204,18 @@ void CSpaceWarClient::OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t 
 
 	if ( pEncryptedAppTicketResponse->m_eResult == k_EResultOK )
 	{
-		uint8 rgubTicket[1024];
-		uint32 cubTicket;		
-		SteamUser()->GetEncryptedAppTicket( rgubTicket, sizeof( rgubTicket), &cubTicket );
+		// first determine what size the buffer should be:
+		uint32 cubTicket = 0;		
+		SteamUser()->GetEncryptedAppTicket( nullptr, 0, &cubTicket );
 
+		uint32 bufSize = cubTicket;
+		uint8 *pTicket = new uint8[ bufSize ];
+		if ( !SteamUser()->GetEncryptedAppTicket( pTicket, bufSize, &cubTicket ) )
+		{
+			OutputDebugString( "App ticket not available\n" );
+			delete[] pTicket;
+			return;
+		}
 
 #ifdef _WIN32
 		// normally at this point you transmit the encrypted ticket to the service that knows the decryption key
@@ -2218,7 +2226,9 @@ void CSpaceWarClient::OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t 
 
 		uint8 rgubDecrypted[1024];
 		uint32 cubDecrypted = sizeof( rgubDecrypted );
-		if ( !SteamEncryptedAppTicket_BDecryptTicket( rgubTicket, cubTicket, rgubDecrypted, &cubDecrypted, rgubKey, sizeof( rgubKey ) ) )
+		bool bDecrypted = SteamEncryptedAppTicket_BDecryptTicket( pTicket, cubTicket, rgubDecrypted, &cubDecrypted, rgubKey, sizeof( rgubKey ) );
+		delete[] pTicket;
+		if ( !bDecrypted )
 		{
 			OutputDebugString( "Ticket failed to decrypt\n" );
 			return;

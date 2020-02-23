@@ -8,6 +8,31 @@ Copyright © 1996-2019, Valve Corporation, All rights reserved.
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
 
+
+----------------------------------------------------------------
+v1.48 12th February 2020
+----------------------------------------------------------------
+
+ISteamNetworkingSockets
+* Added the concept of a "poll group", which is a way to receive messages from many connections at once, efficiently.
+* ReceiveMessagesOnListenSocket was deleted.  To get the same functionality, create a poll group, and then add connections to this poll group when accepting the connection.
+
+Flat interface redesign
+* Fixed many missing interfaces and types.
+* All versions of overloaded functions are now available, using distinct names.
+* There are now simple, global versioned functions to fetch the interfaces.  No more need to mess with HSteamPipes or HSteamUsers directly.
+* The json file now has much more detailed information and several errors have been fixed.
+* steam_api_interop.cs has been removed and will no longer be supported.
+* There is a new manual dispatch API for callbacks, which works similarly to a windows event loop.  This is a replacement for the existing callback registeration and dispatch mechanisms, which which are nice in C++ but awkward to use outside of C++.
+
+----------------------------------------------------------------
+v1.47a 14th February 2020
+----------------------------------------------------------------
+
+macOS
+* Fixed notarization issues caused by code signature of libsteam_api.dylib
+
+
 ----------------------------------------------------------------
 v1.47 3rd December 2019
 ----------------------------------------------------------------
