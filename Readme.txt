@@ -10,6 +10,14 @@ website at: http://partner.steamgames.com
 
 
 ----------------------------------------------------------------
+v1.48a 26th March 2020
+----------------------------------------------------------------
+
+macOS
+* Fixed notarization issues caused by missing code signature of libsdkencryptedappticket.dylib
+
+
+----------------------------------------------------------------
 v1.48 12th February 2020
 ----------------------------------------------------------------
 
@@ -24,13 +32,6 @@ Flat interface redesign
 * The json file now has much more detailed information and several errors have been fixed.
 * steam_api_interop.cs has been removed and will no longer be supported.
 * There is a new manual dispatch API for callbacks, which works similarly to a windows event loop.  This is a replacement for the existing callback registeration and dispatch mechanisms, which which are nice in C++ but awkward to use outside of C++.
-
-----------------------------------------------------------------
-v1.47a 14th February 2020
-----------------------------------------------------------------
-
-macOS
-* Fixed notarization issues caused by code signature of libsteam_api.dylib
 
 
 ----------------------------------------------------------------
