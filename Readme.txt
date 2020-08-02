@@ -1,12 +1,21 @@
 ================================================================
 
-Copyright © 1996-2019, Valve Corporation, All rights reserved.
+Copyright © 1996-2020, Valve Corporation, All rights reserved.
 
 ================================================================
 
 
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
+
+
+----------------------------------------------------------------
+v1.49 12th June 2020
+----------------------------------------------------------------
+* Added ISteamApps::BIsTimedTrial() which allows a game to check if user only has limited playtime
+* Added ISteamFriends::RegisterProtocolInOverlayBrowser() which will enable dispatching callbacks when the overlay web browser navigates to a registered custom protocol, such as “mygame://<callback data>”
+* Added ISteamuserStats::GetAchievementProgressLimits() which lets the game query at run-time the progress-based achievement’s bounds as set by the developers in the Steamworks application settings
+* Added tool to demonstrate processing the steam.signatures file that comes in the steam client package.
 
 
 ----------------------------------------------------------------

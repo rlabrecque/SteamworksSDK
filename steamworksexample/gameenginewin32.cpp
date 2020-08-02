@@ -214,8 +214,7 @@ CGameEngineWin32::CGameEngineWin32( HINSTANCE hInstance, int nShowCommand, int32
 	// Create a mastering voice
 	if( FAILED( m_pXAudio2->CreateMasteringVoice( &m_pMasteringVoice, XAUDIO2_DEFAULT_CHANNELS, VOICE_OUTPUT_SAMPLE_RATE ) ) )
 	{
-		::MessageBoxA( NULL, "Failed to create mastering voice", "SteamworksExample - Fatal error", MB_OK | MB_ICONERROR );
-		return;
+		::MessageBoxA( NULL, "Failed to create mastering voice", "SteamworksExample", MB_OK | MB_ICONERROR );
 	}
 
 

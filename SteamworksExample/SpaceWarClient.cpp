@@ -251,6 +251,10 @@ void CSpaceWarClient::DisconnectFromServer()
 
 		MsgClientLeavingServer_t msg;
 		BSendServerData( &msg, sizeof(msg) );
+
+		// tell steam china duration control system that we are no longer in a match
+		SteamUser()->BSetDurationControlOnlineState( k_EDurationControlOnlineState_Offline );
+
 		m_eConnectedStatus = k_EClientNotConnected;
 	}
 	if ( m_pP2PAuthedGame )
@@ -336,6 +340,9 @@ void CSpaceWarClient::OnReceiveServerAuthenticationResponse( bool bSuccess, uint
 
 		// set information so our friends can join the lobby
 		UpdateRichPresenceConnectionInfo();
+
+		// tell steam china duration control system that we are in a match and not to be interrupted
+		SteamUser()->BSetDurationControlOnlineState( k_EDurationControlOnlineState_OnlineHighPri );
 
 		// send a ping, to measure round-trip time
 		m_ulPingSentTime = m_pGameEngine->GetGameTickCount();
