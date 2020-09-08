@@ -18,6 +18,8 @@
 #include "StatsAndAchievements.h"
 #include "RemoteStorage.h"
 #include "musicplayer.h"
+#include "steam/isteamnetworkingsockets.h"
+#include "steam/isteamnetworkingutils.h"
 
 // Forward class declaration
 class CConnectingMenu;
@@ -230,6 +232,9 @@ private:
 	// Receive a response from the server for a connection attempt
 	void OnReceiveServerAuthenticationResponse( bool bSuccess, uint32 uPlayerPosition );
 
+	// Recieved a response that the server is full
+	void OnReceiveServerFullResponse();
+
 	// Receive a state update from the server
 	void OnReceiveServerUpdate( ServerSpaceWarUpdateData_t *pUpdateData );
 
@@ -339,6 +344,7 @@ private:
 	uint32 m_unServerIP;
 	uint16 m_usServerPort;
 	HAuthTicket m_hAuthTicket;
+	HSteamNetConnection m_hConnServer;
 
 	// keep track of if we opened the overlay for a gamewebcallback
 	bool m_bSentWebOpen;
@@ -491,8 +497,8 @@ private:
 	// html page viewer
 	CHTMLSurface *m_pHTMLSurface;
 
-	// connection handler
-	STEAM_CALLBACK( CSpaceWarClient, OnP2PSessionConnectFail, P2PSessionConnectFail_t );
+	// Called when we get new connections, or the state of a connection changes
+	STEAM_CALLBACK(CSpaceWarClient, OnNetConnectionStatusChanged, SteamNetConnectionStatusChangedCallback_t);
 
 	// ipc failure handler
 	STEAM_CALLBACK( CSpaceWarClient, OnIPCFailure, IPCFailure_t );

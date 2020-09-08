@@ -474,10 +474,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PREBINDING = NO;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = ../public;
 			};
 			name = Debug;
@@ -495,10 +495,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PREBINDING = NO;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = ../public;
 			};
 			name = Release;
@@ -524,8 +524,9 @@
 					"\"$(SRCROOT)/../lib/osx/release\"",
 					../redistributable_bin/osx/,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = steamworksexample;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -552,8 +553,9 @@
 					"\"$(SRCROOT)/../lib/osx/release\"",
 					../redistributable_bin/osx/,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = steamworksexample;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

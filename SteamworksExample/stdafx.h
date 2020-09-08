@@ -67,7 +67,6 @@ typedef unsigned __int32 uint32;
 typedef __int64 int64;
 typedef unsigned __int64 uint64;
 
-#include "steam/steam_api.h"
 #include "steam/isteamuserstats.h"
 #include "steam/isteamremotestorage.h"
 #include "steam/isteammatchmaking.h"

@@ -9,8 +9,8 @@
 
 const int k_cMaxSockets = 16;
 class CP2PAuthPlayer;
-class CNetworkTransport;
 
+bool SendAuthTicketToConnection( CSteamID steamIDFrom, HSteamNetConnection hConnectionTo, uint32 cubTicket, uint8 *pubTicket );
 
 //-----------------------------------------------------------------------------
 // Purpose: one player p2p auth process state machine
@@ -18,19 +18,19 @@ class CNetworkTransport;
 class CP2PAuthPlayer
 {
 public:
-	CP2PAuthPlayer( IGameEngine *pGameEngine, CNetworkTransport *pNetworkTransport );
+	CP2PAuthPlayer( IGameEngine *pGameEngine, CSteamID steamID, HSteamNetConnection hServerConn );
 	~CP2PAuthPlayer();
 	void EndGame();
-	void InitPlayer( CSteamID steamID );
 	void StartAuthPlayer();
 	bool BIsAuthOk();
-	bool HandleMessage( EMessage eMsg, void *pMessage );
+	void HandleP2PSendingTicket( const MsgP2PSendingTicket_t *pMsg );
 
 	CSteamID GetSteamID();
 
 	STEAM_CALLBACK( CP2PAuthPlayer, OnBeginAuthResponse, ValidateAuthTicketResponse_t, m_CallbackBeginAuthResponse );
 
-	CSteamID m_steamID;
+	const CSteamID m_steamID;
+	const HSteamNetConnection m_hServerConnection;
 private:
 	uint64 GetGameTimeInSeconds() 
 	{ 
@@ -50,7 +50,6 @@ private:
 	EBeginAuthSessionResult m_eBeginAuthSessionResult;
 	EAuthSessionResponse m_eAuthSessionResponse;
 
-	CNetworkTransport *m_pNetworkTransport;
 	IGameEngine *m_pGameEngine;
 };
 
@@ -65,29 +64,11 @@ public:
 	void EndGame();
 	void StartAuthPlayer( int iSlot, CSteamID steamID );
 	void RegisterPlayer( int iSlot, CSteamID steamID );
-	bool HandleMessage( EMessage eMsg, void *pMessage );
+	void HandleP2PSendingTicket( const void *pMessage );
 	CSteamID GetSteamID();
 	void InternalInitPlayer( int iSlot, CSteamID steamID, bool bStartAuthProcess );
 
 	CP2PAuthPlayer *m_rgpP2PAuthPlayer[MAX_PLAYERS_PER_SERVER];
-	MsgP2PSendingTicket_t *m_rgpQueuedMessage[MAX_PLAYERS_PER_SERVER];
 	IGameEngine *m_pGameEngine;
-	CNetworkTransport *m_pNetworkTransport;
-};
-
-
-//-----------------------------------------------------------------------------
-// Purpose: trivial wrapper on network messaging 
-//-----------------------------------------------------------------------------
-class CNetworkTransport
-{
-public:
-	CNetworkTransport();
-	bool SendTicket( CSteamID steamIDFrom, CSteamID steamIDTo, uint32 cubTicket, uint8 *pubTicket );
-	void CloseConnection( CSteamID steamID );
-
-	bool SendNetMessage( CSteamID steamIDTo, void *pMessage, int cubMessage );
-
-	STEAM_CALLBACK( CNetworkTransport, OnP2PSessionRequest, P2PSessionRequest_t, m_CallbackP2PSessionRequest );
-	STEAM_CALLBACK( CNetworkTransport, OnP2PSessionConnectFail, P2PSessionConnectFail_t, m_CallbackP2PSessionConnectFail );
+	HSteamNetConnection m_hConnServer;
 };
