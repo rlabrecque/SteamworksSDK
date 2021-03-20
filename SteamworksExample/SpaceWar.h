@@ -32,9 +32,6 @@
 // Current game server version
 #define SPACEWAR_SERVER_VERSION "1.0.0.0"
 
-// UDP port for the spacewar server to do authentication on (ie, talk to Steam on)
-#define SPACEWAR_AUTHENTICATION_PORT 8766
-
 // UDP port for the spacewar server to listen on
 #define SPACEWAR_SERVER_PORT 27015
 

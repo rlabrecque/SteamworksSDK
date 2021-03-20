@@ -156,7 +156,7 @@ public:
 	void InitiateServerConnection( uint32 unServerAddress, const int32 nPort );
 
 	// Send data to a client at the given ship index
-	bool BSendServerData( const void *pData, uint32 nSizeOfData );
+	bool BSendServerData( const void *pData, uint32 nSizeOfData, int nSendFlags );
 
 	// Menu callback handler (handles a bunch of menus that just change state with no extra data)
 	void OnMenuSelection( EClientGameState eState ) { SetGameState( eState ); }

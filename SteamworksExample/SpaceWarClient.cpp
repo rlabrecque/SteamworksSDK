@@ -253,9 +253,6 @@ void CSpaceWarClient::DisconnectFromServer()
 		SteamUser()->AdvertiseGame( k_steamIDNil, 0, 0 );
 #endif
 
-		MsgClientLeavingServer_t msg;
-		BSendServerData( &msg, sizeof(msg) );
-
 		// tell steam china duration control system that we are no longer in a match
 		SteamUser()->BSetDurationControlOnlineState( k_EDurationControlOnlineState_Offline );
 
@@ -315,7 +312,7 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 	if ( msg.GetTokenLen() < 1 )
 		OutputDebugString( "Warning: Looks like GetAuthSessionTicket didn't give us a good ticket\n" );
 
-	BSendServerData( &msg, sizeof(msg) );
+	BSendServerData( &msg, sizeof(msg), k_nSteamNetworkingSend_Reliable );
 }
 
 
@@ -554,9 +551,9 @@ void CSpaceWarClient::SetConnectionFailureText( const char *pchErrorText )
 //-----------------------------------------------------------------------------
 // Purpose: Send data to the current server
 //-----------------------------------------------------------------------------
-bool CSpaceWarClient::BSendServerData( const void *pData, uint32 nSizeOfData )
+bool CSpaceWarClient::BSendServerData( const void *pData, uint32 nSizeOfData, int nSendFlags )
 {
-	EResult res = SteamNetworkingSockets()->SendMessageToConnection( m_hConnServer, pData, nSizeOfData, k_nSteamNetworkingSend_UnreliableNoDelay, nullptr );
+	EResult res = SteamNetworkingSockets()->SendMessageToConnection( m_hConnServer, pData, nSizeOfData, nSendFlags, nullptr );
 	switch (res)
 	{
 		case k_EResultOK:
@@ -636,10 +633,6 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 	// Update when we last retried the connection, as well as the last packet received time so we won't timeout too soon,
 	// and so we will retry at appropriate intervals if packets drop
 	m_ulLastNetworkDataReceivedTime = m_ulLastConnectionAttemptRetryTime = m_pGameEngine->GetGameTickCount();
-
-	// send the packet to the server
-	MsgClientInitiateConnection_t msg;
-	BSendServerData( &msg, sizeof( msg ) );
 }
 
 
@@ -1760,9 +1753,12 @@ void CSpaceWarClient::RunFrame()
 		MsgClientSendLocalUpdate_t msg;
 		msg.SetShipPosition( m_uPlayerShipIndex );
 
-		// If this fails, it probably just means its not time to send an update yet
+		// Send update as unreliable message.  This means that if network packets drop,
+		// the networking system will not attempt retransmission, and our message may not arrive.
+		// That's OK, because we would rather just send a new, update message, instead of
+		// retransmitting the old one.
 		if ( m_rgpShips[ m_uPlayerShipIndex ]->BGetClientUpdateData( msg.AccessUpdateData() ) )
-			BSendServerData( &msg, sizeof( msg ) );
+			BSendServerData( &msg, sizeof( msg ), k_nSteamNetworkingSend_Unreliable );
 	}
 
 	if ( m_pP2PAuthedGame )

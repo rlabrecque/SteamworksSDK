@@ -37,7 +37,7 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 
 	// !FIXME! We need a way to pass the dedicated server flag here!
 
-	if ( !SteamGameServer_Init( unIP, SPACEWAR_AUTHENTICATION_PORT, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
+	if ( !SteamGameServer_Init( unIP, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
 	{
 		OutputDebugString( "SteamGameServer_Init call failed\n" );
 	}
@@ -158,47 +158,65 @@ CSpaceWarServer::~CSpaceWarServer()
 void CSpaceWarServer::OnNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* pCallback)
 {
 	/// Connection handle
-	HSteamNetConnection m_hConn = pCallback->m_hConn;
+	HSteamNetConnection hConn = pCallback->m_hConn;
 
 	/// Full connection info
-	SteamNetConnectionInfo_t m_info = pCallback->m_info;
+	SteamNetConnectionInfo_t info = pCallback->m_info;
 
 	/// Previous state.  (Current state is in m_info.m_eState)
-	ESteamNetworkingConnectionState m_eOldState = pCallback->m_eOldState;
+	ESteamNetworkingConnectionState eOldState = pCallback->m_eOldState;
 
 	// Parse information to know what was changed
 
 	// Check if a client has connected
-	if (m_info.m_hListenSocket && 
-		m_eOldState == k_ESteamNetworkingConnectionState_None && 
-		m_info.m_eState == k_ESteamNetworkingConnectionState_Connecting)
+	if (info.m_hListenSocket && 
+		eOldState == k_ESteamNetworkingConnectionState_None && 
+		info.m_eState == k_ESteamNetworkingConnectionState_Connecting)
 	{
-		// Handle connecting a client
-		// We always accept connectiosn from clients, without even checking for room on the server,
-		// since we reserve that for  the authentication phase of the connection which comes next.
-		// In production code you probably ned to remember the connection and not let it hang
-		// around indefinitely
-		EResult res = SteamGameServerNetworkingSockets()->AcceptConnection(m_hConn);
+		// Connection from a new client
+		// Search for an available slot
 		for (uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i)
 		{
 			if (!m_rgClientData[i].m_bActive && !m_rgPendingClientData[i].m_hConn)
 			{
-				m_rgPendingClientData[i].m_hConn = m_hConn;
+
+				// Found one.  "Accept" the connection.
+				EResult res = SteamGameServerNetworkingSockets()->AcceptConnection( hConn );
+				if ( res != k_EResultOK )
+				{
+					char msg[ 256 ];
+					sprintf( msg, "AcceptConnection returned %d", res );
+					OutputDebugString( msg );
+					SteamGameServerNetworkingSockets()->CloseConnection( hConn, k_ESteamNetConnectionEnd_AppException_Generic, "Failed to accept connection", false );
+					return;
+				}
+
+				m_rgPendingClientData[i].m_hConn = hConn;
+
 				// add the user to the poll group
-				SteamGameServerNetworkingSockets()->SetConnectionPollGroup(m_hConn, m_hNetPollGroup);
-				break;
+				SteamGameServerNetworkingSockets()->SetConnectionPollGroup(hConn, m_hNetPollGroup);
+
+				// Send them the server info as a reliable message
+				MsgServerSendInfo_t msg;
+				msg.SetSteamIDServer(SteamGameServer()->GetSteamID().ConvertToUint64());
+				#ifdef USE_GS_AUTH_API
+					// You can only make use of VAC when using the Steam authentication system
+					msg.SetSecure(SteamGameServer()->BSecure());
+				#endif
+				msg.SetServerName(m_sServerName.c_str());
+				SteamGameServerNetworkingSockets()->SendMessageToConnection( hConn, &msg, sizeof(MsgServerSendInfo_t), k_nSteamNetworkingSend_Reliable, nullptr );
+
+				return;
 			}
 		}
-		if ( res != k_EResultOK )
-		{
-			char msg[ 256 ];
-			sprintf( msg, "AcceptConnection returned %d", res );
-			OutputDebugString("Connection failed: Invalid Param");
-		}
+
+		// No empty slots.  Server full!
+		OutputDebugString("Rejecting connection; server full");
+		SteamGameServerNetworkingSockets()->CloseConnection( hConn, k_ESteamNetConnectionEnd_AppException_Generic, "Server full!", false );
 	}
 	// Check if a client has disconnected
-	else if ((m_eOldState == k_ESteamNetworkingConnectionState_Connecting || m_eOldState == k_ESteamNetworkingConnectionState_Connected) &&
-			 m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
+	else if ((eOldState == k_ESteamNetworkingConnectionState_Connecting || eOldState == k_ESteamNetworkingConnectionState_Connected) &&
+			 info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer)
 	{
 		// Handle disconnecting a client
 		for (uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i)
@@ -207,7 +225,7 @@ void CSpaceWarServer::OnNetConnectionStatusChanged(SteamNetConnectionStatusChang
 			if (!m_rgClientData[i].m_bActive)
 				continue;
 
-			if (m_rgClientData[i].m_SteamIDUser == m_info.m_identityRemote.GetSteamID())//pCallback->m_steamIDRemote)
+			if (m_rgClientData[i].m_SteamIDUser == info.m_identityRemote.GetSteamID())//pCallback->m_steamIDRemote)
 			{
 				OutputDebugString("Disconnected dropped user\n");
 				RemovePlayerFromServer(i, EDisconnectReason::k_EDRClientDisconnect);
@@ -554,21 +572,6 @@ void CSpaceWarServer::ReceiveNetworkData()
 
 		switch (eMsg)
 		{
-		case k_EMsgClientInitiateConnection:
-		{
-			// We always let clients do this without even checking for room on the server since we reserve that for 
-			// the authentication phase of the connection which comes next
-			MsgServerSendInfo_t msg;
-			msg.SetSteamIDServer(SteamGameServer()->GetSteamID().ConvertToUint64());
-#ifdef USE_GS_AUTH_API
-			// You can only make use of VAC when using the Steam authentication system
-			msg.SetSecure(SteamGameServer()->BSecure());
-#endif
-			msg.SetServerName(m_sServerName.c_str());
-			int64 messageOut;
-			SteamGameServerNetworkingSockets()->SendMessageToConnection(connection, &msg, sizeof(MsgServerSendInfo_t), k_nSteamNetworkingSend_Reliable, &messageOut);
-		}
-		break;
 		case k_EMsgClientBeginAuthentication:
 		{
 			if (message->GetSize() != sizeof(MsgClientBeginAuthentication_t))
@@ -612,41 +615,6 @@ void CSpaceWarServer::ReceiveNetworkData()
 				OutputDebugString("Got a client data update, but couldn't find a matching client\n");
 		}
 		break;
-		case k_EMsgClientLeavingServer:
-		{
-			if (message->GetSize() != sizeof(MsgClientLeavingServer_t))
-			{
-				OutputDebugString("Bad leaving server msg\n");
-				message->Release();
-				message = nullptr;
-				continue;
-			}
-			// Find the connection that should exist for this users address
-			bool bFound = false;
-			for (uint32 i = 0; i < MAX_PLAYERS_PER_SERVER; ++i)
-			{
-				if (m_rgClientData[i].m_SteamIDUser == steamIDRemote)
-				{
-					bFound = true;
-					RemovePlayerFromServer(i, EDisconnectReason::k_EDRClientDisconnect);
-					break;
-				}
-
-				// Also check for pending connections that may match
-				if (m_rgPendingClientData[i].m_SteamIDUser == steamIDRemote)
-				{
-#ifdef USE_GS_AUTH_API
-					// Tell the GS the user is leaving the server
-					SteamGameServer()->SendUserDisconnect(m_rgPendingClientData[i].m_SteamIDUser);
-#endif
-					// Clear our data on the user
-					memset(&m_rgPendingClientData[i], 0, sizeof(ClientConnectionData_t));
-					break;
-				}
-			}
-			if (!bFound)
-				OutputDebugString("Got a client leaving server msg, but couldn't find a matching client\n");
-		}
 
 		case k_EMsgVoiceChatData:
 		{

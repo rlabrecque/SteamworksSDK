@@ -10,6 +10,25 @@ website at: http://partner.steamgames.com
 
 
 ----------------------------------------------------------------
+v1.51 8th January 2021
+----------------------------------------------------------------
+ISteamUGC
+* Added GetQueryUGCNumTags(), GetQueryUGCTag(), and GetQueryUGCTagDisplayName() for access to an item's tags and the display names (e.g. localized versions) of those tags
+* A previous SDK update added (but failed to call out) AddRequiredTagGroup() which allows for matching at least one tag from the group (logical "or")
+
+ISteamInput & ISteamController
+* Added PS5 Action Origins
+
+ISteamFriends
+* Added ActivateGameOverlayInviteDialogConnectString - Activates the game overlay to open an invite dialog that will send the provided Rich Presence connect string to selected friends
+
+Steamworks Example
+* Updated to use latest SteamNetworkingSockets API
+
+Content Builder
+* Updated upload example to use a single script file to upload a simple depot
+
+----------------------------------------------------------------
 v1.50 29th August 2020
 ----------------------------------------------------------------
 * Added ISteamUtils::InitFilterText() and ISteamUtils::FilterText() which allow a game to filter content and user-generated text to comply with China legal requirements, and reduce profanity and slurs based on user settings.

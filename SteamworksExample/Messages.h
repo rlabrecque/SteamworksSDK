@@ -26,10 +26,8 @@ enum EMessage
 
 	// Client messages
 	k_EMsgClientBegin = 500,
-	k_EMsgClientInitiateConnection = k_EMsgClientBegin+1,
 	k_EMsgClientBeginAuthentication = k_EMsgClientBegin+2,
 	k_EMsgClientSendLocalUpdate = k_EMsgClientBegin+3,
-	k_EMsgClientLeavingServer = k_EMsgClientBegin+4,
 
 	// P2P authentication messages
 	k_EMsgP2PBegin = 600, 
@@ -126,16 +124,6 @@ private:
 	const DWORD m_dwMessageType;
 };
 
-// Msg from client to server when trying to connect
-struct MsgClientInitiateConnection_t
-{
-	MsgClientInitiateConnection_t() : m_dwMessageType( LittleDWord( k_EMsgClientInitiateConnection ) ) {}
-	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
-
-private:
-	const DWORD m_dwMessageType;
-};
-
 // Msg from client to server when initiating authentication
 struct MsgClientBeginAuthentication_t
 {
@@ -173,16 +161,6 @@ private:
 
 	uint32 m_uShipPosition;
 	ClientSpaceWarUpdateData_t m_ClientUpdateData;
-};
-
-// Msg from the client telling the server it is about to leave
-struct MsgClientLeavingServer_t
-{
-	MsgClientLeavingServer_t() : m_dwMessageType( LittleDWord( k_EMsgClientLeavingServer ) ) {}
-	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
-
-private:
-	const DWORD m_dwMessageType;
 };
 
 // Message sent from one peer to another, so peers authenticate directly with each other.
