@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMUSERSTATS_H
 #define ISTEAMUSERSTATS_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 #include "isteamremotestorage.h"

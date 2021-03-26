@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMGAMECOORDINATOR
 #define ISTEAMGAMECOORDINATOR
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 

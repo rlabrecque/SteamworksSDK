@@ -7,9 +7,7 @@
 
 #ifndef STEAMHTTPENUMS_H
 #define STEAMHTTPENUMS_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 // HTTP related types
 

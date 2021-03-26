@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMUSER_H
 #define ISTEAMUSER_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 

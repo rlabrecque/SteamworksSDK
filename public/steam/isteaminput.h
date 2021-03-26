@@ -9,9 +9,7 @@
 
 #ifndef ISTEAMINPUT_H
 #define ISTEAMINPUT_H
-#ifdef _WIN32
-#pragma once	
-#endif
+#pragma once
 
 #include "steam_api_common.h"
 

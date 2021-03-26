@@ -2,9 +2,7 @@
 
 #ifndef ISTEAMREMOTEPLAY_H
 #define ISTEAMREMOTEPLAY_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 
