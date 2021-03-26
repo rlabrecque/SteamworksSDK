@@ -85,7 +85,6 @@ typedef unsigned int uintp;
 # define STEAM_CLANG_ATTR(ATTR)
 #endif
 
-#define STEAM_METHOD_DESC(DESC) STEAM_CLANG_ATTR( "desc:" #DESC ";" )
 #define STEAM_IGNOREATTR() STEAM_CLANG_ATTR( "ignore" )
 #define STEAM_OUT_STRUCT() STEAM_CLANG_ATTR( "out_struct: ;" )
 #define STEAM_OUT_STRING() STEAM_CLANG_ATTR( "out_string: ;" )
