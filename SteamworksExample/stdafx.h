@@ -83,12 +83,8 @@ typedef unsigned __int64 uint64;
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-	#if defined(_PS3)
+	#if defined(OSX)
 
-	#include "stdafx_ps3.h"
-
-	#elif defined(OSX)
-	
 	#include <OpenGL/OpenGL.h>
 
 	#endif
