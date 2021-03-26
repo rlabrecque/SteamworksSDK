@@ -6,9 +6,7 @@
 
 #ifndef STEAMCLIENTPUBLIC_H
 #define STEAMCLIENTPUBLIC_H
-#ifdef _WIN32
 #pragma once
-#endif
 //lint -save -e1931 -e1927 -e1924 -e613 -e726
 
 // This header file defines the interface between the calling application and the code that

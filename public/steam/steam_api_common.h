@@ -9,9 +9,7 @@
 
 #ifndef STEAM_API_COMMON_H
 #define STEAM_API_COMMON_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steamtypes.h"
 #include "steamclientpublic.h"

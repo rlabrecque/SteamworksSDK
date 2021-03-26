@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMFRIENDS_H
 #define ISTEAMFRIENDS_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 

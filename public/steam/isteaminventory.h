@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMINVENTORY_H
 #define ISTEAMINVENTORY_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 

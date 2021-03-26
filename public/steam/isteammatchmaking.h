@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMMATCHMAKING
 #define ISTEAMMATCHMAKING
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 #include "matchmakingtypes.h" 

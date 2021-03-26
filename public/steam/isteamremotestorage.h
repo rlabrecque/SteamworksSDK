@@ -6,9 +6,7 @@
 
 #ifndef ISTEAMREMOTESTORAGE_H
 #define ISTEAMREMOTESTORAGE_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api_common.h"
 

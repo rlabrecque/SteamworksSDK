@@ -8,9 +8,7 @@
 #ifndef MATCHMAKINGTYPES_H
 #define MATCHMAKINGTYPES_H
 
-#ifdef _WIN32
 #pragma once
-#endif
 
 #ifdef POSIX
 #ifndef _snprintf

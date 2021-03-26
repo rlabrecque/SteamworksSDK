@@ -6,9 +6,7 @@
 
 #ifndef STEAMTYPES_H
 #define STEAMTYPES_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #define S_CALLTYPE __cdecl
 

@@ -7,9 +7,7 @@
 
 #ifndef STEAMDATAGRAM_TICKETS_H
 #define STEAMDATAGRAM_TICKETS_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #ifndef assert
 	#include <assert.h>

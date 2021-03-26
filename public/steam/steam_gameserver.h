@@ -6,9 +6,7 @@
 
 #ifndef STEAM_GAMESERVER_H
 #define STEAM_GAMESERVER_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 #include "steam_api.h"
 #include "isteamgameserver.h"

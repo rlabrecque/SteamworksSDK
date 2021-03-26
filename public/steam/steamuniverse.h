@@ -6,9 +6,7 @@
 
 #ifndef STEAMUNIVERSE_H
 #define STEAMUNIVERSE_H
-#ifdef _WIN32
 #pragma once
-#endif
 
 
 // Steam universes.  Each universe is a self-contained Steam instance.
