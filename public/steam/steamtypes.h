@@ -85,7 +85,6 @@ typedef unsigned int uintp;
 # define STEAM_CLANG_ATTR(ATTR)
 #endif
 
-#define STEAM_IGNOREATTR() STEAM_CLANG_ATTR( "ignore" )
 #define STEAM_OUT_STRUCT() STEAM_CLANG_ATTR( "out_struct: ;" )
 #define STEAM_OUT_STRING() STEAM_CLANG_ATTR( "out_string: ;" )
 #define STEAM_OUT_ARRAY_CALL(COUNTER,FUNCTION,PARAMS) STEAM_CLANG_ATTR( "out_array_call:" #COUNTER "," #FUNCTION "," #PARAMS ";" )
