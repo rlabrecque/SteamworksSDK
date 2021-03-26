@@ -42,10 +42,6 @@
 CRemoteStorage::CRemoteStorage( IGameEngine *pGameEngine ) : m_pGameEngine( pGameEngine ), m_pRemoteStorageSync(NULL)
 {
 	m_pRemoteStorageScreen = new CRemoteStorageScreen( pGameEngine );
-
-#ifdef _PS3
-	m_pRemoteStorageSync = new CRemoteStorageSync( pGameEngine );
-#endif
 }
 
 

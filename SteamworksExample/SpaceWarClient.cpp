@@ -61,21 +61,12 @@ CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine )
 void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 {
 	// On PC/OSX we always know the user has a SteamID and is logged in already,
-	// as Steam enforces this before game launch.  On PS3 however the game must
-	// initiate the logon and we need to check the state here and block the user
-	// while Steam connects.
+	// as Steam enforces this before game launch.
 	if ( SteamUser()->BLoggedOn() )
 	{
 		m_SteamIDLocalUser = SteamUser()->GetSteamID();
 		m_eGameState = k_EClientGameMenu;
 	}
-#ifdef _PS3
-	else
-	{
-		m_eGameState = k_EClientConnectingToSteam;
-		SteamUser()->LogOn( true );
-	}
-#endif
 
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
@@ -1436,34 +1427,13 @@ void CSpaceWarClient::RunFrame()
 		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_MenuControls );
 		break;
 	case k_EClientRetrySteamConnection:
-#ifdef _PS3
-		m_pStarField->Render();
-		SteamUser()->LogOn( true );
-		m_pConnectingMenu->Reset();
-		SetGameState( k_EClientConnectingToSteam );
-#else
 		OutputDebugString( "Invalidate state k_EClientRetrySteamConnection hit on non-PS3 platform" );
-#endif
 		break;
 	case k_EClientLinkSteamAccount:
-#ifdef _PS3
-		m_pStarField->Render();
-		SteamUser()->LogOnAndLinkSteamAccountToPSN( true, "jmccaskeybeta", "test123" );
-		m_pConnectingMenu->Reset();
-		SetGameState( k_EClientConnectingToSteam );
-#else
 		OutputDebugString( "Invalidate state k_EClientLinkSteamAccount hit on non-PS3 platform" );
-#endif
 		break;
 	case k_EClientAutoCreateAccount:
-#ifdef _PS3
-		m_pStarField->Render();
-		m_pConnectingMenu->Reset();
-		SteamUser()->LogOnAndCreateNewSteamAccountIfNeeded( true );
-		SetGameState( k_EClientConnectingToSteam );
-#else
 		OutputDebugString( "Invalidate state k_EClientAutoCreateAccount hit on non-PS3 platform" );
-#endif
 		break;
 	case k_EClientGameMenu:
 		m_pStarField->Render();
@@ -1722,7 +1692,7 @@ void CSpaceWarClient::RunFrame()
 		if ( !m_bSentWebOpen )
 		{
 			m_bSentWebOpen = true;
-#ifndef _PS3
+
 			char szCurDir[MAX_PATH];
 			if ( !_getcwd( szCurDir, sizeof(szCurDir) ) )
             {
@@ -1733,7 +1703,6 @@ void CSpaceWarClient::RunFrame()
 			// load the test html page, it just has a steam://gamewebcallback link in it
 			SteamFriends()->ActivateGameOverlayToWebPage( szURL );
 			SetGameState( k_EClientGameMenu );
-#endif
 		}
 
 		break;
@@ -1852,16 +1821,8 @@ void CSpaceWarClient::RunFrame()
 void CSpaceWarClient::DrawHUDText()
 {
 	// Padding from the edge of the screen for hud elements
-#ifdef _PS3
-	// Larger padding on PS3, since many of our test HDTVs truncate 
-	// edges of the screen and can't be calibrated properly.
-	const int32 nHudPaddingVertical = 20;
-	const int32 nHudPaddingHorizontal = 35;
-#else
 	const int32 nHudPaddingVertical = 15;
 	const int32 nHudPaddingHorizontal = 15;
-#endif
-
 
 	const int32 width = m_pGameEngine->GetViewportWidth();
 	const int32 height = m_pGameEngine->GetViewportHeight();
@@ -2026,11 +1987,8 @@ void CSpaceWarClient::DrawInstructions()
 	rect.right = width;
 
 	char rgchBuffer[256];
-#ifdef _PS3
-	sprintf_safe( rgchBuffer, "Turn Ship Left: 'Left'\nTurn Ship Right: 'Right'\nForward Thrusters: 'R2'\nReverse Thrusters: 'L2'\nFire Photon Beams: 'Cross'" );
-#else
 	sprintf_safe( rgchBuffer, "Turn Ship Left: 'A'\nTurn Ship Right: 'D'\nForward Thrusters: 'W'\nReverse Thrusters: 'S'\nFire Photon Beams: 'Space'" );
-#endif
+
 
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 

@@ -163,8 +163,6 @@ void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const 
 //-----------------------------------------------------------------------------
 // Purpose: Real main entry point for the program
 //-----------------------------------------------------------------------------
-#ifndef _PS3
-
 static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 {
 	
@@ -283,7 +281,6 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// exit
 	return EXIT_SUCCESS;	
 }
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Main entry point for the program -- win32
