@@ -354,6 +354,7 @@ public:
 	// Submit the update request by handle
 	virtual bool SubmitUpdateProperties( SteamInventoryUpdateHandle_t handle, SteamInventoryResult_t * pResultHandle ) = 0;
 	
+	// Look up the given token and return a pseudo-Inventory item.
 	virtual bool InspectItem( SteamInventoryResult_t *pResultHandle, const char *pchItemToken ) = 0;
 };
 
