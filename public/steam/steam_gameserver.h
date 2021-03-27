@@ -61,23 +61,7 @@ inline void SteamGameServer_ReleaseCurrentThreadMemory();
 S_API bool SteamGameServer_BSecure();
 S_API uint64 SteamGameServer_GetSteamID();
 
-//=============================================================================
-//
-// Internal implementation details below
-//
-//=============================================================================
-
-S_API bool S_CALLTYPE SteamInternal_GameServer_Init( uint32 unIP, uint16 usLegacySteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString );
-inline bool SteamGameServer_Init( uint32 unIP, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString )
-{
-	if ( !SteamInternal_GameServer_Init( unIP, 0, usGamePort, usQueryPort, eServerMode, pchVersionString ) )
-		return false;
-
-	return true;
-}
-inline void SteamGameServer_ReleaseCurrentThreadMemory()
-{
-	SteamAPI_ReleaseCurrentThreadMemory();
-}
+// Internal implementation details for all of the above
+#include "steam_gameserver_internal.h"
 
 #endif // STEAM_GAMESERVER_H
