@@ -21,7 +21,7 @@ const int k_ScreenshotThumbWidth = 200;
 
 // Handle is valid for the lifetime of your process and no longer
 typedef uint32 ScreenshotHandle; 
-#define INVALID_SCREENSHOT_HANDLE 0
+const ScreenshotHandle INVALID_SCREENSHOT_HANDLE = 0;
 
 enum EVRScreenshotType
 {

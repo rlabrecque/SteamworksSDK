@@ -17,18 +17,15 @@
 #include "steam_api_common.h"
 #include "isteaminput.h"
 
-#define STEAM_CONTROLLER_MAX_COUNT 16
+const int32 STEAM_CONTROLLER_MAX_COUNT = 16;
 
-#define STEAM_CONTROLLER_MAX_ANALOG_ACTIONS 16
+const int32 STEAM_CONTROLLER_MAX_ANALOG_ACTIONS = 16;
 
-#define STEAM_CONTROLLER_MAX_DIGITAL_ACTIONS 128
+const int32 STEAM_CONTROLLER_MAX_DIGITAL_ACTIONS = 128;
 
-#define STEAM_CONTROLLER_MAX_ORIGINS 8
+const int32 STEAM_CONTROLLER_MAX_ORIGINS = 8;
 
-#define STEAM_CONTROLLER_MAX_ACTIVE_LAYERS 16
-
-// When sending an option to a specific controller handle, you can send to all controllers via this command
-#define STEAM_CONTROLLER_HANDLE_ALL_CONTROLLERS UINT64_MAX
+const int32 STEAM_CONTROLLER_MAX_ACTIVE_LAYERS = 16;
 
 #define STEAM_CONTROLLER_MIN_ANALOG_ACTION_DATA -1.0f
 #define STEAM_CONTROLLER_MAX_ANALOG_ACTION_DATA 1.0f
@@ -513,6 +510,8 @@ enum ESteamControllerLEDFlag
 // ControllerHandle_t is used to refer to a specific controller.
 // This handle will consistently identify a controller, even if it is disconnected and re-connected
 typedef uint64 ControllerHandle_t;
+// When sending an option to a specific controller handle, you can send to all devices via this command
+const ControllerHandle_t STEAM_CONTROLLER_HANDLE_ALL_CONTROLLERS = 0xffffffffffffffffull;
 
 
 // These handles are used to refer to a specific in-game action or action set

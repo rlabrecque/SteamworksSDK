@@ -13,10 +13,10 @@
 
 // Handle to a HTTP Request handle
 typedef uint32 HTTPRequestHandle;
-#define INVALID_HTTPREQUEST_HANDLE		0
+const HTTPRequestHandle INVALID_HTTPREQUEST_HANDLE = 0;
 
 typedef uint32 HTTPCookieContainerHandle;
-#define INVALID_HTTPCOOKIE_HANDLE		0
+const HTTPCookieContainerHandle INVALID_HTTPCOOKIE_HANDLE = 0;
 
 //-----------------------------------------------------------------------------
 // Purpose: interface to http client
