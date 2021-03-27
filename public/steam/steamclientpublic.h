@@ -1418,8 +1418,8 @@ const int k_cchGameExtraInfoMax = 64;
 // Constants used for query ports.
 //-----------------------------------------------------------------------------
 
-#define QUERY_PORT_NOT_INITIALIZED		0xFFFF	// We haven't asked the GS for this query port's actual value yet.
-#define QUERY_PORT_ERROR				0xFFFE	// We were unable to get the query port for this server.
+const uint16 QUERY_PORT_NOT_INITIALIZED = 0xFFFF; // We haven't asked the GS for this query port's actual value yet.
+const uint16 QUERY_PORT_ERROR           = 0xFFFE; // We were unable to get the query port for this server.
 
 
 //-----------------------------------------------------------------------------
@@ -1432,7 +1432,7 @@ typedef void (*PFNPreMinidumpCallback)(void *context);
 // Purpose: Used by ICrashHandler interfaces to reference particular installed crash handlers
 //-----------------------------------------------------------------------------
 typedef void *BREAKPAD_HANDLE;
-#define BREAKPAD_INVALID_HANDLE (BREAKPAD_HANDLE)0 
+const BREAKPAD_HANDLE BREAKPAD_INVALID_HANDLE = 0;
 
 enum EGameSearchErrorCode_t
 {

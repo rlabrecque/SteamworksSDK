@@ -24,7 +24,7 @@ enum EServerMode
 /// UDP queries.  In this case, Steam will not open up a socket to handle server browser queries,
 /// and you must use ISteamGameServer::HandleIncomingPacket and ISteamGameServer::GetNextOutgoingPacket
 /// to handle packets related to server discovery on your socket.
-#define MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE	((uint16)-1)
+const uint16 MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE	= 0xffff;
 
 // Initialize SteamGameServer client and interface objects, and set server properties which may not be changed.
 //

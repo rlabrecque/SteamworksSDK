@@ -46,7 +46,7 @@ enum ELobbyDistanceFilter
 };
 
 // maximum number of characters a lobby metadata key can be
-#define k_nMaxLobbyKeyLength 255
+const int k_nMaxLobbyKeyLength = 255;
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for match making services for clients to get to favorites

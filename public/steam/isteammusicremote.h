@@ -7,8 +7,8 @@
 #include "steam_api_common.h"
 #include "isteammusic.h"
 
-#define k_SteamMusicNameMaxLength 255
-#define k_SteamMusicPNGMaxLength 65535
+const uint32 k_SteamMusicNameMaxLength = 255;
+const uint32 k_SteamMusicPNGMaxLength = 65535;
  
 
 class ISteamMusicRemote
