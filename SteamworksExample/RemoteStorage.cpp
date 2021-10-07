@@ -171,7 +171,7 @@ CRemoteStorageScreen::CRemoteStorageScreen( IGameEngine *pGameEngine ) : m_pGame
 	if ( !m_hDisplayFont )
 		OutputDebugString( "RemoteStorage font was not created properly, text won't draw\n" );
 
-	GetFileStats();	
+	GetFileStats();
 }
 
 
@@ -218,8 +218,60 @@ void CRemoteStorageScreen::Show()
 {
 	GetFileStats();
 	LoadMessage();
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const int32 width = m_pGameEngine->GetViewportWidth();
+		const int32 pxColumn1Left = width / 2 - CLOUDDISP_COLUMN_WIDTH / 2;
+		int32 pxVertOffset = 8 * CLOUDDISP_TEXT_HEIGHT + 4 * ( CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING );
+		SteamUtils()->ShowFloatingGamepadTextInput( k_EFloatingGamepadTextInputModeModeSingleLine, pxColumn1Left, pxVertOffset, CLOUDDISP_COLUMN_WIDTH, CLOUDDISP_TEXT_HEIGHT );
+	}
 }
 
+bool CRemoteStorageScreen::BHandleCancel()
+{
+	// always cancel
+	m_rgchGreetingNext[0] = 0;
+
+	m_bFinished = true;
+	return true;
+}
+ 
+bool CRemoteStorageScreen::BHandleSelect()
+{
+	int nGreetingNextLength = (int)strlen( m_rgchGreetingNext );
+	bool bQuotaExceeded = nGreetingNextLength > m_ulBytesQuota;
+	if ( !bQuotaExceeded )
+	{
+		uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
+		if ( ulCurrentTickCount - 150 > g_ulLastReturnKeyTick )
+		{
+			// global from BaseMenu.h!
+			g_ulLastReturnKeyTick = ulCurrentTickCount;
+
+			// Do it
+			{
+				m_bFinished = true;
+
+				strncpy( m_rgchGreeting, m_rgchGreetingNext, sizeof( m_rgchGreeting ) );
+				m_rgchGreetingNext[0] = 0;
+
+				// Note: not writing the NULL termination, so won't read it back later either.
+				bool bRet = m_pSteamRemoteStorage->FileWrite( MESSAGE_FILE_NAME, m_rgchGreeting, (int)strlen( m_rgchGreeting ) );
+
+				// Update our stats on stuff
+				GetFileStats();
+
+				if ( !bRet )
+				{
+					OutputDebugString( "RemoteStorage: Failed to write file!\n" );
+				}
+
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Render the Remote Storage page
@@ -236,48 +288,28 @@ void CRemoteStorageScreen::Render()
 
 	bool bQuotaExceeded = nGreetingNextLength > m_ulBytesQuota;
 
+	if ( m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_MenuCancel ) )
+	{
+		if ( BHandleCancel() )
+			return;
+	}
+	else if ( m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_MenuSelect ) )
+	{
+		if ( BHandleSelect() )
+			return;
+	}
+
 	while ( m_pGameEngine->BGetFirstKeyDown( &dwVKDown ) )
 	{
 		if ( VK_ESCAPE == dwVKDown )
 		{
-			// cancel
-			m_rgchGreetingNext[0] = 0;
-
-			m_bFinished = true;
-			return;
+			if ( BHandleCancel() )
+				return;
 		}
 		else if ( VK_RETURN == dwVKDown )
 		{
-			if ( !bQuotaExceeded )
-			{
-				uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
-				if ( ulCurrentTickCount - 150 > g_ulLastReturnKeyTick )
-				{
-					// global from BaseMenu.h!
-					g_ulLastReturnKeyTick = ulCurrentTickCount;
-
-					// Do it
-					{
-						m_bFinished = true;
-
-						strncpy( m_rgchGreeting, m_rgchGreetingNext, sizeof( m_rgchGreeting ) );
-						m_rgchGreetingNext[0] = 0;
-
-						// Note: not writing the NULL termination, so won't read it back later either.
-						bool bRet = m_pSteamRemoteStorage->FileWrite( MESSAGE_FILE_NAME, m_rgchGreeting, (int) strlen( m_rgchGreeting ) );
-						
-						// Update our stats on stuff
-						GetFileStats();
-
-						if ( !bRet )
-						{
-							OutputDebugString( "RemoteStorage: Failed to write file!\n" );
-						}
-
-						return;
-					}
-				}
-			}
+			if ( BHandleSelect() )
+				return;
 		}
 		else if ( VK_BACK == dwVKDown )
 		{
@@ -366,7 +398,24 @@ void CRemoteStorageScreen::Render()
 		rect.right = rect.left + CLOUDDISP_COLUMN_WIDTH;
 		pxVertOffset = rect.bottom + CLOUDDISP_TEXT_HEIGHT + CLOUDDISP_VERT_SPACING;
 
-		sprintf_safe( rgchBuffer, "Hit <ENTER> to save, <ESC> to cancel" );
+		if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+		{
+			const char *rgchSaveActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuSelect );
+			const char *rgchCancelActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+			if ( strcmp( rgchSaveActionOrigin, "None" ) == 0 || strcmp( rgchCancelActionOrigin, "None" ) == 0 )
+			{
+				sprintf_safe( rgchBuffer, "Hit <ENTER> to save, <ESC> to cancel. Controller bindings are not setup properly" );
+			}
+			else
+			{
+				sprintf_safe( rgchBuffer, "Hit <ENTER> or %s to save, <ESC> or %s to cancel", rgchSaveActionOrigin, rgchCancelActionOrigin );
+			}
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Hit <ENTER> to save, <ESC> to cancel" );
+		}
+
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
 		if ( bQuotaExceeded )

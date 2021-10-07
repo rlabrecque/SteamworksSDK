@@ -1325,7 +1325,7 @@ void CGameEngineGL::TriggerControllerVibration( unsigned short nLeftSpeed, unsig
 //-----------------------------------------------------------------------------
 void CGameEngineGL::TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat )
 {
-	SteamInput()->TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
+	SteamInput()->Legacy_TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
 }
 
 //-----------------------------------------------------------------------------

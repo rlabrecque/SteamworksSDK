@@ -8,6 +8,64 @@ Copyright © 1996-2020, Valve Corporation, All rights reserved.
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
 
+----------------------------------------------------------------
+v1.52 14th September 2021
+----------------------------------------------------------------
+
+ISteamInput
+* Added support for bundling Steam Input API configurations w/ game depots. Allows developers to use the same configuration file across public/private AppIDs, check configurations into their revision control systems, more easily juggle changes between beta branches, and ensure game/config changes are done in-sync.
+* Added new glyph API support for SVG glyphs and multiple sizes of PNG files. Note: these images will be added in a subsequent Steam Beta Client release.
+* Added support for callbacks for action state changes, controller connect/disconnect, and controller mapping changes.
+* Added BNewDataAvailable function to reduce need to manually compare action data between frames.
+* Added BWaitForData helper function to wait on an event set when controller data is updated.
+* Added functions for getting the localized string for action names (GetStringForDigitalActionName and GetStringForAnalogActionName).
+* Added function to poll current Steam Input enable settings by controller type (GetSessionInputConfigurationSettings).
+
+ISteamGameServer
+* Renamed EnableHeartbeats to SetAdvertiseServerActive.
+* Deprecated the following methods (they have been renamed to *_DEPRECATED and will be removed in a future SDK update):
+** SendUserConnectAndAuthenticate
+** SendUserDisconnect
+** SetMasterServerHeartbeatInterval
+** ForceMasterServerHeartbeat
+
+ISteamRemoteStorage
+* Added GetLocalFileChangeCount and GetLocalFileChange which allows for iterating over Steam Cloud files that have changed locally after the initial sync on app start, when supported by the app.  The callback notification is RemoteStorageLocalFileChange_t.
+* Added BeginFileWriteBatch and EndFileWriteBatch to hint to Steam that a set of files should be written to Steam Cloud together (e.g. a game save that requires updating more than one file).
+* Removed the following unused callbacks: RemoteStorageAppSyncedClient_t, RemoteStorageAppSyncedServer_t, RemoteStorageAppSyncProgress_t, and RemoteStorageAppSyncStatusCheck_t.
+
+ISteamUGC
+* Added ability to sort by "time last updated" (k_EUGCQuery_RankedByLastUpdatedDate).
+* Added ShowWorkshopEULA and GetWorkshopEULAStatus, which allows a game to have a separate EULA for the Steam Workshop.
+* Added UserSubscribedItemsListChanged_t callback.
+* Added WorkshopEULAStatus_t callback, which will be sent asynchronously after calling GetWorkshopEULAStatus.
+
+ISteamUser
+* Deprecated InitiateGameConnection and TerminateGameConnection (renamed to *_DEPRECATED).  Please migrate to BeginAuthSession and EndAuthSession.
+
+ISteamUtils
+* Added IsSteamRunningOnSteamDeck - Can be used to optimize the experience of the game on Steam Deck, such as scaling the UI appropriately, applying performance related settings, etc.
+* Added SetGameLauncherMode - In game launchers that don't have controller support you can call this to have Steam Input translate the controller input into mouse/kb to navigate the launcher.
+* Added AppResumingFromSuspend_t callback - Sent after the device returns from sleep/suspend mode.
+* Added ShowFloatingGamepadTextInput - Activates the modal gamepad input keyboard which pops up over game content and sends OS keyboard keys directly to the game. Note: Currently this is only implemented in the Steam Deck UI.
+* Added FloatingGamepadTextInputDismissed_t callback - Sent after the floating gamepad input keyboard displayed via ShowFloatingGamepadTextInput has been dismissed.
+
+macOS
+* Added i386/x86_64/arm64 universal builds of libsdkencryptedappticket.dylib and libsteam_api.dylib
+
+Steamworks Example Project
+* Updated project to illustrate new Steam Input changes
+* Updated to build properly with macOS 11 SDK for arm64
+* Updated Windows project files to Visual Studio 2015
+* Windows project files now target Windows 8.1
+* Windows project files now set include and library path using DXSDK_DIR
+
+Misc.
+* ISteamAppList - Added m_iInstallFolderIndex to SteamAppInstalled_t and SteamAppUninstalled_t callbacks.
+* ISteamApps - Removed unused SteamGameServerApps() accessor.
+* CSteamGameServerAPIContext - removed SteamApps() accessor.
+* Cleanup of types and enums that were unnecessarily in the SDK.
+
 
 ----------------------------------------------------------------
 v1.51 8th January 2021

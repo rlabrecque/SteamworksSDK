@@ -73,7 +73,7 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 		// We want to actively update the master server with our presence so players can
 		// find us via the steam matchmaking/server browser interfaces
 		#ifdef USE_GS_AUTH_API
-			SteamGameServer()->EnableHeartbeats( true );
+			SteamGameServer()->SetAdvertiseServerActive( true );
 		#endif
 	}
 	else
@@ -122,11 +122,6 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 //-----------------------------------------------------------------------------
 CSpaceWarServer::~CSpaceWarServer()
 {
-#ifdef USE_GS_AUTH_API
-	// Notify Steam master server we are going offline
-	SteamGameServer()->EnableHeartbeats( false );
-#endif
-
 	delete m_pSun;
 
 	for( uint32 i=0; i < MAX_PLAYERS_PER_SERVER; ++i )

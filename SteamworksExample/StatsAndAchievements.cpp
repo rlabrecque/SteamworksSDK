@@ -438,6 +438,25 @@ void CStatsAndAchievements::Render()
 
 	RECT rect;
 
+	char rgchBuffer[256];
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
+
 	if ( !m_bStatsValid )
 	{
 		rect.top = 0;
@@ -445,7 +464,6 @@ void CStatsAndAchievements::Render()
 		rect.left = 0;
 		rect.right = width;
 
-		char rgchBuffer[256];
 		sprintf_safe( rgchBuffer, "Unable to retrieve data from Steam\n" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
 
@@ -455,9 +473,7 @@ void CStatsAndAchievements::Render()
 		rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
-		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
-
 	}
 	else
 	{
@@ -561,10 +577,7 @@ void CStatsAndAchievements::Render()
 		rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
 		rect.bottom = m_pGameEngine->GetViewportHeight();
 
-		char rgchBuffer[256];
-		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 		m_pGameEngine->BDrawString( m_hDisplayFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
-
 	}
 }
 

@@ -34,6 +34,8 @@
 #ifdef _WIN32
 void MiniDumpFunction( unsigned int nExceptionCode, EXCEPTION_POINTERS *pException )
 {
+	MessageBox( nullptr, "Spacewar is crashing now!", "Unhandled Exception", MB_OK );
+
 	// You can build and set an arbitrary comment to embed in the minidump here,
 	// maybe you want to put what level the user was playing, how many players on the server,
 	// how much memory is free, etc...
@@ -213,27 +215,6 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 		return EXIT_FAILURE;
 	}
 
-	// We are going to use the controller interface, initialize it, which is a seperate step as it 
-	// create a new thread in the game proc and we don't want to force that on games that don't
-	// have native Steam controller implementations
-
-	char rgchCWD[1024];
-	if ( !_getcwd( rgchCWD, sizeof( rgchCWD ) ) )
-    {
-        strcpy( rgchCWD, "." );
-    }
-
-	char rgchFullPath[1024];
-#if defined(_WIN32)
-	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "controller.vdf" );
-#elif defined(OSX)
-    // hack for now, because we do not have utility functions available for finding the resource path
-    // alternatively we could disable the SteamController init on OS X
-    _snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/steamworksexample.app/Contents/Resources/%s", rgchCWD, "controller.vdf" );
-#else
-	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "controller.vdf" );
-#endif
-
 	const char *pchServerAddress, *pchLobbyID;
 	if ( !ParseCommandLine( pchCmdLine, &pchServerAddress, &pchLobbyID ) )
 	{
@@ -265,12 +246,30 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 #error	Need CreateGameEngine()
 #endif
 
-	if ( !SteamInput()->Init() )
+	if ( !SteamInput()->Init( false ) )
 	{
 		OutputDebugString( "SteamInput()->Init failed.\n" );
 		Alert( "Fatal Error", "SteamInput()->Init failed.\n" );
 		return EXIT_FAILURE;
 	}
+	char rgchCWD[1024];
+	if ( !_getcwd( rgchCWD, sizeof( rgchCWD ) ) )
+	{
+		strcpy( rgchCWD, "." );
+	}
+
+	char rgchFullPath[1024];
+#if defined(_WIN32)
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "steam_input_manifest.vdf" );
+#elif defined(OSX)
+	// hack for now, because we do not have utility functions available for finding the resource path
+	// alternatively we could disable the SteamController init on OS X
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/steamworksexample.app/Contents/Resources/%s", rgchCWD, "steam_input_manifest.vdf" );
+#else
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "steam_input_manifest.vdf" );
+#endif
+
+	SteamInput()->SetInputActionManifestFilePath( rgchFullPath );
 
 	// This call will block and run until the game exits
 	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );

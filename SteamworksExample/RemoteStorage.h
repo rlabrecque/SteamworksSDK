@@ -81,6 +81,8 @@ public:
 private:
 	void GetFileStats();
 	void LoadMessage();
+	bool BHandleSelect();
+	bool BHandleCancel();
 
 	// Game engine
 	IGameEngine *m_pGameEngine;

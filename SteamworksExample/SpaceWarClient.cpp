@@ -1377,7 +1377,8 @@ void CSpaceWarClient::RunFrame()
 	// Check if escape has been pressed, we'll use that info in a couple places below
 	bool bEscapePressed = false;
 	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) ||
-		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_PauseMenu ) )
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_PauseMenu ) ||
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_MenuCancel ) )
 	{
 		static uint64 m_ulLastESCKeyTick = 0;
 		uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
@@ -1516,12 +1517,7 @@ void CSpaceWarClient::RunFrame()
 		// Check if we've waited too long and should time out the connection
 		if ( m_pGameEngine->GetGameTickCount() - m_ulStateTransitionTime > MILLISECONDS_CONNECTION_TIMEOUT )
 		{
-			if ( m_pP2PAuthedGame )
-				m_pP2PAuthedGame->EndGame();
-			if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated )
-			{
-				SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
-			}
+			DisconnectFromServer();
 			m_GameServerPing.CancelPing();
 			SetConnectionFailureText( "Timed out connecting to game server" );
 			SetGameState( k_EClientGameConnectionFailure );
@@ -2026,7 +2022,24 @@ void CSpaceWarClient::DrawInstructions()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu\n Build ID:%d", SteamApps()->GetAppBuildId() );
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound\n Build ID:%d", SteamApps()->GetAppBuildId() );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu\n Build ID:%d", rgchActionOrigin, SteamApps()->GetAppBuildId() );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu\n Build ID:%d", SteamApps()->GetAppBuildId() );
+	}
+	
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 }
@@ -2086,7 +2099,23 @@ void CSpaceWarClient::DrawConnectionFailureText()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 }
 
@@ -2640,7 +2669,23 @@ void CSpaceWarClient::DrawWorkshopItems()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
 	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
 }
 
@@ -2696,6 +2741,22 @@ void CSpaceWarClient::DrawInGameStore()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
 	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
 }

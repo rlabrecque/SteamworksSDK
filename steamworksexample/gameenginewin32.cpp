@@ -2025,7 +2025,7 @@ void CGameEngineWin32::TriggerControllerVibration( unsigned short nLeftSpeed, un
 //-----------------------------------------------------------------------------
 void CGameEngineWin32::TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat )
 {
-	SteamInput()->TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
+	SteamInput()->Legacy_TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
 }
 
 //-----------------------------------------------------------------------------
