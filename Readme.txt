@@ -9,6 +9,13 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.53a 11th December 2021
+----------------------------------------------------------------
+
+macOS
+* Fixed libsdkencryptedappticket.dylib to include arm64 support
+
+----------------------------------------------------------------
 v1.53 23th November 2021
 ----------------------------------------------------------------
 
