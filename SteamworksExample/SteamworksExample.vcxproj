@@ -213,6 +213,7 @@ copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)
     <ClCompile Include="gameenginewin32.cpp" />
     <ClCompile Include="htmlsurface.cpp" />
     <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="ItemStore.cpp" />
     <ClCompile Include="Leaderboards.cpp" />
     <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -244,6 +245,7 @@ copy ..\public\steam\lib\win64\sdkencryptedappticket64.dll $(OutDir)
     <ClInclude Include="gameenginewin32.h" />
     <ClInclude Include="htmlsurface.h" />
     <ClInclude Include="Inventory.h" />
+    <ClInclude Include="ItemStore.h" />
     <ClInclude Include="Leaderboards.h" />
     <ClInclude Include="Lobby.h" />
     <ClInclude Include="MainMenu.h" />

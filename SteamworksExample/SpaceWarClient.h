@@ -37,6 +37,7 @@ class CP2PAuthedGame;
 class CVoiceChat;
 class CHTMLSurface;
 class CRemotePlayList;
+class CItemStore;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -192,6 +193,7 @@ public:
 	void OnMenuSelection( FriendsListMenuItem_t selection );
 	void OnMenuSelection( RemotePlayListMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
+	void OnMenuSelection( PurchaseableItem_t selection );
 
 	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
 
@@ -281,9 +283,6 @@ private:
 	// load a workshop item from file
 	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
 	CWorkshopItem *LoadWorkshopItemFromFile( const char *pszFileName );
-
-	// ask the inventory service for things to purchase
-	void LoadItemsWithPrices();
 
 	// draw the in-game store
 	void DrawInGameStore();
@@ -431,7 +430,7 @@ private:
 	CServerBrowser *m_pServerBrowser;
 	CRemotePlayList *m_pRemotePlayList;
 	CRemoteStorage *m_pRemoteStorage;
-
+	CItemStore *m_pItemStore;
 
 	// lobby handling
 	// the name of the lobby we're connected to
@@ -475,12 +474,6 @@ private:
 		}
 	}
 	CCallResult<CSpaceWarClient, DurationControl_t> m_SteamCallResultDurationControl;
-
-	// callback when we ask the Inventory Service for prices
-	void OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure );
-	CCallResult<CSpaceWarClient, SteamInventoryRequestPricesResult_t> m_SteamCallResultRequestPrices;
-	char m_rgchCurrency[4];
-	std::vector<PurchaseableItem_t> m_vecPurchaseableItems;
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

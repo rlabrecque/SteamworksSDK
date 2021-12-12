@@ -9,6 +9,34 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.53 23th November 2021
+----------------------------------------------------------------
+
+SteamNetworkingSockets:
+* Added support for connections to have multiple streams of messages, known as "lanes," with mechanisms to control bandwidth utilization and head-of-line blocking between lanes.
+* Added the "FakeIP" system, which can be useful to add P2P networking or Steam Datagram Relay support to games while retaining the assumption that network hosts are identified by an IPv4 address.  Added steamnetworkingfakeip.h and ISteamNetworkingFakeUDPPort
+* Simplified interface for iterating config values.
+* Added SteamNetConnectionInfo_t::m_nFlags, which have misc info about a connection.
+
+ISteamInput
+* Added Steam Deck values to the EInputActionOrigin and ESteamInputType origins
+
+ISteamUGC:
+* Added SetTimeCreatedDateRange and SetTimeUpdatedDateRange
+
+ISteamUtils:
+* Added DismissFloatingGamepadTextInput
+
+Flat Interface:
+* For each interface accessor, there is now an inline, unversioned accessor that calls the versioned accessor exported by the .dll.  This reduces the number of changes that need to be made when updating the SDK and accessing the flat interface directly, while still retaining version safety.
+
+General:
+* Removed definitions for many internal callback IDs that are not needed by general users of the SDK.
+
+Spacewar example:
+* Added CItemStore, which demonstrates how to interact with an in-game store
+
+----------------------------------------------------------------
 v1.52 14th September 2021
 ----------------------------------------------------------------
 

@@ -25,6 +25,7 @@
 #include "Inventory.h"
 #include "steam/steamencryptedappticket.h"
 #include "RemotePlay.h"
+#include "ItemStore.h"
 #ifdef WIN32
 #include <direct.h>
 #else
@@ -165,9 +166,11 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// HTML Surface page
 	m_pHTMLSurface = new CHTMLSurface(pGameEngine);
 
-	LoadWorkshopItems();
+	// in-game store
+	m_pItemStore = new CItemStore( pGameEngine );
+	m_pItemStore->LoadItemsWithPrices();
 
-	LoadItemsWithPrices();
+	LoadWorkshopItems();
 }
 
 
@@ -1036,6 +1039,15 @@ void CSpaceWarClient::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing the Item Store
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( PurchaseableItem_t selection )
+{
+	m_pItemStore->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: For a player in game, set the appropriate rich presence keys for display
 // in the Steam friends list and return the value for steam_display
 //-----------------------------------------------------------------------------
@@ -1215,6 +1227,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		// we've switched to the html page
 		m_pHTMLSurface->Show();
 		SteamFriends()->SetRichPresence("status", "Using the web");
+	}
+	else if ( m_eGameState == k_EClientInGameStore )
+	{
+		// we've switched to the item store
+		m_pItemStore->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing Item Store" );
 	}
 
 	if ( pchSteamRichPresenceDisplay != NULL )
@@ -1732,7 +1750,7 @@ void CSpaceWarClient::RunFrame()
 
 	case k_EClientInGameStore:
 		m_pStarField->Render();
-		DrawInGameStore();
+		m_pItemStore->RunFrame();
 
 		if (bEscapePressed)
 			SetGameState(k_EClientGameMenu);
@@ -2534,18 +2552,6 @@ void CSpaceWarClient::LoadWorkshopItems()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: load all all purchaseable items
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::LoadItemsWithPrices()
-{
-	m_vecPurchaseableItems.clear();
-
-	SteamAPICall_t hSteamAPICall = SteamInventory()->RequestPrices();
-	m_SteamCallResultRequestPrices.Set( hSteamAPICall, this, &CSpaceWarClient::OnRequestPricesResult );
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: new Workshop was installed, load it instantly
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnWorkshopItemInstalled( ItemInstalled_t *pParam )
@@ -2598,36 +2604,6 @@ void CSpaceWarClient::OnDurationControl( DurationControl_t *pParam )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Request prices from the Steam Inventory Service
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure )
-{
-	if ( pParam->m_result == k_EResultOK )
-	{
-		strncpy( m_rgchCurrency, pParam->m_rgchCurrency, sizeof( m_rgchCurrency ) );
-
-		uint32 unItems = SteamInventory()->GetNumItemsWithPrices();
-		std::vector<SteamItemDef_t> vecItemDefs;
-		vecItemDefs.resize( unItems );
-		std::vector<uint64> vecPrices;
-		vecPrices.resize( unItems );
-
-		if ( SteamInventory()->GetItemsWithPrices( vecItemDefs.data(), vecPrices.data(), NULL, unItems ) )
-		{
-			m_vecPurchaseableItems.reserve( unItems );
-			for ( uint32 i = 0; i < unItems; ++i )
-			{
-				PurchaseableItem_t t;
-				t.m_nItemDefID = vecItemDefs[i];
-				t.m_ulPrice = vecPrices[i];
-				m_vecPurchaseableItems.push_back( t );
-			}
-		}
-	}
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: Draws PublishFileID, title & description for each subscribed Workshop item
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::DrawWorkshopItems()
@@ -2662,78 +2638,6 @@ void CSpaceWarClient::DrawWorkshopItems()
 			pItem->m_ItemDetails.m_rgchTitle, pItem->m_ItemDetails.m_nPublishedFileId, pItem->m_ItemDetails.m_rgchDescription );
 
 		m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_LEFT |TEXTPOS_VCENTER, rgchBuffer);
-	}
-	
-	rect.left = 0;
-	rect.right = width;
-	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
-	rect.bottom = m_pGameEngine->GetViewportHeight();
-
-	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
-	{
-		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
-
-		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
-		{
-			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
-		}
-		else
-		{
-			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
-		}
-	}
-	else
-	{
-		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
-	}
-	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
-}
-
-
-void CSpaceWarClient::DrawInGameStore()
-{
-	const int32 width = m_pGameEngine->GetViewportWidth();
-
-	RECT rect;
-	rect.top = 0;
-	rect.bottom = 64;
-	rect.left = 0;
-	rect.right = width;
-
-	char rgchBuffer[1024];
-	sprintf_safe(rgchBuffer, "In-Game Store");
-	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER |TEXTPOS_VCENTER, rgchBuffer);
-
-	rect.left = 32;
-	rect.top = 64;
-	rect.bottom = 96;
-
-	for ( uint32 i = 0; i < m_vecPurchaseableItems.size(); ++i )
-	{
-		const auto &t = m_vecPurchaseableItems[i];
-		
-		char buf[512];
-		uint32 bufSize = sizeof(buf);
-		if ( !SteamInventory()->GetItemDefinitionProperty( t.m_nItemDefID, "name", buf, &bufSize ) && bufSize <= sizeof(buf) )
-		{
-			continue;
-		}
-		uint32 unQuantity = SpaceWarLocalInventory()->GetNumOf( t.m_nItemDefID );
-
-		rect.top += 32;
-		rect.bottom += 32;
-
-		sprintf_safe( rgchBuffer, "%u. Purchase %-25s    %s %0.2f    (own %u)", i+1, buf, m_rgchCurrency, float(t.m_ulPrice)/100, unQuantity );
-
-		m_pGameEngine->BDrawString( m_hInGameStoreFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_LEFT |TEXTPOS_VCENTER, rgchBuffer);
-
-		// if the user presses a key, let them purchase the item
-		uint32 key = 0x30 + i + 1;
-		if ( m_pGameEngine->BIsKeyDown( key ) )
-		{
-			uint32 rgQuantity[1] = {1};
-			SteamInventory()->StartPurchase( &t.m_nItemDefID, rgQuantity, 1 );
-		}
 	}
 	
 	rect.left = 0;
