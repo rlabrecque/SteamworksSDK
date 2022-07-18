@@ -65,6 +65,8 @@ void CMainMenu::SetupMenu()
 
 	AddMenuItem( MenuItem_t( "In-game Store", k_EClientInGameStore ) );
 
+	AddMenuItem( MenuItem_t( "OverlayAPI", k_EClientOverlayAPI ) );
+
 	AddMenuItem( MenuItem_t( "Exit Game", k_EClientGameExiting ) );
 }
 

@@ -51,6 +51,7 @@
 		50E77DF61362190C000FC072 /* mathlite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E77DE91362190C000FC072 /* mathlite.cpp */; };
 		50E77DF813621991000FC072 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50E77DF713621991000FC072 /* IOKit.framework */; };
 		840B387019BB91C50084B9F1 /* htmlsurface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 840B386E19BB91C50084B9F1 /* htmlsurface.cpp */; };
+		975820DB2765BE3900093F91 /* ItemStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 975820DA2765BE3900093F91 /* ItemStore.cpp */; };
 		A4B5A0FD24906974000E9151 /* RemotePlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FC24906974000E9151 /* RemotePlay.cpp */; };
 		A4B5A101249069C9000E9151 /* remotestoragesync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */; };
 		A4B5A10424906A0E000E9151 /* SimpleProtobuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */; };
@@ -162,6 +163,8 @@
 		50E77DF713621991000FC072 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		840B386E19BB91C50084B9F1 /* htmlsurface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = htmlsurface.cpp; sourceTree = "<group>"; };
 		840B386F19BB91C50084B9F1 /* htmlsurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = htmlsurface.h; sourceTree = "<group>"; };
+		975820DA2765BE3900093F91 /* ItemStore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ItemStore.cpp; sourceTree = "<group>"; };
+		975820DD2765BE5000093F91 /* ItemStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemStore.h; sourceTree = "<group>"; };
 		A46ECF6D26BE389800985AA7 /* steamworksexample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = steamworksexample.entitlements; path = osx/steamworksexample.entitlements; sourceTree = "<group>"; };
 		A4B5A0FC24906974000E9151 /* RemotePlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RemotePlay.cpp; sourceTree = "<group>"; };
 		A4B5A0FE2490698A000E9151 /* RemotePlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RemotePlay.h; sourceTree = "<group>"; };
@@ -210,6 +213,7 @@
 				50E77DCF136218F5000FC072 /* glmgr */,
 				BA60B6B41A82EDD200F4AC4F /* Friends.cpp */,
 				BA60B6B61A82EDD200F4AC4F /* Inventory.cpp */,
+				975820DA2765BE3900093F91 /* ItemStore.cpp */,
 				840B386E19BB91C50084B9F1 /* htmlsurface.cpp */,
 				503C6CED1268F49F00B66E3B /* p2pauth.cpp */,
 				503C6CEF1268F49F00B66E3B /* PhotonBeam.cpp */,
@@ -278,6 +282,7 @@
 			children = (
 				BA60B6B51A82EDD200F4AC4F /* Friends.h */,
 				BA60B6B71A82EDD200F4AC4F /* Inventory.h */,
+				975820DD2765BE5000093F91 /* ItemStore.h */,
 				840B386F19BB91C50084B9F1 /* htmlsurface.h */,
 				50D642861461EF3200A5739B /* clanchatroom.h */,
 				503C6CEE1268F49F00B66E3B /* p2pauth.h */,
@@ -439,6 +444,7 @@
 				50E77DEC1362190C000FC072 /* cglmfbo.cpp in Sources */,
 				50E77DED1362190C000FC072 /* cglmprogram.cpp in Sources */,
 				BA60B6B91A82EDD200F4AC4F /* Inventory.cpp in Sources */,
+				975820DB2765BE3900093F91 /* ItemStore.cpp in Sources */,
 				50E77DEE1362190C000FC072 /* cglmquery.cpp in Sources */,
 				50E77DEF1362190C000FC072 /* cglmtex.cpp in Sources */,
 				A4B5A10424906A0E000E9151 /* SimpleProtobuf.cpp in Sources */,

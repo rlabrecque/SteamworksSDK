@@ -114,6 +114,23 @@ CGameEngineGL::CGameEngineGL( )
 	m_rgflQuadsTextureData = new GLfloat[ 8*QUAD_BUFFER_TOTAL_SIZE ];
 	m_dwQuadsToFlush = 0;
 
+	// clear the action handles
+	for ( int i = 0; i <eControllerDigitalAction_NumActions; i++ )
+	{
+		m_ControllerDigitalActionHandles[i] = 0;
+		m_ControllerDigitalActionOrigins[i] = k_EInputActionOrigin_None;
+	}
+	for ( int i = 0; i <eControllerAnalogAction_NumActions; i++ )
+	{
+		m_ControllerAnalogActionHandles[i] = 0;
+		m_ControllerAnalogActionOrigins[i] = k_EInputActionOrigin_None;
+	}
+	for ( int i = 0; i <eControllerActionSet_NumSets; i++ )
+	{
+		m_ControllerActionSetHandles[i] = 0;
+	}
+	m_ActiveControllerHandle = 0;
+
 	TTF_Init();
 
 	if( !BInitializeGraphics() )
@@ -1240,7 +1257,7 @@ void CGameEngineGL::FindActiveSteamInputDevice( )
 
 	// See how many Steam Controllers are active. 
 	ControllerHandle_t pHandles[STEAM_CONTROLLER_MAX_COUNT];
-	int nNumActive =SteamInput()->GetConnectedControllers( pHandles );
+	int nNumActive = SteamInput()->GetConnectedControllers( pHandles );
 
 	// If there's an active controller, and if we're not already using it, select the first one.
 	if ( nNumActive && (m_ActiveControllerHandle != pHandles[0]) )

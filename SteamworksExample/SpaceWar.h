@@ -188,6 +188,7 @@ enum EClientGameState
 	k_EClientHTMLSurface,
 	k_EClientInGameStore,
 	k_EClientRemotePlay,
+	k_EClientOverlayAPI,
 };
 
 

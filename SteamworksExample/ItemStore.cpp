@@ -1,6 +1,6 @@
 //========= Copyright © Valve LLC, All rights reserved. ============
 //
-// Purpose: Class for tracking friends list
+// Purpose: Class for interacting with the Item Store
 //
 //=============================================================================
 
@@ -13,7 +13,7 @@
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Menu that shows your friends
+// Purpose: Menu that shows purchaseable items
 //-----------------------------------------------------------------------------
 class CItemStoreMenu : public CBaseMenu<PurchaseableItem_t>
 {
@@ -91,7 +91,7 @@ void CItemStore::RunFrame()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Handles menu actions when viewing a friends list
+// Purpose: Handles menu actions when viewing purchaseable items
 //-----------------------------------------------------------------------------
 void CItemStore::OnMenuSelection( PurchaseableItem_t selection )
 {

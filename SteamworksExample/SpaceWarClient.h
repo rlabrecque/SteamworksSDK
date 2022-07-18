@@ -38,6 +38,7 @@ class CVoiceChat;
 class CHTMLSurface;
 class CRemotePlayList;
 class CItemStore;
+class COverlayExamples;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -130,6 +131,24 @@ struct PurchaseableItem_t
 	uint64 m_ulPrice;
 };
 
+struct OverlayExample_t
+{
+	enum EOverlayExampleItem
+	{
+		k_EOverlayExampleItem_BackToMenu,
+		k_EOverlayExampleItem_Invalid,
+		k_EOverlayExampleItem_ActivateGameOverlay,
+		k_EOverlayExampleItem_ActivateGameOverlayToUser,
+		k_EOverlayExampleItem_ActivateGameOverlayToWebPage,
+		k_EOverlayExampleItem_ActivateGameOverlayToStore,
+		// k_EOverlayExampleItem_ActivateGameOverlayRemotePlayTogetherInviteDialog,
+		k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString
+	};
+
+	EOverlayExampleItem m_eItem;
+	const char *m_pchExtraCommandData;
+};
+
 
 class CSpaceWarClient 
 {
@@ -194,6 +213,7 @@ public:
 	void OnMenuSelection( RemotePlayListMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
 	void OnMenuSelection( PurchaseableItem_t selection );
+	void OnMenuSelection( OverlayExample_t selection );
 
 	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
 
@@ -431,6 +451,7 @@ private:
 	CRemotePlayList *m_pRemotePlayList;
 	CRemoteStorage *m_pRemoteStorage;
 	CItemStore *m_pItemStore;
+	COverlayExamples *m_pOverlayExamples;
 
 	// lobby handling
 	// the name of the lobby we're connected to

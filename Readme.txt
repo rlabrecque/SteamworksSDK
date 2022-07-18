@@ -1,12 +1,28 @@
 ================================================================
 
-Copyright © 1996-2020, Valve Corporation, All rights reserved.
+Copyright © 1996-2022, Valve Corporation, All rights reserved.
 
 ================================================================
 
 
 Welcome to the Steamworks SDK.  For documentation please see our partner 
 website at: http://partner.steamgames.com
+
+----------------------------------------------------------------
+v1.54 16th June 2022
+----------------------------------------------------------------
+
+ISteamFriends
+* Added various functions to retrieve equipped Steam Community profile items and their properties
+** RequestEquippedProfileItems – requests information on what Steam Community profile items a user has equipped.  Will send callback EquippedProfileItems_t.
+** BHasEquippedProfileItem – after calling RequestEquippedProfileItems, returns true/false depending on whether a user has a ECommunityProfileItemType equipped or not
+** GetProfileItemPropertyString – returns a string property given a ECommunityProfileItemType and ECommunityProfileItemProperty
+** GetProfileItemPropertyUint – returns an unsigned integer property given a ECommunityProfileItemType and ECommunityProfileItemProperty
+* Added callback EquippedProfileItemsChanged_t for when a user's equipped Steam Community profile items have changed.  This will be sent for the current user and for their friends.
+
+Spacewar example:
+* Added examples for how to interact with various overlay related functions (e.g. ActivateGameOverlay, ActivateGameOverlayToUser, ActivateGameOverlayToWebPage, ActivateGameOverlayToStore, ActivateGameOverlayInviteDialogConnectString)
+* Fixed Steam Input example code not working on Linux
 
 ----------------------------------------------------------------
 v1.53a 11th December 2021
