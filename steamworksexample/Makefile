@@ -2,7 +2,40 @@
 #Visit http://visualgdb.com/makefiles for more details
 
 #VisualGDB: AutoSourceFiles		#<--- remove this line to disable auto-updating of SOURCEFILES and EXTERNAL_LIBS
-SOURCEFILES := BaseMenu.cpp clanchatroom.cpp connectingmenu.cpp Friends.cpp gameenginesdl.cpp glew.c htmlsurface.cpp Inventory.cpp Leaderboards.cpp Lobby.cpp Main.cpp MainMenu.cpp musicplayer.cpp p2pauth.cpp PhotonBeam.cpp QuitMenu.cpp RemoteStorage.cpp remotestoragesync.cpp ServerBrowser.cpp Ship.cpp SpaceWarClient.cpp SpaceWarEntity.cpp SpaceWarServer.cpp StarField.cpp StatsAndAchievements.cpp stdafx.cpp Sun.cpp VectorEntity.cpp voicechat.cpp
+SOURCEFILES := \
+	BaseMenu.cpp \
+	Friends.cpp \
+	Inventory.cpp \
+	ItemStore.cpp \
+	Leaderboards.cpp \
+	Lobby.cpp \
+	Main.cpp \
+	MainMenu.cpp \
+	OverlayExamples.cpp \
+	PhotonBeam.cpp \
+	QuitMenu.cpp \
+	RemotePlay.cpp \
+	RemoteStorage.cpp \
+	ServerBrowser.cpp \
+	Ship.cpp \
+	SimpleProtobuf.cpp \
+	SpaceWarClient.cpp \
+	SpaceWarEntity.cpp \
+	SpaceWarServer.cpp \
+	StarField.cpp \
+	StatsAndAchievements.cpp \
+	Sun.cpp \
+	VectorEntity.cpp \
+	clanchatroom.cpp \
+	connectingmenu.cpp \
+	gameenginesdl.cpp \
+	htmlsurface.cpp \
+	musicplayer.cpp \
+	p2pauth.cpp \
+	remotestoragesync.cpp \
+	stdafx.cpp \
+	voicechat.cpp \
+	glew.c
 
 TARGETNAME := SteamworksExampleLinux
 #TARGETTYPE can be APP, STATIC or SHARED
@@ -37,6 +70,8 @@ endif
 
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
+
+CXXFLAGS += -std=c++0x -Wno-invalid-offsetof
 
 CFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
 CXXFLAGS += $(addprefix -I,$(INCLUDE_DIRS))

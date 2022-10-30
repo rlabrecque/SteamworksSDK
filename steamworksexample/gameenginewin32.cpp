@@ -9,6 +9,7 @@
 #include "GameEngineWin32.h"
 #include <map>
 #include "steam\isteaminput.h"
+#include "steam\isteamdualsense.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -1955,7 +1956,6 @@ void CGameEngineWin32::FindActiveSteamInputDevice()
 	return;
 }
 
-
 // These are human-readable names for each of the origin enumerations. It is preferred to 
 // show the supplied icons in-game, but for a simple application these strings can be useful.
 
@@ -2004,12 +2004,37 @@ void CGameEngineWin32::PollSteamInput()
 
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Set the LED color on the controller, if supported by controller
 //-----------------------------------------------------------------------------
 void CGameEngineWin32::SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags )
 {
 	SteamInput()->SetLEDColor( m_ActiveControllerHandle, nColorR, nColorG, nColorB, nFlags );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the trigger effect on DualSense controllers
+//-----------------------------------------------------------------------------
+void CGameEngineWin32::SetTriggerEffect( bool bEnabled )
+{
+	ScePadTriggerEffectParam param;
+
+	memset( &param, 0, sizeof( param ) );
+	param.triggerMask = SCE_PAD_TRIGGER_EFFECT_TRIGGER_MASK_R2;
+
+	// Clear any existing effect
+	param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_OFF;
+	SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+
+	if ( bEnabled )
+	{
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_VIBRATION;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.position = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.amplitude = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.frequency = 8;
+		SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+	}
 }
 
 //-----------------------------------------------------------------------------

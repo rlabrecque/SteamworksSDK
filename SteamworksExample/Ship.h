@@ -158,6 +158,9 @@ private:
 	// When we exploded
 	uint64 m_ulExplosionTickCount;
 
+	// Current trigger effect state
+	bool m_bTriggerEffectEnabled;
+
 	// is this ship our local ship, or a remote player?
 	bool m_bIsLocalPlayer;
 

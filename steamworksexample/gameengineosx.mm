@@ -15,6 +15,8 @@
 #include "glstringosx.h"
 #include "gameengineosx.h"
 
+#include "steam/isteamdualsense.h"
+
 #if MAC_OS_X_VERSION_MIN_REQUIRED < 101400
 #define NSOpenGLContextParameterSwapInterval NSOpenGLCPSwapInterval
 
@@ -2571,6 +2573,30 @@ void CGameEngineGL::PollSteamInput( )
 void CGameEngineGL::SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags )
 {
 	SteamInput()->SetLEDColor( m_ActiveControllerHandle, nColorR, nColorG, nColorB, nFlags );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the trigger effect on DualSense controllers
+//-----------------------------------------------------------------------------
+void CGameEngineGL::SetTriggerEffect( bool bEnabled )
+{
+	ScePadTriggerEffectParam param;
+
+	memset( &param, 0, sizeof( param ) );
+	param.triggerMask = SCE_PAD_TRIGGER_EFFECT_TRIGGER_MASK_R2;
+
+	// Clear any existing effect
+	param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_OFF;
+	SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+
+	if ( bEnabled )
+	{
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_VIBRATION;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.position = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.amplitude = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.frequency = 8;
+		SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+	}
 }
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Main class for the space war game server
 //
@@ -27,6 +27,12 @@ struct ClientConnectionData_t
 	CSteamID m_SteamIDUser;			// What is the steamid of the player?
 	uint64 m_ulTickCountLastData;	// What was the last time we got data from the player?
 	HSteamNetConnection m_hConn;	// The handle for the connection to the player
+
+	ClientConnectionData_t() {
+		m_bActive = false;
+		m_ulTickCountLastData = 0;
+		m_hConn = 0;
+	}
 };
 
 class CSpaceWarServer

@@ -30,16 +30,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\lib\win32\release\sdkencryptedappticket.lib">
+    <Library Include="..\public\steam\lib\win32\sdkencryptedappticket.lib">
       <Filter>Link Libraries</Filter>
     </Library>
-    <Library Include="..\lib\win32\debug\sdkencryptedappticket.lib">
+    <Library Include="..\public\steam\lib\win32\sdkencryptedappticket.lib">
       <Filter>Link Libraries</Filter>
     </Library>
-    <Library Include="..\lib\win32\release\steam_api.lib">
+    <Library Include="..\redistributable_bin\steam_api.lib">
       <Filter>Link Libraries</Filter>
     </Library>
-    <Library Include="..\lib\win32\debug\steam_api.lib">
+    <Library Include="..\redistributable_bin\steam_api.lib">
       <Filter>Link Libraries</Filter>
     </Library>
   </ItemGroup>
@@ -50,7 +50,16 @@
     <ClInclude Include="GameEngine.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="gameengineosx.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="gameenginesdl.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="gameenginewin32.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="glstringosx.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="VectorEntity.h">
@@ -84,6 +93,9 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="MainMenu.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\glmgr\mathlite.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Messages.h">
@@ -293,27 +305,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="gameengineosx.h">
-      <Filter>Header Files\Engine</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gameenginesdl.h">
-      <Filter>Header Files\Engine</Filter>
-    </CustomBuild>
-    <CustomBuild Include="glstringosx.h">
-      <Filter>Header Files\Engine</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\glmgr\mathlite.h">
-      <Filter>Header Files\Game</Filter>
-    </CustomBuild>
-    <CustomBuild Include="gameengineosx.mm">
-      <Filter>Source Files\Engine</Filter>
-    </CustomBuild>
-    <CustomBuild Include="glstringosx.mm">
-      <Filter>Source Files\Engine</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\glmgr\glmgrcocoa.mm">
-      <Filter>Source Files\Game</Filter>
-    </CustomBuild>
     <CustomBuild Include="steamworksexample.vpc">
       <Filter>VPC Scripts</Filter>
     </CustomBuild>
@@ -321,6 +312,15 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <None Include="gameengineosx.mm">
+      <Filter>Source Files\Engine</Filter>
+    </None>
+    <None Include="glstringosx.mm">
+      <Filter>Source Files\Engine</Filter>
+    </None>
+    <None Include="..\glmgr\glmgrcocoa.mm">
+      <Filter>Source Files\Game</Filter>
+    </None>
     <None Include="..\vpc_scripts\branch_settings.vpc">
       <Filter>VPC Scripts</Filter>
     </None>

@@ -153,6 +153,7 @@ CShip::CShip( IGameEngine *pGameEngine, bool bIsServerInstance, float xPos, floa
 	m_hTextureWhite = 0;
 	m_nShipShieldStrength = 0;
 	m_ulExplosionTickCount = 0;
+	m_bTriggerEffectEnabled = false;
 
 	memset( &m_SpaceWarClientUpdateData, 0, sizeof( m_SpaceWarClientUpdateData ) );
 
@@ -231,6 +232,12 @@ CShip::~CShip()
 
 	// Restore Controller Color
 	m_pGameEngine->SetControllerColor( 0, 0, 0, k_ESteamControllerLEDFlag_RestoreUserDefault );
+
+	// Turn off trigger effect
+	if ( m_bTriggerEffectEnabled )
+	{
+		m_pGameEngine->SetTriggerEffect( false );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -801,6 +808,13 @@ void CShip::UpdateVibrationEffects()
 		{
 			m_pGameEngine->TriggerControllerVibration( (unsigned short)( ( 1.0f - flVibration ) * 48000.0f), (unsigned short)( ( 1.0f - flVibration ) * 24000.0f) );
 		}
+	}
+
+	bool bTriggerEffectEnabled = !BIsDisabled() && !BIsExploding();
+	if ( bTriggerEffectEnabled != m_bTriggerEffectEnabled )
+	{
+		m_pGameEngine->SetTriggerEffect( bTriggerEffectEnabled );
+		m_bTriggerEffectEnabled = bTriggerEffectEnabled;
 	}
 }
 

@@ -38,7 +38,7 @@ public:
 		const std::vector<PurchaseableItem_t> &vecPurchaseableItems = m_pItemStore->GetPurchaseableItems();
 		for ( uint32 i = 0; i < vecPurchaseableItems.size(); ++i )
 		{
-			const auto &t = vecPurchaseableItems[i];
+			const PurchaseableItem_t &t = vecPurchaseableItems[i];
 			AddItemToMenu( t );
 		}
 

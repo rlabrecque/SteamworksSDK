@@ -275,7 +275,7 @@ void CSpaceWarClient::DisconnectFromServer()
 	}
 
 	if ( m_hConnServer != k_HSteamNetConnection_Invalid )
-		SteamNetworkingSockets()->CloseConnection( m_hConnServer, EDisconnectReason::k_EDRClientDisconnect, nullptr, false );
+		SteamNetworkingSockets()->CloseConnection( m_hConnServer, k_EDRClientDisconnect, nullptr, false );
 	m_steamIDGameServer = CSteamID();
 	m_hConnServer = k_HSteamNetConnection_Invalid;
 }
@@ -666,10 +666,10 @@ void CSpaceWarClient::OnNetConnectionStatusChanged(SteamNetConnectionStatusChang
 		SteamNetworkingSockets()->CloseConnection(m_hConn, m_info.m_eEndReason, nullptr, false);
 		switch (m_info.m_eEndReason)
 		{
-		case EDisconnectReason::k_EDRServerReject:
+		case k_EDRServerReject:
 			OnReceiveServerAuthenticationResponse(false, 0);
 			break;
-		case EDisconnectReason::k_EDRServerFull:
+		case k_EDRServerFull:
 			OnReceiveServerFullResponse();
 			break;
 		}

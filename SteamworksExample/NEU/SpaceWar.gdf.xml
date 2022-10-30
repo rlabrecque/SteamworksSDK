@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-16"?>
+<GameDefinitionFile xmlns:baseTypes="urn:schemas-microsoft-com:GamesExplorerBaseTypes.v1" xmlns="urn:schemas-microsoft-com:GameDescription.v1">
+    <GameDefinition gameID="{E54C5490-0D98-4488-AA61-FBF6F3E167A2}">
+        <Name>SpaceWar</Name>
+        <Description>STEAMWORKS Space Wars Example Game</Description>
+        <ReleaseDate>2009-01-01</ReleaseDate>
+        <Genres>
+            <Genre>Action</Genre>
+        </Genres>
+        <Version>
+            <VersionNumber versionNumber="1.0.0.0" />
+        </Version>
+        <WindowsSystemPerformanceRating minimum="1" recommended="2.0" />
+        <Developers>
+            <Developer URI="http://www.valvesoftware.com/">Valve Corporation</Developer>
+        </Developers>
+        <Publishers>
+            <Publisher URI="http://www.valvesoftware.com/">Valve Corporation</Publisher>
+        </Publishers>
+        <GameExecutables>
+            <GameExecutable path="SteamWorksExample.exe" />
+            <GameExecutable path="%SteamPath%\Steam.exe" />
+            <GameExecutable path="%SteamPath%\GameOverlayUI.exe" />
+            <GameExecutable path="%SteamPath%\bin\SteamService.exe" />
+				
+        </GameExecutables>
+    </GameDefinition>
+</GameDefinitionFile>

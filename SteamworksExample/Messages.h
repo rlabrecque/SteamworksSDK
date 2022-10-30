@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Defines the wire protocol for the game
 //
@@ -47,11 +47,11 @@ enum EMessage
 // enums for use in 
 enum EDisconnectReason
 {
-	k_EDRClientDisconnect = ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Min + 1,
-	k_EDRServerClosed = ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Min + 2,
-	k_EDRServerReject = ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Min + 3,
-	k_EDRServerFull = ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Min + 4,
-	k_EDRClientKicked = ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Min + 5
+	k_EDRClientDisconnect = k_ESteamNetConnectionEnd_App_Min + 1,
+	k_EDRServerClosed = k_ESteamNetConnectionEnd_App_Min + 2,
+	k_EDRServerReject = k_ESteamNetConnectionEnd_App_Min + 3,
+	k_EDRServerFull = k_ESteamNetConnectionEnd_App_Min + 4,
+	k_EDRClientKicked = k_ESteamNetConnectionEnd_App_Min + 5
 };
 
 
@@ -171,7 +171,6 @@ struct MsgP2PSendingTicket_t
 	MsgP2PSendingTicket_t() : m_dwMessageType( LittleDWord( k_EMsgP2PSendingTicket ) ) {}
 	DWORD GetMessageType() { return LittleDWord( m_dwMessageType ); }
 
-
 	void SetToken( const void *pToken, uint32 unLen ) { m_uTokenLen = LittleDWord( unLen ); memcpy( m_rgchToken, pToken, MIN( unLen, sizeof( m_rgchToken ) ) ); }
 	uint32 GetTokenLen() const { return LittleDWord( m_uTokenLen ); }
 	const char *GetTokenPtr() const { return m_rgchToken; }
@@ -181,7 +180,7 @@ struct MsgP2PSendingTicket_t
 	uint64 GetSteamID() const { return LittleQWord( m_ulSteamID ); }
 
 private:
-	const DWORD m_dwMessageType;
+	DWORD m_dwMessageType;
 	uint32 m_uTokenLen;
 	char m_rgchToken[1024];
 	uint64 m_ulSteamID;

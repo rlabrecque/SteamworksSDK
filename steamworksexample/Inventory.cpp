@@ -218,7 +218,7 @@ void CSpaceWarLocalInventory::ModifyItemProperties()
 	const CSpaceWarItem *item100 = GetInstanceOf( k_SpaceWarItem_ShipDecoration1 );
 	if ( item100 )
 	{
-		auto updateHandle = SteamInventory()->StartUpdateProperties();
+		SteamInventoryUpdateHandle_t  updateHandle = SteamInventory()->StartUpdateProperties();
 		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "string_value", "blah" );
 		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "bool_value", true );
 		SteamInventory()->SetProperty( updateHandle, item100->GetItemId(), "int64_value", (int64)55 );		

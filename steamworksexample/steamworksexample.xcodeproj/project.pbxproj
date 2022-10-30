@@ -57,6 +57,7 @@
 		A4B5A10424906A0E000E9151 /* SimpleProtobuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */; };
 		BA60B6B81A82EDD200F4AC4F /* Friends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA60B6B41A82EDD200F4AC4F /* Friends.cpp */; };
 		BA60B6B91A82EDD200F4AC4F /* Inventory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA60B6B61A82EDD200F4AC4F /* Inventory.cpp */; };
+		F323060928947C1800E66D30 /* OverlayExamples.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F323060828947C1800E66D30 /* OverlayExamples.cpp */; };
 		F803305119087F9200344590 /* musicplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F803305019087F9200344590 /* musicplayer.cpp */; };
 /* End PBXBuildFile section */
 
@@ -176,6 +177,8 @@
 		BA60B6B51A82EDD200F4AC4F /* Friends.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Friends.h; sourceTree = "<group>"; };
 		BA60B6B61A82EDD200F4AC4F /* Inventory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Inventory.cpp; sourceTree = "<group>"; };
 		BA60B6B71A82EDD200F4AC4F /* Inventory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Inventory.h; sourceTree = "<group>"; };
+		F323060828947C1800E66D30 /* OverlayExamples.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OverlayExamples.cpp; sourceTree = "<group>"; };
+		F323060A28947C2C00E66D30 /* OverlayExamples.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayExamples.h; sourceTree = "<group>"; };
 		F803304F19087DA600344590 /* musicplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = musicplayer.h; sourceTree = "<group>"; };
 		F803305019087F9200344590 /* musicplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = musicplayer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -211,16 +214,30 @@
 			isa = PBXGroup;
 			children = (
 				50E77DCF136218F5000FC072 /* glmgr */,
+				503C6CD91268F49F00B66E3B /* BaseMenu.cpp */,
+				50D642851461EF3200A5739B /* clanchatroom.cpp */,
+				503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */,
 				BA60B6B41A82EDD200F4AC4F /* Friends.cpp */,
+				503C6CE01268F49F00B66E3B /* gameengineosx.mm */,
+				503C6CE21268F49F00B66E3B /* glstringosx.mm */,
+				840B386E19BB91C50084B9F1 /* htmlsurface.cpp */,
 				BA60B6B61A82EDD200F4AC4F /* Inventory.cpp */,
 				975820DA2765BE3900093F91 /* ItemStore.cpp */,
-				840B386E19BB91C50084B9F1 /* htmlsurface.cpp */,
+				503C6CE31268F49F00B66E3B /* Leaderboards.cpp */,
+				503C6CE51268F49F00B66E3B /* Lobby.cpp */,
+				503C6CE71268F49F00B66E3B /* Main.cpp */,
+				503C6CE81268F49F00B66E3B /* MainMenu.cpp */,
+				F803305019087F9200344590 /* musicplayer.cpp */,
+				F323060828947C1800E66D30 /* OverlayExamples.cpp */,
 				503C6CED1268F49F00B66E3B /* p2pauth.cpp */,
 				503C6CEF1268F49F00B66E3B /* PhotonBeam.cpp */,
 				503C6CF11268F49F00B66E3B /* QuitMenu.cpp */,
+				A4B5A0FC24906974000E9151 /* RemotePlay.cpp */,
 				503C6CF31268F49F00B66E3B /* RemoteStorage.cpp */,
+				A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */,
 				503C6CF51268F49F00B66E3B /* ServerBrowser.cpp */,
 				503C6CF81268F49F00B66E3B /* Ship.cpp */,
+				A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */,
 				503C6CFB1268F49F00B66E3B /* SpaceWarClient.cpp */,
 				503C6CFD1268F49F00B66E3B /* SpaceWarEntity.cpp */,
 				503C6D011268F49F00B66E3B /* SpaceWarServer.cpp */,
@@ -230,19 +247,6 @@
 				503C6D091268F49F00B66E3B /* Sun.cpp */,
 				503C6D0B1268F49F00B66E3B /* VectorEntity.cpp */,
 				503C6D0D1268F49F00B66E3B /* voicechat.cpp */,
-				503C6CD91268F49F00B66E3B /* BaseMenu.cpp */,
-				50D642851461EF3200A5739B /* clanchatroom.cpp */,
-				503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */,
-				503C6CE01268F49F00B66E3B /* gameengineosx.mm */,
-				503C6CE21268F49F00B66E3B /* glstringosx.mm */,
-				503C6CE31268F49F00B66E3B /* Leaderboards.cpp */,
-				503C6CE51268F49F00B66E3B /* Lobby.cpp */,
-				503C6CE71268F49F00B66E3B /* Main.cpp */,
-				503C6CE81268F49F00B66E3B /* MainMenu.cpp */,
-				F803305019087F9200344590 /* musicplayer.cpp */,
-				A4B5A0FC24906974000E9151 /* RemotePlay.cpp */,
-				A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */,
-				A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -280,18 +284,32 @@
 		503C6D291268F4EE00B66E3B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				503C6CDA1268F49F00B66E3B /* BaseMenu.h */,
+				50D642861461EF3200A5739B /* clanchatroom.h */,
+				503C6CDC1268F49F00B66E3B /* connectingmenu.h */,
 				BA60B6B51A82EDD200F4AC4F /* Friends.h */,
+				503C6CDD1268F49F00B66E3B /* GameEngine.h */,
+				503C6CDF1268F49F00B66E3B /* gameengineosx.h */,
+				503C6CE11268F49F00B66E3B /* glstringosx.h */,
+				840B386F19BB91C50084B9F1 /* htmlsurface.h */,
 				BA60B6B71A82EDD200F4AC4F /* Inventory.h */,
 				975820DD2765BE5000093F91 /* ItemStore.h */,
-				840B386F19BB91C50084B9F1 /* htmlsurface.h */,
-				50D642861461EF3200A5739B /* clanchatroom.h */,
+				503C6CE41268F49F00B66E3B /* Leaderboards.h */,
+				503C6CE61268F49F00B66E3B /* Lobby.h */,
+				503C6CE91268F49F00B66E3B /* MainMenu.h */,
+				503C6CEA1268F49F00B66E3B /* Messages.h */,
+				F803304F19087DA600344590 /* musicplayer.h */,
+				F323060A28947C2C00E66D30 /* OverlayExamples.h */,
 				503C6CEE1268F49F00B66E3B /* p2pauth.h */,
 				503C6CF01268F49F00B66E3B /* PhotonBeam.h */,
 				503C6CF21268F49F00B66E3B /* QuitMenu.h */,
+				A4B5A0FE2490698A000E9151 /* RemotePlay.h */,
 				503C6CF41268F49F00B66E3B /* RemoteStorage.h */,
+				A4B5A100249069C9000E9151 /* remotestoragesync.h */,
 				503C6CF61268F49F00B66E3B /* ServerBrowser.h */,
 				503C6CF71268F49F00B66E3B /* ServerBrowserMenu.h */,
 				503C6CF91268F49F00B66E3B /* Ship.h */,
+				A4B5A10224906A0E000E9151 /* SimpleProtobuf.h */,
 				503C6CFA1268F49F00B66E3B /* SpaceWar.h */,
 				503C6CFC1268F49F00B66E3B /* SpaceWarClient.h */,
 				503C6CFE1268F49F00B66E3B /* SpaceWarEntity.h */,
@@ -303,19 +321,6 @@
 				503C6D0A1268F49F00B66E3B /* Sun.h */,
 				503C6D0C1268F49F00B66E3B /* VectorEntity.h */,
 				503C6D0E1268F49F00B66E3B /* voicechat.h */,
-				503C6CDA1268F49F00B66E3B /* BaseMenu.h */,
-				503C6CDC1268F49F00B66E3B /* connectingmenu.h */,
-				503C6CDD1268F49F00B66E3B /* GameEngine.h */,
-				503C6CDF1268F49F00B66E3B /* gameengineosx.h */,
-				503C6CE11268F49F00B66E3B /* glstringosx.h */,
-				503C6CE41268F49F00B66E3B /* Leaderboards.h */,
-				503C6CE61268F49F00B66E3B /* Lobby.h */,
-				503C6CE91268F49F00B66E3B /* MainMenu.h */,
-				503C6CEA1268F49F00B66E3B /* Messages.h */,
-				F803304F19087DA600344590 /* musicplayer.h */,
-				A4B5A0FE2490698A000E9151 /* RemotePlay.h */,
-				A4B5A100249069C9000E9151 /* remotestoragesync.h */,
-				A4B5A10224906A0E000E9151 /* SimpleProtobuf.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -442,6 +447,7 @@
 				503C6D281268F49F00B66E3B /* voicechat.cpp in Sources */,
 				50E77DEB1362190C000FC072 /* cglmbuffer.cpp in Sources */,
 				50E77DEC1362190C000FC072 /* cglmfbo.cpp in Sources */,
+				F323060928947C1800E66D30 /* OverlayExamples.cpp in Sources */,
 				50E77DED1362190C000FC072 /* cglmprogram.cpp in Sources */,
 				BA60B6B91A82EDD200F4AC4F /* Inventory.cpp in Sources */,
 				975820DB2765BE3900093F91 /* ItemStore.cpp in Sources */,

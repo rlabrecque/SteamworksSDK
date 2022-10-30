@@ -211,6 +211,9 @@ public:
 	// Set the controller LED Color, if available
 	void SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags );
 
+	// Set the trigger effect on DualSense controllers
+	void SetTriggerEffect( bool bEnabled );
+
 	// Trigger a vibration on the controller, if available
 	void TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed );
 

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2008, Valve LLC, All rights reserved. ============
 //
 // Purpose: Main class for the space war game server
 //
@@ -223,7 +223,7 @@ void CSpaceWarServer::OnNetConnectionStatusChanged(SteamNetConnectionStatusChang
 			if (m_rgClientData[i].m_SteamIDUser == info.m_identityRemote.GetSteamID())//pCallback->m_steamIDRemote)
 			{
 				OutputDebugString("Disconnected dropped user\n");
-				RemovePlayerFromServer(i, EDisconnectReason::k_EDRClientDisconnect);
+				RemovePlayerFromServer(i, k_EDRClientDisconnect);
 				break;
 			}
 		}
@@ -296,7 +296,7 @@ void CSpaceWarServer::OnClientBeginAuthentication(CSteamID steamIDClient, HSteam
 	// We are full (or will be if the pending players auth), deny new login
 	if ( nPendingOrActivePlayerCount >= MAX_PLAYERS_PER_SERVER )
 	{
-		SteamGameServerNetworkingSockets()->CloseConnection(connectionID, EDisconnectReason::k_EDRServerFull, "Server full", false);
+		SteamGameServerNetworkingSockets()->CloseConnection(connectionID, k_EDRServerFull, "Server full", false);
 	}
 
 	// If we get here there is room, add the player as pending
@@ -352,7 +352,7 @@ void CSpaceWarServer::OnAuthCompleted( bool bAuthSuccessful, uint32 iPendingAuth
 		MsgServerFailAuthentication_t msg;
 		int64 outMessage;
 		SteamGameServerNetworkingSockets()->SendMessageToConnection(m_rgPendingClientData[iPendingAuthIndex].m_hConn, &msg, sizeof(msg), k_nSteamNetworkingSend_Reliable, &outMessage);
-		memset( &m_rgPendingClientData[iPendingAuthIndex], 0, sizeof( ClientConnectionData_t ) );
+		m_rgPendingClientData[iPendingAuthIndex] = ClientConnectionData_t();
 		return;
 	}
 
@@ -363,7 +363,7 @@ void CSpaceWarServer::OnAuthCompleted( bool bAuthSuccessful, uint32 iPendingAuth
 		{
 			// copy over the data from the pending array
 			memcpy( &m_rgClientData[i], &m_rgPendingClientData[iPendingAuthIndex], sizeof( ClientConnectionData_t ) );
-			memset( &m_rgPendingClientData[iPendingAuthIndex], 0, sizeof( ClientConnectionData_t	) );
+			m_rgPendingClientData[iPendingAuthIndex] = ClientConnectionData_t();
 			m_rgClientData[i].m_ulTickCountLastData = m_pGameEngine->GetGameTickCount();
 
 			// Add a new ship, make it dead immediately
@@ -499,7 +499,7 @@ void CSpaceWarServer::RemovePlayerFromServer( uint32 uShipPosition, EDisconnectR
 	// Tell the GS the user is leaving the server
 	SteamGameServer()->EndAuthSession( m_rgClientData[uShipPosition].m_SteamIDUser );
 #endif
-	memset( &m_rgClientData[uShipPosition], 0, sizeof( ClientConnectionData_t ) );
+	m_rgClientData[uShipPosition] = ClientConnectionData_t();
 }
 
 
@@ -681,7 +681,7 @@ void CSpaceWarServer::RunFrame()
 		if ( m_pGameEngine->GetGameTickCount() - m_rgClientData[i].m_ulTickCountLastData > SERVER_TIMEOUT_MILLISECONDS )
 		{
 			OutputDebugString( "Timing out player connection\n" );
-			RemovePlayerFromServer( i, EDisconnectReason::k_EDRClientKicked );
+			RemovePlayerFromServer( i, k_EDRClientKicked );
 		}
 		else
 		{
@@ -1094,7 +1094,7 @@ void CSpaceWarServer::KickPlayerOffServer( CSteamID steamID )
 		if ( m_rgClientData[i].m_SteamIDUser == steamID )
 		{
 			OutputDebugString( "Kicking player\n" );
-			RemovePlayerFromServer( i, EDisconnectReason::k_EDRClientKicked);
+			RemovePlayerFromServer( i, k_EDRClientKicked);
 			// send him a kick message
 			MsgServerFailAuthentication_t msg;
 			int64 outMessage;

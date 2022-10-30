@@ -191,6 +191,7 @@ public:
 	virtual const char *GetTextStringForControllerOriginAnalog( ECONTROLLERACTIONSET dwActionSet, ECONTROLLERANALOGACTION dwDigitalAction ) = 0;
 
 	virtual void SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags ) = 0;
+	virtual void SetTriggerEffect( bool bEnabled ) = 0;
 	virtual void TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed ) = 0;
 	virtual void TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat ) = 0;
 
