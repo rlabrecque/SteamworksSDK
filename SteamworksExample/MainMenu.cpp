@@ -43,7 +43,8 @@ void CMainMenu::SetupMenu()
 		AddMenuItem( MenuItem_t( "Friends List", k_EClientFriendsList ) );
 		AddMenuItem( MenuItem_t( "Group chat room", k_EClientClanChatRoom ) );
 	}
-	AddMenuItem( MenuItem_t( "Remote Play", k_EClientRemotePlay ) );
+	AddMenuItem( MenuItem_t( "Remote Play Invite", k_EClientRemotePlayInvite ) );
+	AddMenuItem( MenuItem_t( "Remote Play Sessions", k_EClientRemotePlaySessions ) );
 	AddMenuItem( MenuItem_t( "Remote Storage", k_EClientRemoteStorage ) );
 	AddMenuItem( MenuItem_t( "Write Minidump", k_EClientMinidump ) );
 

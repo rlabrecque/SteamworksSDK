@@ -805,6 +805,12 @@ public:
 	// Note: this is called within either SteamInput()->RunFrame or by SteamAPI_RunCallbacks
 	STEAM_CALL_BACK( SteamInputDeviceDisconnected_t )
 
+	// Controllers using Gamepad emulation (XInput, DirectInput, etc) will be seated in the order that
+	// input is sent by the device. This callback will fire on first input for each device and when the
+	// a user has manually changed the order via the Steam overlay. This also has the device type info
+	// so that you can change out glyph sets without making additional API calls
+	STEAM_CALL_BACK( SteamInputGamepadSlotChange_t )
+
 	// Enable SteamInputActionEvent_t callbacks. Directly calls your callback function
 	// for lower latency than standard Steam callbacks. Supports one callback at a time.
 	// Note: this is called within either SteamInput()->RunFrame or by SteamAPI_RunCallbacks
@@ -1007,6 +1013,20 @@ struct SteamInputConfigurationLoaded_t
 	uint32			m_unMinorRevision;
 	bool			m_bUsesSteamInputAPI;	// Does the configuration contain any Analog/Digital actions?
 	bool			m_bUsesGamepadAPI;		// Does the configuration contain any Xinput bindings?
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: called when controller gamepad slots change - on Linux/macOS these
+// slots are shared for all running apps.
+//-----------------------------------------------------------------------------
+struct SteamInputGamepadSlotChange_t
+{
+	enum { k_iCallback = k_iSteamControllerCallbacks + 4 };
+	AppId_t			m_unAppID;
+	InputHandle_t	m_ulDeviceHandle;		// Handle for device
+	ESteamInputType m_eDeviceType;			// Type of device
+	int				m_nOldGamepadSlot;		// Previous GamepadSlot - can be -1 controller doesn't uses gamepad bindings
+	int				m_nNewGamepadSlot;		// New Gamepad Slot - can be -1 controller doesn't uses gamepad bindings
 };
 
 #pragma pack( pop )

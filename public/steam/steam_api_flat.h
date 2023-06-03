@@ -58,9 +58,9 @@ S_API ISteamRemotePlay * SteamAPI_ISteamClient_GetISteamRemotePlay( ISteamClient
 // ISteamUser
 
 // A versioned accessor is exported by the library
-S_API ISteamUser *SteamAPI_SteamUser_v022();
+S_API ISteamUser *SteamAPI_SteamUser_v023();
 // Inline, unversioned accessor to get the current version.  Essentially the same as SteamUser(), but using this ensures that you are using a matching library.
-inline ISteamUser *SteamAPI_SteamUser() { return SteamAPI_SteamUser_v022(); }
+inline ISteamUser *SteamAPI_SteamUser() { return SteamAPI_SteamUser_v023(); }
 S_API HSteamUser SteamAPI_ISteamUser_GetHSteamUser( ISteamUser* self );
 S_API bool SteamAPI_ISteamUser_BLoggedOn( ISteamUser* self );
 S_API uint64_steamid SteamAPI_ISteamUser_GetSteamID( ISteamUser* self );
@@ -75,6 +75,7 @@ S_API EVoiceResult SteamAPI_ISteamUser_GetVoice( ISteamUser* self, bool bWantCom
 S_API EVoiceResult SteamAPI_ISteamUser_DecompressVoice( ISteamUser* self, const void * pCompressed, uint32 cbCompressed, void * pDestBuffer, uint32 cbDestBufferSize, uint32 * nBytesWritten, uint32 nDesiredSampleRate );
 S_API uint32 SteamAPI_ISteamUser_GetVoiceOptimalSampleRate( ISteamUser* self );
 S_API HAuthTicket SteamAPI_ISteamUser_GetAuthSessionTicket( ISteamUser* self, void * pTicket, int cbMaxTicket, uint32 * pcbTicket, const SteamNetworkingIdentity * pSteamNetworkingIdentity );
+S_API HAuthTicket SteamAPI_ISteamUser_GetAuthTicketForWebApi( ISteamUser* self, const char * pchIdentity );
 S_API EBeginAuthSessionResult SteamAPI_ISteamUser_BeginAuthSession( ISteamUser* self, const void * pAuthTicket, int cbAuthTicket, uint64_steamid steamID );
 S_API void SteamAPI_ISteamUser_EndAuthSession( ISteamUser* self, uint64_steamid steamID );
 S_API void SteamAPI_ISteamUser_CancelAuthTicket( ISteamUser* self, HAuthTicket hAuthTicket );

@@ -1226,7 +1226,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		pchSteamRichPresenceDisplay = SetInGameRichPresence();
 		bDisplayScoreInRichPresence = true;
 	}
-	else if ( m_eGameState == k_EClientRemotePlay )
+	else if ( m_eGameState == k_EClientRemotePlayInvite )
+	{
+		SteamRemotePlay()->BSendRemotePlayTogetherInvite( CSteamID() );
+		SetGameState( k_EClientGameMenu );
+	}
+	else if ( m_eGameState == k_EClientRemotePlaySessions )
 	{
 		// we've switched to the remote play menu
 		m_pRemotePlayList->Show();
@@ -1641,7 +1646,7 @@ void CSpaceWarClient::RunFrame()
 			SetGameState( k_EClientGameMenu );
 		break;
 
-	case k_EClientRemotePlay:
+	case k_EClientRemotePlaySessions:
 		m_pStarField->Render();
 		m_pRemotePlayList->RunFrame();
 
@@ -2594,6 +2599,18 @@ void CSpaceWarClient::OnWorkshopItemInstalled( ItemInstalled_t *pParam )
 {
 	if ( pParam->m_unAppID == SteamUtils()->GetAppID() )
 		LoadWorkshopItem( pParam->m_nPublishedFileId );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Remote Play Together guest invite was created
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnSteamRemotePlayTogetherGuestInvite( SteamRemotePlayTogetherGuestInvite_t *pParam )
+{
+	char rgch[ 1024 ];
+	sprintf_safe( rgch, "Remote Play Together guest invite URL: %s\n",
+		pParam->m_szConnectURL );
+	OutputDebugString( rgch );
 }
 
 

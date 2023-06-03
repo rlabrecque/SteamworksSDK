@@ -490,6 +490,9 @@ private:
 	void OnUGCQueryCompleted( SteamUGCQueryCompleted_t *pParam, bool bIOFailure );
 	CCallResult<CSpaceWarClient, SteamUGCQueryCompleted_t> m_SteamCallResultUGCQueryCompleted;
 
+	// callback when a Remote Play Together guest invite has been created
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamRemotePlayTogetherGuestInvite, SteamRemotePlayTogetherGuestInvite_t );
+
 	// Steam China support. duration control callback can be posted asynchronously, but we also
 	// call it directly.
 	STEAM_CALLBACK( CSpaceWarClient, OnDurationControl, DurationControl_t );

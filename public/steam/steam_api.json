@@ -126,6 +126,16 @@
       "struct": "DurationControl_t"
     },
     {
+      "callback_id": 168,
+      "fields": [
+        { "fieldname":"m_hAuthTicket", "fieldtype":"HAuthTicket" },
+        { "fieldname":"m_eResult", "fieldtype":"EResult" },
+        { "fieldname":"m_cubTicket", "fieldtype":"int" },
+        { "fieldname":"m_rgubTicket", "fieldtype":"uint8 [2560]" }
+      ],
+      "struct": "GetTicketForWebApiResponse_t"
+    },
+    {
       "callback_id": 304,
       "fields": [
         { "fieldname":"m_ulSteamID", "fieldtype":"uint64" },
@@ -1202,6 +1212,17 @@
       "struct": "SteamInputConfigurationLoaded_t"
     },
     {
+      "callback_id": 2804,
+      "fields": [
+        { "fieldname":"m_unAppID", "fieldtype":"AppId_t" },
+        { "fieldname":"m_ulDeviceHandle", "fieldtype":"InputHandle_t" },
+        { "fieldname":"m_eDeviceType", "fieldtype":"ESteamInputType" },
+        { "fieldname":"m_nOldGamepadSlot", "fieldtype":"int" },
+        { "fieldname":"m_nNewGamepadSlot", "fieldtype":"int" }
+      ],
+      "struct": "SteamInputGamepadSlotChange_t"
+    },
+    {
       "callback_id": 3401,
       "fields": [
         { "fieldname":"m_handle", "fieldtype":"UGCQueryHandle_t" },
@@ -1690,6 +1711,13 @@
         { "fieldname":"m_unSessionID", "fieldtype":"RemotePlaySessionID_t" }
       ],
       "struct": "SteamRemotePlaySessionDisconnected_t"
+    },
+    {
+      "callback_id": 5703,
+      "fields": [
+        { "fieldname":"m_szConnectURL", "fieldtype":"char [1024]" }
+      ],
+      "struct": "SteamRemotePlayTogetherGuestInvite_t"
     },
     {
       "callback_id": 1251,
@@ -4570,7 +4598,7 @@
         {
           "kind": "user",
           "name": "SteamUser",
-          "name_flat": "SteamAPI_SteamUser_v022"
+          "name_flat": "SteamAPI_SteamUser_v023"
         }
       ],
       "classname": "ISteamUser",
@@ -4701,6 +4729,14 @@
             { "paramname":"cbMaxTicket", "paramtype":"int" },
             { "paramname":"pcbTicket", "paramtype":"uint32 *" },
             { "paramname":"pSteamNetworkingIdentity", "paramtype":"const SteamNetworkingIdentity *" }
+          ],
+          "returntype": "HAuthTicket"
+        },
+        {
+          "methodname": "GetAuthTicketForWebApi",
+          "methodname_flat": "SteamAPI_ISteamUser_GetAuthTicketForWebApi",
+          "params": [
+            { "paramname":"pchIdentity", "paramtype":"const char *" }
           ],
           "returntype": "HAuthTicket"
         },
@@ -4846,7 +4882,7 @@
           "returntype": "bool"
         }
       ],
-      "version_string": "SteamUser022"
+      "version_string": "SteamUser023"
     },
     {
       "accessors": [
@@ -9036,7 +9072,7 @@
           "returntype": "void"
         },
         {
-          "callback": "SteamInputDeviceDisconnected_t",
+          "callback": "SteamInputGamepadSlotChange_t",
           "methodname": "EnableActionEventCallbacks",
           "methodname_flat": "SteamAPI_ISteamInput_EnableActionEventCallbacks",
           "params": [
