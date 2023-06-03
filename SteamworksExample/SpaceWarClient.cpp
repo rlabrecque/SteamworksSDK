@@ -33,6 +33,7 @@
 #define MAX_PATH PATH_MAX
 #include <unistd.h>
 #define _getcwd getcwd
+#define _snprintf snprintf
 #endif
 
 
@@ -277,6 +278,7 @@ void CSpaceWarClient::DisconnectFromServer()
 	if ( m_hConnServer != k_HSteamNetConnection_Invalid )
 		SteamNetworkingSockets()->CloseConnection( m_hConnServer, k_EDRClientDisconnect, nullptr, false );
 	m_steamIDGameServer = CSteamID();
+	m_steamIDGameServerFromBrowser = CSteamID();
 	m_hConnServer = k_HSteamNetConnection_Invalid;
 }
 
@@ -301,9 +303,17 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 
 	MsgClientBeginAuthentication_t msg;
 #ifdef USE_GS_AUTH_API
+	SteamNetworkingIdentity snid;
+	// if the server Steam ID was aquired from another source ( m_steamIDGameServerFromBrowser )
+	// then use it as the identity
+	// if it only came from the server itself, then use the IP address
+	if ( m_steamIDGameServer == m_steamIDGameServerFromBrowser )
+		snid.SetSteamID( m_steamIDGameServer );
+	else
+		snid.SetIPv4Addr( m_unServerIP, m_usServerPort );
 	char rgchToken[1024];
 	uint32 unTokenLen = 0;
-	m_hAuthTicket = SteamUser()->GetAuthSessionTicket( rgchToken, sizeof( rgchToken ), &unTokenLen );
+	m_hAuthTicket = SteamUser()->GetAuthSessionTicket( rgchToken, sizeof( rgchToken ), &unTokenLen, &snid );
 	msg.SetToken( rgchToken, unTokenLen );
 
 #else
@@ -625,7 +635,7 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 
 	SetGameState( k_EClientGameConnecting );
 
-	m_steamIDGameServer = steamIDGameServer;
+	m_steamIDGameServerFromBrowser = m_steamIDGameServer = steamIDGameServer;
 
 	SteamNetworkingIdentity identity;
 	identity.SetSteamID(steamIDGameServer);

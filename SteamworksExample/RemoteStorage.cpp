@@ -232,6 +232,11 @@ bool CRemoteStorageScreen::BHandleCancel()
 	// always cancel
 	m_rgchGreetingNext[0] = 0;
 
+	if( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		SteamUtils()->DismissFloatingGamepadTextInput();
+	}
+
 	m_bFinished = true;
 	return true;
 }

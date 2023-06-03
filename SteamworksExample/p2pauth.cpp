@@ -59,7 +59,9 @@ void CP2PAuthPlayer::StartAuthPlayer()
 	// Create a ticket if we haven't yet
 	if ( m_cubTicketIGaveThisUser == 0 )
 	{
-		m_hAuthTicketIGaveThisUser = SteamUser()->GetAuthSessionTicket( m_rgubTicketIGaveThisUser, sizeof( m_rgubTicketIGaveThisUser ), &m_cubTicketIGaveThisUser );
+		SteamNetworkingIdentity snid;
+		snid.SetSteamID( m_steamID );
+		m_hAuthTicketIGaveThisUser = SteamUser()->GetAuthSessionTicket( m_rgubTicketIGaveThisUser, sizeof( m_rgubTicketIGaveThisUser ), &m_cubTicketIGaveThisUser, &snid );
 	}
 
 	// Send the ticket to the server.  It will relay to the client

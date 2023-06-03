@@ -52,11 +52,20 @@ public:
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToUser - friendrequestaccept", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToUser, "friendrequestaccept" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToUser - friendrequestignore", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToUser, "friendrequestignore" } ) );
 
-		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToWebPage", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPage, "https://steamcommunity.com" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToWebPage", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPage, "https://tomb.valve.org/community/actions/buttons/" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore - Add to Cart", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "addtocart" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore - Add to Cart & Show", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "addtocartandshow" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayInviteDialogConnectString", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString, NULL } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( SteamScreenshots()->IsScreenshotsHooked() ? "Screenshots Hooked!" : "Hook Screenshots", { OverlayExample_t::k_EOverlayExampleItem_HookScreenshots, NULL } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Request Keyboard", { OverlayExample_t::k_EOverlayExampleItem_RequestKeyboard, NULL } ) );
+
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Set Notification Inset", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetInset, "100" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Reset Notification Inset", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetInset, "0" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Set Notification Position: Top Left", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetPosition, "0" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Set Notification Position: Top Right", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetPosition, "1" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Set Notification Position: Bottom Left", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetPosition, "2" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Set Notification Position: Bottom Right", { OverlayExample_t::k_EOverlayExampleItem_Notification_SetPosition, "3" } ) );
 
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "Return to main menu", { OverlayExample_t::k_EOverlayExampleItem_BackToMenu, NULL } ) );
 		
@@ -154,8 +163,33 @@ void COverlayExamples::RunFrame()
 			}
 			break;
 
+			case OverlayExample_t::k_EOverlayExampleItem_HookScreenshots:
+			{
+				SteamScreenshots()->HookScreenshots( !SteamScreenshots()->IsScreenshotsHooked() );
+				m_pMenu->Rebuild();
+			}
+			break;
+
+			case OverlayExample_t::k_EOverlayExampleItem_RequestKeyboard:
+			{
+				EGamepadTextInputMode eInputMode = k_EGamepadTextInputModeNormal;
+				EGamepadTextInputLineMode eLineInputMode = k_EGamepadTextInputLineModeSingleLine;
+				const char *pchDescription = "Enter Text Here";
+				uint32 unCharMax = 20;
+				const char *pchExistingText = "Placeholder";
+				SteamUtils()->ShowGamepadTextInput( eInputMode , eLineInputMode, pchDescription, unCharMax, pchExistingText );
+			}
+			break;
+
+			case OverlayExample_t::k_EOverlayExampleItem_Notification_SetInset:
+				SteamUtils()->SetOverlayNotificationInset( atoi( m_delayedCommand.m_pchExtraCommandData ), atoi( m_delayedCommand.m_pchExtraCommandData ) );
+				break;
+			case OverlayExample_t::k_EOverlayExampleItem_Notification_SetPosition:
+				SteamUtils()->SetOverlayNotificationPosition( (ENotificationPosition)atoi( m_delayedCommand.m_pchExtraCommandData ) );
+				break;
+
 			default:
-			OutputDebugString( "wat" );
+				break;
 		}
 
 		m_delayedCommand.m_eItem = OverlayExample_t::k_EOverlayExampleItem_Invalid;
@@ -180,3 +214,12 @@ void COverlayExamples::Show()
 	m_pMenu->Rebuild();
 }
 
+void COverlayExamples::OnScreenshotRequested( ScreenshotRequested_t *pCallback )
+{
+	SteamFriends()->ActivateGameOverlayToWebPage( "google.com" );
+}
+
+void COverlayExamples::OnSteamScreenshotReady( ScreenshotReady_t *pCallback )
+{
+
+}

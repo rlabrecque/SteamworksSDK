@@ -142,7 +142,11 @@ struct OverlayExample_t
 		k_EOverlayExampleItem_ActivateGameOverlayToWebPage,
 		k_EOverlayExampleItem_ActivateGameOverlayToStore,
 		// k_EOverlayExampleItem_ActivateGameOverlayRemotePlayTogetherInviteDialog,
-		k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString
+		k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString,
+		k_EOverlayExampleItem_HookScreenshots,
+		k_EOverlayExampleItem_RequestKeyboard,
+		k_EOverlayExampleItem_Notification_SetInset,
+		k_EOverlayExampleItem_Notification_SetPosition,
 	};
 
 	EOverlayExampleItem m_eItem;
@@ -295,6 +299,7 @@ private:
 
 	// load subscribed workshop items
 	void LoadWorkshopItems();
+	void QueryWorkshopItems();
 
 	// Set appropriate rich presence keys for a player who is currently in-game and
 	// return the value that should go in steam_display
@@ -360,6 +365,7 @@ private:
 
 	// Server address data
 	CSteamID m_steamIDGameServer;
+	CSteamID m_steamIDGameServerFromBrowser;
 	uint32 m_unServerIP;
 	uint16 m_usServerPort;
 	HAuthTicket m_hAuthTicket;
@@ -424,7 +430,7 @@ private:
 
 	// Steam Workshop items
 	CWorkshopItem *m_rgpWorkshopItems[ MAX_WORKSHOP_ITEMS ];
-	int m_nNumWorkshopItems; // items in m_rgpWorkshopItems
+	int m_nNumWorkshopItems; // items in m_rgpWorkshopItem
 
 	// Main menu instance
 	CMainMenu *m_pMainMenu;
@@ -481,6 +487,8 @@ private:
 
 	// callback when new Workshop item was installed
 	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t);
+	void OnUGCQueryCompleted( SteamUGCQueryCompleted_t *pParam, bool bIOFailure );
+	CCallResult<CSpaceWarClient, SteamUGCQueryCompleted_t> m_SteamCallResultUGCQueryCompleted;
 
 	// Steam China support. duration control callback can be posted asynchronously, but we also
 	// call it directly.

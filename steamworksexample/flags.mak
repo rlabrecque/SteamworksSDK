@@ -64,7 +64,7 @@ RELEASE_CXXFLAGS := $(RELEASE_CFLAGS)
 
 MACOS_FRAMEWORKS := 
 
-LDFLAGS := $(shell STEAM_RUNTIME_ROOT=$(STEAM_RUNTIME_ROOT) $(SDL_CONFIG) --libs) -lSDL2_ttf -lfreetype -lz -lGL -lopenal
+LDFLAGS := $(shell STEAM_RUNTIME_ROOT=$(STEAM_RUNTIME_ROOT) $(SDL_CONFIG) --libs) -lSDL3_ttf -lfreetype -lz -lGL -lopenal
 DEBUG_LDFLAGS := 
 RELEASE_LDGLAGS :=
 

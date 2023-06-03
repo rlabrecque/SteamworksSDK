@@ -12,6 +12,7 @@
 #define MAX_PATH PATH_MAX
 #include <unistd.h>
 #define _getcwd getcwd
+#define _snprintf snprintf
 #endif
 
 #if defined(WIN32)
@@ -259,14 +260,12 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	}
 
 	char rgchFullPath[1024];
-#if defined(_WIN32)
-	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "steam_input_manifest.vdf" );
-#elif defined(OSX)
+#if defined(OSX)
 	// hack for now, because we do not have utility functions available for finding the resource path
 	// alternatively we could disable the SteamController init on OS X
 	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/steamworksexample.app/Contents/Resources/%s", rgchCWD, "steam_input_manifest.vdf" );
 #else
-	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s/%s", rgchCWD, "steam_input_manifest.vdf" );
+	_snprintf( rgchFullPath, sizeof( rgchFullPath ), "%s\\%s", rgchCWD, "steam_input_manifest.vdf" );
 #endif
 
 	SteamInput()->SetInputActionManifestFilePath( rgchFullPath );

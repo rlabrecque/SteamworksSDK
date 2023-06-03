@@ -37,6 +37,9 @@ private:
 	
 	COverlayExamplesMenu *m_pMenu;
 	OverlayExample_t m_delayedCommand;
+
+	STEAM_CALLBACK( COverlayExamples, OnScreenshotRequested, ScreenshotRequested_t );
+	STEAM_CALLBACK( COverlayExamples, OnSteamScreenshotReady, ScreenshotReady_t );
 };
 
 #endif // OVERLAYEXAMPLES_H
