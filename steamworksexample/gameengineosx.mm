@@ -52,11 +52,11 @@ IGameEngine *CreateGameEngineOSX()
 	return s_pGameEngine;
 }
 
-inline uint64_t GetTickCount()
+uint64_t GetTickCount()
 {
-    timeval time;
-    gettimeofday(&time, NULL);
-    return (time.tv_sec * 1000ULL) + (time.tv_usec / 1000ULL);
+	timeval time;
+	gettimeofday(&time, NULL);
+	return (time.tv_sec * 1000ULL) + (time.tv_usec / 1000ULL);
 }
 
 void OutputDebugString( const char *pchMsg )

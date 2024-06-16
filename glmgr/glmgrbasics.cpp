@@ -2652,7 +2652,6 @@ int		s_glmStrCursor = 0;
 const char *	GLMDecode( GLMThing_t thingtype, unsigned long value )
 {
 	GLMValueEntry_t *table = NULL;
-	char			isflags = 0;
 
 	switch( thingtype )
 	{
@@ -3203,8 +3202,7 @@ void GLMPrintText( const char *str, EGLMDebugFlavor flavor, uint options )
 	// walk the text and treat each newline as an indentation opportunity..
 	const char *mark = buf;
 	const char *end = mark + strlen(buf);
-	const char *next = NULL;
-	
+
 	while(mark < end)
 	{
 		// starting at mark, see if there is a newline between there and end
@@ -3404,6 +3402,8 @@ bool CGLMFileMirror::PollForChanges( void )
 	// snapshot old stat
 	bool		old_exists = m_exists;
 	struct stat	old_stat = m_stat;
+
+	(void)old_exists;
 	
 	UpdateStatInfo();
 	
@@ -3676,11 +3676,11 @@ void	CGLMEditableTextItem::GenHashOfOrigText( void )
 
 void	CGLMEditableTextItem::GenBaseNameAndFullPath(  char *prefix, char *suffix  )
 {
-	// base name is hash digest in hex, plus the suffix.
-	char	temp[5000];
-
 	// bring this code back if you need the live shader edit/debug mode.
-	#if 0	
+	#if 0
+		// base name is hash digest in hex, plus the suffix.
+		char	temp[5000];
+
 		V_binarytohex( m_origDigest, sizeof(m_origDigest), temp, sizeof( temp ) );
 		if (suffix)
 		{

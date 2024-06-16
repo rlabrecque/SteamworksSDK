@@ -442,7 +442,6 @@ template<typename T, int COUNT> class GLStateArray
 
 		bool Check( void )
 		{
-			T		temp;
 			bool	result = false;
 
 			for( int i=0; i<COUNT; i++)

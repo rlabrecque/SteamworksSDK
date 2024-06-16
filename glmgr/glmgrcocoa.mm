@@ -1004,7 +1004,6 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						// gather more info from IOKit
 						// cribbed from http://developer.apple.com/mac/library/samplecode/VideoHardwareInfo/listing3.html
 						
-						CFTypeRef typeCode;
 						CFDataRef vendorID, deviceID, model;
 						io_registry_entry_t dspPort;
 							
@@ -1022,7 +1021,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						if(vendorID)
 						{
 							fields.m_pciVendorID = *((UInt32*)CFDataGetBytePtr(vendorID));
-                            CFRelease( vendorID );
+							CFRelease( vendorID );
 							vendorID = NULL;
 						}
 						else
@@ -1033,7 +1032,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						if(deviceID)
 						{
 							fields.m_pciDeviceID = *((UInt32*)CFDataGetBytePtr(deviceID));
-                            CFRelease( deviceID );
+							CFRelease( deviceID );
 							deviceID = NULL;
 						}
 						else
@@ -1044,9 +1043,11 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						if(model)
 						{
 							int length = CFDataGetLength(model);
+							(void)length;
+
 							char *data = (char*)CFDataGetBytePtr(model);
 							strncpy( fields.m_pciModelString, data, sizeof(fields.m_pciModelString) );
-                            CFRelease( model );
+							CFRelease( model );
 							model = NULL;
 						}
 						else
@@ -1503,6 +1504,8 @@ bool	GLMDisplayDB::GetModeInfo( int rendererIndex, int displayIndex, int modeInd
 
 			// now match
 			int foundIndex = -1;
+			(void)foundIndex;
+
 			int i=0;
 			for( std::vector< GLMDisplayMode * >::iterator p = (*dispinfo).m_modes->begin(); p != (*dispinfo).m_modes->end(); p++ )
 			{

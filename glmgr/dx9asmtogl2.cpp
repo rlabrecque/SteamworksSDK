@@ -37,7 +37,6 @@ void Error( const char *fmt, ... )
 static const char *g_szVecZeros[] = { NULL, "0.0", "vec2( 0.0, 0.0 )", "vec3( 0.0, 0.0, 0.0 )", "vec4( 0.0, 0.0, 0.0, 0.0 )" };
 static const char *g_szVecOnes[] = { NULL, "1.0", "vec2( 1.0, 1.0 )", "vec3( 1.0, 1.0, 1.0 )", "vec4( 1.0, 1.0, 1.0, 1.0 )" };
 static const char *g_szDefaultSwizzle = "xyzw";
-static const char *g_szDefaultSwizzleStrings[] = { "x", "y", "z", "w" };
 static const char *g_szSamplerStrings[] = { "2D", "CUBE", "3D" };
 
 static const char *g_pAtomicTempVarName = "atomic_temp_var";
@@ -77,6 +76,8 @@ void PrintToBuf( CUtlBuffer &buf, const char *pFormat, ... )
 
 void PrintToBuf( char *pOut, int nOutSize, const char *pFormat, ... )
 {
+	(void)nOutSize;
+
 	int nStrlen = V_strlen( pOut );
 	pOut += nStrlen;
 	nOutSize -= nStrlen;

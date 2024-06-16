@@ -8,6 +8,10 @@
 #include "cglmprogram.h"
 #include "dxabstract.h"
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+
 #ifdef OSX
 // Debugger - 10.8
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

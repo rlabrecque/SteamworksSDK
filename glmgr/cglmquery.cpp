@@ -329,8 +329,7 @@ void	CGLMQuery::Complete( uint *result )
 
 	uint resultval = 0;
 	GLint available = 0;
-	bool bogus_available = false;
-	
+
 	// blocking call if not done
 	Assert(m_started);
 	Assert(m_stopped);

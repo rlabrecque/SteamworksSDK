@@ -24,6 +24,10 @@
 
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+
 #ifdef USE_ACTUAL_DX
 
 #pragma comment( lib, "../../dx9sdk/lib/d3d9.lib" )
@@ -5545,7 +5549,8 @@ void IDirect3DDevice9::SetGammaRamp(UINT iSwapChain,DWORD Flags,CONST D3DGAMMARA
 	// just slam it directly for the time being
 	// this code is OS X specific
 
-    CGDisplayErr cgErr;
+	CGDisplayErr cgErr;
+	(void)cgErr;
 
 	CGGammaValue	redt[256];
 	CGGammaValue	grnt[256];

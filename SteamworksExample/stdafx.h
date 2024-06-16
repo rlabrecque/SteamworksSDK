@@ -188,6 +188,10 @@ extern void OutputDebugString( const char *pchMsg );
 extern int Alert( const char *lpCaption, const char *lpText );
 extern const char *GetUserSaveDataPath();
 
+#ifdef OSX
+extern uint64_t GetTickCount();
+#endif // OSX
+
 #define V_ARRAYSIZE(a) sizeof(a)/sizeof(a[0]) 
 
 #endif	// POSIX
