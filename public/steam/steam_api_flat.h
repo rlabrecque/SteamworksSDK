@@ -962,18 +962,13 @@ S_API bool SteamAPI_ISteamInventory_InspectItem( ISteamInventory* self, SteamInv
 // ISteamVideo
 
 // A versioned accessor is exported by the library
-S_API ISteamVideo *SteamAPI_SteamVideo_v003();
+S_API ISteamVideo *SteamAPI_SteamVideo_v002();
 // Inline, unversioned accessor to get the current version.  Essentially the same as SteamVideo(), but using this ensures that you are using a matching library.
-inline ISteamVideo *SteamAPI_SteamVideo() { return SteamAPI_SteamVideo_v003(); }
+inline ISteamVideo *SteamAPI_SteamVideo() { return SteamAPI_SteamVideo_v002(); }
 S_API void SteamAPI_ISteamVideo_GetVideoURL( ISteamVideo* self, AppId_t unVideoAppID );
 S_API bool SteamAPI_ISteamVideo_IsBroadcasting( ISteamVideo* self, int * pnNumViewers );
 S_API void SteamAPI_ISteamVideo_GetOPFSettings( ISteamVideo* self, AppId_t unVideoAppID );
 S_API bool SteamAPI_ISteamVideo_GetOPFStringForApp( ISteamVideo* self, AppId_t unVideoAppID, char * pchBuffer, int32 * pnBufferSize );
-S_API void SteamAPI_ISteamVideo_AddTimelineHighlightMarker( ISteamVideo* self, const char * pchIcon, const char * pchTitle, const char * pchDescription, uint32 unPriority );
-S_API void SteamAPI_ISteamVideo_AddTimelineTimestamp( ISteamVideo* self, const char * pchTitle );
-S_API void SteamAPI_ISteamVideo_AddTimelineRangeStart( ISteamVideo* self, const char * pchID, const char * pchTitle );
-S_API void SteamAPI_ISteamVideo_AddTimelineRangeEnd( ISteamVideo* self, const char * pchID );
-S_API void SteamAPI_ISteamVideo_SetTimelineGameMode( ISteamVideo* self, ETimelineGameMode eMode );
 
 // ISteamParentalSettings
 
