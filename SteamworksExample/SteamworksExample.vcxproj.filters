@@ -25,21 +25,24 @@
     <Filter Include="Source Files\Game">
       <UniqueIdentifier>{84F38993-4EB4-8F80-2E2C-37AA0D9C662A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="VPC Scripts">
-      <UniqueIdentifier>{A40EE377-781A-C6B9-0C7C-B3BE118D248E}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\public\steam\lib\win32\sdkencryptedappticket.lib">
       <Filter>Link Libraries</Filter>
     </Library>
+    <Library Include="..\redistributable_bin\steam_api.lib">
+      <Filter>Link Libraries</Filter>
+    </Library>
+    <Library Include="..\redistributable_bin\steam_api.lib">
+      <Filter>Link Libraries</Filter>
+    </Library>
     <Library Include="..\public\steam\lib\win32\sdkencryptedappticket.lib">
       <Filter>Link Libraries</Filter>
     </Library>
-    <Library Include="..\redistributable_bin\steam_api.lib">
+    <Library Include="..\public\steam\lib\win64\sdkencryptedappticket64.lib">
       <Filter>Link Libraries</Filter>
     </Library>
-    <Library Include="..\redistributable_bin\steam_api.lib">
+    <Library Include="..\redistributable_bin\win64\steam_api64.lib">
       <Filter>Link Libraries</Filter>
     </Library>
   </ItemGroup>
@@ -156,6 +159,9 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Sun.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="timeline.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="voicechat.h">
@@ -295,6 +301,9 @@
     <ClCompile Include="Sun.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="timeline.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
     <ClCompile Include="voicechat.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
@@ -303,11 +312,6 @@
     <ResourceCompile Include="SpaceWarRes.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="steamworksexample.vpc">
-      <Filter>VPC Scripts</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
@@ -320,30 +324,6 @@
     </None>
     <None Include="..\glmgr\glmgrcocoa.mm">
       <Filter>Source Files\Game</Filter>
-    </None>
-    <None Include="..\vpc_scripts\branch_settings.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\loadaddress.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\steam_base.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\steam_exe_base.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\steam_exe_win_win32_base.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\steam_steamapilib_include.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\steam_win32_base.vpc">
-      <Filter>VPC Scripts</Filter>
-    </None>
-    <None Include="..\vpc_scripts\version.vpc">
-      <Filter>VPC Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>

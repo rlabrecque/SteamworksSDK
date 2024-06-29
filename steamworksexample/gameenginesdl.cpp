@@ -249,8 +249,6 @@ bool CGameEngineGL::BInitializeAudio()
 
 bool CGameEngineGL::BInitializeGraphics()
 {
-	int windowX = SDL_WINDOWPOS_CENTERED;
-	int windowY = SDL_WINDOWPOS_CENTERED;
 	int nWindowWidth, nWindowHeight;
 	nWindowWidth = m_nWindowWidth = 1024;
 	nWindowHeight = m_nWindowHeight = 768;
@@ -258,12 +256,21 @@ bool CGameEngineGL::BInitializeGraphics()
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
 
+#if defined(USE_SDL2)
+	int windowX = SDL_WINDOWPOS_CENTERED;
+	int windowY = SDL_WINDOWPOS_CENTERED;
 	m_window = SDL_CreateWindow( "SteamworksExample",
 					windowX,
 					windowY,
 					nWindowWidth,
 					nWindowHeight,
 					SDL_WINDOW_OPENGL );
+#else
+	m_window = SDL_CreateWindow( "SteamworksExample",
+					nWindowWidth,
+					nWindowHeight,
+					SDL_WINDOW_OPENGL );
+#endif
 	if ( !m_window ) {
 		OutputDebugString( "Couldn't create SDL window: " );
 		OutputDebugString( SDL_GetError() );
@@ -360,7 +367,11 @@ void CGameEngineGL::AdjustViewport()
 void CGameEngineGL::UpdateGameTickCount()
 {
 	m_ulPreviousGameTickCount = m_ulGameTickCount;
+#if defined(USE_SDL2)
+	m_ulGameTickCount = SDL_GetTicks64();
+#else
 	m_ulGameTickCount = SDL_GetTicks();
+#endif
 }
 
 
@@ -374,7 +385,11 @@ bool CGameEngineGL::BSleepForFrameRateLimit( uint32 ulMaxFrameRate )
 	// Frame rate limiting
 	float flDesiredFrameMilliseconds = 1000.0f/ulMaxFrameRate;
 
+#if defined(USE_SDL2)
+	uint64 ulGameTickCount = SDL_GetTicks64();
+#else
 	uint64 ulGameTickCount = SDL_GetTicks();
+#endif
 
 	float flMillisecondsElapsed = (float)(ulGameTickCount - m_ulGameTickCount);
 	if ( flMillisecondsElapsed < flDesiredFrameMilliseconds )
@@ -931,7 +946,11 @@ bool CGameEngineGL::BDrawString( HGAMEFONT hFont, RECT rect, DWORD dwColor, DWOR
 		m_MapTextures[ hTexture ].m_uWidth = surface->w;
 		m_MapTextures[ hTexture ].m_uHeight = surface->h;
 
+#if defined(USE_SDL2)
+		SDL_FreeSurface( surface );
+#else
 		SDL_DestroySurface( surface );
+#endif
 
 		m_MapStrings[ std::string(szFontPrefix) + std::string(pchText) ] = hTexture;
 	}
@@ -989,6 +1008,11 @@ void CGameEngineGL::UpdateKey( uint32_t vkKey, int nDown )
 //-----------------------------------------------------------------------------
 void CGameEngineGL::MessagePump()
 {
+#if defined(USE_SDL2)
+	#define SDL_EVENT_KEY_DOWN SDL_KEYDOWN
+	#define SDL_EVENT_KEY_UP SDL_KEYUP
+	#define SDL_EVENT_QUIT SDL_QUIT
+#endif
 	SDL_Event event;
 
     do
@@ -996,7 +1020,7 @@ void CGameEngineGL::MessagePump()
 	if ( SDL_PollEvent(&event) <= 0 )
 		break;
 	
-	if ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP )
+	if ( event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP )
 	{
 		DWORD dwVK = 0;
 		switch (event.key.keysym.sym)
@@ -1028,7 +1052,7 @@ void CGameEngineGL::MessagePump()
 
 		if (dwVK)
 		{
-			if ( event.type == SDL_KEYDOWN )
+			if ( event.type == SDL_EVENT_KEY_DOWN )
 			{
 				m_SetKeysDown.insert( dwVK );
 			}
@@ -1038,7 +1062,7 @@ void CGameEngineGL::MessagePump()
 			}
 		}
 	}
-	else if ( event.type == SDL_QUIT )
+	else if ( event.type == SDL_EVENT_QUIT )
 	{
 		CreateGameEngineSDL( )->Shutdown();
 	}

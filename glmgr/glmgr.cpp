@@ -3381,6 +3381,9 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 							
 							case eAttribWriteDirty:
 								static uint hits=0,misses=0;
+								(void)hits;
+								(void)misses;
+
 								// first see if we have to do anything at all.
 								// the equality operator checks buffer name, offset, stride, datatype and normalized.
 								// we check buffer revision separately, submitter of vertex setup is not expected to provide it (zero is preferred).

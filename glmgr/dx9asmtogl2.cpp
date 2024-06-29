@@ -1340,6 +1340,8 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 
 			// Optionally put on the x, y, z or w
 			int nMasksWritten = 0;
+			(void)nMasksWritten;
+
 			if ( dwToken & D3DSP_WRITEMASK_0 )
 			{
 				strcat_s( pRegisterName, nBufLen, "x" );
@@ -2645,6 +2647,7 @@ void D3DToGL::InsertMoveInstruction( CUtlBuffer *pCode, int nARLComponent )
 void D3DToGL::InsertMoveFromAddressRegister( CUtlBuffer *pCode, int nARLComp0, int nARLComp1, int nARLComp2 /* = ARL_DEST_NONE */ )
 {
 	int nNumSwizzles = 0;
+	(void)nNumSwizzles;
 
 	if ( nARLComp0 != ARL_DEST_NONE )
 		nNumSwizzles++;

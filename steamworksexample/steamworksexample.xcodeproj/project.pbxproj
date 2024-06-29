@@ -52,6 +52,7 @@
 		50E77DF813621991000FC072 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50E77DF713621991000FC072 /* IOKit.framework */; };
 		840B387019BB91C50084B9F1 /* htmlsurface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 840B386E19BB91C50084B9F1 /* htmlsurface.cpp */; };
 		975820DB2765BE3900093F91 /* ItemStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 975820DA2765BE3900093F91 /* ItemStore.cpp */; };
+		97919DA62C22281400272343 /* timeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 97919DA52C22281400272343 /* timeline.cpp */; };
 		A4B5A0FD24906974000E9151 /* RemotePlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FC24906974000E9151 /* RemotePlay.cpp */; };
 		A4B5A101249069C9000E9151 /* remotestoragesync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */; };
 		A4B5A10424906A0E000E9151 /* SimpleProtobuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */; };
@@ -166,6 +167,8 @@
 		840B386F19BB91C50084B9F1 /* htmlsurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = htmlsurface.h; sourceTree = "<group>"; };
 		975820DA2765BE3900093F91 /* ItemStore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ItemStore.cpp; sourceTree = "<group>"; };
 		975820DD2765BE5000093F91 /* ItemStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemStore.h; sourceTree = "<group>"; };
+		97919DA42C22280B00272343 /* timeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timeline.h; sourceTree = "<group>"; };
+		97919DA52C22281400272343 /* timeline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timeline.cpp; sourceTree = "<group>"; };
 		A46ECF6D26BE389800985AA7 /* steamworksexample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = steamworksexample.entitlements; path = osx/steamworksexample.entitlements; sourceTree = "<group>"; };
 		A4B5A0FC24906974000E9151 /* RemotePlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RemotePlay.cpp; sourceTree = "<group>"; };
 		A4B5A0FE2490698A000E9151 /* RemotePlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RemotePlay.h; sourceTree = "<group>"; };
@@ -245,6 +248,7 @@
 				503C6D051268F49F00B66E3B /* StatsAndAchievements.cpp */,
 				503C6D071268F49F00B66E3B /* stdafx.cpp */,
 				503C6D091268F49F00B66E3B /* Sun.cpp */,
+				97919DA52C22281400272343 /* timeline.cpp */,
 				503C6D0B1268F49F00B66E3B /* VectorEntity.cpp */,
 				503C6D0D1268F49F00B66E3B /* voicechat.cpp */,
 			);
@@ -319,6 +323,7 @@
 				503C6D061268F49F00B66E3B /* StatsAndAchievements.h */,
 				503C6D081268F49F00B66E3B /* stdafx.h */,
 				503C6D0A1268F49F00B66E3B /* Sun.h */,
+				97919DA42C22280B00272343 /* timeline.h */,
 				503C6D0C1268F49F00B66E3B /* VectorEntity.h */,
 				503C6D0E1268F49F00B66E3B /* voicechat.h */,
 			);
@@ -461,6 +466,7 @@
 				50E77DF41362190C000FC072 /* glmgrcocoa.mm in Sources */,
 				50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */,
 				A4B5A101249069C9000E9151 /* remotestoragesync.cpp in Sources */,
+				97919DA62C22281400272343 /* timeline.cpp in Sources */,
 				BA60B6B81A82EDD200F4AC4F /* Friends.cpp in Sources */,
 				50E77DF61362190C000FC072 /* mathlite.cpp in Sources */,
 				50D642871461EF3200A5739B /* clanchatroom.cpp in Sources */,

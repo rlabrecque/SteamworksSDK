@@ -37,10 +37,6 @@ root\resources\setup_<language>.ini :
   korean, spanish, schinese, tchinese, russian, thai, japanese, portuguese,
   polish, danish, dutch, finnish, norwegian, swedish, hungarian, czech
   
-root\resources\installscript.vdf :
-  This is a script file in KeyValues format to run 3rd party installers before 
-  Steam and the game are installed. This file is optional and can be removed.
-
 root\resources\eula.rtf :
   The end user license agreement shown before the user installs the game.
   This file is optional. If you have localized versions of this file,

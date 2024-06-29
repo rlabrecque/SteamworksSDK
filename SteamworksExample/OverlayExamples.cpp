@@ -52,7 +52,8 @@ public:
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToUser - friendrequestaccept", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToUser, "friendrequestaccept" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToUser - friendrequestignore", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToUser, "friendrequestignore" } ) );
 
-		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToWebPage", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPage, "https://tomb.valve.org/community/actions/buttons/" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToWebPage", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPage, "https://steamcommunity.com/" } ) );
+		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToWebPageModal", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPageModal, "https://steamcommunity.com/" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore - Add to Cart", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "addtocart" } ) );
 		AddMenuItem( COverlayExamplesMenu::MenuItem_t( "ActivateGameOverlayToStore - Add to Cart & Show", { OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToStore, "addtocartandshow" } ) );
@@ -128,6 +129,12 @@ void COverlayExamples::RunFrame()
 			case OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPage:
 			{
 				SteamFriends()->ActivateGameOverlayToWebPage( m_delayedCommand.m_pchExtraCommandData );
+			}
+			break;
+
+			case OverlayExample_t::k_EOverlayExampleItem_ActivateGameOverlayToWebPageModal:
+			{
+				SteamFriends()->ActivateGameOverlayToWebPage( m_delayedCommand.m_pchExtraCommandData, k_EActivateGameOverlayToWebPageMode_Modal );
 			}
 			break;
 

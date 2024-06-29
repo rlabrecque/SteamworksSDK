@@ -338,7 +338,9 @@ bool CGameEngineGL::BInitializeGraphics()
 
 	m_view = [[NSOpenGLView alloc] initWithFrame:NSMakeRect( 0, 0, m_nWindowWidth, m_nWindowHeight )
 									 pixelFormat:pixelFormat];
-	
+
+	m_view.wantsBestResolutionOpenGLSurface = NO;
+
 	
 	int wherex = 50;
 	int wherey = 50;
@@ -645,13 +647,9 @@ bool CGameEngineGL::BInitializeGraphics()
 #else	
 	void CGameEngineGL::AdjustViewport()
 	{
-		NSRect viewBounds = { { 0, 0 }, { static_cast<CGFloat>(m_nWindowWidth), static_cast<CGFloat>(m_nWindowHeight) } };
-		
-		if( !NSEqualRects( [m_view bounds], viewBounds ) )
-		{
-			m_nWindowWidth = [m_view bounds].size.width;
-			m_nWindowHeight = [m_view bounds].size.height;			
-		}
+		NSRect viewBounds = [m_view convertRectToBacking:m_view.bounds];
+		m_nWindowWidth = viewBounds.size.width;
+		m_nWindowHeight = viewBounds.size.height;
 
 		// Perspective
 		glMatrixMode(GL_PROJECTION);

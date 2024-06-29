@@ -39,6 +39,7 @@ class CHTMLSurface;
 class CRemotePlayList;
 class CItemStore;
 class COverlayExamples;
+class CTimeline;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -140,6 +141,7 @@ struct OverlayExample_t
 		k_EOverlayExampleItem_ActivateGameOverlay,
 		k_EOverlayExampleItem_ActivateGameOverlayToUser,
 		k_EOverlayExampleItem_ActivateGameOverlayToWebPage,
+		k_EOverlayExampleItem_ActivateGameOverlayToWebPageModal,
 		k_EOverlayExampleItem_ActivateGameOverlayToStore,
 		// k_EOverlayExampleItem_ActivateGameOverlayRemotePlayTogetherInviteDialog,
 		k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString,
@@ -168,6 +170,8 @@ public:
 
 	// Run a game frame
 	void RunFrame();
+
+	void RenderTimer();
 
 	// Service calls that need to happen less frequently than every frame (e.g. every second)
 	void RunOccasionally();
@@ -250,6 +254,7 @@ public:
 
 	void ExecCommandLineConnect( const char *pchServerAddress, const char *pchLobbyID );
 
+	void SetShowTimer( bool bShowTimer ) { m_bShowTimer = bShowTimer; }
 private:
 
 	// Receive a response from the server for a connection attempt
@@ -374,6 +379,11 @@ private:
 	// keep track of if we opened the overlay for a gamewebcallback
 	bool m_bSentWebOpen;
 
+	// true if we want to show an on-screen timer in our main menu
+	bool m_bShowTimer;
+	uint32 m_unTicksAtLaunch;
+	HGAMEFONT m_hTimerFont;
+
 	// simple class to marshal callbacks from pinging a game server
 	class CGameServerPing : public ISteamMatchmakingPingResponse
 	{
@@ -448,6 +458,7 @@ private:
 	std::map<int, HGAMETEXTURE> m_MapSteamImagesToTextures;
 
 	CStatsAndAchievements *m_pStatsAndAchievements;
+	CTimeline *m_pTimeline;
 
 	CLeaderboards *m_pLeaderboards;
 	CFriendsList *m_pFriendsList;

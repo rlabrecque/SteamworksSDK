@@ -23,7 +23,7 @@
 	extern IGameEngine *CreateGameEngineOSX();
 #elif defined(SDL)
 	#include "GameEngine.h"
-	extern IGameEngine *CreateGameEngineSDL( );
+	extern IGameEngine *CreateGameEngineSDL();
 #endif
 
 #include "SpaceWarClient.h"
@@ -115,13 +115,15 @@ bool ParseCommandLine( const char *pchCmdLine, const char **ppchServerAddress, c
 //-----------------------------------------------------------------------------
 // Purpose: Main loop code shared between all platforms
 //-----------------------------------------------------------------------------
-void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const char *pchLobbyID )
+void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const char *pchLobbyID, bool bShowTimer )
 {
 	// Make sure it initialized ok
 	if ( pGameEngine->BReadyForUse() )
 	{
 		// Initialize the game
 		CSpaceWarClient *pGameClient = new CSpaceWarClient( pGameEngine );
+
+		pGameClient->SetShowTimer( bShowTimer );
 
 		// Black background
 		pGameEngine->SetBackgroundColor( 0, 0, 0, 0 );
@@ -196,9 +198,13 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// This will also load the in-game steam overlay dll into your process.  That dll is normally
 	// injected by steam when it launches games, but by calling this you cause it to always load,
 	// even when not launched via steam.
-	if ( !SteamAPI_Init() )
+	SteamErrMsg errMsg = { 0 };
+	if ( SteamAPI_InitEx( &errMsg ) != k_ESteamAPIInitResult_OK )
 	{
-		OutputDebugString( "SteamAPI_Init() failed\n" );
+		OutputDebugString( "SteamAPI_Init() failed: " );
+		OutputDebugString( errMsg );
+		OutputDebugString( "\n" );
+
 		Alert( "Fatal Error", "Steam must be running to play this game (SteamAPI_Init() failed).\n" );
 		return EXIT_FAILURE;
 	}
@@ -230,6 +236,8 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 			ParseCommandLine( szCommandLine, &pchServerAddress, &pchLobbyID );
 		}
 	}
+
+	bool bShowTimer = !!strstr( pchCmdLine, "-timer" );
 
 	// do a DRM self check
 	Steamworks_SelfCheck();
@@ -271,7 +279,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	SteamInput()->SetInputActionManifestFilePath( rgchFullPath );
 
 	// This call will block and run until the game exits
-	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID );
+	RunGameLoop( pGameEngine, pchServerAddress, pchLobbyID, bShowTimer );
 
 	// Shutdown the SteamAPI
 	SteamAPI_Shutdown();

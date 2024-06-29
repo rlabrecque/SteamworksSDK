@@ -3473,7 +3473,8 @@ HRESULT IDirect3DDevice9::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVert
 	//	each one is a cursor that gets bumped by decls.
 	uint	streamOffsets[ D3D_MAX_STREAMS ];
 	uint	streamCount = 0;
-	
+	(void)streamCount;
+
 	uint	attribMap[16];
 	uint	attribMapIndex = 0;
 	memset( attribMap, 0xFF, sizeof( attribMap ) );

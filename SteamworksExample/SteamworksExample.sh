@@ -7,14 +7,26 @@ TOP=$(cd "${0%/*}" && echo ${PWD})
 
 PROGRAM="${TOP}/SteamworksExampleLinux"
 
-# Steam sets this environment variable when launching games
-if [ "$STEAM_RUNTIME" = "" ]; then
-    export STEAM_RUNTIME="${TOP}/../../tools/linux/runtime/i386"
-    export LD_LIBRARY_PATH="${STEAM_RUNTIME}/lib/i386-linux-gnu:${STEAM_RUNTIME}/lib:${STEAM_RUNTIME}/usr/lib/i386-linux-gnu:${STEAM_RUNTIME}/usr/lib:${LD_LIBRARY_PATH}"
+log () {
+    ( echo "[$$]: $*" >&2 ) || :
+}
+
+# Require LDLP scout runtime environment
+if [ -n "${STEAM_RUNTIME-}" ]; then
+	log "Detected scout LDLP runtime."
+	# continue
+else
+	log "Relaunch under scout LDLP runtime."
+	log exec "$HOME/.steam/bin/steam-runtime/run.sh" "$0" "$@"
+	exec "$HOME/.steam/bin/steam-runtime/run.sh" "$0" "$@"
+	# unreachable
 fi
 
-# Add the current directory to the library path to pick up libsteam_api.so
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:."
+# The public SDK binary links with -Wl,--rpath=$ORIGIN and doesn't need this,
+# But the binary produced in-tree at Valve does
+export LD_LIBRARY_PATH=${TOP}:${LD_LIBRARY_PATH-}
+
+cd "${TOP}"
 
 exec "${PROGRAM}" "$@"
 

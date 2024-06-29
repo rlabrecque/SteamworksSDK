@@ -37,9 +37,12 @@ CSpaceWarServer::CSpaceWarServer( IGameEngine *pGameEngine )
 
 	// !FIXME! We need a way to pass the dedicated server flag here!
 
-	if ( !SteamGameServer_Init( unIP, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION ) )
+	SteamErrMsg errMsg = { 0 };
+	if ( SteamGameServer_InitEx( unIP, SPACEWAR_SERVER_PORT, usMasterServerUpdaterPort, eMode, SPACEWAR_SERVER_VERSION, &errMsg ) != k_ESteamAPIInitResult_OK )
 	{
-		OutputDebugString( "SteamGameServer_Init call failed\n" );
+		OutputDebugString( "SteamGameServer_Init call failed: " );
+		OutputDebugString( errMsg );
+		OutputDebugString( "\n" );
 	}
 
 	if ( SteamGameServer() )
