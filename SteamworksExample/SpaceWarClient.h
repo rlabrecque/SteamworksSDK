@@ -149,6 +149,8 @@ struct OverlayExample_t
 		k_EOverlayExampleItem_RequestKeyboard,
 		k_EOverlayExampleItem_Notification_SetInset,
 		k_EOverlayExampleItem_Notification_SetPosition,
+		k_EOverlayExampleItem_Timeline_OpenOverlayToTimelineEvent,
+		k_EOverlayExampleItem_Timeline_OpenOverlayToGamePhase,
 	};
 
 	EOverlayExampleItem m_eItem;
@@ -255,6 +257,9 @@ public:
 	void ExecCommandLineConnect( const char *pchServerAddress, const char *pchLobbyID );
 
 	void SetShowTimer( bool bShowTimer ) { m_bShowTimer = bShowTimer; }
+
+	uint32 GetLastGamePhaseID() const { return m_unLastGamePhaseID; }
+	uint64 GetLastCrashIntoSunEvent() const { return m_ulLastCrashIntoSunEvent;  }
 private:
 
 	// Receive a response from the server for a connection attempt
@@ -309,6 +314,9 @@ private:
 	// Set appropriate rich presence keys for a player who is currently in-game and
 	// return the value that should go in steam_display
 	const char *SetInGameRichPresence() const;
+
+	// Sets the player scores in the game phase
+	void UpdateScoreInGamePhase( bool bFinal );
 
 	// load a workshop item from file
 	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
@@ -459,6 +467,9 @@ private:
 
 	CStatsAndAchievements *m_pStatsAndAchievements;
 	CTimeline *m_pTimeline;
+	uint32 m_unGamePhaseID = 0;
+	uint32 m_unLastGamePhaseID = 0;
+	uint64 m_ulLastCrashIntoSunEvent = 0;
 
 	CLeaderboards *m_pLeaderboards;
 	CFriendsList *m_pFriendsList;

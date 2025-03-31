@@ -2805,6 +2805,7 @@ bool	GLMDetectGDB( void )			// aka AmIBeingDebugged()
   
     size = sizeof(info);  
     junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);  
+    (void)junk;
   
     assert(junk == 0);  
   
@@ -2816,9 +2817,6 @@ bool	GLMDetectGDB( void )			// aka AmIBeingDebugged()
 	return result;
 }
 
-
-static uint		g_glmDebugChannelMask = 0;		// which output channels are available (can be more than one)
-static uint		g_glmDebugFlavorMask = 0;		// which message flavors are enabled for output (can be more than one)
 
 uint	GLMDetectAvailableChannels( void )
 {
@@ -2845,9 +2843,11 @@ uint	GLMDetectAvailableChannels( void )
 }
 
 
-static bool	g_debugInitDone	= false;
-
 #if GLMDEBUG
+
+static bool		g_debugInitDone	= false;
+static uint		g_glmDebugChannelMask = 0;		// which output channels are available (can be more than one)
+static uint		g_glmDebugFlavorMask = 0;		// which message flavors are enabled for output (can be more than one)
 
 	// following funcs vanish if GLMDEBUG not set
 

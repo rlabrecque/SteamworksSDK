@@ -847,6 +847,12 @@ void CSpaceWarServer::CheckForCollisions()
 
 		if ( m_rgpShips[i]->BCollidesWith( m_pSun ) )
 		{
+			{
+				MsgServerPlayerHitSun_t msg;
+				msg.SetSteamID( m_rgClientData[ i ].m_SteamIDUser );
+				BSendDataToClient( i, ( char * )&msg, sizeof( msg ) );
+			}
+
 			rgbExplodingShips[i] |= 1;
 		}
 

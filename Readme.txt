@@ -10,6 +10,26 @@ website at: http://partner.steamgames.com
 
 
 ----------------------------------------------------------------
+v1.61 8th November 2024
+----------------------------------------------------------------
+
+ISteamTimeline:
+* Renamed Set/ClearTimelineStateDescription to Set/ClearTimelineTooltip to make it more clear where the text will appear.
+* Renamed AddTimelineEvent to AddInstantaneousTimelineEvent and removed the duration parameter.
+* Added AddRangeTimelineEvent for adding a a timeline event that happens over a period of time.
+* Added Start/Update/EndRangeTimelineEvent calls for situations where the caller doesn't know when the event will end before creating it.
+* Added RemoveTimelineEvent to let the game remove an event it previously added
+* Added DoesEventRecordingExist/OpenOverlayToTimelineEvent, which allow the game to show an event in the Steam overlay
+* Added Start/EndGamePhase, along with some supporting functions, to let the game identify meaningful time ranges like multiplayer matches or chapters in a single player game. See the Timeline documentation for more information.
+
+ISteamUserStats:
+* RequestCurrentStats is no longer necessary and has been removed. The Steam Client will synchronize this data before your game launches.
+
+ISteamInput:
+* Added glyph support for the Wireless HORIPAD for Steam
+
+
+----------------------------------------------------------------
 v1.60 19th June 2024
 ----------------------------------------------------------------
 

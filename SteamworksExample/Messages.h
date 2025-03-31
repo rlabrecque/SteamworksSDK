@@ -23,6 +23,7 @@ enum EMessage
 	k_EMsgServerUpdateWorld = k_EMsgServerBegin+4,
 	k_EMsgServerExiting = k_EMsgServerBegin+5,
 	k_EMsgServerPingResponse = k_EMsgServerBegin+6,
+	k_EMsgServerPlayerHitSun = k_EMsgServerBegin+7,
 
 	// Client messages
 	k_EMsgClientBegin = 500,
@@ -201,6 +202,20 @@ struct MsgVoiceChatData_t
 private:
 	const DWORD m_dwMessageType;
 	uint32 m_uDataLength;
+	CSteamID from_steamID;
+};
+
+// A notification to the client that this player collided with the sun
+struct MsgServerPlayerHitSun_t
+{
+	MsgServerPlayerHitSun_t() : m_dwMessageType( LittleDWord( k_EMsgServerPlayerHitSun ) ) {}
+	DWORD GetMessageType() const { return LittleDWord( m_dwMessageType ); }
+
+	void SetSteamID( CSteamID steamID ) { from_steamID = steamID; }
+	CSteamID GetSteamID() const { return from_steamID; }
+
+private:
+	const DWORD m_dwMessageType;
 	CSteamID from_steamID;
 };
 

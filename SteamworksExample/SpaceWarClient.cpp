@@ -292,6 +292,12 @@ void CSpaceWarClient::DisconnectFromServer()
 		SteamUser()->BSetDurationControlOnlineState( k_EDurationControlOnlineState_Offline );
 
 		m_eConnectedStatus = k_EClientNotConnected;
+
+		UpdateScoreInGamePhase( true );
+		SteamTimeline()->EndGamePhase();
+
+		m_unLastGamePhaseID = m_unGamePhaseID;
+		m_unGamePhaseID = 0;
 	}
 	if ( m_pP2PAuthedGame )
 	{
@@ -454,9 +460,15 @@ void CSpaceWarClient::OnReceiveServerUpdate( ServerSpaceWarUpdateData_t *pUpdate
 	}
 
 	// Update scores
+	bool bScoresChanged = false;
 	for( int i=0; i < MAX_PLAYERS_PER_SERVER; ++i )
 	{
 		m_rguPlayerScores[i] = pUpdateData->GetPlayerScore(i);
+		bScoresChanged = bScoresChanged || m_rguPlayerScores[ i ] != pUpdateData->GetPlayerScore( i );
+	}
+	if ( bScoresChanged )
+	{
+		UpdateScoreInGamePhase( false );
 	}
 
 	// Update who won last
@@ -678,6 +690,12 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 	// Update when we last retried the connection, as well as the last packet received time so we won't timeout too soon,
 	// and so we will retry at appropriate intervals if packets drop
 	m_ulLastNetworkDataReceivedTime = m_ulLastConnectionAttemptRetryTime = m_pGameEngine->GetGameTickCount();
+
+	SteamTimeline()->StartGamePhase();
+
+	// When you call this function for real, you should use an ID that you'll refer back to
+	m_unGamePhaseID = Plat_GetTicks();
+	//SteamTimeline()->SetGamePhaseID( std::to_string( m_unGamePhaseID ).c_str() );
 }
 
 
@@ -839,6 +857,15 @@ void CSpaceWarClient::ReceiveNetworkData()
 			m_pP2PAuthedGame->HandleP2PSendingTicket( message->GetData() );
 			break;
 			
+		case k_EMsgServerPlayerHitSun:
+		{
+			TimelineEventHandle_t ulEvent = SteamTimeline()->StartRangeTimelineEvent( "Hit Sun", "This description will be replaced", "steam_8", 8, 0, k_ETimelineEventClipPriority_None );
+			SteamTimeline()->UpdateRangeTimelineEvent( ulEvent, nullptr, "It was too hot to handle", "steam_starburst", 10, k_ETimelineEventClipPriority_Standard );
+			SteamTimeline()->EndRangeTimelineEvent( ulEvent, 3.f );
+			m_ulLastCrashIntoSunEvent = 0;
+		}
+		break;
+
 		default:
 			OutputDebugString("Unhandled message from server\n");
 			break;
@@ -1224,6 +1251,7 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 
 		pchSteamRichPresenceDisplay = SetInGameRichPresence();
 		bDisplayScoreInRichPresence = true;
+		UpdateScoreInGamePhase( true );
 	}
 	else if ( m_eGameState == k_EClientLeaderboards )
 	{
@@ -1317,6 +1345,7 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 	}
 
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Handles notification of a steam ipc failure
@@ -2777,4 +2806,50 @@ void CSpaceWarClient::DrawWorkshopItems()
 		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
 	}
 	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Draws PublishFileID, title & description for each subscribed Workshop item
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::UpdateScoreInGamePhase( bool bFinal )
+{
+	std::string strScores;
+	uint32 unHighScore = 0;
+	for ( int i = 0; i < MAX_PLAYERS_PER_SERVER; i++ )
+	{
+		if ( !strScores.empty() )
+			strScores += " / ";
+		strScores += std::to_string( m_rguPlayerScores[ i ] );
+		unHighScore = unHighScore < m_rguPlayerScores[ i ] ? m_rguPlayerScores[ i ] : unHighScore;
+	}
+
+	uint32 unCountAtHighScore = 0;
+	for ( int i = 0; i < MAX_PLAYERS_PER_SERVER; i++ )
+	{
+		if ( m_rguPlayerScores[ i ] == unHighScore )
+			unCountAtHighScore++;
+	}
+
+	std::string strPlayerScore = "0";
+
+	SteamTimeline()->SetGamePhaseAttribute( "Scores", strScores.c_str(), 1 );
+	SteamTimeline()->SetGamePhaseAttribute( "Player Score", strPlayerScore.c_str(), 2 );
+
+	if ( BLocalPlayerWonLastGame() )
+	{
+		SteamTimeline()->AddGamePhaseTag( "Won", "steam_ribbon", "Game Outcome", 3 );
+	}
+	else if ( unCountAtHighScore == 1 && unHighScore > 0 )
+	{
+		SteamTimeline()->AddGamePhaseTag( "Lost", "steam_death", "Game Outcome", 3 );
+	}
+	else if ( unCountAtHighScore > 1 && unHighScore > 0 )
+	{
+		SteamTimeline()->AddGamePhaseTag( "Tied", "steam_triangle", "Game Outcome", 3 );
+	}
+	else
+	{
+		SteamTimeline()->AddGamePhaseTag( "Stalemate", "steam_minus", "Game Outcome", 3 );
+	}
 }

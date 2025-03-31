@@ -42,7 +42,6 @@ CStatsAndAchievements::CStatsAndAchievements( IGameEngine *pGameEngine )
 	m_pSteamUser( NULL ),
 	m_pSteamUserStats( NULL ),
 	m_GameID( SteamUtils()->GetAppID() ),
-	m_CallbackUserStatsReceived( this, &CStatsAndAchievements::OnUserStatsReceived ),
 	m_CallbackUserStatsStored( this, &CStatsAndAchievements::OnUserStatsStored ),
 	m_CallbackAchievementStored( this, &CStatsAndAchievements::OnAchievementStored ),
 	m_CallbackPS3TrophiesInstalled( this, &CStatsAndAchievements::OnPS3TrophiesInstalled )
@@ -50,7 +49,6 @@ CStatsAndAchievements::CStatsAndAchievements( IGameEngine *pGameEngine )
 	m_pSteamUser = SteamUser();
 	m_pSteamUserStats = SteamUserStats();
 
-	m_bRequestedStats = false;
 	m_bStatsValid = false;
 	m_bStoreStats = false;
 
@@ -102,29 +100,9 @@ void CStatsAndAchievements::RunFrame()
 		m_bStartedPS3TrophyInstall = true;
 #endif
 	}
-	else if ( !m_bRequestedStats )
-	{		
-		// Is Steam Loaded? if no, can't get stats, done
-		if ( NULL == m_pSteamUserStats || NULL == m_pSteamUser )
-		{
-			m_bRequestedStats = true;
-			return;
-		}
-
-		LoadUserStatsOnPS3();
-
-		// If yes, request our stats
-		bool bSuccess = m_pSteamUserStats->RequestCurrentStats();
-		
-		// This function should only return false if we weren't logged in, and we already checked that.
-		// But handle it being false again anyway, just ask again later.
-		m_bRequestedStats = bSuccess;
-	}
 
 	if ( !m_bStatsValid )
-		return;
-
-	// Get info from sources
+		LoadUserStats();
 
 	// Evaluate achievements
 	for ( int iAch = 0; iAch < ARRAYSIZE( g_rgAchievements ); ++iAch )
@@ -290,49 +268,29 @@ void CStatsAndAchievements::StoreStatsIfNecessary()
 // Purpose: We have stats data from Steam. It is authoritative, so update
 //			our data with those results now.
 //-----------------------------------------------------------------------------
-void CStatsAndAchievements::OnUserStatsReceived( UserStatsReceived_t *pCallback )
+void CStatsAndAchievements::LoadUserStats()
 {
 	if ( !m_pSteamUserStats )
 		return;
 
-	// we may get callbacks for other games' stats arriving, ignore them
-	if ( m_GameID.ToUint64() == pCallback->m_nGameID )
+	// load achievements
+	for ( int iAch = 0; iAch < ARRAYSIZE( g_rgAchievements ); ++iAch )
 	{
-		if ( k_EResultOK == pCallback->m_eResult )
-		{
-			OutputDebugString( "Received stats and achievements from Steam\n" );
-
-			m_bStatsValid = true;
-
-			// load achievements
-			for ( int iAch = 0; iAch < ARRAYSIZE( g_rgAchievements ); ++iAch )
-			{
-				Achievement_t &ach = g_rgAchievements[iAch];
-				m_pSteamUserStats->GetAchievement( ach.m_pchAchievementID, &ach.m_bAchieved );
-				sprintf_safe( ach.m_rgchName, "%s", 
-					m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "name" ) );
-				sprintf_safe( ach.m_rgchDescription, "%s", 
-					m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "desc" ) );			
-			}
-
-			// load stats
-			m_pSteamUserStats->GetStat( "NumGames", &m_nTotalGamesPlayed );
-			m_pSteamUserStats->GetStat( "NumWins", &m_nTotalNumWins );
-			m_pSteamUserStats->GetStat( "NumLosses", &m_nTotalNumLosses );
-			m_pSteamUserStats->GetStat( "FeetTraveled", &m_flTotalFeetTraveled );
-			m_pSteamUserStats->GetStat( "MaxFeetTraveled", &m_flMaxFeetTraveled );
-			m_pSteamUserStats->GetStat( "AverageSpeed", &m_flAverageSpeed );
-
-			SaveUserStatsOnPS3();
-		}
-		else
-		{
-			char buffer[128];
-			sprintf_safe( buffer, "RequestStats - failed, %d\n", pCallback->m_eResult );
-			buffer[ sizeof(buffer) - 1 ] = 0;
-			OutputDebugString( buffer );
-		}
+		Achievement_t &ach = g_rgAchievements[iAch];
+		m_pSteamUserStats->GetAchievement( ach.m_pchAchievementID, &ach.m_bAchieved );
+		sprintf_safe( ach.m_rgchName, "%s", m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "name" ) );
+		sprintf_safe( ach.m_rgchDescription, "%s", m_pSteamUserStats->GetAchievementDisplayAttribute( ach.m_pchAchievementID, "desc" ) );			
 	}
+
+	// load stats
+	m_pSteamUserStats->GetStat( "NumGames", &m_nTotalGamesPlayed );
+	m_pSteamUserStats->GetStat( "NumWins", &m_nTotalNumWins );
+	m_pSteamUserStats->GetStat( "NumLosses", &m_nTotalNumLosses );
+	m_pSteamUserStats->GetStat( "FeetTraveled", &m_flTotalFeetTraveled );
+	m_pSteamUserStats->GetStat( "MaxFeetTraveled", &m_flMaxFeetTraveled );
+	m_pSteamUserStats->GetStat( "AverageSpeed", &m_flAverageSpeed );
+
+	m_bStatsValid = true;
 }
 
 
@@ -354,11 +312,7 @@ void CStatsAndAchievements::OnUserStatsStored( UserStatsStored_t *pCallback )
 			// One or more stats we set broke a constraint. They've been reverted,
 			// and we should re-iterate the values now to keep in sync.
 			OutputDebugString( "StoreStats - some failed to validate\n" );
-			// Fake up a callback here so that we re-load the values.
-			UserStatsReceived_t callback;
-			callback.m_eResult = k_EResultOK;
-			callback.m_nGameID = m_GameID.ToUint64();
-			OnUserStatsReceived( &callback );
+			LoadUserStats();
 		}
 		else
 		{

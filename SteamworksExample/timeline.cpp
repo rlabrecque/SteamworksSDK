@@ -76,7 +76,7 @@ void CTimeline::OnGameStateChange( EClientGameState eNewState )
 			float flDurationSeconds = (float)unSessionDuration / 1000.f;
 			float flStartOffsetSeconds = -flDurationSeconds;
 
-			SteamTimeline()->AddTimelineEvent( "steam_starburst", "In Match", nullptr, 100, flStartOffsetSeconds, flDurationSeconds, k_ETimelineEventClipPriority_None );
+			SteamTimeline()->AddRangeTimelineEvent( "In Match", nullptr, "steam_starburst", 100, flStartOffsetSeconds, flDurationSeconds, k_ETimelineEventClipPriority_None );
 		}
 
 		m_bInGame = bInGameNow;
@@ -85,11 +85,11 @@ void CTimeline::OnGameStateChange( EClientGameState eNewState )
 	// add a highlight marker every time the player wins
 	if ( eNewState == k_EClientGameWinner && SpaceWarClient()->BLocalPlayerWonLastGame() )
 	{
-		SteamTimeline()->AddTimelineEvent( "steam_attack", "Winner!", "You won a round!", 10, 0, 0, k_ETimelineEventClipPriority_Standard );
+		SteamTimeline()->AddInstantaneousTimelineEvent( "Winner!", "You won a round!", "steam_attack", 10, 0, k_ETimelineEventClipPriority_Standard );
 	}
 	else if ( eNewState == k_EClientGameDraw )
 	{
-		SteamTimeline()->AddTimelineEvent( "steam_defend", "Draw", "This round was a draw.", 5, 0, 0, k_ETimelineEventClipPriority_None );
+		SteamTimeline()->AddInstantaneousTimelineEvent( "Draw", "This round was a draw.", "steam_defend", 5, 0, k_ETimelineEventClipPriority_None );
 	}
 }
 
@@ -113,7 +113,7 @@ void CTimeline::RunFrame()
 			// max string length is "95:00"
 			char rgchBuffer[ 6 ];
 			sprintf_safe( rgchBuffer, "%02d:00", unTimestampIndex * k_unMinutesBetweenTimestamps );
-			SteamTimeline()->SetTimelineStateDescription( rgchBuffer, 0 );
+			SteamTimeline()->SetTimelineTooltip( rgchBuffer, 0 );
 
 			m_unLastTimestampIndexDisplayed = unTimestampIndex;
 		}

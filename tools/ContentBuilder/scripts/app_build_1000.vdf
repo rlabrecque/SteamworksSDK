@@ -7,6 +7,7 @@
 	"SetLive" "AlphaTest" // set this build live on beta branch AlphaTest
 	"ContentRoot" "..\content\" // content root folder relative to this script file
 	"BuildOutput" "D:\build_output\" // put build cache and log files on different drive for better performance
+	"verbose" "0" // spew more build details in console
 	"Depots"
 	{
 		// file mapping instructions for each depot are in separate script files

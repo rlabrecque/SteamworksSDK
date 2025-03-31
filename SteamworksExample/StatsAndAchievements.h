@@ -56,13 +56,13 @@ public:
 	float GetGameFeetTraveled() { return m_flGameFeetTraveled; }
 	double GetGameDurationSeconds() { return m_flGameDurationSeconds; }
 
-	STEAM_CALLBACK( CStatsAndAchievements, OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
 	STEAM_CALLBACK( CStatsAndAchievements, OnUserStatsStored, UserStatsStored_t, m_CallbackUserStatsStored );
 	STEAM_CALLBACK( CStatsAndAchievements, OnAchievementStored, UserAchievementStored_t, m_CallbackAchievementStored );
 	STEAM_CALLBACK( CStatsAndAchievements, OnPS3TrophiesInstalled, PS3TrophiesInstalled_t, m_CallbackPS3TrophiesInstalled );
 	
-
 private:
+
+	void LoadUserStats();
 
 	// Determine if we get this achievement now
 	void EvaluateAchievement( Achievement_t &achievement );
@@ -96,7 +96,6 @@ private:
 	HGAMEFONT m_hDisplayFont;
 
 	// Did we get the stats from Steam?
-	bool m_bRequestedStats;
 	bool m_bStatsValid;
 
 	// Should we store stats this frame?

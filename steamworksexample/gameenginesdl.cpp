@@ -23,12 +23,12 @@ CGameEngineGL *g_engine;		// dxabstract will use this.. it is set by the engine 
 IGameEngine *CreateGameEngineSDL( )
 {
 	static CGameEngineGL* s_pGameEngine = NULL;
-	
+
 	if (!s_pGameEngine)
 	{
 		s_pGameEngine = new CGameEngineGL( );
 	}
-	
+
 	return s_pGameEngine;
 }
 
@@ -43,24 +43,24 @@ struct Packet_t
 	void *pData;
 };
 
-class CVoiceContext 
+class CVoiceContext
 {
 public:
-	CVoiceContext() 
+	CVoiceContext()
 	{
 		alGenBuffers( ARRAYSIZE(m_buffers), m_buffers );
 		alGenSources( 1, &m_nSource );
-		
+
 		alSourcei( m_nSource, AL_LOOPING, AL_FALSE );
-		
+
 		for (int i = 0; i < ARRAYSIZE(m_buffers); i++ )
-			alSourcei( m_nSource, AL_BUFFER, m_buffers[i] ); 
-		
+			alSourcei( m_nSource, AL_BUFFER, m_buffers[i] );
+
 		m_nNextFreeBuffer = 0;
 	}
 	virtual ~CVoiceContext()
 	{
-		// 
+		//
 	}
 
 	ALuint m_buffers[4];
@@ -87,7 +87,7 @@ power_of_two(int input)
 CGameEngineGL::CGameEngineGL( )
 {
 	g_engine = this;
-	
+
 	m_bEngineReadyForUse = false;
 	m_bShuttingDown = false;
 	m_window = NULL;
@@ -220,7 +220,7 @@ void CGameEngineGL::Shutdown()
 
 	m_MapStrings.clear();
 	m_MapTextures.clear();
-	
+
 	m_dwLinesToFlush = 0;
 	m_dwPointsToFlush = 0;
 	m_dwQuadsToFlush = 0;
@@ -233,7 +233,7 @@ void CGameEngineGL::Shutdown()
 bool CGameEngineGL::BInitializeAudio()
 {
 	m_palDevice = alcOpenDevice(NULL);
-	if ( m_palDevice ) 
+	if ( m_palDevice )
 	{
 		m_palContext = alcCreateContext( m_palDevice, NULL );
 		alcMakeContextCurrent( m_palContext );
@@ -285,7 +285,7 @@ bool CGameEngineGL::BInitializeGraphics()
 		OutputDebugString( "\n" );
 		return false;
 	}
-	
+
 	GLenum err = glewInit();
 	if( err != GLEW_OK )
 	{
@@ -326,13 +326,13 @@ bool CGameEngineGL::BInitializeGraphics()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef( 0, 0, 0 );
-	
+
 	glMatrixMode( GL_TEXTURE );
 	glLoadIdentity();
 	glTranslatef( 0, 0, 0 );
 
 	glDepthRange( 0.0f, 1.0f );
-	
+
 	AdjustViewport();
 
 	return true;
@@ -348,7 +348,7 @@ void CGameEngineGL::AdjustViewport()
 	glLoadIdentity();
 	glOrtho( 0, m_nWindowWidth, m_nWindowHeight, 0, -1.0f, 1.0f );
 	glTranslatef( 0, 0, 0 );
-	
+
 	// View port has changed as well
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -427,7 +427,7 @@ void CGameEngineGL::SetBackgroundColor( short a, short r, short g, short b )
 bool CGameEngineGL::StartFrame()
 {
 	AdjustViewport();
-    
+
 	// Pump system callbacks
 	MessagePump();
 
@@ -470,7 +470,7 @@ void CGameEngineGL::EndFrame()
 
 	// Swap buffers now that everything is flushed
 	SDL_GL_SwapWindow( m_window );
-    
+
 	RunAudio();
 }
 
@@ -484,7 +484,7 @@ bool CGameEngineGL::BDrawLine( float xPos0, float yPos0, DWORD dwColor0, float x
 		return false;
 
 	// Check if we are out of room and need to flush the buffer
-	if ( m_dwLinesToFlush == LINE_BUFFER_TOTAL_SIZE )	
+	if ( m_dwLinesToFlush == LINE_BUFFER_TOTAL_SIZE )
 	{
 		BFlushLineBuffer();
 	}
@@ -543,7 +543,7 @@ bool CGameEngineGL::BDrawPoint( float xPos, float yPos, DWORD dwColor )
 		return false;
 
 	// Check if we are out of room and need to flush the buffer
-	if ( m_dwPointsToFlush == POINT_BUFFER_TOTAL_SIZE )	
+	if ( m_dwPointsToFlush == POINT_BUFFER_TOTAL_SIZE )
 	{
 		BFlushPointBuffer();
 	}
@@ -558,7 +558,7 @@ bool CGameEngineGL::BDrawPoint( float xPos, float yPos, DWORD dwColor )
 	m_rgflPointsColorData[dwOffset+1] = COLOR_GREEN( dwColor );
 	m_rgflPointsColorData[dwOffset+2] = COLOR_BLUE( dwColor );
 	m_rgflPointsColorData[dwOffset+3] = COLOR_ALPHA( dwColor );
-	
+
 	++m_dwPointsToFlush;
 
 	return true;
@@ -581,7 +581,7 @@ bool CGameEngineGL::BFlushPointBuffer()
 
 		m_dwPointsToFlush = 0;
 	}
- 
+
 	return true;
 }
 
@@ -622,7 +622,7 @@ bool CGameEngineGL::BDrawTexturedRect( float xPos0, float yPos0, float xPos1, fl
 
 	// Check if we are out of room and need to flush the buffer, or if our texture is changing
 	// then we also need to flush the buffer.
-	if ( m_dwQuadsToFlush == QUAD_BUFFER_TOTAL_SIZE || m_hLastTexture != hTexture )	
+	if ( m_dwQuadsToFlush == QUAD_BUFFER_TOTAL_SIZE || m_hLastTexture != hTexture )
 	{
 		BFlushQuadBuffer();
 	}
@@ -698,7 +698,7 @@ bool CGameEngineGL::BDrawTexturedQuad( float xPos0, float yPos0, float xPos1, fl
 
 	// Check if we are out of room and need to flush the buffer, or if our texture is changing
 	// then we also need to flush the buffer.
-	if ( m_dwQuadsToFlush == QUAD_BUFFER_TOTAL_SIZE || m_hLastTexture != hTexture )	
+	if ( m_dwQuadsToFlush == QUAD_BUFFER_TOTAL_SIZE || m_hLastTexture != hTexture )
 	{
 		BFlushQuadBuffer();
 	}
@@ -784,7 +784,7 @@ bool CGameEngineGL::BFlushQuadBuffer()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Creates a new texture 
+// Purpose: Creates a new texture
 //-----------------------------------------------------------------------------
 HGAMETEXTURE CGameEngineGL::HCreateTexture( byte *pRGBAData, uint32 uWidth, uint32 uHeight, ETEXTUREFORMAT eTextureFormat )
 {
@@ -826,7 +826,7 @@ bool CGameEngineGL::UpdateTexture( HGAMETEXTURE texture, byte *pRGBAData, uint32
 {
 	if ( m_bShuttingDown )
 		return false;
-	
+
 	std::map<HGAMETEXTURE, TextureData_t>::iterator iter;
 	iter = m_MapTextures.find( texture );
 	if ( iter == m_MapTextures.end() )
@@ -834,14 +834,14 @@ bool CGameEngineGL::UpdateTexture( HGAMETEXTURE texture, byte *pRGBAData, uint32
 		OutputDebugString( "BDrawTexturedQuad called with invalid hTexture value\n" );
 		return false;
 	}
-	
+
 	glEnable( GL_TEXTURE_2D );
 	glBindTexture( GL_TEXTURE_2D, iter->second.m_uTextureID );
-	
+
 	// build our texture mipmaps
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, uWidth, uHeight, 0, eTextureFormat == eTextureFormat_RGBA ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE, (void *)pRGBAData );
 	glDisable( GL_TEXTURE_2D );
-	
+
 	return true;
 }
 
@@ -853,7 +853,7 @@ HGAMEFONT CGameEngineGL::HCreateFont( int nHeight, int nFontWeight, bool bItalic
 {
 	// For this sample we include a single font
 	pchFont = "DejaVuSans.ttf";
-	
+
 	TTF_Font *font = TTF_OpenFont( pchFont, nHeight );
 	if ( !font )
 	{
@@ -1019,7 +1019,7 @@ void CGameEngineGL::MessagePump()
     {
 	if ( SDL_PollEvent(&event) <= 0 )
 		break;
-	
+
 	if ( event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP )
 	{
 		DWORD dwVK = 0;
@@ -1103,15 +1103,15 @@ bool CGameEngineGL::BGetFirstKeyDown( DWORD *pdwVK )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 HGAMEVOICECHANNEL CGameEngineGL::HCreateVoiceChannel()
 {
 	m_unVoiceChannelCount++;
 	CVoiceContext* pVoiceContext = new CVoiceContext;
-    
+
 	m_MapVoiceChannel[m_unVoiceChannelCount] = pVoiceContext;
-	
+
 	return m_unVoiceChannelCount;
 }
 
@@ -1127,27 +1127,27 @@ void CGameEngineGL::RunAudio()
 		ALint nQueued, nProcessed;
 		alGetSourcei( pVoice->m_nSource, AL_BUFFERS_QUEUED, &nQueued );
 		alGetSourcei( pVoice->m_nSource, AL_BUFFERS_PROCESSED, &nProcessed );
-		
+
 		if ( ( nQueued == nBufferCount ) && ( nProcessed == 0 ) )
 		{	// No room at the inn
 			continue;
 		}
-		
+
 		ALuint nBufferID;
 		for ( int i = 0; i < nProcessed; i++ )
 			alSourceUnqueueBuffers( pVoice->m_nSource, 1, &nBufferID );
-		
+
 		int nMaxToQueue = nBufferCount - nQueued + nProcessed;
 		bool bQueued = false;
-		
+
 		while ( nMaxToQueue && !pVoice->m_pending.empty() )
 		{
 			Packet_t &packet = pVoice->m_pending.front();
-			
+
 			nBufferID = pVoice->m_buffers[ pVoice->m_nNextFreeBuffer ];
 			alBufferData( nBufferID, AL_FORMAT_MONO16, packet.pData, packet.unSize, VOICE_OUTPUT_SAMPLE_RATE_IDEAL );
 			pVoice->m_nNextFreeBuffer = (pVoice->m_nNextFreeBuffer + 1 ) % nBufferCount;
-			
+
             alSourceQueueBuffers( pVoice->m_nSource, 1, &nBufferID);
 
 			nMaxToQueue--;
@@ -1155,7 +1155,7 @@ void CGameEngineGL::RunAudio()
 			pVoice->m_pending.pop();
 			bQueued = true;
         }
-	
+
 		if ( bQueued && ( (nQueued-nProcessed) == 0 ) )
 		{
 			alSourcePlay( pVoice->m_nSource );
@@ -1165,7 +1165,7 @@ void CGameEngineGL::RunAudio()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CGameEngineGL::DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel )
 {
@@ -1174,7 +1174,7 @@ void CGameEngineGL::DestroyVoiceChannel( HGAMEVOICECHANNEL hChannel )
 	if ( iter != m_MapVoiceChannel.end() )
 	{
 		CVoiceContext* pVoiceContext = iter->second;
-		
+
 		// free outstanding voice packets
 
 		while( !pVoiceContext->m_pending.empty() )
@@ -1221,7 +1221,7 @@ bool CGameEngineGL::BIsSteamInputDeviceActive( )
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -1263,7 +1263,7 @@ void CGameEngineGL::FindActiveSteamInputDevice( )
 	// a controller disconnecting and a different one reconnecting. Handles are guaranteed to be unique for
 	// a given controller, even across power cycles.
 
-	// See how many Steam Controllers are active. 
+	// See how many Steam Controllers are active.
 	ControllerHandle_t pHandles[STEAM_CONTROLLER_MAX_COUNT];
 	int nNumActive = SteamInput()->GetConnectedControllers( pHandles );
 
@@ -1387,7 +1387,7 @@ bool CGameEngineGL::BIsControllerActionActive( ECONTROLLERDIGITALACTION dwAction
 	// Actions are only 'active' when they're assigned to a control in an action set, and that action set is active.
 	if ( digitalData.bActive )
 		return digitalData.bState;
-	
+
 	return false;
 }
 
