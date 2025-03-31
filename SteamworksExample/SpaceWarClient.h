@@ -497,11 +497,6 @@ private:
 	STEAM_CALLBACK( CSpaceWarClient, OnGameJoinRequested, GameRichPresenceJoinRequested_t );
 	STEAM_CALLBACK( CSpaceWarClient, OnAvatarImageLoaded, AvatarImageLoaded_t );
 	STEAM_CALLBACK( CSpaceWarClient, OnNewUrlLaunchParameters, NewUrlLaunchParameters_t );
-
-	// callbacks for Steam connection state
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersConnected, SteamServersConnected_t );
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServersDisconnected, SteamServersDisconnected_t );
-	STEAM_CALLBACK( CSpaceWarClient, OnSteamServerConnectFailure, SteamServerConnectFailure_t );
 	STEAM_CALLBACK( CSpaceWarClient, OnGameOverlayActivated, GameOverlayActivated_t );
 	
 	// callback when getting the results of a web call
@@ -527,7 +522,7 @@ private:
 			OnDurationControl( pParam );
 		}
 	}
-	CCallResult<CSpaceWarClient, DurationControl_t> m_SteamCallResultDurationControl;
+	CCallResult< CSpaceWarClient, DurationControl_t > m_SteamCallResultDurationControl;
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

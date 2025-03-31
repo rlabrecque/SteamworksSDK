@@ -8,7 +8,6 @@
 #include "stdafx.h"
 #include "SpaceWarClient.h"
 #include "SpaceWarServer.h"
-#include "connectingmenu.h"
 #include "MainMenu.h"
 #include "QuitMenu.h"
 #include "stdlib.h"
@@ -82,22 +81,8 @@ CSpaceWarClient::CSpaceWarClient( IGameEngine *pGameEngine )
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 {
-	// On PC/OSX we always know the user has a SteamID and is logged in already,
-	// as Steam enforces this before game launch.  On PS3 however the game must
-	// initiate the logon and we need to check the state here and block the user
-	// while Steam connects.
-	if ( SteamUser()->BLoggedOn() )
-	{
-		m_SteamIDLocalUser = SteamUser()->GetSteamID();
-		m_eGameState = k_EClientGameMenu;
-	}
-#ifdef _PS3
-	else
-	{
-		m_eGameState = k_EClientConnectingToSteam;
-		SteamUser()->LogOn( true );
-	}
-#endif
+	m_SteamIDLocalUser = SteamUser()->GetSteamID();
+	m_eGameState = k_EClientGameMenu;
 
 	g_pSpaceWarClient = this;
 	m_pGameEngine = pGameEngine;
@@ -148,9 +133,6 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 
 	// Initialize main menu
 	m_pMainMenu = new CMainMenu( pGameEngine );
-
-	// Initialize connecting menu
-	m_pConnectingMenu = new CConnectingMenu( pGameEngine );
 
 	// Initialize pause menu
 	m_pQuitMenu = new CQuitMenu( pGameEngine );
@@ -228,9 +210,6 @@ CSpaceWarClient::~CSpaceWarClient()
 
 	if ( m_pMainMenu )
 		delete m_pMainMenu;
-
-	if ( m_pConnectingMenu )
-		delete m_pConnectingMenu;
 
 	if ( m_pQuitMenu ) 
 		delete m_pQuitMenu;
@@ -1384,31 +1363,6 @@ void CSpaceWarClient::OnSteamShutdown( SteamShutdown_t *callback )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Handles notification that we are now connected to Steam
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::OnSteamServersConnected( SteamServersConnected_t *callback )
-{
-	if ( SteamUser()->BLoggedOn() )
-		m_eGameState = k_EClientGameMenu;
-	else
-	{
-		OutputDebugString( "Got SteamServersConnected_t, but not logged on?\n" );
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Handles notification that we are now connected to Steam
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::OnSteamServersDisconnected( SteamServersDisconnected_t *callback )
-{
-	SetGameState( k_EClientConnectingToSteam );
-	m_pConnectingMenu->OnConnectFailure();
-	OutputDebugString( "Got SteamServersDisconnected_t\n" );
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: Handles notification that the Steam overlay is shown/hidden, note, this
 // doesn't mean the overlay will or will not draw, it may still draw when not active.
 // This does mean the time when the overlay takes over input focus from the game.
@@ -1433,18 +1387,6 @@ void CSpaceWarClient::OnGameWebCallback( GameWebCallback_t *callback )
 	char rgchString[256];
 	sprintf_safe( rgchString, "User submitted following url: %s\n", callback->m_szURL );
 	OutputDebugString( rgchString );
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Handles notification that we are failed to connected to Steam
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::OnSteamServerConnectFailure( SteamServerConnectFailure_t *callback )
-{
-	char rgchString[256];
-	sprintf_safe( rgchString, "SteamServerConnectFailure_t: %d\n", callback->m_eResult );
-
-	m_pConnectingMenu->OnConnectFailure();
 }
 
 
@@ -1523,42 +1465,6 @@ void CSpaceWarClient::RunFrame()
 	// Update state for everything
 	switch ( m_eGameState )
 	{
-	case k_EClientConnectingToSteam:
-		m_pStarField->Render();
-		m_pConnectingMenu->RunFrame();
-		// Make sure the Steam Controller is in the correct mode.
-		m_pGameEngine->SetSteamControllerActionSet( eControllerActionSet_MenuControls );
-		break;
-	case k_EClientRetrySteamConnection:
-#ifdef _PS3
-		m_pStarField->Render();
-		SteamUser()->LogOn( true );
-		m_pConnectingMenu->Reset();
-		SetGameState( k_EClientConnectingToSteam );
-#else
-		OutputDebugString( "Invalidate state k_EClientRetrySteamConnection hit on non-PS3 platform" );
-#endif
-		break;
-	case k_EClientLinkSteamAccount:
-#ifdef _PS3
-		m_pStarField->Render();
-		SteamUser()->LogOnAndLinkSteamAccountToPSN( true, "jmccaskeybeta", "test123" );
-		m_pConnectingMenu->Reset();
-		SetGameState( k_EClientConnectingToSteam );
-#else
-		OutputDebugString( "Invalidate state k_EClientLinkSteamAccount hit on non-PS3 platform" );
-#endif
-		break;
-	case k_EClientAutoCreateAccount:
-#ifdef _PS3
-		m_pStarField->Render();
-		m_pConnectingMenu->Reset();
-		SteamUser()->LogOnAndCreateNewSteamAccountIfNeeded( true );
-		SetGameState( k_EClientConnectingToSteam );
-#else
-		OutputDebugString( "Invalidate state k_EClientAutoCreateAccount hit on non-PS3 platform" );
-#endif
-		break;
 	case k_EClientGameMenu:
 		m_pStarField->Render();
 		m_pMainMenu->RunFrame();
@@ -1816,7 +1722,7 @@ void CSpaceWarClient::RunFrame()
 		if ( !m_bSentWebOpen )
 		{
 			m_bSentWebOpen = true;
-#ifndef _PS3
+
 			char szCurDir[MAX_PATH];
 			if ( !_getcwd( szCurDir, sizeof(szCurDir) ) )
             {
@@ -1827,7 +1733,6 @@ void CSpaceWarClient::RunFrame()
 			// load the test html page, it just has a steam://gamewebcallback link in it
 			SteamFriends()->ActivateGameOverlayToWebPage( szURL );
 			SetGameState( k_EClientGameMenu );
-#endif
 		}
 
 		break;
@@ -1983,16 +1888,8 @@ void CSpaceWarClient::RenderTimer()
 void CSpaceWarClient::DrawHUDText()
 {
 	// Padding from the edge of the screen for hud elements
-#ifdef _PS3
-	// Larger padding on PS3, since many of our test HDTVs truncate 
-	// edges of the screen and can't be calibrated properly.
-	const int32 nHudPaddingVertical = 20;
-	const int32 nHudPaddingHorizontal = 35;
-#else
 	const int32 nHudPaddingVertical = 15;
 	const int32 nHudPaddingHorizontal = 15;
-#endif
-
 
 	const int32 width = m_pGameEngine->GetViewportWidth();
 	const int32 height = m_pGameEngine->GetViewportHeight();
@@ -2157,14 +2054,8 @@ void CSpaceWarClient::DrawInstructions()
 	rect.right = width;
 
 	char rgchBuffer[256];
-#ifdef _PS3
-	sprintf_safe( rgchBuffer, "Turn Ship Left: 'Left'\nTurn Ship Right: 'Right'\nForward Thrusters: 'R2'\nReverse Thrusters: 'L2'\nFire Photon Beams: 'Cross'" );
-#else
 	sprintf_safe( rgchBuffer, "Turn Ship Left: 'A'\nTurn Ship Right: 'D'\nForward Thrusters: 'W'\nReverse Thrusters: 'S'\nFire Photon Beams: 'Space'" );
-#endif
-
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_VCENTER, rgchBuffer );
-
 	
 	rect.left = 0;
 	rect.right = width;

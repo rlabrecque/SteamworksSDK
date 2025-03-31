@@ -85,15 +85,9 @@ typedef unsigned __int64 uint64;
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-	#if defined(_PS3)
-
-	#include "stdafx_ps3.h"
-
-	#elif defined(OSX)
-	
+#if defined(OSX)	
 	#include <OpenGL/OpenGL.h>
-
-	#endif
+#endif
 
 #define ARRAYSIZE(A) ( sizeof(A)/sizeof(A[0]) )
 // Need to define some types on POSIX

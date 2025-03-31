@@ -4821,14 +4821,14 @@ HRESULT IDirect3DDevice9::FlushSamplers( uint mask )
 	uint samplerHitMask = gl.m_samplerDirtyMask & mask;
 	for( int index = 0; (index < 16) && (samplerHitMask !=0); index++)
 	{
-		uint mask = 1<<index;
-		
+		uint bitMask = 1<<index;
+
 		// only push a sampler to GLM if the sampler is dirty *and* there is a live texture on that TMU
 		// else the values will sit quietly in the d3d sampler side until conditions permit pushing them
-		if ( (samplerHitMask & mask) && (m_textures[index] != NULL) )
+		if ( (samplerHitMask & bitMask) && (m_textures[index] != NULL) )
 		{
 			// clear that dirty bit before you forget...
-			gl.m_samplerDirtyMask &= (~mask);
+			gl.m_samplerDirtyMask &= (~bitMask);
 			
 			// translate from D3D sampler desc
 			D3DSamplerDesc			*dxsamp = &m_samplers[ index ];

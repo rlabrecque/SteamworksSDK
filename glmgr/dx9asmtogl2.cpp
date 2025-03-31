@@ -2690,7 +2690,7 @@ static int g_translationCounter = 0;
 int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bool *bVertexShader, uint32 options, int32 nShadowDepthSampler, uint32 nCentroidMask, char *debugLabel )
 {
 	CUtlString sLine, sParamName;
-	uint32 i, dwToken, nInstruction, nNumTokensToSkip;
+	uint32 dwToken, nInstruction, nNumTokensToSkip;
 	char buff[256];
 
 	// obey options
@@ -2728,7 +2728,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	((char*)m_pBufALUCode->Base())[0] = 0;
 
 
-	for ( i=0; i<MAX_SHADER_CONSTANTS; i++ )
+	for ( int i = 0; i < MAX_SHADER_CONSTANTS; i++ )
 	{
 		m_bConstantRegisterDefined[i] = false;
 	}
@@ -2760,11 +2760,11 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	m_nHighestRegister = 0;
 
 	m_bUsedAtomicTempVar = false;
-	for ( int i=0; i < ARRAYSIZE( m_dwSamplerTypes ); i++ )
+	for ( int i = 0; i < ARRAYSIZE( m_dwSamplerTypes ); i++ )
 	{
 		m_dwSamplerTypes[i] = SAMPLER_TYPE_UNUSED;
 	}
-	for ( int i=0; i < ARRAYSIZE( m_DeclaredOutputs ); i++ )
+	for ( int i = 0; i < ARRAYSIZE( m_DeclaredOutputs ); i++ )
 	{
 		m_DeclaredOutputs[i] = UNDECLARED_OUTPUT;
 	}

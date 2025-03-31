@@ -24,12 +24,10 @@ SOURCEFILES := \
 	timeline.cpp \
 	VectorEntity.cpp \
 	clanchatroom.cpp \
-	connectingmenu.cpp \
 	gameenginesdl.cpp \
 	htmlsurface.cpp \
 	musicplayer.cpp \
 	p2pauth.cpp \
-	remotestoragesync.cpp \
 	stdafx.cpp \
 	voicechat.cpp \
 	glew.c

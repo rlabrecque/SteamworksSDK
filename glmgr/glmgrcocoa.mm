@@ -958,7 +958,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 					// decide if this renderer goes in the table.
 					// only insert renderers with at least one active display.
 					
-					bool	selected = !problems;
+					selected = !problems;
 					
 					if (selected)
 					{
@@ -1098,8 +1098,8 @@ void	GLMDisplayDB::PopulateRenderers( void )
 												
 												if (this_vendorIDBytes && this_deviceIDBytes)	// null check...
 												{
-													unsigned short this_vendorIDValue = *this_vendorIDBytes;
-													unsigned short this_deviceIDValue = *this_deviceIDBytes;
+													this_vendorIDValue = *this_vendorIDBytes;
+													this_deviceIDValue = *this_deviceIDBytes;
 													
 													if ( (fields.m_pciVendorID == this_vendorIDValue) && (fields.m_pciDeviceID == this_deviceIDValue) )
 													{
@@ -1484,15 +1484,15 @@ bool	GLMDisplayDB::GetModeInfo( int rendererIndex, int displayIndex, int modeInd
 		GLMDisplayInfo		*dispinfo = (*rendInfo ->m_displays)[displayIndex];	
 		CGDirectDisplayID	cgid = dispinfo->m_info.m_cgDisplayID;
 		
-		CGDisplayModeRef		mode = CGDisplayCopyDisplayMode( cgid );
+		CGDisplayModeRef		cgMode = CGDisplayCopyDisplayMode( cgid );
 
 		// get the mode number from the mode dict (using system mode numbering, not our sorted numbering)
-		if (mode)
+		if (cgMode)
 		{
 			// grab the width and height, I am unclear on whether this is the displayed FB width or the display device width.
-			int screenWidth=CGDisplayModeGetWidth( mode );
-			int screenHeight=CGDisplayModeGetHeight( mode );
-			int refreshHz=CGDisplayModeGetRefreshRate( mode );
+			int screenWidth=CGDisplayModeGetWidth( cgMode );
+			int screenHeight=CGDisplayModeGetHeight( cgMode );
+			int refreshHz=CGDisplayModeGetRefreshRate( cgMode );
 			
 			GLMPRINTF(( "-D- GLMDisplayDB::GetModeInfo sees mode-index=%d, width=%d, height=%d on CGID %08x (display index %d on rendererindex %d)", 
 				modeIndex,

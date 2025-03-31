@@ -10,6 +10,27 @@ website at: http://partner.steamgames.com
 
 
 ----------------------------------------------------------------
+v1.62 14th March 2025
+----------------------------------------------------------------
+
+ISteamFriends:
+* Removed SetPersonaName() and GetUserRestrictions().
+
+ISteamHTMLSurface:
+* Renamed EMouseCursor to EHTMLMouseCursor, and renamed values to match.
+
+ISteamRemotePlay:
+* Removed BStartRemotePlayTogether() since it's always available when a supported game launches.
+* Added ShowRemotePlayTogetherUI() to show the Remote Play Together UI in the game overlay.
+* Added functions to get remote keyboard and mouse input directly instead of simulating local input: BEnableRemotePlayTogetherDirectInput(), DisableRemotePlayTogetherDirectInput(), GetInput(), SetMouseVisibility(), SetMousePosition(), CreateMouseCursor(), SetMouseCursor().
+
+ISteamUGC:
+* Added SetSubscriptionsLoadOrder() to allow changing the load order.
+* Added SetItemsDisabledLocally() set an item as locally disabled or not.
+* GetNumSubscribedItems() and GetSubscribedItems() also takes an optional boolean to return locally disabled items as well.
+
+
+----------------------------------------------------------------
 v1.61 8th November 2024
 ----------------------------------------------------------------
 

@@ -552,7 +552,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="clanchatroom.cpp" />
-    <ClCompile Include="connectingmenu.cpp" />
     <ClCompile Include="..\glmgr\dx9asmtogl2.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -603,7 +602,6 @@
     <ClCompile Include="QuitMenu.cpp" />
     <ClCompile Include="RemotePlay.cpp" />
     <ClCompile Include="RemoteStorage.cpp" />
-    <ClCompile Include="remotestoragesync.cpp" />
     <ClCompile Include="ServerBrowser.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="SimpleProtobuf.cpp" />

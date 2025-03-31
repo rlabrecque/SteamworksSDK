@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		503C6CB61268F34200B66E3B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 503C6CB51268F34200B66E3B /* Cocoa.framework */; };
 		503C6D0F1268F49F00B66E3B /* BaseMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 503C6CD91268F49F00B66E3B /* BaseMenu.cpp */; };
-		503C6D101268F49F00B66E3B /* connectingmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */; };
 		503C6D121268F49F00B66E3B /* gameengineosx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 503C6CE01268F49F00B66E3B /* gameengineosx.mm */; };
 		503C6D131268F49F00B66E3B /* glstringosx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 503C6CE21268F49F00B66E3B /* glstringosx.mm */; };
 		503C6D141268F49F00B66E3B /* Leaderboards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 503C6CE31268F49F00B66E3B /* Leaderboards.cpp */; };
@@ -54,7 +53,6 @@
 		975820DB2765BE3900093F91 /* ItemStore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 975820DA2765BE3900093F91 /* ItemStore.cpp */; };
 		97919DA62C22281400272343 /* timeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 97919DA52C22281400272343 /* timeline.cpp */; };
 		A4B5A0FD24906974000E9151 /* RemotePlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FC24906974000E9151 /* RemotePlay.cpp */; };
-		A4B5A101249069C9000E9151 /* remotestoragesync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */; };
 		A4B5A10424906A0E000E9151 /* SimpleProtobuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */; };
 		BA60B6B81A82EDD200F4AC4F /* Friends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA60B6B41A82EDD200F4AC4F /* Friends.cpp */; };
 		BA60B6B91A82EDD200F4AC4F /* Inventory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA60B6B61A82EDD200F4AC4F /* Inventory.cpp */; };
@@ -81,8 +79,6 @@
 		503C6CB51268F34200B66E3B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		503C6CD91268F49F00B66E3B /* BaseMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseMenu.cpp; sourceTree = "<group>"; };
 		503C6CDA1268F49F00B66E3B /* BaseMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseMenu.h; sourceTree = "<group>"; };
-		503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = connectingmenu.cpp; sourceTree = "<group>"; };
-		503C6CDC1268F49F00B66E3B /* connectingmenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = connectingmenu.h; sourceTree = "<group>"; };
 		503C6CDD1268F49F00B66E3B /* GameEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameEngine.h; sourceTree = "<group>"; };
 		503C6CDF1268F49F00B66E3B /* gameengineosx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameengineosx.h; sourceTree = "<group>"; };
 		503C6CE01268F49F00B66E3B /* gameengineosx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = gameengineosx.mm; sourceTree = "<group>"; };
@@ -172,8 +168,6 @@
 		A46ECF6D26BE389800985AA7 /* steamworksexample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = steamworksexample.entitlements; path = osx/steamworksexample.entitlements; sourceTree = "<group>"; };
 		A4B5A0FC24906974000E9151 /* RemotePlay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RemotePlay.cpp; sourceTree = "<group>"; };
 		A4B5A0FE2490698A000E9151 /* RemotePlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RemotePlay.h; sourceTree = "<group>"; };
-		A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = remotestoragesync.cpp; sourceTree = "<group>"; };
-		A4B5A100249069C9000E9151 /* remotestoragesync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = remotestoragesync.h; sourceTree = "<group>"; };
 		A4B5A10224906A0E000E9151 /* SimpleProtobuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleProtobuf.h; sourceTree = "<group>"; };
 		A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleProtobuf.cpp; sourceTree = "<group>"; };
 		BA60B6B41A82EDD200F4AC4F /* Friends.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Friends.cpp; sourceTree = "<group>"; };
@@ -219,7 +213,6 @@
 				50E77DCF136218F5000FC072 /* glmgr */,
 				503C6CD91268F49F00B66E3B /* BaseMenu.cpp */,
 				50D642851461EF3200A5739B /* clanchatroom.cpp */,
-				503C6CDB1268F49F00B66E3B /* connectingmenu.cpp */,
 				BA60B6B41A82EDD200F4AC4F /* Friends.cpp */,
 				503C6CE01268F49F00B66E3B /* gameengineosx.mm */,
 				503C6CE21268F49F00B66E3B /* glstringosx.mm */,
@@ -237,7 +230,6 @@
 				503C6CF11268F49F00B66E3B /* QuitMenu.cpp */,
 				A4B5A0FC24906974000E9151 /* RemotePlay.cpp */,
 				503C6CF31268F49F00B66E3B /* RemoteStorage.cpp */,
-				A4B5A0FF249069C9000E9151 /* remotestoragesync.cpp */,
 				503C6CF51268F49F00B66E3B /* ServerBrowser.cpp */,
 				503C6CF81268F49F00B66E3B /* Ship.cpp */,
 				A4B5A10324906A0E000E9151 /* SimpleProtobuf.cpp */,
@@ -290,7 +282,6 @@
 			children = (
 				503C6CDA1268F49F00B66E3B /* BaseMenu.h */,
 				50D642861461EF3200A5739B /* clanchatroom.h */,
-				503C6CDC1268F49F00B66E3B /* connectingmenu.h */,
 				BA60B6B51A82EDD200F4AC4F /* Friends.h */,
 				503C6CDD1268F49F00B66E3B /* GameEngine.h */,
 				503C6CDF1268F49F00B66E3B /* gameengineosx.h */,
@@ -309,7 +300,6 @@
 				503C6CF21268F49F00B66E3B /* QuitMenu.h */,
 				A4B5A0FE2490698A000E9151 /* RemotePlay.h */,
 				503C6CF41268F49F00B66E3B /* RemoteStorage.h */,
-				A4B5A100249069C9000E9151 /* remotestoragesync.h */,
 				503C6CF61268F49F00B66E3B /* ServerBrowser.h */,
 				503C6CF71268F49F00B66E3B /* ServerBrowserMenu.h */,
 				503C6CF91268F49F00B66E3B /* Ship.h */,
@@ -426,7 +416,6 @@
 			files = (
 				840B387019BB91C50084B9F1 /* htmlsurface.cpp in Sources */,
 				503C6D0F1268F49F00B66E3B /* BaseMenu.cpp in Sources */,
-				503C6D101268F49F00B66E3B /* connectingmenu.cpp in Sources */,
 				F803305119087F9200344590 /* musicplayer.cpp in Sources */,
 				503C6D121268F49F00B66E3B /* gameengineosx.mm in Sources */,
 				503C6D131268F49F00B66E3B /* glstringosx.mm in Sources */,
@@ -465,7 +454,6 @@
 				50E77DF31362190C000FC072 /* glmgrbasics.cpp in Sources */,
 				50E77DF41362190C000FC072 /* glmgrcocoa.mm in Sources */,
 				50E77DF51362190C000FC072 /* glmgrext.cpp in Sources */,
-				A4B5A101249069C9000E9151 /* remotestoragesync.cpp in Sources */,
 				97919DA62C22281400272343 /* timeline.cpp in Sources */,
 				BA60B6B81A82EDD200F4AC4F /* Friends.cpp in Sources */,
 				50E77DF61362190C000FC072 /* mathlite.cpp in Sources */,

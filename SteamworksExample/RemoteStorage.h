@@ -44,19 +44,7 @@ public:
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
 
 private:
-	void CheckState();
-
-	enum ERemoteStorageState
-	{
-		k_ERemoteStorageStateIdle,
-		k_ERemoteStorageStateSyncToClient,
-		k_ERemoteStorageStateDisplayMessage,
-		k_ERemoteStorageStateSyncToServer,
-	};
-
 	IGameEngine *m_pGameEngine;
-	ERemoteStorageState m_eState;
-	IRemoteStorageSync *m_pRemoteStorageSync;
 	CRemoteStorageScreen *m_pRemoteStorageScreen;
 };
 

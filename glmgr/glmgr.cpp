@@ -2885,7 +2885,6 @@ void	GLMContext::FlushDrawStates( bool shadersOn )	// shadersOn = true for draw 
 	
 	// if drawing FBO has any MSAA attachments, mark them dirty
 	{
-		CGLMTex *tex;
 		for( int att=kAttColor0; att<kAttCount; att++)
 		{
 			if (m_drawingFBO->m_attach[ att ].m_tex)

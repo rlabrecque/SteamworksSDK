@@ -166,11 +166,8 @@ void RunGameLoop( IGameEngine *pGameEngine, const char *pchServerAddress, const 
 //-----------------------------------------------------------------------------
 // Purpose: Real main entry point for the program
 //-----------------------------------------------------------------------------
-#ifndef _PS3
-
 static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
-{
-	
+{	
 	if ( SteamAPI_RestartAppIfNecessary( k_uAppIdInvalid ) )
 	{
 		// if Steam is not running or the game wasn't started through Steam, SteamAPI_RestartAppIfNecessary starts the 
@@ -180,8 +177,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 		// removed steam_appid.txt from the game depot.
 
 		return EXIT_FAILURE;
-	}
-	
+	}	
 
 	// Init Steam CEG
 	if ( !Steamworks_InitCEGLibrary() )
@@ -290,7 +286,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	// exit
 	return EXIT_SUCCESS;	
 }
-#endif
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Main entry point for the program -- win32
