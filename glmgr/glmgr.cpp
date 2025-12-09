@@ -2004,7 +2004,7 @@ void	GLMContext::Clear( bool color, unsigned long colorValue, bool depth, float 
 			m_ScissorEnable.Read( &scissorEnableSave, 0 );
 			m_ScissorBox.Read( &scissorBoxSave, 0 );
 			
-			if(0)
+			if ( ( 0 ) )
 			{
 				// calc new scissorbox as intersection against *box
 
@@ -5325,7 +5325,7 @@ void	GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 	glEnable(GL_TEXTURE_2D);
 	GLMCheckError();
 
-	if (0)
+	if ( ( 0 ) )
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		GLMCheckError();
@@ -5351,7 +5351,7 @@ void	GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 	GLMCheckError();
 
 	// disable all the input streams
-	if (0)
+	if ( ( 0 ) )
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 		GLMCheckError();
@@ -5376,8 +5376,9 @@ void	GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 
 void GLMgrSelfTests( void )	
 {
-	return;	// until such time as the tests are revised or axed
-	
+// until such time as the tests are revised or axed
+#if 0
+
 	// make a new context on renderer 0.
 	GLMContext *ctx = GLMgr::aGLMgr()->NewContext( 0 );	////FIXME you can't make contexts this way any more.
 	if (!ctx)
@@ -5412,6 +5413,7 @@ void GLMgrSelfTests( void )
 	testobj.RunTests( );
 	
 	GLMgr::aGLMgr()->DelContext( ctx );
+#endif
 }
 
 void GLMContext::SetDefaultStates( void )

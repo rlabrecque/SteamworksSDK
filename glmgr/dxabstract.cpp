@@ -4672,7 +4672,7 @@ HRESULT IDirect3DDevice9::FlushStates( uint mask )
 				temp1 = temp2 = gl.m_ClipPlaneEquation[x];
 			}
 
-			if (1)	//GLMKnob("caps-key",NULL)==0.0)
+			if ( ( 1 ) )	//GLMKnob("caps-key",NULL)==0.0)
 			{
 				m_ctx->WriteClipPlaneEquation( &temp1, x );		// no caps lock = Antonio or classic
 				

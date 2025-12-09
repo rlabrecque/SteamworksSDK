@@ -2859,7 +2859,7 @@ void	GLMDebugInitialize( bool forceReinit )
 		uint channelMask = GLMDetectAvailableChannels();
 		
 		// finally, disable all of them if commandline did not say "enable spew"
-		if (0 /* !CommandLine()->FindParm("-glmspew") */)	//FIXME change back to 1 later
+		if ( ( 0 ) /* !CommandLine()->FindParm("-glmspew") */)	//FIXME change back to 1 later
 		{
 			channelMask = 0;
 		}
@@ -2871,7 +2871,7 @@ void	GLMDebugInitialize( bool forceReinit )
 		if ( channelMask )
 		{
 			// start mostly quiet unless the -glmbootspew option is there
-			if ( 0 /*CommandLine()->FindParm( "-glmbootspew" )*/ )
+			if ( ( 0 ) /*CommandLine()->FindParm( "-glmbootspew" )*/ )
 			{
 				g_glmDebugFlavorMask = 0xFFFFFFFF;
 			}

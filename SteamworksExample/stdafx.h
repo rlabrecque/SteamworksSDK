@@ -236,7 +236,7 @@ inline void strncpy_safe( char *pDest, char const *pSrc, size_t maxLen )
 // Steam DRM header file
 #include "cegclient.h"
 #else
-#define Steamworks_InitCEGLibrary() (true)
+#define Steamworks_InitCEGLibrary() true
 #define Steamworks_TermCEGLibrary()
 #define Steamworks_TestSecret()
 #define Steamworks_SelfCheck()

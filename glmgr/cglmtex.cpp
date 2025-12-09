@@ -1241,7 +1241,7 @@ void CGLMTex::WriteTexels( GLMTexLockDesc *desc, bool writeWholeSlice, bool noDa
 	// (mechanism not policy)
 	
 	GLenum intformat = (m_layout->m_key.m_texFlags & kGLMTexSRGB) ? format->m_glIntFormatSRGB : format->m_glIntFormat;
-	if (0 /* CommandLine()->FindParm("-disable_srgbtex") */)
+	if ( ( 0 ) /* CommandLine()->FindParm("-disable_srgbtex") */)
 	{
 		// force non srgb flavor - experiment to make ATI r600 happy on 10.5.8 (maybe x1600 too!)
 		intformat = format->m_glIntFormat;

@@ -180,7 +180,7 @@ static int RealMain( const char *pchCmdLine, HINSTANCE hInstance, int nCmdShow )
 	}	
 
 	// Init Steam CEG
-	if ( !Steamworks_InitCEGLibrary() )
+	if ( ( !Steamworks_InitCEGLibrary() ) )
 	{
 		OutputDebugString( "Steamworks_InitCEGLibrary() failed\n" );
 		Alert( "Fatal Error", "Steam must be running to play this game (InitDrmLibrary() failed).\n" );

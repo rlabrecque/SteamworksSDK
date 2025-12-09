@@ -10,7 +10,6 @@
 #include <Cocoa/Cocoa.h>
 #undef MIN
 #undef MAX
-#define DONT_DEFINE_BOOL	// Don't define BOOL!
 //#include "tier0/threadtools.h"
 //#include "tier1/interface.h"
 //#include "tier1/strtools.h"
@@ -484,7 +483,7 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 	}
 	
 	// if CLI option for fake SRGB mode is enabled, turn off this cap, act like we do not have EXT FB SRGB
-	if (0 /* CommandLine()->FindParm("-glmenablefakesrgb") */)
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmenablefakesrgb") */)
 	{
 		m_info.m_hasGammaWrites = false;
 	}
@@ -555,13 +554,13 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 	}
 
 	// if user disabled them
-	if (0 /* CommandLine()->FindParm("-glmdisableclipplanes") */)
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmdisableclipplanes") */)
 	{
 		m_info.m_hasNativeClipVertexMode = false;
 	}
 	
 	// or maybe enabled them..
-	if (0 /* CommandLine()->FindParm("-glmenableclipplanes") */)
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmenableclipplanes") */)
 	{
 		m_info.m_hasNativeClipVertexMode = true;
 	}
@@ -608,12 +607,12 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 		m_info.m_hasPerfPackage1 = true;
 	}	
 
-	if (0 /* CommandLine()->FindParm("-glmenableperfpackage") */)	// force it on
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmenableperfpackage") */)	// force it on
 	{
 		m_info.m_hasPerfPackage1 = true;
 	}
 	
-	if (0 /* CommandLine()->FindParm("-glmdisableperfpackage") */)	// force it off
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmdisableperfpackage") */)	// force it off
 	{
 		m_info.m_hasPerfPackage1 = false;
 	}
@@ -628,11 +627,11 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 	// "can'ts "
 	
 	m_info.m_cantBlitReliably = m_info.m_intel;		//FIXME X3100&10.6.3 has problems blitting.. adjust this if bug fixed in 10.6.4
-	if (0 /*CommandLine()->FindParm("-glmenabletrustblit") */)
+	if ( ( 0 ) /*CommandLine()->FindParm("-glmenabletrustblit") */)
 	{
 		m_info.m_cantBlitReliably = false;			// we trust the blit, so set the cant-blit cap to false
 	}
-	if (0 /* CommandLine()->FindParm("-glmdisabletrustblit") */)
+	if ( ( 0 ) /* CommandLine()->FindParm("-glmdisabletrustblit") */)
 	{
 		m_info.m_cantBlitReliably = true;			// we do not trust the blit, so set the cant-blit cap to true
 	}
@@ -655,7 +654,7 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 	
 	// this is just the private assessment of whather scaled resolve is available.
 	// the activation of it will stay tied to the gl_minify_resolve_mode / gl_magnify_resolve_mode convars in glmgr
-	if 	( 1 /* CommandLine()->FindParm("-gl_enable_scaled_resolve") */ )
+	if 	( ( 1 ) /* CommandLine()->FindParm("-gl_enable_scaled_resolve") */ )
 	{
 		bool scaledResolveDetected = GLMDetectScaledResolveMode( m_info.m_osComboVersion, m_info.m_hasPerfPackage1 );
 		m_info.m_cantResolveScaled = !scaledResolveDetected;
@@ -666,7 +665,7 @@ GLMRendererInfo::GLMRendererInfo( GLMRendererInfoFields *info )
 	}
 
 	// and you can force it to be "available" if you really want to..
-	if ( 0 /* CommandLine()->FindParm("-gl_force_enable_scaled_resolve") */ )
+	if ( ( 0 ) /* CommandLine()->FindParm("-gl_force_enable_scaled_resolve") */ )
 	{
 		m_info.m_cantResolveScaled = false;
 	}
@@ -985,7 +984,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						//encode into one quantity - 10.6.3 becomes 0x000A0603
 						fields.m_osComboVersion = (vMajor << 16) | (vMinor << 8) | (vMinorMinor);
 
-						if (0 /* CommandLine()->FindParm("-fakeleopard") */)
+						if ( ( 0 ) /* CommandLine()->FindParm("-fakeleopard") */)
 						{
 							// lie
 							fields.m_osComboVersion = 0x000A0508;
