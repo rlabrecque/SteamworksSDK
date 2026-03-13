@@ -10,6 +10,29 @@ website at: http://partner.steamgames.com
 
 
 ----------------------------------------------------------------
+v1.64 11th March 2026
+----------------------------------------------------------------
+
+General:
+* androidarm64 libs now statically link libc++
+* androidarm64 libs now use 16KB max page size (from 4KB)
+* linuxarm64 libs now use 4KB max page size (from 64KB)
+
+ISteamApps:
+* Added last update timestamp to GetBetaInfo()
+
+ISteamUGC:
+* Added MarkDownloadedItemAsUnused()
+* Added GetDownloadedItems(), GetNumDownloadedItems()
+
+ISteamRemotePlay:
+* Added BSessionRemotePlayTogether()
+* Added GetSessionGuestID()
+* Added GetSmallSessionAvatar(), GetMediumSessionAvatar(), GetLargeSessionAvatar()
+* Added SteamRemotePlaySessionAvatarLoaded_t callback
+
+
+----------------------------------------------------------------
 v1.63 18th November 2025
 ----------------------------------------------------------------
 
