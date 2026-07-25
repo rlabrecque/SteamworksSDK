@@ -1,12 +1,38 @@
 ================================================================
 
-Copyright © 1996-2025, Valve Corporation, All rights reserved.
+Copyright © 1996-2026, Valve Corporation, All rights reserved.
 
 ================================================================
 
 
-Welcome to the Steamworks SDK.  For documentation please see our partner 
+Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
+
+
+----------------------------------------------------------------
+v1.65 23th July 2026
+----------------------------------------------------------------
+
+Steam Machine, Steam Frame and Steam Deck:
+* Removed ISteamUtils::IsRunningOnSteamDeck(). Please use other feature specific methods below.
+* Added ISteamUtils::IsRunningOnSteamHardware() which returns ESteamHardwareType. Use this call for analytics, support or diagnostic purposes. For functional decisions, see other SDK calls.
+* Added ISteamUtils::GetSteamHardwareDefaultConfig() to help choose default game settings (video and other) that you have tuned for specific Steam hardware. It also enables changing your default game settings on future Steam hardware without needing to recompile your game.
+* Added ISteamUtils::IsRunningUnderProton() to determine if your game is running under the Proton compatibility layer on Linux.
+* ISteamUtils contains other pre-existing methods that may be useful when replacing IsRunningOnSteamDeck(), such as ISteamUtils::IsSteamInBigPictureMode() and ISteamUtils::IsSteamRunningInVR().
+
+ISteamApps:
+* Added SetGamePerformanceSetting() and SetGameRenderResolution() methods so a game can report to Steam servers what the relative performance settings and game resolution are set to for the given user. This data will be included with anonymous framerate data if the user has opted into sharing that.
+
+ISteamUGC - Added options for querying UGC (sorted in descending order):
+* k_EUGCQuery_RankedByNumParentItems - how many items depend on this item (if it isn't a collection)
+* k_EUGCRankedByNumParentCollections - how many collections contain this item
+
+Steam Input:
+* Added Switch 2, Steam Controller and Steam Frame Controller action origin enum values
+
+ISteamMatchmakingServers:
+* Added ISteamMatchmakingServers::ServerFriends() to get a list of friends that have recently played on a specific server
+* Added "popularamongfriends" filter option to retrieve a set of servers that the user's friends commonly play on
 
 
 ----------------------------------------------------------------
@@ -112,7 +138,7 @@ ISteamUGC
 * Added SetAdminQuery() to allow ISteamUGC to be used in a tools like environment for users who have the appropriate privileges for the calling appid.
 
 ISteamApps
-* Added API to allow the game to manage active beta branches. 
+* Added API to allow the game to manage active beta branches.
 
 
 ----------------------------------------------------------------
@@ -158,7 +184,7 @@ User
 v1.56 30th March 2023
 ----------------------------------------------------------------
 User
-* Updated ISteamUser::GetAuthSessionTicket(), Add parameter SteamNetworkingIdentity 
+* Updated ISteamUser::GetAuthSessionTicket(), Add parameter SteamNetworkingIdentity
 
 ----------------------------------------------------------------
 v1.55 29th July 2022
@@ -398,8 +424,8 @@ ISteamNetworkingUtils
 v1.43 20th February 2019
 ----------------------------------------------------------------
 
-ISteamParties 
-* This API can be used to selectively advertise your multiplayer game session in a Steam chat room group. Tell Steam the number of player spots that are available for your party, and a join-game string, and it will show a beacon in the selected group and allow that many users to “follow” the beacon to your party. Adjust the number of open slots if other players join through alternate matchmaking methods.  
+ISteamParties
+* This API can be used to selectively advertise your multiplayer game session in a Steam chat room group. Tell Steam the number of player spots that are available for your party, and a join-game string, and it will show a beacon in the selected group and allow that many users to “follow” the beacon to your party. Adjust the number of open slots if other players join through alternate matchmaking methods.
 
 ISteamController
 * This interface will be deprecated and replaced with ISteamInput. For ease in upgrading the SDK ISteamController currently has feature parity with ISteamInput, but future features may not be ported back. Please use ISteamInput for new projects.
@@ -418,7 +444,7 @@ ISteamFriends
 * ActivateGameOverlayToWebPage – Added a new parameter to control how the created web browser window is displayed within the Steam Overlay. The default mode will create a new browser tab next to all other overlay windows that the user already has open. The new modal mode will create a new browser window and activate the Steam Overlay, showing only that window. When the browser window is closed, the Steam Overlay is automatically closed as well.
 
 ISteamInventory
-* GetItemsWithPrices and GetItemPrice - Added the ability to get the “base price” for a set of items, which you can use to markup in your own UI that items are “on sale” 
+* GetItemsWithPrices and GetItemPrice - Added the ability to get the “base price” for a set of items, which you can use to markup in your own UI that items are “on sale”
 
 ISteamUGC
 * SetAllowLegacyUpload - Call to force the use of Steam Cloud for back-end storage (instead of Steam Pipe), which is faster and more efficient for uploading and downloading small files (less than 100MB).
@@ -468,7 +494,7 @@ v1.41 13th July 2017
 ----------------------------------------------------------------
 
 ISteamClient
-* Exposed ISteamParentalSettings interface. You can use this to determine if the user has parental settings turned on and for what high-level Steam features. 
+* Exposed ISteamParentalSettings interface. You can use this to determine if the user has parental settings turned on and for what high-level Steam features.
 
 * ISteamHTMLSurface
 * Added SetDPIScalingFactor - Scale the output display space by this factor, this is useful when displaying content on high dpi devices.
@@ -484,7 +510,7 @@ v1.40 25th April 2017
 ----------------------------------------------------------------
 
 ISteamInventory
-* Update API documentation 
+* Update API documentation
 * GetResultItemProperty - Retrieve dynamic properties for a given item returned in the result set.
 
 ISteamUtils
@@ -494,13 +520,13 @@ ISteamUtils
 ISteamUser
 * GetAvailableVoice and GetVoice - Some parameters have become deprecated and now have default values.
 
-ISteamUGC 
+ISteamUGC
 * SetReturnPlaytimeStats - Set the number of days of playtime stats to return for a piece of UGC.
 * AddDependency and RemoveDependency - Useful for parent-child relationship or dependency management
 
 ISteamVideo
-* Added GetOPFSettings and GetOPFStringForApp for retrieving Open Projection Format data used in Steam 360 Video playback. 
-* GetOPFSettings - Handle the GetOPFSettingsResult_t callback which is called when the OPF related data for the passed in AppID is ready for retrieval. 
+* Added GetOPFSettings and GetOPFStringForApp for retrieving Open Projection Format data used in Steam 360 Video playback.
+* GetOPFSettings - Handle the GetOPFSettingsResult_t callback which is called when the OPF related data for the passed in AppID is ready for retrieval.
 * GetOPFStringForApp - Using the AppID returned in GetOPFSettingsResult_t pass in an allocated string buffer to get the OPF data.
 
 SteamPipe GUI Tool
@@ -684,7 +710,7 @@ v1.30 10th July 2014
 ----------------------------------------------------------------
 
 General:
-* Added a new Workshop item content API in ISteamUGC that is easy to use and allows multiple files per item without any size limits. It uses the same 
+* Added a new Workshop item content API in ISteamUGC that is easy to use and allows multiple files per item without any size limits. It uses the same
   content system that handles regular content depots, resulting in faster and smaller downloads due to delta patching. Subscribed workshop items will
   be placed in unique subfolders in the install folder, so the game doesn't need to fetch them using ISteamRemoteStorage anymore. The new API is not
   backwards compatible with old items created with ISteamRemoteStorage. Added Workshop feature to steamworksexample using ISteamUGC.
@@ -814,7 +840,7 @@ Apps
 * Added new API call ISteamApps::MarkContentCorrupt() so a game can hint Steam that some of it's local content seems corrupt. Steam will verify the content next time the game is started.
 * Added new API call ISteamApps::GetCurrentBetaName() so a game can get the current content beta branch name if the user chose to opt-in to a content beta.
 
-Cloud 
+Cloud
 * Added an offset parameter to ISteamRemoteStorage::UGCRead() to allow reading files in chunks, and increased the limit from 100MB to 200MB when downloading files this way.
 
 HTTP
@@ -1226,12 +1252,12 @@ v1.03	16th Jan 2009
 ----------------------------------------------------------------
 
 Major changes:
-* ISteamRemoteStorage interface has been added, which contains functions to store per-user data in the Steam Cloud back-end. 
-** To use this, you must first use the partner web site to enable Cloud for your game. 
+* ISteamRemoteStorage interface has been added, which contains functions to store per-user data in the Steam Cloud back-end.
+** To use this, you must first use the partner web site to enable Cloud for your game.
 ** The current setting is allowing 1MB of storage per-game per-user (we hope to increase this over time).
 
 Lobby & Matchmaking related changes:
-* ISteamFriends::GetFriendGamePlayed() now also return the steamID of the lobby the friend is in, if any. It now takes a pointer to a new FriendGameInfo_t struct, which it fills 
+* ISteamFriends::GetFriendGamePlayed() now also return the steamID of the lobby the friend is in, if any. It now takes a pointer to a new FriendGameInfo_t struct, which it fills
 * Removed ISteamFriends::GetFriendsLobbies(), since this is now redundant to ISteamFriends::GetFriendGamePlayed()
 * Added enum ELobbyComparison, to set the comparison operator in ISteamMatchmaking::AddRequestLobbyListNumericalFilter()
 * Changed ISteamMatchmaking::CreateLobby(), JoinLobby() and RequestLobbyList() to now return SteamAPICall_t handles, so you can easily track if a particular call has completed (see below)
@@ -1277,11 +1303,11 @@ ISteamUser
 	virtual void StopVoiceRecording( ) = 0;
 
 	// Gets the latest voice data. It should be called as often as possible once recording has started.
-	// nBytesWritten is set to the number of bytes written to pDestBuffer. 
+	// nBytesWritten is set to the number of bytes written to pDestBuffer.
 	virtual EVoiceResult GetCompressedVoice( void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
 
-	// Decompresses a chunk of data produced by GetCompressedVoice(). nBytesWritten is set to the 
-	// number of bytes written to pDestBuffer. The output format of the data is 16-bit signed at 
+	// Decompresses a chunk of data produced by GetCompressedVoice(). nBytesWritten is set to the
+	// number of bytes written to pDestBuffer. The output format of the data is 16-bit signed at
 	// 11025 samples per second.
 	virtual EVoiceResult DecompressVoice( void *pCompressed, uint32 cbCompressed, void *pDestBuffer, uint32 cbDestBufferSize, uint32 *nBytesWritten ) = 0;
 
