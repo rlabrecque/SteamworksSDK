@@ -480,6 +480,7 @@
 					OSX,
 					GL_SILENCE_DEPRECATION,
 				);
+				"GCC_WARN_64_TO_32_BIT_CONVERSION[arch=*64]" = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -501,6 +502,7 @@
 					POSIX,
 					OSX,
 				);
+				"GCC_WARN_64_TO_32_BIT_CONVERSION[arch=*64]" = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -526,10 +528,10 @@
 				INFOPLIST_FILE = "osx/steamworksexample-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					../lib/osx32/release,
-					"\"$(SRCROOT)/../lib/osx32/release\"",
+					../lib/osx32/debug,
+					"\"$(SRCROOT)/../lib/osx32/debug\"",
 					../lib/osx/release,
-					"\"$(SRCROOT)/../lib/osx/release\"",
+					"\"$(SRCROOT)/../lib/osx/debug\"",
 					../redistributable_bin/osx/,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.valvesoftware.steam.steamworksexample;
@@ -552,7 +554,7 @@
 				INFOPLIST_FILE = "osx/steamworksexample-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					../lib/osx32/debug,
+					../lib/osx32/release,
 					"\"$(SRCROOT)/../lib/osx32/release\"",
 					../lib/osx/debug,
 					"\"$(SRCROOT)/../lib/osx/release\"",
